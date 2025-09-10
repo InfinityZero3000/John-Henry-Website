@@ -1,0 +1,668 @@
+@{
+    ViewData["Title"] = "John Henry - Premium Fashion";
+}
+
+<!-- Hero Carousel Section -->
+<section class="hero-carousel">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        </div>
+        
+        <div class="carousel-inner">
+            <!-- Slide 1: Women Banner -->
+            <div class="carousel-item active">
+                <div class="hero-slide">
+                    <div class="hero-background">
+                        <img src="~/images/Banner/banner-women-main.jpg" alt="Women Fashion" class="hero-bg-img">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2: Men Banner -->
+            <div class="carousel-item">
+                <div class="hero-slide">
+                    <div class="hero-background">
+                        <img src="~/images/Banner/banner-man-main.jpg" alt="Men Fashion" class="hero-bg-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carousel Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</section>
+
+<!-- Small Banners Section -->
+<section class="small-banners-section">
+    <div class="container">
+        <div class="row g-3"> <!-- Thêm gap giữa các cột -->
+            <!-- John Henry - New Arrival -->
+            <div class="col-lg-4 col-md-4">
+                <div class="small-banner-card">
+                    <div class="small-banner-image">
+                        <img src="~/images/Banner/banner-man-0.jpg" alt="John Henry New Arrival" class="img-fluid">
+                    </div>
+                    <div class="small-banner-content">
+                        <h4>JOHN HENRY - NEW ARRIVAL</h4>
+                        <p class="banner-link">Xem ngay</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Best Seller -->
+            <div class="col-lg-4 col-md-4">
+                <div class="small-banner-card">
+                    <div class="small-banner-image">
+                        <img src="~/images/Banner/banner-sale.jpg" alt="Best Seller" class="img-fluid">
+                    </div>
+                    <div class="small-banner-content">
+                        <h4>BEST SELLER</h4>
+                        <p class="banner-link">Xem ngay</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Freelancer - New Arrival -->
+            <div class="col-lg-4 col-md-4">
+                <div class="small-banner-card">
+                    <div class="small-banner-image">
+                        <img src="~/images/Banner/banner-women-1.jpg" alt="Freelancer New Arrival" class="img-fluid">
+                    </div>
+                    <div class="small-banner-content">
+                        <h4>FREELANCER - NEW ARRIVAL</h4>
+                        <p class="banner-link">Xem ngay</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Collections Section -->
+<section class="collections-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Bộ Sưu Tập Nổi Bật</h2>
+                <p class="section-subtitle">Khám phá những sản phẩm thời trang cao cấp mới nhất</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- New Arrival -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="collection-card">
+                    <div class="collection-image">
+                        <img src="~/images/Banner/banner-man-0.jpg" alt="John Henry New Arrival" class="img-fluid">
+                        <div class="collection-overlay">
+                            <h3>JOHN HENRY</h3>
+                            <p>New Arrival</p>
+                            <a href="/Products" class="btn btn-outline-light">Xem Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Best Seller -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="collection-card">
+                    <div class="collection-image">
+                        <img src="~/images/Banner/banner-sale.jpg" alt="Best Seller" class="img-fluid">
+                        <div class="collection-overlay">
+                            <h3>BEST SELLER</h3>
+                            <p>Sản phẩm bán chạy</p>
+                            <a href="/Products" class="btn btn-outline-light">Mua Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Women Collection -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="collection-card">
+                    <div class="collection-image">
+                        <img src="~/images/Banner/banner-women-0.jpg" alt="Women Collection" class="img-fluid">
+                        <div class="collection-overlay">
+                            <h3>WOMEN COLLECTION</h3>
+                            <p>Thời trang nữ</p>
+                            <a href="/Products" class="btn btn-outline-light">Khám Phá</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="featured-products py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
+                <p class="section-subtitle">Những món đồ thời trang được yêu thích nhất</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Product 1 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Khoác Nam Cá Tính" class="img-fluid">
+                        <div class="product-overlay">
+                            <a href="/Products/Details/1" class="btn btn-primary">Xem Chi Tiết</a>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h5>Áo Khoác Nam Cá Tính</h5>
+                        <p class="product-price">1.200.000 VNĐ</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product 2 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="~/images/Áo nam/Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB.jpg" alt="Áo Len Nam" class="img-fluid">
+                        <div class="product-overlay">
+                            <a href="/Products/Details/2" class="btn btn-primary">Xem Chi Tiết</a>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h5>Áo Len Nam Tay Dài</h5>
+                        <p class="product-price">890.000 VNĐ</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product 3 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="~/images/Áo nữ/Áo Blouse Nữ Thời Trang FWBL25SS01C.jpg" alt="Áo Blouse Nữ" class="img-fluid">
+                        <div class="product-overlay">
+                            <a href="/Products/Details/3" class="btn btn-primary">Xem Chi Tiết</a>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h5>Áo Blouse Nữ Thời Trang</h5>
+                        <p class="product-price">750.000 VNĐ</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product 4 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="~/images/Áo nữ/Áo Polo Nữ Cổ Lưới FWKS25SS11G.jpg" alt="Áo Polo Nữ" class="img-fluid">
+                        <div class="product-overlay">
+                            <a href="/Products/Details/4" class="btn btn-primary">Xem Chi Tiết</a>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h5>Áo Polo Nữ Cổ Lưới</h5>
+                        <p class="product-price">680.000 VNĐ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Hero carousel simple auto-play
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize carousel with auto-play
+            const carousel = new bootstrap.Carousel(document.querySelector('#heroCarousel'), {
+                interval: 4000,
+                wrap: true,
+                ride: 'carousel'
+            });
+        });
+    </script>
+}
+
+<style>
+    :root {
+        --jh-red: #CE193A;
+        --jh-dark-red: #95122A;
+        --jh-white: #FFFFFF;
+        --jh-gold: #FFD700;
+        --primary-color: #CE193A;
+    }
+    
+    .hero-carousel {
+        height: 60vh; /* Giảm từ 100vh xuống 60vh */
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .carousel-inner {
+        height: 100%;
+    }
+    
+    .carousel-item {
+        height: 60vh; /* Giảm từ 100vh xuống 60vh */
+    }
+    
+    .hero-slide {
+        position: relative;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+    
+    .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+    
+    .hero-bg-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    /* Carousel Controls */
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%;
+        color: white;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+    
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        opacity: 1;
+    }
+    
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        width: 2rem;
+        height: 2rem;
+        background-size: 100%, 100%;
+        border-radius: 50%;
+        background-color: rgba(0,0,0,0.3);
+    }
+    
+    /* Carousel Indicators */
+    .carousel-indicators {
+        bottom: 20px;
+        margin-bottom: 0;
+    }
+    
+    .carousel-indicators [data-bs-target] {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin: 0 5px;
+        background-color: rgba(255,255,255,0.5);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .carousel-indicators .active {
+        background-color: var(--jh-red);
+        transform: scale(1.2);
+    }
+    
+    /* Small Banners Section */
+    .small-banners-section {
+        padding: 30px 0;
+        background-color: #f8f9fa;
+    }
+    
+    .small-banner-card {
+        background: white;
+        border-radius: 0; /* Loại bỏ bo góc */
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .small-banner-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .small-banner-image {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+    }
+    
+    .small-banner-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .small-banner-card:hover .small-banner-image img {
+        transform: scale(1.05);
+    }
+    
+    .small-banner-content {
+        padding: 20px;
+        text-align: center;
+        background: white;
+    }
+    
+    .small-banner-content h4 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #333;
+        line-height: 1.3;
+    }
+    
+    .banner-link {
+        color: var(--jh-red);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    
+    .small-banner-card:hover .banner-link {
+        color: var(--jh-dark-red);
+    }
+    
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .hero-carousel {
+            height: 50vh;
+        }
+        
+        .carousel-item {
+            height: 50vh;
+        }
+        
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+        }
+        
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        
+        .small-banners-section {
+            padding: 20px 0;
+        }
+        
+        .small-banner-image {
+            height: 200px;
+        }
+        
+        .small-banner-content {
+            padding: 15px;
+        }
+        
+        .small-banner-content h4 {
+            font-size: 1rem;
+        }
+        
+        .banner-link {
+            font-size: 0.8rem;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .hero-carousel {
+            height: 40vh;
+        }
+        
+        .carousel-item {
+            height: 40vh;
+        }
+        
+        .carousel-indicators [data-bs-target] {
+            width: 10px;
+            height: 10px;
+        }
+        
+        .small-banners-section {
+            padding: 15px 0;
+        }
+        
+        .small-banner-image {
+            height: 180px;
+        }
+        
+        .small-banner-content {
+            padding: 12px;
+        }
+        
+        .small-banner-content h4 {
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+        
+        .banner-link {
+            font-size: 0.75rem;
+        }
+        
+        .row.g-3 {
+            gap: 15px;
+        }
+    }
+    }
+    
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.8rem;
+        }
+        
+        .hero-description {
+            font-size: 1rem;
+        }
+        
+        .hero-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .hero-btn,
+        .hero-btn-outline {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+        }
+    }
+    
+    /* Collections Section Styles */
+    .collections-section {
+        background-color: #f8f9fa;
+    }
+    
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+    
+    .collection-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0; /* Loại bỏ bo góc */
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .collection-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .collection-image {
+        position: relative;
+        overflow: hidden;
+        height: 300px;
+    }
+    
+    .collection-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .collection-card:hover .collection-image img {
+        transform: scale(1.1);
+    }
+    
+    .collection-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(206, 25, 58, 0.8);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .collection-card:hover .collection-overlay {
+        opacity: 1;
+    }
+    
+    .collection-overlay h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .collection-overlay p {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Featured Products Section */
+    .featured-products {
+        background-color: #f8f9fa;
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 0; /* Loại bỏ bo góc */
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .product-image {
+        position: relative;
+        overflow: hidden;
+        height: 250px;
+    }
+    
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+    
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+    
+    .product-info {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .product-info h5 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .product-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+</style>

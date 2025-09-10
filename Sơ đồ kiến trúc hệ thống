@@ -1,0 +1,108 @@
+## Sơ đồ kiến trúc chi tiết và lộ trình phát triển web luxury (.NET MVC)
+
+### 1. Sơ đồ kiến trúc hệ thống
+
+```
+┌─────────────────────────────┐
+│         Client (UI)         │
+│ - HTML5, CSS3, JS           │
+│ - Bootstrap 5 (layout)      │
+│ - GSAP, AOS, Lottie (anim)  │
+│ - Video.js (video bg)       │
+└─────────────┬───────────────┘
+              │ HTTP/HTTPS
+┌─────────────▼──────────────┐
+│       ASP.NET MVC          │
+│ - Controllers (C#)         │
+│ - Views (.cshtml Razor)    │
+│ - Models (EF Core/ORM)     │
+│ - Bundling & Minification  │
+└─────────────┬──────────────┘
+              │ Entity Framework
+┌─────────────▼──────────────┐
+│        Database            │
+│ - SQL Server/PostgreSQL    │
+│ - Tables: Products, Users, │
+│   Orders, Carts            │
+└─────────────┬──────────────┘
+              │ CDN/Cloud Storage
+┌─────────────▼──────────────┐
+│     Media & Assets         │
+│ - Videos (WebM/MP4)        │
+│ - Images (Lazy load)       │
+│ - JSON Lottie files        │
+└────────────────────────────┘
+```
+
+---
+
+### 2. Công nghệ sử dụng
+
+* **Back-end:** ASP.NET MVC 5 hoặc ASP.NET Core MVC.
+* **Front-end:** Bootstrap 5, GSAP, AOS, Lottie, Video.js.
+* **Database:** SQL Server hoặc PostgreSQL.
+* **Media:** WebM/MP4 video, JSON animation Lottie.
+* **SEO:** Razor partial views, sitemap.xml.
+
+---
+
+### 3. Lộ trình phát triển web
+
+**Giai đoạn 1: Khởi tạo & Kiến trúc**
+
+* Cấu trúc MVC: Models, Views, Controllers, wwwroot.
+* Cài đặt Bootstrap 5, GSAP, AOS.
+* Cấu hình Bundling & Minification.
+
+**Giai đoạn 2: Thiết kế giao diện (UI/UX)**
+
+* Tạo layout.cshtml.
+* Thiết kế Hero section với video nền.
+* Thêm Navigation bar sticky + scroll animation.
+
+**Giai đoạn 3: Chức năng chính**
+
+* Models: Sản phẩm, giỏ hàng, đơn hàng.
+* Controllers: Shop, Cart, Home.
+* Views: Trang chủ, danh mục, chi tiết sản phẩm, giỏ hàng.
+
+**Giai đoạn 4: Animation & Hiệu ứng**
+
+* GSAP: hero intro, CTA, product hover.
+* AOS: phần xuất hiện khi cuộn.
+* Lottie: logo.
+* Video.js: video nền.
+
+**Giai đoạn 5: Tối ưu & Hoàn thiện**
+
+* Lazy load hình ảnh & video.
+* CDN cho thư viện.
+* Nén video (WebM + MP4 fallback).
+* Cache + nén dữ liệu.
+
+**Giai đoạn 6: Triển khai & Mở rộng**
+
+* Deploy: Azure App Service, Vercel, hoặc IIS.
+* Tích hợp thanh toán online.
+* AI product recommendation.
+* Chuyển hướng SPA (React/Vue).
+
+---
+
+### 4. Animation đề xuất cho giao diện luxury
+
+* Hero intro: GSAP fade-in + slide.
+* Navbar: shrink on scroll.
+* Product cards: hover 3D tilt + shadow.
+* Add to cart: icon bounce & fly.
+* Footer: fade-in từ dưới lên.
+* Video overlay: gradient animate.
+
+---
+
+### 5. Hướng phát triển nâng cao
+
+* Micro-interactions bằng GSAP timeline.
+* Dark mode luxury.
+* AI chatbot tư vấn sản phẩm.
+* Progressive Web App (PWA) để tăng tốc độ và trải nghiệm.

@@ -1,0 +1,870 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - JOHN HENRY</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/JohnHenryFashionWeb.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --jh-red: #CE193A;
+            --jh-dark-red: #95122A;
+            --jh-white: #FFFFFF;
+        }
+        
+        body {
+            padding-top: 180px; /* Account for combined header */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Top Red Line */
+        .top-red-line {
+            background: var(--jh-red);
+            height: 40px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1100;
+        }
+        
+        /* Main Header */
+        .main-header {
+            background: var(--jh-white);
+            position: fixed !important;
+            top: 50px !important;
+            left: 0;
+            right: 0;
+            z-index: 1090;
+            transform: none !important;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: auto;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon img {
+            width: 100%;
+            height: 35px;
+            object-fit: contain;
+        }
+        
+        .brand-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        
+        .search-section {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 30px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 6px 20px 6px 50px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .search-box input:focus {
+            border-color: var(--jh-red);
+            outline: none;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-icon {
+            color: #000000;
+            font-size: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .header-icon i[data-lucide] {
+            width: 20px;
+            height: 20px;
+            stroke-width: 1.5;
+        }
+        
+        .header-icon:hover {
+            color: var(--jh-red);
+            transform: translateY(-2px);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--jh-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .cart-badge.show {
+            display: flex; /* Show when has items */
+        }
+        
+        /* Navigation Section trong header */
+        .nav-section {
+            padding: 2px 0;
+            margin-top: 1px;
+        }
+        
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin: 0 30px;
+        }
+        
+        .nav-link {
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            padding: 4px 0;
+            display: block;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--jh-red);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .nav-link:hover {
+            color: var(--jh-red);
+        }
+        
+        @@keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            body {
+                padding-top: 140px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-section {
+                order: 3;
+                max-width: 100%;
+                margin: 0;
+            }
+            
+            .header-icons {
+                gap: 15px;
+            }
+            
+            .header-icon {
+                font-size: 18px;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-item {
+                margin: 0 15px;
+            }
+            
+            .logo-icon img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        
+        @@media (max-width: 480px) {
+            body {
+                padding-top: 140px;
+            }
+            
+            .brand-text {
+                font-size: 20px;
+            }
+            
+            .logo-icon img {
+                width: 110px;
+                height: 110px;
+            }
+            
+            .header-icons {
+                gap: 12px;
+            }
+        }
+        
+        /* Footer Styles */
+        .footer-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+        }
+        
+        .footer-brand .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .footer-description {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .contact-item i {
+            color: var(--jh-red);
+            width: 16px;
+        }
+        
+        .footer-title {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+        
+        .footer-link {
+            color: #cccccc;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .footer-link:hover {
+            color: var(--jh-red);
+            transform: translateX(5px);
+        }
+        
+        /* Social Links */
+        .social-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .social-link:hover {
+            transform: translateY(-3px);
+            color: #ffffff;
+        }
+        
+        .social-link.facebook:hover {
+            background: #1877f2;
+            box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4);
+        }
+        
+        .social-link.instagram:hover {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            box-shadow: 0 5px 15px rgba(225, 48, 108, 0.4);
+        }
+        
+        .social-link.youtube:hover {
+            background: #ff0000;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+        
+        .social-link.tiktok:hover {
+            background: #000000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .social-link.zalo:hover {
+            background: #0068ff;
+            box-shadow: 0 5px 15px rgba(0, 104, 255, 0.4);
+        }
+        
+        .zalo-icon {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        /* Newsletter */
+        .newsletter-title {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .newsletter-form {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .newsletter-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 20px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+        
+        .newsletter-input::placeholder {
+            color: #cccccc;
+        }
+        
+        .newsletter-input:focus {
+            outline: none;
+        }
+        
+        .newsletter-btn {
+            background: var(--jh-red);
+            border: none;
+            padding: 12px 20px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .newsletter-btn:hover {
+            background: var(--jh-dark-red);
+            transform: scale(1.05);
+        }
+        
+        /* Payment Methods */
+        .payment-title {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .payment-icons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .payment-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 35px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .payment-icon:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .payment-icon.visa {
+            background: #1a1f71;
+        }
+        
+        .payment-icon.mastercard {
+            background: #eb001b;
+        }
+        
+        .momo-text, .zalopay-text {
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .payment-icon.momo {
+            background: #a50064;
+        }
+        
+        .payment-icon.zalopay {
+            background: #0068ff;
+        }
+        
+        .payment-icon.banking {
+            background: #2e7d32;
+        }
+        
+        /* Footer Bottom */
+        .footer-bottom {
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .copyright {
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .footer-legal {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legal-link {
+            color: #cccccc;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .legal-link:hover {
+            color: var(--jh-red);
+        }
+        
+        .separator {
+            color: #666666;
+        }
+        
+        /* Footer Responsive */
+        @@media (max-width: 768px) {
+            .footer-main {
+                text-align: center;
+            }
+            
+            .footer-brand .brand-logo {
+                justify-content: center;
+            }
+            
+            .contact-info {
+                align-items: center;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+            
+            .payment-icons {
+                justify-content: center;
+            }
+            
+            .footer-legal {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Top Red Line -->
+    <div class="top-red-line"></div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section -->
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <img src="~/images/logo.png" alt="John Henry Logo">
+                    </div>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Áo thun nam" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Header Icons -->
+                <div class="header-icons">
+                    <a href="#" class="header-icon" title="Cửa hàng gần bạn">
+                        <i data-lucide="map-pin"></i>
+                    </a>
+                    <a href="#" class="header-icon" title="Tài khoản">
+                        <i data-lucide="user"></i>
+                    </a>
+                    <a href="#" class="header-icon" title="Yêu thích">
+                        <i data-lucide="heart"></i>
+                    </a>
+                    <a href="#" class="header-icon" title="Giỏ hàng">
+                        <i data-lucide="shopping-bag"></i>
+                        <span class="cart-badge">0</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu trong header -->
+            <div class="nav-section">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link active">JOHN HENRY</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">FREELANCER</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">BLOG</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/Products" class="nav-link">CỬA HÀNG</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">UNIFORMPRO</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid p-0">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer-section bg-dark text-light">
+        <div class="container">
+            <!-- Main Footer Content -->
+            <div class="footer-main py-5">
+                <div class="row g-4">
+                    <!-- Company Info -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-brand">
+                            <div class="brand-logo mb-3">
+                                <span class="logo-icon"></span>
+                                <span class="brand-text text-light">JOHN HENRY</span>
+                            </div>
+                            <p class="footer-description">
+                                Thương hiệu thời trang cao cấp hàng đầu, mang đến phong cách hiện đại và sang trọng cho quý khách hàng.
+                            </p>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>123 Đường Nguyễn Huệ, Quận 1, TP.HCM</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>+84 123 456 789</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>info@johnhenry.vn</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-6">
+                        <h5 class="footer-title">Liên Kết</h5>
+                        <ul class="footer-links">
+                            <li><a href="/" class="footer-link">Trang Chủ</a></li>
+                            <li><a href="/Products" class="footer-link">Sản Phẩm</a></li>
+                            <li><a href="#" class="footer-link">Nam</a></li>
+                            <li><a href="#" class="footer-link">Nữ</a></li>
+                            <li><a href="#" class="footer-link">Phụ Kiện</a></li>
+                            <li><a href="/Contact" class="footer-link">Liên Hệ</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Customer Service -->
+                    <div class="col-lg-2 col-md-6">
+                        <h5 class="footer-title">Hỗ Trợ</h5>
+                        <ul class="footer-links">
+                            <li><a href="#" class="footer-link">Hướng Dẫn Mua Hàng</a></li>
+                            <li><a href="#" class="footer-link">Chính Sách Đổi Trả</a></li>
+                            <li><a href="#" class="footer-link">Bảo Hành</a></li>
+                            <li><a href="#" class="footer-link">Vận Chuyển</a></li>
+                            <li><a href="#" class="footer-link">Size Chart</a></li>
+                            <li><a href="#" class="footer-link">FAQ</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Social & Newsletter -->
+                    <div class="col-lg-4 col-md-6">
+                        <h5 class="footer-title">Kết Nối Với Chúng Tôi</h5>
+                        <div class="social-links mb-4">
+                            <a href="#" class="social-link facebook" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link instagram" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link youtube" title="YouTube">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            <a href="#" class="social-link tiktok" title="TikTok">
+                                <i class="fab fa-tiktok"></i>
+                            </a>
+                            <a href="#" class="social-link zalo" title="Zalo">
+                                <span class="zalo-icon">Z</span>
+                            </a>
+                        </div>
+
+                        <div class="newsletter">
+                            <h6 class="newsletter-title">Đăng Ký Nhận Ưu Đãi</h6>
+                            <div class="newsletter-form">
+                                <input type="email" class="newsletter-input" placeholder="Nhập email của bạn">
+                                <button class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="payment-methods mt-4">
+                            <h6 class="payment-title">Phương Thức Thanh Toán</h6>
+                            <div class="payment-icons">
+                                <div class="payment-icon visa" title="Visa">
+                                    <i class="fab fa-cc-visa"></i>
+                                </div>
+                                <div class="payment-icon mastercard" title="Mastercard">
+                                    <i class="fab fa-cc-mastercard"></i>
+                                </div>
+                                <div class="payment-icon momo" title="MoMo">
+                                    <span class="momo-text">MoMo</span>
+                                </div>
+                                <div class="payment-icon zalopay" title="ZaloPay">
+                                    <span class="zalopay-text">ZaloPay</span>
+                                </div>
+                                <div class="payment-icon banking" title="Banking">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom py-3 border-top border-secondary">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright mb-0">
+                            &copy; 2025 JOHN HENRY Fashion. Infinity Zero 3000.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-legal">
+                            <a href="#" class="legal-link">Điều Khoản Sử Dụng</a>
+                            <span class="separator">|</span>
+                            <a href="#" class="legal-link">Chính Sách Bảo Mật</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://unpkg.com/aos@@2.3.1/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize AOS
+            AOS.init({
+                duration: 1000,
+                easing: 'ease-out-cubic',
+                once: true
+            });
+
+            // Back to Top Button Functionality
+            const backToTopBtn = document.getElementById('backToTop');
+            
+            // Show/hide button based on scroll position
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+            
+            // Smooth scroll to top when clicked
+            backToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Logo Lottie animation on page load
+            const logoAnimation = document.getElementById('logoAnimation');
+            const brandText = document.getElementById('brandText');
+            
+            // Hide brand text initially and show after logo animation
+            brandText.style.opacity = '0';
+            
+            // Play logo animation and then show text
+            setTimeout(() => {
+                gsap.to(brandText, { duration: 1, opacity: 1, x: 0, ease: "power2.out" });
+            }, 1000);
+            
+            // Logo hover effect
+            const logoContainer = document.getElementById('logoContainer');
+            logoContainer.addEventListener('mouseenter', () => {
+                logoAnimation.play();
+            });
+
+            // Header is now fixed and won't move on scroll
+            const header = document.querySelector('.main-header');
+            
+            // Force fixed positioning and reset any transforms
+            function keepHeaderFixed() {
+                if (header) {
+                    header.style.position = 'fixed';
+                    header.style.top = '4px';
+                    header.style.transform = 'none';
+                    header.style.transition = 'none';
+                }
+            }
+            
+            // Apply immediately and on any changes
+            keepHeaderFixed();
+            setInterval(keepHeaderFixed, 100); // Check every 100ms
+
+            // GSAP animations for header and footer
+            gsap.from("header", { duration: 1, y: -50, opacity: 0, ease: "power2.out" });
+            gsap.from("footer", { duration: 1, y: 50, opacity: 0, ease: "power2.out" });
+        });
+    </script>
+    
+    <style>
+        #logoContainer {
+            transition: all 0.3s ease;
+        }
+        
+        #logoAnimation {
+            transition: all 0.3s ease;
+        }
+        
+        #brandText {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover #logoAnimation {
+            transform: scale(1.1);
+        }
+        
+        /* Navigation styles - fixed positioning */
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #CE193A !important;
+        }
+    </style>
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

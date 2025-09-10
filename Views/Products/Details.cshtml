@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    var productId = ViewData["ProductId"];
+}
+
+<div class="container py-5">
+    <h1 class="display-4 text-center mb-5" data-aos="fade-down">Chi tiết sản phẩm</h1>
+    <div class="card shadow" data-aos="zoom-in" data-aos-delay="200">
+        <img src="https://via.placeholder.com/800x400?text=Sản+phẩm+@productId" class="card-img-top" alt="Sản phẩm @productId">
+        <div class="card-body">
+            <h5 class="card-title">Sản phẩm @productId</h5>
+            <p class="card-text">Mô tả chi tiết về sản phẩm @productId. Đây là sản phẩm chất lượng cao, phù hợp với mọi nhu cầu của bạn.</p>
+            <a href="/Products" class="btn btn-secondary">Quay lại danh sách sản phẩm</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        gsap.from(".card", { duration: 1, scale: 0.8, opacity: 0, ease: "elastic" });
+    </script>
+}

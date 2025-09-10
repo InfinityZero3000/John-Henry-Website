@@ -1,0 +1,499 @@
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+<div class="container py-5">
+    <h1 class="display-4 text-center mb-5" data-aos="fade-down">JOHN HENRY COLLECTION</h1>
+    
+    <!-- Filter Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="filter-section text-center" data-aos="fade-up">
+                <button class="btn btn-outline-primary active me-2 mb-2" data-filter="all">Tất cả</button>
+                <button class="btn btn-outline-primary me-2 mb-2" data-filter="ao-nam">Áo Nam</button>
+                <button class="btn btn-outline-primary me-2 mb-2" data-filter="ao-nu">Áo Nữ</button>
+                <button class="btn btn-outline-primary me-2 mb-2" data-filter="quan-nam">Quần Nam</button>
+                <button class="btn btn-outline-primary me-2 mb-2" data-filter="chan-vay">Chân Váy</button>
+                <button class="btn btn-outline-primary me-2 mb-2" data-filter="dam-nu">Đầm Nữ</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="row g-4" id="products-grid">
+        <!-- Áo Nam Products -->
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nam" data-aos="fade-up" data-aos-delay="100">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="product-badge">HOT</div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Khoác Nam Cá Tính</h5>
+                    <p class="product-code">JK25FH04C-PA</p>
+                    <div class="product-price">
+                        <span class="current-price">1,299,000đ</span>
+                        <span class="old-price">1,599,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <span class="rating-count">(32)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nam" data-aos="fade-up" data-aos-delay="200">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nam/Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB.jpg" alt="Áo Len Nam Tay Dài" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="product-badge new-badge">NEW</div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Len Nam Tay Dài Form Vừa</h5>
+                    <p class="product-code">SW25FH04M-LB</p>
+                    <div class="product-price">
+                        <span class="current-price">799,000đ</span>
+                        <span class="old-price">999,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        <span class="rating-count">(18)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nam" data-aos="fade-up" data-aos-delay="300">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nam/Áo Sơ Mi Nam Form Ôm Tay Dài WS25FH98T-LD.jpg" alt="Áo Sơ Mi Nam" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Sơ Mi Nam Form Ôm Tay Dài</h5>
+                    <p class="product-code">WS25FH98T-LD</p>
+                    <div class="product-price">
+                        <span class="current-price">599,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <span class="rating-count">(25)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nam" data-aos="fade-up" data-aos-delay="400">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nam/Áo Polo Nam Form Ôm Tay Ngắn KS25FH49C-SLWK.jpg" alt="Áo Polo Nam" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Polo Nam Form Ôm Tay Ngắn</h5>
+                    <p class="product-code">KS25FH49C-SLWK</p>
+                    <div class="product-price">
+                        <span class="current-price">459,000đ</span>
+                        <span class="old-price">599,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        <span class="rating-count">(14)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Áo Nữ Products -->
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nu" data-aos="fade-up" data-aos-delay="100">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nữ/Áo Blouse Nữ Thời Trang FWBL25SS01C.jpg" alt="Áo Blouse Nữ" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="product-badge sale-badge">-20%</div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Blouse Nữ Thời Trang</h5>
+                    <p class="product-code">FWBL25SS01C</p>
+                    <div class="product-price">
+                        <span class="current-price">599,000đ</span>
+                        <span class="old-price">749,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <span class="rating-count">(42)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nu" data-aos="fade-up" data-aos-delay="200">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nữ/Áo Polo Nữ Cổ Lưới FWKS25SS11G.jpg" alt="Áo Polo Nữ" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="product-badge">SALE</div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Polo Nữ Cổ Lưới</h5>
+                    <p class="product-code">FWKS25SS11G</p>
+                    <div class="product-price">
+                        <span class="current-price">459,000đ</span>
+                        <span class="old-price">599,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        <span class="rating-count">(28)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nu" data-aos="fade-up" data-aos-delay="300">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nữ/Áo Sơ Mi Freelancer FWWS25SS04C.jpg" alt="Áo Sơ Mi Freelancer" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Sơ Mi Freelancer</h5>
+                    <p class="product-code">FWWS25SS04C</p>
+                    <div class="product-price">
+                        <span class="current-price">699,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <span class="rating-count">(35)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 product-item" data-category="ao-nu" data-aos="fade-up" data-aos-delay="400">
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="~/images/Áo nữ/Áo Thun Freelancer FWTS25SS20G.jpg" alt="Áo Thun Freelancer" class="product-image">
+                    <div class="product-actions">
+                        <button class="action-btn heart-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="product-badge new-badge">NEW</div>
+                </div>
+                <div class="product-info">
+                    <h5 class="product-name">Áo Thun Freelancer</h5>
+                    <p class="product-code">FWTS25SS20G</p>
+                    <div class="product-price">
+                        <span class="current-price">399,000đ</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        <span class="rating-count">(19)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load More Button -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <button class="btn btn-outline-primary btn-lg" id="load-more-btn">
+                TẢI THÊM SẢN PHẨM
+                <i class="fas fa-plus ms-2"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        // Filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('[data-filter]');
+            const productItems = document.querySelectorAll('.product-item');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filter products
+                    productItems.forEach(item => {
+                        if (filter === 'all' || item.dataset.category === filter) {
+                            item.style.display = 'block';
+                            gsap.fromTo(item, 
+                                { opacity: 0, scale: 0.8 }, 
+                                { opacity: 1, scale: 1, duration: 0.5 }
+                            );
+                        } else {
+                            gsap.to(item, { 
+                                opacity: 0, 
+                                scale: 0.8, 
+                                duration: 0.3,
+                                onComplete: () => item.style.display = 'none'
+                            });
+                        }
+                    });
+                });
+            });
+            
+            // Load more functionality
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            loadMoreBtn.addEventListener('click', function() {
+                // Simulate loading more products
+                gsap.to(this, { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1 });
+                
+                // Here you would typically load more products via AJAX
+                console.log('Loading more products...');
+            });
+            
+            // Product card animations
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    gsap.to(this, { y: -10, duration: 0.3, ease: "power2.out" });
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    gsap.to(this, { y: 0, duration: 0.3, ease: "power2.out" });
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        /* Product Page Styles */
+        :root {
+            --jh-red: #CE193A;
+            --jh-dark-red: #95122A;
+            --jh-white: #FFFFFF;
+            --jh-gold: #FFD700;
+        }
+        
+        .filter-section .btn {
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-section .btn.active,
+        .filter-section .btn:hover {
+            background-color: var(--jh-red);
+            border-color: var(--jh-red);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .product-image-container {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+        
+        .product-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .product-card:hover .product-actions {
+            opacity: 1;
+        }
+        
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: var(--jh-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .action-btn:hover {
+            background: var(--jh-red);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--jh-red);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .product-badge.new-badge {
+            background: #28a745;
+        }
+        
+        .product-badge.sale-badge {
+            background: #ff6b35;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        
+        .product-code {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        .product-price {
+            margin-bottom: 10px;
+        }
+        
+        .current-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--jh-red);
+        }
+        
+        .old-price {
+            font-size: 0.9rem;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .product-rating i {
+            color: #b4282b;
+            font-size: 0.8rem;
+        }
+        
+        .rating-count {
+            color: #666;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+        
+        #load-more-btn {
+            border-radius: 25px;
+            padding: 15px 40px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        #load-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(206, 25, 58, 0.3);
+        }
+        
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .product-image-container {
+                height: 250px;
+            }
+            
+            .product-actions {
+                opacity: 1;
+                flex-direction: row;
+                top: auto;
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .filter-section .btn {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+}
