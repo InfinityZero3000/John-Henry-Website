@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: johnhenry_postgres
+    environment:
+      POSTGRES_DB: johnhenry_db
+      POSTGRES_USER: johnhenry_user
+      POSTGRES_PASSWORD: JohnHenry@2025!
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - johnhenry_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: johnhenry_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@johnhenry.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - johnhenry_network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  johnhenry_network:
+    driver: bridge
