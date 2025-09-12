@@ -1,16 +1,39 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - JOHN HENRY</title>
+    
+    @{
+        var seoService = ViewContext.HttpContext.RequestServices.GetService<JohnHenryFashionWeb.Services.ISeoService>();
+        var seoData = ViewData["SeoData"] as JohnHenryFashionWeb.Services.SeoData ?? seoService?.GetDefaultSeoData() ?? new JohnHenryFashionWeb.Services.SeoData { Title = ViewData["Title"]?.ToString() ?? "John Henry Fashion" };
+    }
+    
+    @Html.GenerateMetaTags(seoData)
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="~/css/site.css" as="style">
+    <link rel="preload" href="~/lib/bootstrap/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//unpkg.com">
+    
+    <!-- Favicon and app icons -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/apple-touch-icon.png">
+    <link rel="manifest" href="~/manifest.json">
+    
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JohnHenryFashionWeb.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Lazy load non-critical resources -->
+    <script async src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script async src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
     <style>
         :root {
             --jh-red: #CE193A;
@@ -18,9 +41,29 @@
             --jh-white: #FFFFFF;
         }
         
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             padding-top: 180px; /* Account for combined header */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Main content wrapper */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
         }
         
         /* Top Red Line */
@@ -38,7 +81,7 @@
         .main-header {
             background: var(--jh-white);
             position: fixed !important;
-            top: 50px !important;
+            top: 40px !important;
             left: 0;
             right: 0;
             z-index: 1090;
@@ -58,8 +101,8 @@
         }
         
         .logo-icon img {
-            width: 100%;
-            height: 35px;
+            width: 200px;
+            height: 50px;
             object-fit: contain;
         }
         
@@ -88,7 +131,7 @@
             border-radius: 25px;
             font-size: 14px;
             transition: all 0.3s ease;
-            background-color: #f8f9fa;
+            background-color: #dcddde;
         }
         
         .search-box input:focus {
@@ -129,7 +172,7 @@
             transform: translateY(-2px);
         }
         
-        .cart-badge {
+        .cart-badge, .wishlist-badge {
             position: absolute;
             top: -8px;
             right: -8px;
@@ -145,8 +188,118 @@
             font-weight: bold;
         }
 
-        .cart-badge.show {
+        .cart-badge.show, .wishlist-badge.show {
             display: flex; /* Show when has items */
+        }
+        
+        .wishlist-badge {
+            background: #e91e63;
+        }
+        
+        /* Account Dropdown Styles */
+        .account-dropdown {
+            position: relative;
+        }
+        
+        .account-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--jh-white);
+            min-width: 280px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 8px;
+            padding: 0;
+            display: none;
+            z-index: 1200;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .account-dropdown:hover .account-menu,
+        .account-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .account-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+            border-radius: 8px 8px 0 0;
+            color: white;
+        }
+        
+        .account-info h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .account-info small {
+            opacity: 0.9;
+            font-size: 13px;
+        }
+        
+        .account-divider {
+            margin: 0;
+            border-color: #e9ecef;
+            opacity: 0.5;
+        }
+        
+        .account-links {
+            padding: 15px 0;
+        }
+        
+        .account-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .account-link:hover {
+            background: #f8f9fa;
+            color: var(--jh-red);
+            transform: translateX(5px);
+        }
+        
+        .account-link i {
+            width: 16px;
+            color: #6c757d;
+        }
+        
+        .account-link:hover i {
+            color: var(--jh-red);
+        }
+        
+        .logout-form {
+            margin: 0;
+        }
+        
+        .logout-btn {
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background: #fee;
+            color: #dc3545;
+        }
+        
+        .logout-btn:hover i {
+            color: #dc3545;
         }
         
         /* Navigation Section trong header */
@@ -173,7 +326,7 @@
             font-weight: 600;
             font-size: 14px;
             text-transform: uppercase;
-            padding: 4px 0;
+            padding: 10px 0;
             display: block;
             transition: all 0.3s ease;
             position: relative;
@@ -197,6 +350,173 @@
         
         .nav-link:hover {
             color: var(--jh-red);
+        }
+        
+        /* Dropdown Styles */
+        .nav-item {
+            position: relative;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--jh-white);
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 0;
+            padding: 35px !important;
+            display: none;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover .dropdown-menu {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .dropdown-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px !important;
+            align-items: start;
+        }
+        
+        .dropdown-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 25px !important;
+            width: 100%;
+        }
+        
+        .dropdown-category {
+            display: block;
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            padding: 15px 0 !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .dropdown-category:hover {
+            color: var(--jh-red);
+        }
+        
+        .dropdown-category.active {
+            color: var(--jh-red);
+        }
+        
+        .dropdown-category.with-arrow::after {
+            content: '\f054' !important; /* Font Awesome chevron-right */
+            font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 900 !important;
+            margin-left: 15px !important;
+            font-size: 14px !important;
+            color: #CE193A !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        
+        .dropdown-category.with-arrow:hover::after {
+            color: #95122A !important;
+        }
+        
+        .dropdown-subcategories {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        /* Submenu Styles */
+        .dropdown-category-item {
+            position: relative;
+        }
+        
+        .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: var(--jh-white);
+            min-width: 250px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: none;
+            z-index: 1001;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--jh-red);
+        }
+        
+        .dropdown-category-item:hover .submenu {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .submenu-item {
+            display: block;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            padding: 15px 0 !important;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .submenu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .submenu-item:hover {
+            color: var(--jh-red);
+            background: #f8f9fa;
+            padding-left: 10px;
+        }
+        
+        .subcategory-item {
+            display: block;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            padding: 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .subcategory-item:hover {
+            color: var(--jh-red);
+            transform: translateX(5px);
+        }
+        
+        .dropdown-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 200px;
+        }
+        
+        .dropdown-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
         @@keyframes slideDown {
@@ -245,6 +565,42 @@
                 width: 100px;
                 height: 100px;
             }
+            
+            /* Mobile Dropdown Adjustments */
+            .dropdown-menu {
+                min-width: 90vw;
+                left: -20vw;
+                padding: 15px;
+                max-width: none;
+            }
+            
+            .dropdown-content {
+                gap: 15px;
+            }
+            
+            .dropdown-subcategories {
+                gap: 8px;
+            }
+            
+            /* Mobile Submenu */
+            .submenu {
+                position: static;
+                box-shadow: none;
+                border-left: none;
+                border-top: 2px solid var(--jh-red);
+                margin-top: 10px;
+                transform: none;
+                display: none;
+            }
+            
+            .dropdown-category-item:hover .submenu {
+                display: block;
+                opacity: 1;
+            }
+            
+            .dropdown-image {
+                height: 150px;
+            }
         }
         
         @@media (max-width: 480px) {
@@ -270,6 +626,8 @@
         .footer-section {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             color: #ffffff;
+            margin-top: 0;
+            position: relative;
         }
         
         .footer-brand .brand-logo {
@@ -553,6 +911,15 @@
         }
         
     </style>
+    
+    <!-- Structured Data for SEO -->
+    @Html.GenerateStructuredData(seoData)
+    
+    <!-- Google Analytics or other tracking code would go here -->
+    @if (ViewData["BreadcrumbItems"] is List<JohnHenryFashionWeb.Helpers.BreadcrumbItem> breadcrumbs)
+    {
+        @Html.GenerateBreadcrumbStructuredData(breadcrumbs)
+    }
 </head>
 <body>
     <!-- Top Red Line -->
@@ -582,33 +949,182 @@
                     <a href="#" class="header-icon" title="Cửa hàng gần bạn">
                         <i data-lucide="map-pin"></i>
                     </a>
-                    <a href="#" class="header-icon" title="Tài khoản">
-                        <i data-lucide="user"></i>
-                    </a>
-                    <a href="#" class="header-icon" title="Yêu thích">
-                        <i data-lucide="heart"></i>
-                    </a>
-                    <a href="#" class="header-icon" title="Giỏ hàng">
+                    
+                    <!-- Account Dropdown -->
+                    <div class="account-dropdown">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <a href="#" class="header-icon account-toggle" title="Tài khoản của @(User.Identity?.Name ?? "User")">
+                                <i data-lucide="user"></i>
+                            </a>
+                            <div class="account-menu">
+                                <div class="account-header">
+                                    <div class="account-info">
+                                        <h6>@(User.Identity?.Name ?? "User")</h6>
+                                        <small>Chào mừng trở lại!</small>
+                                    </div>
+                                </div>
+                                <hr class="account-divider">
+                                <div class="account-links">
+                                    <a href="@Url.Action("Profile", "Account")" class="account-link">
+                                        <i class="fas fa-user-circle"></i>
+                                        Hồ sơ cá nhân
+                                    </a>
+                                    <a href="@Url.Action("ChangePassword", "Account")" class="account-link">
+                                        <i class="fas fa-lock"></i>
+                                        Đổi mật khẩu
+                                    </a>
+                                    <a href="/Account/Orders" class="account-link">
+                                        <i class="fas fa-shopping-bag"></i>
+                                        Đơn hàng của tôi
+                                    </a>
+                                    <a href="/Wishlist" class="account-link">
+                                        <i class="fas fa-heart"></i>
+                                        Sản phẩm yêu thích
+                                    </a>
+                                    <a href="#" class="account-link">
+                                        <i class="fas fa-cog"></i>
+                                        Cài đặt
+                                    </a>
+                                </div>
+                                <hr class="account-divider">
+                                <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
+                                    <button type="submit" class="account-link logout-btn">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Account")" class="header-icon" title="Đăng nhập">
+                                <i data-lucide="user"></i>
+                            </a>
+                        }
+                    </div>
+                    
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="/Wishlist" class="header-icon" title="Yêu thích">
+                            <i data-lucide="heart"></i>
+                            <span class="wishlist-badge wishlist-count">0</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Account/Login" class="header-icon" title="Yêu thích">
+                            <i data-lucide="heart"></i>
+                        </a>
+                    }
+                    <a href="/Cart" class="header-icon" title="Giỏ hàng">
                         <i data-lucide="shopping-bag"></i>
-                        <span class="cart-badge">0</span>
+                        <span class="cart-badge cart-count">0</span>
                     </a>
                 </div>
             </div>
+            
+            <!-- Authentication indicator for JavaScript -->
+            @if (User?.Identity?.IsAuthenticated == true)
+            {
+                <div class="user-authenticated" data-user-authenticated="true" style="display: none;"></div>
+            }
             
             <!-- Navigation Menu trong header -->
             <div class="nav-section">
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="/" class="nav-link active">JOHN HENRY</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content">
+                                <div class="dropdown-categories">
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category with-arrow">ÁO NAM</a>
+                                        <div class="submenu">
+                                            <a href="#" class="submenu-item">ÁO POLO</a>
+                                            <a href="#" class="submenu-item">ÁO SƠ MI</a>
+                                            <a href="#" class="submenu-item">ÁO THUN</a>
+                                            <a href="#" class="submenu-item">ÁO LEN</a>
+                                            <a href="#" class="submenu-item">ÁO KHOÁC</a>
+                                            <a href="#" class="submenu-item">ÁO VEST - BLAZER</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category with-arrow">QUẦN NAM</a>
+                                        <div class="submenu">
+                                            <a href="#" class="submenu-item">QUẦN KHAKI</a>
+                                            <a href="#" class="submenu-item">QUẦN JEANS</a>
+                                            <a href="#" class="submenu-item">QUẦN TÂY</a>
+                                            <a href="#" class="submenu-item">QUẦN SHORT</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category with-arrow">PHỤ KIỆN NAM</a>
+                                        <div class="submenu">
+                                            <a href="#" class="submenu-item">TÚI XÁCH</a>
+                                            <a href="#" class="submenu-item">DÂY LƯNG</a>
+                                            <a href="#" class="submenu-item">KÍNH MẮT</a>
+                                            <a href="#" class="submenu-item">GIÀY DÉP</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">FREELANCER</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content">
+                                <div class="dropdown-categories">
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category">ĐẦM</a>
+                                    </div>
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category">CHÂN VÁY</a>
+                                    </div>
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category with-arrow">ÁO NỮ</a>
+                                        <div class="submenu">
+                                            <a href="#" class="submenu-item">ÁO BLOUSE</a>
+                                            <a href="#" class="submenu-item">ÁO T-SHIRT</a>
+                                            <a href="#" class="submenu-item">ÁO SƠ MI</a>
+                                            <a href="#" class="submenu-item">ÁO POLO</a>
+                                            <a href="#" class="submenu-item">ÁO BLAZER</a>
+                                            <a href="#" class="submenu-item">ÁO LEN</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category with-arrow">QUẦN NỮ</a>
+                                        <div class="submenu">
+                                            <a href="#" class="submenu-item">QUẦN JEAN</a>
+                                            <a href="#" class="submenu-item">QUẦN TÂY</a>
+                                            <a href="#" class="submenu-item">QUẦN SHORT</a>
+                                            <a href="#" class="submenu-item">QUẦN LEGGING</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-category-item">
+                                        <a href="#" class="dropdown-category">PHỤ KIỆN NỮ</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">BLOG</a>
+                        <a href="/Blog" class="nav-link">BLOG</a>
                     </li>
                     <li class="nav-item">
                         <a href="/Products" class="nav-link">CỬA HÀNG</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-content">
+                                <div class="dropdown-categories">
+                                    <a href="#" class="dropdown-category">JOHN HENRY</a>
+                                    <a href="#" class="dropdown-category">FREELANCER</a>
+                                </div>
+                                <div class="dropdown-image">
+                                    <img src="~/images/client-suit-boutique-with-shopping-bags.jpg" alt="Store Image">
+                                </div>
+                            </div>
+                        </div>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">UNIFORMPRO</a>
@@ -618,10 +1134,12 @@
         </div>
     </header>
 
-    <div class="container-fluid p-0">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <div class="main-wrapper">
+        <div class="container-fluid p-0">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
     <footer class="footer-section bg-dark text-light">
@@ -760,11 +1278,115 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Account dropdown enhancement
+        $(document).ready(function() {
+            console.log('Account dropdown script loaded');
+            
+            // Close dropdown when clicking outside
+            $(document).click(function(e) {
+                if (!$(e.target).closest('.account-dropdown').length) {
+                    $('.account-menu').removeClass('show').hide();
+                }
+            });
+            
+            // Toggle dropdown on click for better mobile experience
+            $('.account-toggle').click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Account toggle clicked');
+                
+                var $menu = $('.account-menu');
+                console.log('Menu found:', $menu.length);
+                
+                if ($menu.hasClass('show')) {
+                    console.log('Hiding menu');
+                    $menu.removeClass('show').hide();
+                } else {
+                    console.log('Showing menu');
+                    $menu.addClass('show').show();
+                }
+                return false;
+            });
+            
+            // Also support hover for desktop
+            $('.account-dropdown').hover(
+                function() {
+                    // Mouse enter
+                    $(this).find('.account-menu').addClass('show').show();
+                },
+                function() {
+                    // Mouse leave - with a small delay
+                    var $menu = $(this).find('.account-menu');
+                    setTimeout(function() {
+                        if (!$menu.is(':hover')) {
+                            $menu.removeClass('show').hide();
+                        }
+                    }, 200);
+                }
+            );
+        });
+    </script>
     <script src="https://unpkg.com/aos@@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
     <script>
+        // Load cart and wishlist counts when page loads
+        async function loadCounts() {
+            if (document.querySelector('.user-authenticated')) {
+                try {
+                    // Load cart count
+                    const cartResponse = await fetch('/Cart/GetCount');
+                    if (cartResponse.ok) {
+                        const cartCount = await cartResponse.json();
+                        updateCartCount(cartCount);
+                    }
+                    
+                    // Load wishlist count
+                    const wishlistResponse = await fetch('/Wishlist/GetCount');
+                    if (wishlistResponse.ok) {
+                        const wishlistCount = await wishlistResponse.json();
+                        updateWishlistCount(wishlistCount);
+                    }
+                } catch (error) {
+                    console.error('Error loading counts:', error);
+                }
+            }
+        }
+        
+        // Update cart count display
+        function updateCartCount(count) {
+            const cartElements = document.querySelectorAll('.cart-count');
+            cartElements.forEach(element => {
+                element.textContent = count;
+                if (count > 0) {
+                    element.classList.add('show');
+                } else {
+                    element.classList.remove('show');
+                }
+            });
+        }
+        
+        // Update wishlist count display
+        function updateWishlistCount(count) {
+            const wishlistElements = document.querySelectorAll('.wishlist-count');
+            wishlistElements.forEach(element => {
+                element.textContent = count;
+                if (count > 0) {
+                    element.classList.add('show');
+                } else {
+                    element.classList.remove('show');
+                }
+            });
+        }
+        
+        // Make functions globally available
+        window.updateCartCount = updateCartCount;
+        window.updateWishlistCount = updateWishlistCount;
+        
         document.addEventListener("DOMContentLoaded", function() {
+            // Load initial counts
+            loadCounts();
             // Initialize AOS
             AOS.init({
                 duration: 1000,

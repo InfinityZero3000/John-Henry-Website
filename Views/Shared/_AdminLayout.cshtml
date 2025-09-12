@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - John Henry Admin</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="~/css/admin-style.css" rel="stylesheet" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="admin-layout">
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <img src="~/images/logo.png" alt="John Henry" class="brand-logo">
+                    <span class="brand-text">John Henry Admin</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">@User.Identity?.Name</span>
+                        <span class="user-role">@(User.IsInRole("Admin") ? "Quản trị viên" : "Người bán")</span>
+                    </div>
+                </div>
+
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="@Url.Action("Dashboard", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="menu-header">QUẢN LÝ SẢN PHẨM</li>
+                        
+                        <li class="menu-item">
+                            <a href="@Url.Action("Categories", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Categories" ? "active" : "")">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Danh mục</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="@Url.Action("Brands", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Brands" ? "active" : "")">
+                                <i class="fas fa-tag"></i>
+                                <span>Thương hiệu</span>
+                            </a>
+                        </li>
+                    }
+
+                    <li class="menu-item">
+                        <a href="@Url.Action("Products", User.IsInRole("Admin") ? "Admin" : "Seller")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
+                            <i class="fas fa-box"></i>
+                            <span>Sản phẩm</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header">QUẢN LÝ ĐỠN HÀNG</li>
+                    
+                    <li class="menu-item">
+                        <a href="@Url.Action("Orders", User.IsInRole("Admin") ? "Admin" : "Seller")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Đơn hàng</span>
+                        </a>
+                    </li>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="menu-header">QUẢN LÝ KHO</li>
+                        
+                        <li class="menu-item">
+                            <a href="@Url.Action("Inventory", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Inventory" ? "active" : "")">
+                                <i class="fas fa-warehouse"></i>
+                                <span>Tồn kho</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="@Url.Action("StockMovements", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "StockMovements" ? "active" : "")">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Xuất nhập kho</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-header">QUẢN LÝ NGƯỜI DÙNG</li>
+                        
+                        <li class="menu-item">
+                            <a href="@Url.Action("Customers", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Customers" ? "active" : "")">
+                                <i class="fas fa-users"></i>
+                                <span>Khách hàng</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="@Url.Action("Sellers", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Sellers" ? "active" : "")">
+                                <i class="fas fa-store"></i>
+                                <span>Người bán</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-header">BÁO CÁO & THỐNG KÊ</li>
+                        
+                        <li class="menu-item">
+                            <a href="@Url.Action("Reports", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Reports" ? "active" : "")">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Báo cáo</span>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="@Url.Action("Analytics", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")">
+                                <i class="fas fa-analytics"></i>
+                                <span>Phân tích</span>
+                            </a>
+                        </li>
+                    }
+
+                    <li class="menu-header">CÀI ĐẶT</li>
+                    
+                    <li class="menu-item">
+                        <a href="@Url.Action("Profile", "Admin")" class="menu-link">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Hồ sơ</span>
+                        </a>
+                    </li>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="menu-item">
+                            <a href="@Url.Action("Settings", "Admin")" class="menu-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Cài đặt hệ thống</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <!-- Top Header -->
+            <header class="admin-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggleTop">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb-wrapper">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                                @if (ViewData["Breadcrumb"] != null)
+                                {
+                                    @Html.Raw(ViewData["Breadcrumb"])
+                                }
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-notifications">
+                        <div class="dropdown">
+                            <button class="btn btn-link notification-btn" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                                <li><h6 class="dropdown-header">Thông báo</h6></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-circle text-warning"></i> Sản phẩm sắp hết hàng</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-cart text-info"></i> Đơn hàng mới</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user text-success"></i> Khách hàng mới đăng ký</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="#">Xem tất cả</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="header-user">
+                        <div class="dropdown">
+                            <button class="btn btn-link user-btn" type="button" data-bs-toggle="dropdown">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity?.Name</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user-circle"></i> Hồ sơ</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Settings", "Admin")"><i class="fas fa-cog"></i> Cài đặt</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="admin-content">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i>
+                        @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["Warning"] != null)
+                {
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        @TempData["Warning"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/admin.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
