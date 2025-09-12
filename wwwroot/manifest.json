@@ -1,0 +1,25 @@
+{
+  "name": "John Henry Fashion",
+  "short_name": "John Henry",
+  "description": "Thời trang nam nữ cao cấp - John Henry Fashion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#CE193A",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "fashion", "lifestyle"],
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
