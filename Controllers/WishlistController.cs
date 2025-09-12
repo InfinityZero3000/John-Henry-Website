@@ -8,63 +8,42 @@ using System.Security.Claims;
 
 namespace JohnHenryFashionWeb.Controllers
 {
-    public class ProductsController : Controller
+    [Authorize]
+    public class WishlistController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public WishlistController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
-        // GET: Products
+        // GET: Wishlist
         public async Task<IActionResult> Index()
         {
-            var products = await _context.Products
-                .Include(p => p.Category)
-                .Where(p => p.IsActive)
-                .OrderBy(p => p.Name)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var wishlistItems = await _context.Wishlists
+                .Include(w => w.Product)
+                .ThenInclude(p => p.Category)
+                .Where(w => w.UserId == userId)
+                .OrderByDescending(w => w.CreatedAt)
                 .ToListAsync();
-            
-            return View(products);
+
+            ViewBag.WishlistCount = wishlistItems.Count;
+
+            return View(wishlistItems);
         }
 
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Check if user is authenticated and get wishlist status
-            bool isInWishlist = false;
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (!string.IsNullOrEmpty(userId))
-                {
-                    isInWishlist = await _context.Wishlists
-                        .AnyAsync(w => w.UserId == userId && w.ProductId == product.Id);
-                }
-            }
-
-            ViewBag.IsInWishlist = isInWishlist;
-            ViewBag.IsAuthenticated = User.Identity?.IsAuthenticated == true;
-
-            return View(product);
-        }
-
-        // POST: Products/AddToWishlist
+        // POST: Wishlist/Add
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> AddToWishlist(Guid productId)
+        public async Task<IActionResult> Add(Guid productId)
         {
             try
             {
@@ -82,10 +61,10 @@ namespace JohnHenryFashionWeb.Controllers
                 }
 
                 // Check if already in wishlist
-                var existingWishlistItem = await _context.Wishlists
+                var existingItem = await _context.Wishlists
                     .FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == productId);
 
-                if (existingWishlistItem != null)
+                if (existingItem != null)
                 {
                     return Json(new { success = false, message = "Product already in wishlist" });
                 }
@@ -102,7 +81,15 @@ namespace JohnHenryFashionWeb.Controllers
                 _context.Wishlists.Add(wishlistItem);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Product added to wishlist" });
+                // Get updated count
+                var wishlistCount = await _context.Wishlists
+                    .CountAsync(w => w.UserId == userId);
+
+                return Json(new { 
+                    success = true, 
+                    message = "Product added to wishlist",
+                    wishlistCount = wishlistCount
+                });
             }
             catch (Exception ex)
             {
@@ -110,10 +97,9 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
-        // POST: Products/RemoveFromWishlist
+        // POST: Wishlist/Remove
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> RemoveFromWishlist(Guid productId)
+        public async Task<IActionResult> Remove(Guid productId)
         {
             try
             {
@@ -134,7 +120,15 @@ namespace JohnHenryFashionWeb.Controllers
                 _context.Wishlists.Remove(wishlistItem);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Product removed from wishlist" });
+                // Get updated count
+                var wishlistCount = await _context.Wishlists
+                    .CountAsync(w => w.UserId == userId);
+
+                return Json(new { 
+                    success = true, 
+                    message = "Product removed from wishlist",
+                    wishlistCount = wishlistCount
+                });
             }
             catch (Exception ex)
             {
@@ -142,10 +136,40 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
-        // POST: Products/AddToCart
+        // POST: Wishlist/Clear
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> AddToCart(Guid productId, int quantity = 1, string? size = null, string? color = null)
+        public async Task<IActionResult> Clear()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not authenticated" });
+                }
+
+                var wishlistItems = await _context.Wishlists
+                    .Where(w => w.UserId == userId)
+                    .ToListAsync();
+
+                _context.Wishlists.RemoveRange(wishlistItems);
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Wishlist cleared",
+                    wishlistCount = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred while clearing wishlist" });
+            }
+        }
+
+        // POST: Wishlist/AddToCart
+        [HttpPost]
+        public async Task<IActionResult> AddToCart(Guid productId)
         {
             try
             {
@@ -163,28 +187,19 @@ namespace JohnHenryFashionWeb.Controllers
                 }
 
                 // Check stock availability
-                if (product.StockQuantity < quantity)
+                if (product.StockQuantity < 1)
                 {
-                    return Json(new { success = false, message = "Insufficient stock available" });
+                    return Json(new { success = false, message = "Product out of stock" });
                 }
 
-                // Check if item already exists in cart with same specifications
+                // Check if item already exists in cart
                 var existingCartItem = await _context.ShoppingCartItems
-                    .FirstOrDefaultAsync(c => c.UserId == userId && 
-                                            c.ProductId == productId && 
-                                            c.Size == size && 
-                                            c.Color == color);
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == productId);
 
                 if (existingCartItem != null)
                 {
                     // Update quantity
-                    var newQuantity = existingCartItem.Quantity + quantity;
-                    if (product.StockQuantity < newQuantity)
-                    {
-                        return Json(new { success = false, message = "Insufficient stock for requested quantity" });
-                    }
-
-                    existingCartItem.Quantity = newQuantity;
+                    existingCartItem.Quantity += 1;
                     existingCartItem.UpdatedAt = DateTime.UtcNow;
                 }
                 else
@@ -195,10 +210,8 @@ namespace JohnHenryFashionWeb.Controllers
                         Id = Guid.NewGuid(),
                         UserId = userId,
                         ProductId = productId,
-                        Quantity = quantity,
-                        Size = size,
-                        Color = color,
-                        Price = product.Price,
+                        Quantity = 1,
+                        Price = product.SalePrice ?? product.Price,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -225,39 +238,20 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
-        // GET: Products/IsInWishlist
+        // GET: Wishlist/GetCount
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> IsInWishlist(Guid productId)
+        public async Task<IActionResult> GetCount()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                return Json(new { isInWishlist = false });
+                return Json(new { wishlistCount = 0 });
             }
 
-            var isInWishlist = await _context.Wishlists
-                .AnyAsync(w => w.UserId == userId && w.ProductId == productId);
+            var wishlistCount = await _context.Wishlists
+                .CountAsync(w => w.UserId == userId);
 
-            return Json(new { isInWishlist = isInWishlist });
-        }
-
-        // GET: Products/GetCartCount
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetCartCount()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { cartCount = 0 });
-            }
-
-            var cartCount = await _context.ShoppingCartItems
-                .Where(c => c.UserId == userId)
-                .SumAsync(c => c.Quantity);
-
-            return Json(new { cartCount = cartCount });
+            return Json(new { wishlistCount = wishlistCount });
         }
     }
 }
