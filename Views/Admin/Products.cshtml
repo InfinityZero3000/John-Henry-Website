@@ -1,0 +1,778 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Quản lý sản phẩm</li>";
+}
+
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-box"></i>
+        Quản lý sản phẩm
+        <span class="badge bg-secondary ms-2">@Model.Products.Count() sản phẩm</span>
+    </h1>
+    <div class="page-actions">
+        <div class="btn-group me-2">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-download"></i>
+                Xuất dữ liệu
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportProducts('excel')">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportProducts('csv')">
+                    <i class="fas fa-file-csv"></i> CSV
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportProducts('pdf')">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a></li>
+            </ul>
+        </div>
+        <button class="btn btn-info me-2" onclick="location.href='@Url.Action("ImportProductsFromImages")'">
+            <i class="fas fa-magic"></i>
+            Nhập từ thư mục ảnh
+        </button>
+        <button class="btn btn-warning me-2" onclick="openBulkEditModal()">
+            <i class="fas fa-edit"></i>
+            Chỉnh sửa hàng loạt
+        </button>
+        <a href="@Url.Action("CreateProduct")" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Thêm sản phẩm
+        </a>
+    </div>
+</div>
+
+<!-- Advanced Search and Filters -->
+<div class="filter-card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+                <i class="fas fa-filter"></i>
+                Bộ lọc tìm kiếm
+            </h6>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#advancedFilters" aria-expanded="false">
+                <i class="fas fa-chevron-down"></i>
+                Bộ lọc nâng cao
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="get" id="filterForm" class="row g-3">
+            <!-- Basic Filters -->
+            <div class="col-md-4">
+                <label class="form-label">Tìm kiếm</label>
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Tên sản phẩm, SKU, mô tả..." 
+                           value="@Model.SearchTerm" id="searchInput">
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Danh mục</label>
+                <select name="categoryId" class="form-control">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Trạng thái</label>
+                <select name="status" class="form-control">
+                    <option value="">Tất cả</option>
+                    <option value="active" selected="@(Model.Status == "active")">Hoạt động</option>
+                    <option value="inactive" selected="@(Model.Status == "inactive")">Không hoạt động</option>
+                    <option value="out_of_stock" selected="@(Model.Status == "out_of_stock")">Hết hàng</option>
+                    <option value="low_stock">Sắp hết hàng</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sắp xếp</label>
+                <select name="sortBy" class="form-control">
+                    <option value="name">Tên A-Z</option>
+                    <option value="name_desc">Tên Z-A</option>
+                    <option value="price_asc">Giá thấp → cao</option>
+                    <option value="price_desc">Giá cao → thấp</option>
+                    <option value="created_desc">Mới nhất</option>
+                    <option value="created_asc">Cũ nhất</option>
+                    <option value="stock_asc">Tồn kho ít</option>
+                    <option value="stock_desc">Tồn kho nhiều</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fas fa-search"></i>
+                        Lọc
+                    </button>
+                    <a href="@Url.Action("Products")" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Advanced Filters -->
+            <div class="collapse" id="advancedFilters">
+                <div class="col-12"><hr></div>
+                <div class="col-md-3">
+                    <label class="form-label">Khoảng giá</label>
+                    <div class="row g-2">
+                        <div class="col">
+                            <input type="number" name="priceFrom" class="form-control" placeholder="Từ" min="0">
+                        </div>
+                        <div class="col">
+                            <input type="number" name="priceTo" class="form-control" placeholder="Đến" min="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tồn kho</label>
+                    <div class="row g-2">
+                        <div class="col">
+                            <input type="number" name="stockFrom" class="form-control" placeholder="Từ" min="0">
+                        </div>
+                        <div class="col">
+                            <input type="number" name="stockTo" class="form-control" placeholder="Đến" min="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ngày tạo</label>
+                    <div class="row g-2">
+                        <div class="col">
+                            <input type="date" name="createdFrom" class="form-control">
+                        </div>
+                        <div class="col">
+                            <input type="date" name="createdTo" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tags</label>
+                    <input type="text" name="tags" class="form-control" placeholder="Nhập tags...">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bulk Actions Bar -->
+<div class="bulk-actions-bar" id="bulkActionsBar" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span id="selectedCount">0</span> sản phẩm được chọn
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-success btn-sm" onclick="bulkAction('activate')">
+                <i class="fas fa-check"></i> Kích hoạt
+            </button>
+            <button class="btn btn-warning btn-sm" onclick="bulkAction('deactivate')">
+                <i class="fas fa-pause"></i> Tạm dừng
+            </button>
+            <button class="btn btn-info btn-sm" onclick="bulkAction('updateCategory')">
+                <i class="fas fa-layer-group"></i> Đổi danh mục
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="bulkAction('delete')">
+                <i class="fas fa-trash"></i> Xóa
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Enhanced Products Table -->
+<div class="data-table-card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-0">Danh sách sản phẩm</h6>
+                <small class="text-muted">
+                    Hiển thị @Model.Products.Count() / @Model.TotalPages sản phẩm
+                </small>
+            </div>
+            <div class="table-controls">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="toggleView('table')" id="tableViewBtn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="toggleView('grid')" id="gridViewBtn">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Table View -->
+    <div class="table-responsive" id="tableView">
+        <table class="table table-hover mb-0" id="productsTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleSelectAll()">
+                    </th>
+                    <th style="width: 80px;">Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th style="width: 100px;">SKU</th>
+                    <th style="width: 120px;">Giá</th>
+                    <th style="width: 80px;">Tồn kho</th>
+                    <th style="width: 120px;">Danh mục</th>
+                    <th style="width: 100px;">Trạng thái</th>
+                    <th style="width: 120px;">Ngày tạo</th>
+                    <th style="width: 160px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Products.Any())
+                {
+                    @foreach (var product in Model.Products)
+                    {
+                        <tr data-product-id="@product.Id">
+                            <td>
+                                <input type="checkbox" class="form-check-input product-checkbox" 
+                                       value="@product.Id" onchange="updateBulkActions()">
+                            </td>
+                            <td>
+                                <div class="product-image">
+                                    @if (!string.IsNullOrEmpty(product.FeaturedImageUrl))
+                                    {
+                                        <img src="@product.FeaturedImageUrl" alt="@product.Name" 
+                                             class="rounded product-thumb" onclick="previewImage('@product.FeaturedImageUrl')">
+                                    }
+                                    else
+                                    {
+                                        <div class="image-placeholder">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="product-info">
+                                    <div class="product-name">
+                                        <strong>@product.Name</strong>
+                                        @if (product.IsFeatured)
+                                        {
+                                            <span class="badge bg-warning ms-1">
+                                                <i class="fas fa-star"></i>
+                                            </span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(product.BrandName))
+                                    {
+                                        <small class="text-muted">@product.BrandName</small>
+                                    }
+                                    @if (product.SalePrice.HasValue && product.SalePrice > 0)
+                                    {
+                                        <div>
+                                            <span class="badge bg-danger">Sale</span>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <code class="sku-code">@product.SKU</code>
+                            </td>
+                            <td>
+                                <div class="price-info">
+                                    @if (product.SalePrice.HasValue && product.SalePrice > 0)
+                                    {
+                                        <div class="sale-price">@product.SalePrice?.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                        <div class="original-price">@product.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="current-price">@product.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stock-info">
+                                    <span class="stock-number @(product.StockQuantity <= 0 ? "text-danger" : product.StockQuantity <= 10 ? "text-warning" : "")">
+                                        @product.StockQuantity
+                                    </span>
+                                    @if (product.StockQuantity <= 0)
+                                    {
+                                        <div><small class="badge bg-danger">Hết hàng</small></div>
+                                    }
+                                    else if (product.StockQuantity <= 10)
+                                    {
+                                        <div><small class="badge bg-warning">Sắp hết</small></div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <span class="category-name">@product.CategoryName</span>
+                            </td>
+                            <td>
+                                <div class="status-wrapper">
+                                    @switch (product.Status.ToLower())
+                                    {
+                                        case "active":
+                                            <span class="status-badge status-active">
+                                                <i class="fas fa-check-circle"></i>
+                                                Hoạt động
+                                            </span>
+                                            break;
+                                        case "inactive":
+                                            <span class="status-badge status-inactive">
+                                                <i class="fas fa-pause-circle"></i>
+                                                Tạm dừng
+                                            </span>
+                                            break;
+                                        case "draft":
+                                            <span class="status-badge status-draft">
+                                                <i class="fas fa-edit"></i>
+                                                Nháp
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="status-badge">@product.Status</span>
+                                            break;
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    <div>@product.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@product.CreatedAt.ToString("HH:mm")</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Details", "Products", new { id = product.Id })" 
+                                           class="btn btn-outline-info" title="Xem chi tiết" target="_blank">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("EditProduct", "Admin", new { id = product.Id })" 
+                                           class="btn btn-outline-primary" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-outline-warning" onclick="duplicateProduct('@product.Id')" title="Nhân bản">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-secondary dropdown-toggle" 
+                                                    data-bs-toggle="dropdown" title="Thêm">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <button class="dropdown-item" onclick="toggleProductStatus('@product.Id', '@product.Status')">
+                                                        <i class="fas fa-toggle-@(product.Status == "active" ? "off" : "on")"></i>
+                                                        @(product.Status == "active" ? "Tạm dừng" : "Kích hoạt")
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item" onclick="setFeatured('@product.Id', @(product.IsFeatured ? "false" : "true"))">
+                                                        <i class="fas fa-star"></i>
+                                                        @(product.IsFeatured ? "Bỏ nổi bật" : "Đặt nổi bật")
+                                                    </button>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger" onclick="deleteProduct('@product.Id', '@product.Name')">
+                                                        <i class="fas fa-trash"></i>
+                                                        Xóa sản phẩm
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                                <h5>Không có sản phẩm nào</h5>
+                                <p class="text-muted">Chưa có sản phẩm nào được tạo hoặc không có sản phẩm phù hợp với bộ lọc.</p>
+                                <a href="@Url.Action("CreateProduct")" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Thêm sản phẩm đầu tiên
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Grid View -->
+    <div class="products-grid" id="gridView" style="display: none;">
+        <div class="row g-3 p-3">
+            @foreach (var product in Model.Products)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="product-card" data-product-id="@product.Id">
+                        <div class="card-header">
+                            <input type="checkbox" class="form-check-input product-checkbox" 
+                                   value="@product.Id" onchange="updateBulkActions()">
+                            @if (product.IsFeatured)
+                            {
+                                <span class="featured-badge">
+                                    <i class="fas fa-star"></i>
+                                </span>
+                            }
+                        </div>
+                        <div class="product-image">
+                            @if (!string.IsNullOrEmpty(product.FeaturedImageUrl))
+                            {
+                                <img src="@product.FeaturedImageUrl" alt="@product.Name" onclick="previewImage('@product.FeaturedImageUrl')">
+                            }
+                            else
+                            {
+                                <div class="image-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="product-details">
+                            <h6 class="product-name">@product.Name</h6>
+                            <div class="product-meta">
+                                <div class="sku">SKU: @product.SKU</div>
+                                <div class="category">@product.CategoryName</div>
+                            </div>
+                            <div class="price-stock">
+                                <div class="price">@product.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                <div class="stock">Tồn: @product.StockQuantity</div>
+                            </div>
+                            <div class="status">
+                                @switch (product.Status.ToLower())
+                                {
+                                    case "active":
+                                        <span class="status-badge status-active">Hoạt động</span>
+                                        break;
+                                    case "inactive":
+                                        <span class="status-badge status-inactive">Tạm dừng</span>
+                                        break;
+                                    default:
+                                        <span class="status-badge">@product.Status</span>
+                                        break;
+                                }
+                            </div>
+                            <div class="card-actions">
+                                <a href="@Url.Action("EditProduct", "Admin", new { id = product.Id })" 
+                                   class="btn btn-sm btn-primary">Sửa</a>
+                                <button onclick="duplicateProduct('@product.Id')" class="btn btn-sm btn-outline-secondary">Nhân bản</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer">
+            <nav aria-label="Products pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(Model.CurrentPage - 1)@(Context.Request.QueryString.HasValue ? "&" + Context.Request.QueryString.Value.TrimStart('?') : "")">>
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="?page=@i@(Context.Request.QueryString.HasValue ? "&" + Context.Request.QueryString.Value.TrimStart('?') : "")">@i</a>
+                        </li>
+                    }
+                    
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(Model.CurrentPage + 1)@(Context.Request.QueryString.HasValue ? "&" + Context.Request.QueryString.Value.TrimStart('?') : "")">>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+<!-- Create Product Modal -->
+<div class="modal fade" id="createProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo sản phẩm mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createProductForm" method="post" action="@Url.Action("CreateProduct")" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productName" class="form-label">Tên sản phẩm *</label>
+                                <input type="text" class="form-control" id="productName" name="Name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productSku" class="form-label">SKU *</label>
+                                <input type="text" class="form-control" id="productSku" name="SKU" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productPrice" class="form-label">Giá *</label>
+                                <input type="number" class="form-control" id="productPrice" name="Price" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productSalePrice" class="form-label">Giá khuyến mãi</label>
+                                <input type="number" class="form-control" id="productSalePrice" name="SalePrice" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productCategory" class="form-label">Danh mục *</label>
+                        <select class="form-select" id="productCategory" name="CategoryId" required>
+                            <option value="">Chọn danh mục</option>
+                            @foreach (var category in ViewBag.Categories as List<JohnHenryFashionWeb.Models.Category> ?? new List<JohnHenryFashionWeb.Models.Category>())
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productDescription" class="form-label">Mô tả ngắn</label>
+                        <textarea class="form-control" id="productDescription" name="ShortDescription" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productStock" class="form-label">Số lượng tồn kho</label>
+                                <input type="number" class="form-control" id="productStock" name="StockQuantity" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productImage" class="form-label">Hình ảnh</label>
+                                <input type="file" class="form-control" id="productImage" name="FeaturedImage" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="productFeatured" name="IsFeatured">
+                                <label class="form-check-label" for="productFeatured">Sản phẩm nổi bật</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="productActive" name="IsActive" checked>
+                                <label class="form-check-label" for="productActive">Kích hoạt</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="productInStock" name="InStock" checked>
+                                <label class="form-check-label" for="productInStock">Còn hàng</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" form="createProductForm" class="btn btn-primary">Tạo sản phẩm</button>
+            </div>
+        </div>
+    </div>
+</div>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="Product pagination">
+            <ul class="pagination">
+                @if (Model.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Products", new { page = Model.CurrentPage - 1, search = Model.SearchTerm, categoryId = Model.CategoryId, status = Model.Status })">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Products", new { page = i, search = Model.SearchTerm, categoryId = Model.CategoryId, status = Model.Status })">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Products", new { page = Model.CurrentPage + 1, search = Model.SearchTerm, categoryId = Model.CategoryId, status = Model.Status })">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+
+    <div class="text-center text-muted">
+        Trang @Model.CurrentPage của @Model.TotalPages
+    </div>
+}
+
+<!-- Quick Stats -->
+@if (Model.Products.Any())
+{
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Tổng sản phẩm</span>
+                    <i class="fas fa-box stat-icon" style="color: #3498db;"></i>
+                </div>
+                <div class="stat-value">@Model.Products.Count()</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <span class="stat-title">Hoạt động</span>
+                    <i class="fas fa-check-circle stat-icon" style="color: #27ae60;"></i>
+                </div>
+                <div class="stat-value">@Model.Products.Count(p => p.Status == "active")</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <span class="stat-title">Sắp hết hàng</span>
+                    <i class="fas fa-exclamation-triangle stat-icon" style="color: #f39c12;"></i>
+                </div>
+                <div class="stat-value">@Model.Products.Count(p => p.StockQuantity <= 10)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card danger">
+                <div class="stat-header">
+                    <span class="stat-title">Hết hàng</span>
+                    <i class="fas fa-times-circle stat-icon" style="color: #e74c3c;"></i>
+                </div>
+                <div class="stat-value">@Model.Products.Count(p => p.StockQuantity <= 0)</div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function confirmDelete(message) {
+            return confirm(message);
+        }
+
+        // Bulk operations
+        function selectAllProducts() {
+            const checkboxes = document.querySelectorAll('input[name="selectedProducts"]');
+            const selectAll = document.getElementById('selectAllProducts');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+            
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const checkedBoxes = document.querySelectorAll('input[name="selectedProducts"]:checked');
+            const bulkActions = document.getElementById('bulkActions');
+            
+            if (checkedBoxes.length > 0) {
+                bulkActions.style.display = 'block';
+                document.getElementById('selectedCount').textContent = checkedBoxes.length;
+            } else {
+                bulkActions.style.display = 'none';
+            }
+        }
+
+        // Quick stock update
+        function updateStock(productId, currentStock) {
+            const newStock = prompt(`Cập nhật số lượng tồn kho (hiện tại: ${currentStock}):`, currentStock);
+            
+            if (newStock !== null && !isNaN(newStock) && newStock >= 0) {
+                // AJAX call to update stock
+                fetch(`/admin/products/${productId}/update-stock`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ stock: parseInt(newStock) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật tồn kho!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi cập nhật tồn kho!');
+                });
+            }
+        }
+
+        // Add fade-in animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+    </script>
+}

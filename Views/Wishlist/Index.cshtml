@@ -1,0 +1,520 @@
+@model List<JohnHenryFashionWeb.Models.Wishlist>
+@{
+    ViewData["Title"] = "Danh sách yêu thích";
+    var wishlistCount = ViewBag.WishlistCount as int? ?? 0;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Danh sách yêu thích</li>
+        </ol>
+    </nav>
+
+    <!-- Wishlist Header -->
+    <div class="wishlist-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="wishlist-title">
+                    <i class="fas fa-heart text-danger me-2"></i>
+                    Danh sách yêu thích
+                </h2>
+                @if (wishlistCount > 0)
+                {
+                    <p class="text-muted">Bạn có @wishlistCount sản phẩm yêu thích</p>
+                }
+            </div>
+            @if (wishlistCount > 0)
+            {
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-danger" onclick="clearWishlist()">
+                        <i class="fas fa-trash me-2"></i>Xóa tất cả
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Wishlist Items -->
+        <div class="wishlist-items">
+            <div class="row g-4">
+                @foreach (var item in Model)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-12" data-wishlist-item-id="@item.Id">
+                        <div class="wishlist-item-card h-100">
+                            <!-- Product Image -->
+                            <div class="product-image-wrapper position-relative">
+                                <a href="/Products/Details/@item.Product.Id">
+                                    <img src="@(!string.IsNullOrEmpty(item.Product.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "~/images/placeholder-product.jpg")" 
+                                         alt="@item.Product.Name" 
+                                         class="product-img w-100"
+                                         onerror="this.src='/images/placeholder-product.jpg'">
+                                </a>
+                                
+                                <!-- Action Buttons -->
+                                <div class="product-actions">
+                                    <button class="btn-action remove-btn" 
+                                            onclick="removeFromWishlist('@item.Product.Id', this)"
+                                            title="Xóa khỏi danh sách yêu thích">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    @if (item.Product.StockQuantity > 0)
+                                    {
+                                        <button class="btn-action cart-btn" 
+                                                onclick="addToCartFromWishlist('@item.Product.Id', this)"
+                                                title="Thêm vào giỏ hàng">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn-action cart-btn disabled" 
+                                                disabled
+                                                title="Hết hàng">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    }
+                                </div>
+
+                                <!-- Stock Status -->
+                                @if (item.Product.StockQuantity <= 0)
+                                {
+                                    <div class="stock-badge out-of-stock">
+                                        Hết hàng
+                                    </div>
+                                }
+                                else if (item.Product.StockQuantity <= 5)
+                                {
+                                    <div class="stock-badge low-stock">
+                                        Còn @item.Product.StockQuantity
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="product-details p-3">
+                                <div class="product-category mb-1">
+                                    <small class="text-muted">@item.Product.Category?.Name</small>
+                                </div>
+                                
+                                <h6 class="product-title mb-2">
+                                    <a href="/Products/Details/@item.Product.Id" class="text-decoration-none">
+                                        @item.Product.Name
+                                    </a>
+                                </h6>
+                                
+                                <div class="product-price mb-2">
+                                    @if (item.Product.SalePrice.HasValue && item.Product.SalePrice > 0)
+                                    {
+                                        <span class="sale-price">@item.Product.SalePrice?.ToString("N0")₫</span>
+                                        <span class="original-price ms-2">@item.Product.Price.ToString("N0")₫</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="current-price">@item.Product.Price.ToString("N0")₫</span>
+                                    }
+                                </div>
+
+                                <div class="product-meta">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Thêm vào @item.CreatedAt.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Wishlist Actions -->
+        <div class="wishlist-actions mt-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="/Products" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+                    </a>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary" onclick="addAllToCart()">
+                        <i class="fas fa-shopping-cart me-2"></i>Thêm tất cả vào giỏ hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty Wishlist -->
+        <div class="empty-wishlist text-center py-5">
+            <div class="empty-wishlist-icon mb-4">
+                <i class="far fa-heart fa-4x text-muted"></i>
+            </div>
+            <h4 class="mb-3">Danh sách yêu thích của bạn đang trống</h4>
+            <p class="text-muted mb-4">Hãy khám phá và thêm những sản phẩm yêu thích!</p>
+            <a href="/Products" class="btn btn-primary">
+                <i class="fas fa-shopping-bag me-2"></i>Khám phá sản phẩm
+            </a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .wishlist-item-card {
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .wishlist-item-card:hover {
+            border-color: var(--jh-red);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .product-image-wrapper {
+            overflow: hidden;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .product-img {
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .wishlist-item-card:hover .product-img {
+            transform: scale(1.05);
+        }
+        
+        .product-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .wishlist-item-card:hover .product-actions {
+            opacity: 1;
+        }
+        
+        .btn-action {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-action:hover {
+            background: var(--jh-red);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .btn-action.disabled {
+            background: rgba(255, 255, 255, 0.5);
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .btn-action.disabled:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: #999;
+            transform: none;
+        }
+        
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .out-of-stock {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .low-stock {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .product-title a {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .product-title a:hover {
+            color: var(--jh-red);
+        }
+        
+        .sale-price {
+            color: var(--jh-red);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .current-price {
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .empty-wishlist-icon i {
+            opacity: 0.3;
+        }
+        
+        @@media (max-width: 768px) {
+            .product-actions {
+                opacity: 1;
+            }
+            
+            .wishlist-actions .col-md-6:not(:first-child) {
+                margin-top: 1rem;
+                text-align: left !important;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Remove from wishlist function
+        async function removeFromWishlist(productId, button) {
+            if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi danh sách yêu thích?')) {
+                return;
+            }
+            
+            try {
+                button.disabled = true;
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                const response = await fetch('/Wishlist/Remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(productId)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove item from DOM with animation
+                    const itemCard = button.closest('[data-wishlist-item-id]');
+                    itemCard.style.transition = 'all 0.3s ease';
+                    itemCard.style.transform = 'scale(0)';
+                    itemCard.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        itemCard.remove();
+                        
+                        // Check if wishlist is empty
+                        const remainingItems = document.querySelectorAll('[data-wishlist-item-id]');
+                        if (remainingItems.length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                    
+                    showToast(result.message, 'success');
+                } else {
+                    button.innerHTML = originalIcon;
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error removing from wishlist:', error);
+                button.innerHTML = originalIcon;
+                showToast('Có lỗi xảy ra khi xóa sản phẩm.', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+        
+        // Add to cart from wishlist
+        async function addToCartFromWishlist(productId, button) {
+            try {
+                button.disabled = true;
+                const originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                const response = await fetch('/Wishlist/AddToCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(productId)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    updateCartCount(result.cartCount);
+                    showToast(result.message, 'success');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalIcon;
+                    }, 2000);
+                } else {
+                    button.innerHTML = originalIcon;
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                button.innerHTML = originalIcon;
+                showToast('Có lỗi xảy ra khi thêm vào giỏ hàng.', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+        
+        // Clear wishlist function
+        async function clearWishlist() {
+            if (!confirm('Bạn có chắc muốn xóa tất cả sản phẩm trong danh sách yêu thích?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/Wishlist/Clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing wishlist:', error);
+                showToast('Có lỗi xảy ra khi xóa danh sách yêu thích.', 'error');
+            }
+        }
+        
+        // Add all to cart function
+        async function addAllToCart() {
+            const productIds = Array.from(document.querySelectorAll('[data-wishlist-item-id]'))
+                .map(item => {
+                    const cartBtn = item.querySelector('.cart-btn:not(.disabled)');
+                    return cartBtn ? cartBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : null;
+                })
+                .filter(id => id !== null);
+            
+            if (productIds.length === 0) {
+                showToast('Không có sản phẩm nào có thể thêm vào giỏ hàng.', 'warning');
+                return;
+            }
+            
+            let successCount = 0;
+            let totalCount = productIds.length;
+            
+            for (const productId of productIds) {
+                try {
+                    const response = await fetch('/Wishlist/AddToCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify(productId)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        successCount++;
+                        if (result.cartCount) {
+                            updateCartCount(result.cartCount);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error adding product to cart:', error);
+                }
+            }
+            
+            if (successCount > 0) {
+                showToast(`Đã thêm ${successCount}/${totalCount} sản phẩm vào giỏ hàng.`, 'success');
+            } else {
+                showToast('Không thể thêm sản phẩm nào vào giỏ hàng.', 'error');
+            }
+        }
+        
+        // Utility functions
+        function updateCartCount(count) {
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(element => {
+                element.textContent = count;
+            });
+        }
+        
+        function showToast(message, type) {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} border-0`;
+            toast.setAttribute('role', 'alert');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+    </script>
+}

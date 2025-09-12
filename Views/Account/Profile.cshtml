@@ -1,0 +1,164 @@
+@model JohnHenryFashionWeb.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3 col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <img src="https://via.placeholder.com/100x100" class="rounded-circle mb-3" alt="Avatar" width="100" height="100">
+                        <h5 class="card-title">@Model.FirstName @Model.LastName</h5>
+                        <p class="text-muted">@Model.Email</p>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                        </a>
+                        <a asp-action="ChangePassword" class="list-group-item list-group-item-action">
+                            <i class="fas fa-lock me-2"></i>Đổi mật khẩu
+                        </a>
+                        <a href="/Account/Orders" class="list-group-item list-group-item-action">
+                            <i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi
+                        </a>
+                        <a href="/Wishlist" class="list-group-item list-group-item-action">
+                            <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["StatusMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["StatusMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Profile" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FirstName" class="form-label fw-semibold">Họ</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LastName" class="form-label fw-semibold">Tên</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                            <input asp-for="Email" class="form-control" readonly />
+                            <div class="form-text">Email không thể thay đổi</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PhoneNumber" class="form-label fw-semibold">Số điện thoại</label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Gender" class="form-label fw-semibold">Giới tính</label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="">Chọn giới tính</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="DateOfBirth" class="form-label fw-semibold">Ngày sinh</label>
+                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Lưu thay đổi
+                            </button>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        padding-left: 25px;
+    }
+
+    .list-group-item.active {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .form-control[readonly] {
+        background-color: #f8f9fa;
+    }
+
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

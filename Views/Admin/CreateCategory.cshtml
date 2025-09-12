@@ -1,0 +1,235 @@
+@model CategoryCreateEditViewModel
+@{
+    ViewData["Title"] = Model.Id.HasValue ? "Chỉnh sửa danh mục" : "Thêm danh mục mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = $"<li class=\"breadcrumb-item\"><a href=\"{Url.Action("Categories")}\">Quản lý danh mục</a></li><li class=\"breadcrumb-item active\">{(Model.Id.HasValue ? "Chỉnh sửa" : "Thêm mới")}</li>";
+}
+
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-@(Model.Id.HasValue ? "edit" : "plus")"></i>
+        @(Model.Id.HasValue ? "Chỉnh sửa danh mục" : "Thêm danh mục mới")
+    </h1>
+    <div class="page-actions">
+        <a href="@Url.Action("Categories")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="admin-form">
+            <form method="post" enctype="multipart/form-data" id="categoryForm">
+                @if (Model.Id.HasValue)
+                {
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ImageUrl" />
+                }
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="Name" class="form-label required">Tên danh mục</label>
+                            <input asp-for="Name" class="form-control" placeholder="Nhập tên danh mục...">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ParentId" class="form-label">Danh mục cha</label>
+                            <select asp-for="ParentId" class="form-control">
+                                <option value="">-- Chọn danh mục cha (tùy chọn) --</option>
+                                @foreach (var parent in Model.ParentCategories)
+                                {
+                                    <option value="@parent.Id">@parent.Name</option>
+                                }
+                            </select>
+                            <small class="form-text text-muted">Để trống nếu đây là danh mục chính</small>
+                            <span asp-validation-for="ParentId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SortOrder" class="form-label">Thứ tự sắp xếp</label>
+                            <input asp-for="SortOrder" type="number" class="form-control" min="0" placeholder="0">
+                            <small class="form-text text-muted">Số nhỏ hơn sẽ hiển thị trước</small>
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">Mô tả</label>
+                    <textarea asp-for="Description" class="form-control" rows="4" 
+                              placeholder="Nhập mô tả cho danh mục..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Image" class="form-label">Hình ảnh danh mục</label>
+                    <input asp-for="Image" type="file" class="form-control" accept="image/*" id="categoryImage">
+                    <small class="form-text text-muted">Chấp nhận file: JPG, JPEG, PNG. Kích thước tối đa: 5MB</small>
+                    <span asp-validation-for="Image" class="text-danger"></span>
+                    
+                    <!-- Image Preview -->
+                    <div id="imagePreview" class="mt-3">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <div class="current-image">
+                                <label class="form-label">Hình ảnh hiện tại:</label>
+                                <div>
+                                    <img src="@Model.ImageUrl" alt="Current image" class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 200px;">
+                                </div>
+                            </div>
+                        }
+                        <div id="categoryImagePreview"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox">
+                        <label asp-for="IsActive" class="form-check-label">
+                            Danh mục hoạt động
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">Danh mục không hoạt động sẽ bị ẩn khỏi website</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        @(Model.Id.HasValue ? "Cập nhật" : "Tạo mới")
+                    </button>
+                    <a href="@Url.Action("Categories")" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Hủy bỏ
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Quick Tips -->
+        <div class="admin-form">
+            <h6 class="mb-3">
+                <i class="fas fa-lightbulb text-warning"></i>
+                Gợi ý
+            </h6>
+            <ul class="list-unstyled">
+                <li class="mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Sử dụng tên danh mục ngắn gọn và dễ hiểu
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Mô tả nên từ 100-200 ký tự
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Hình ảnh nên có tỷ lệ 1:1 (vuông)
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Danh mục con giúp tổ chức sản phẩm tốt hơn
+                </li>
+            </ul>
+        </div>
+
+        <!-- Image Categories from Folder -->
+        @if (Model.Id == null)
+        {
+            <div class="admin-form mt-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-folder text-info"></i>
+                    Danh mục từ thư mục ảnh
+                </h6>
+                <p class="text-muted small">
+                    Hệ thống phát hiện các thư mục ảnh sau có thể tạo thành danh mục:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-folder me-2"></i> Áo nam</li>
+                    <li><i class="fas fa-folder me-2"></i> Áo nữ</li>
+                    <li><i class="fas fa-folder me-2"></i> Chân váy nữ</li>
+                    <li><i class="fas fa-folder me-2"></i> Đầm nữ</li>
+                    <li><i class="fas fa-folder me-2"></i> Quần nam</li>
+                </ul>
+                <a href="@Url.Action("CreateCategoriesFromImages")" class="btn btn-info btn-sm">
+                    <i class="fas fa-magic"></i>
+                    Tạo tự động
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image preview
+            const imageInput = document.getElementById('categoryImage');
+            const previewContainer = document.getElementById('categoryImagePreview');
+            
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                previewContainer.innerHTML = '';
+                
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.createElement('div');
+                        preview.className = 'mt-2';
+                        preview.innerHTML = `
+                            <label class="form-label">Xem trước:</label>
+                            <div>
+                                <img src="${e.target.result}" alt="Preview" class="img-thumbnail" 
+                                     style="max-width: 200px; max-height: 200px;">
+                            </div>
+                        `;
+                        previewContainer.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Auto-generate slug from name (optional feature)
+            const nameInput = document.querySelector('input[name="Name"]');
+            nameInput.addEventListener('input', function() {
+                // You could implement auto-slug generation here
+                console.log('Category name changed:', this.value);
+            });
+
+            // Form validation
+            const form = document.getElementById('categoryForm');
+            form.addEventListener('submit', function(e) {
+                const nameInput = document.querySelector('input[name="Name"]');
+                
+                if (!nameInput.value.trim()) {
+                    e.preventDefault();
+                    nameInput.focus();
+                    adminDashboard.showToast('Vui lòng nhập tên danh mục!', 'error');
+                    return false;
+                }
+
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                submitBtn.disabled = true;
+
+                // Re-enable after 3 seconds (in case of error)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            });
+        });
+    </script>
+}

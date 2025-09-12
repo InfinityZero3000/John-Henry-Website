@@ -1,0 +1,473 @@
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/Account/Profile">Tài khoản</a></li>
+            <li class="breadcrumb-item active">Lịch sử mua hàng</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img src="https://via.placeholder.com/80x80" class="rounded-circle mb-2" alt="Avatar" width="80" height="80">
+                        <h6 class="mb-1">@(User.Identity?.Name ?? "User")</h6>
+                        <small class="text-muted">Thành viên</small>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/Account/Profile" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                        </a>
+                        <a href="/Account/ChangePassword" class="list-group-item list-group-item-action">
+                            <i class="fas fa-lock me-2"></i>Đổi mật khẩu
+                        </a>
+                        <a href="/Account/Orders" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi
+                        </a>
+                        <a href="/Wishlist" class="list-group-item list-group-item-action">
+                            <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="fas fa-shopping-bag me-2"></i>Lịch sử mua hàng
+                            </h4>
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" id="orderFilter">
+                                <option value="">Tất cả đơn hàng</option>
+                                <option value="pending">Chờ xử lý</option>
+                                <option value="processing">Đang xử lý</option>
+                                <option value="shipped">Đã giao hàng</option>
+                                <option value="delivered">Đã nhận hàng</option>
+                                <option value="cancelled">Đã hủy</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Sample Orders - In real implementation, this would come from the database -->
+                    <div class="order-history">
+                        <!-- Order 1 -->
+                        <div class="order-item mb-4">
+                            <div class="order-header p-3 bg-light rounded-top">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">Đơn hàng #JH000001</h6>
+                                        <small class="text-muted">Đặt ngày: 15/01/2024</small>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <span class="badge bg-success">Đã giao hàng</span>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <strong class="text-primary">2.850.000₫</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-body border border-top-0 rounded-bottom p-3">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="order-products">
+                                            <div class="product-item d-flex align-items-center mb-3">
+                                                <img src="/images/Áo nam/ao-polo-01.jpg" alt="Áo Polo Nam" class="product-thumb me-3" width="60" height="60">
+                                                <div>
+                                                    <h6 class="mb-1">Áo Polo Nam Premium</h6>
+                                                    <small class="text-muted">Màu: Xanh Navy | Size: L | SL: 2</small>
+                                                    <div class="price">850.000₫</div>
+                                                </div>
+                                            </div>
+                                            <div class="product-item d-flex align-items-center mb-3">
+                                                <img src="/images/Quần nam/quan-khaki-01.jpg" alt="Quần Khaki Nam" class="product-thumb me-3" width="60" height="60">
+                                                <div>
+                                                    <h6 class="mb-1">Quần Khaki Slim Fit</h6>
+                                                    <small class="text-muted">Màu: Be | Size: 32 | SL: 1</small>
+                                                    <div class="price">1.200.000₫</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="order-actions text-end">
+                                            <button class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                            </button>
+                                            <button class="btn btn-primary btn-sm">
+                                                <i class="fas fa-redo me-1"></i>Mua lại
+                                            </button>
+                                        </div>
+                                        <div class="delivery-info mt-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-truck me-1"></i>Giao ngày: 18/01/2024
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order 2 -->
+                        <div class="order-item mb-4">
+                            <div class="order-header p-3 bg-light rounded-top">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">Đơn hàng #JH000002</h6>
+                                        <small class="text-muted">Đặt ngày: 08/01/2024</small>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <span class="badge bg-warning">Đang giao hàng</span>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <strong class="text-primary">1.450.000₫</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-body border border-top-0 rounded-bottom p-3">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="order-products">
+                                            <div class="product-item d-flex align-items-center mb-3">
+                                                <img src="/images/Áo nam/ao-somi-01.jpg" alt="Áo Sơ Mi Nam" class="product-thumb me-3" width="60" height="60">
+                                                <div>
+                                                    <h6 class="mb-1">Áo Sơ Mi Trắng Classic</h6>
+                                                    <small class="text-muted">Màu: Trắng | Size: M | SL: 1</small>
+                                                    <div class="price">750.000₫</div>
+                                                </div>
+                                            </div>
+                                            <div class="product-item d-flex align-items-center mb-3">
+                                                <img src="/images/Quần nam/quan-tay-01.jpg" alt="Quần Tây Nam" class="product-thumb me-3" width="60" height="60">
+                                                <div>
+                                                    <h6 class="mb-1">Quần Tây Đen Formal</h6>
+                                                    <small class="text-muted">Màu: Đen | Size: 30 | SL: 1</small>
+                                                    <div class="price">700.000₫</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="order-actions text-end">
+                                            <button class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-truck me-1"></i>Theo dõi
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-times me-1"></i>Hủy đơn
+                                            </button>
+                                        </div>
+                                        <div class="delivery-info mt-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>Dự kiến: 12/01/2024
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order 3 -->
+                        <div class="order-item mb-4">
+                            <div class="order-header p-3 bg-light rounded-top">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">Đơn hàng #JH000003</h6>
+                                        <small class="text-muted">Đặt ngày: 28/12/2023</small>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <span class="badge bg-secondary">Đã hủy</span>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <strong class="text-muted">950.000₫</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-body border border-top-0 rounded-bottom p-3">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="order-products">
+                                            <div class="product-item d-flex align-items-center mb-3">
+                                                <img src="/images/Áo nam/ao-thun-01.jpg" alt="Áo Thun Nam" class="product-thumb me-3" width="60" height="60">
+                                                <div>
+                                                    <h6 class="mb-1">Áo Thun Cotton Premium</h6>
+                                                    <small class="text-muted">Màu: Đen | Size: L | SL: 1</small>
+                                                    <div class="price">450.000₫</div>
+                                                </div>
+                                            </div>
+                                            <div class="product-item d-flex align-items-center mb-3">
+                                                <img src="/images/Quần nam/quan-short-01.jpg" alt="Quần Short Nam" class="product-thumb me-3" width="60" height="60">
+                                                <div>
+                                                    <h6 class="mb-1">Quần Short Kaki</h6>
+                                                    <small class="text-muted">Màu: Be | Size: L | SL: 1</small>
+                                                    <div class="price">500.000₫</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="order-actions text-end">
+                                            <button class="btn btn-primary btn-sm">
+                                                <i class="fas fa-redo me-1"></i>Đặt lại
+                                            </button>
+                                        </div>
+                                        <div class="delivery-info mt-3">
+                                            <small class="text-muted text-danger">
+                                                <i class="fas fa-info-circle me-1"></i>Hủy do hết hàng
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-orders text-center py-5" style="display: none;">
+                        <div class="empty-icon mb-4">
+                            <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                        </div>
+                        <h5 class="mb-3">Chưa có đơn hàng nào</h5>
+                        <p class="text-muted mb-4">Bạn chưa thực hiện đơn hàng nào. Hãy khám phá sản phẩm và mua sắm ngay!</p>
+                        <a href="/Products" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Mua sắm ngay
+                        </a>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Order pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
+                            </li>
+                            <li class="page-item active">
+                                <a class="page-link" href="#">1</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">2</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">3</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .order-item {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .order-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .order-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .product-thumb {
+            border-radius: 0.25rem;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+        }
+        
+        .product-item h6 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .price {
+            font-weight: 600;
+            color: var(--jh-red);
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .order-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+        
+        .delivery-info {
+            font-size: 0.8rem;
+        }
+        
+        .empty-icon i {
+            opacity: 0.3;
+        }
+        
+        .list-group-item {
+            border: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .list-group-item.active {
+            background-color: var(--jh-red);
+            border-color: var(--jh-red);
+        }
+        
+        .list-group-item:hover:not(.active) {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        
+        @@media (max-width: 768px) {
+            .order-header .row,
+            .order-body .row {
+                text-align: center;
+            }
+            
+            .order-actions {
+                margin-top: 1rem;
+                text-align: center !important;
+            }
+            
+            .delivery-info {
+                text-align: center;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Order filter functionality
+        document.getElementById('orderFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            const orderItems = document.querySelectorAll('.order-item');
+            let visibleCount = 0;
+            
+            orderItems.forEach(item => {
+                const status = item.querySelector('.badge');
+                let shouldShow = true;
+                
+                if (filterValue) {
+                    const statusText = status.textContent.toLowerCase();
+                    switch(filterValue) {
+                        case 'pending':
+                            shouldShow = statusText.includes('chờ');
+                            break;
+                        case 'processing':
+                            shouldShow = statusText.includes('xử lý');
+                            break;
+                        case 'shipped':
+                            shouldShow = statusText.includes('giao');
+                            break;
+                        case 'delivered':
+                            shouldShow = statusText.includes('nhận');
+                            break;
+                        case 'cancelled':
+                            shouldShow = statusText.includes('hủy');
+                            break;
+                    }
+                }
+                
+                if (shouldShow) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Show empty state if no orders match filter
+            const emptyState = document.querySelector('.empty-orders');
+            const orderHistory = document.querySelector('.order-history');
+            
+            if (visibleCount === 0) {
+                orderHistory.style.display = 'none';
+                emptyState.style.display = 'block';
+            } else {
+                orderHistory.style.display = 'block';
+                emptyState.style.display = 'none';
+            }
+        });
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} border-0`;
+            toast.setAttribute('role', 'alert');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+        
+        // Order action handlers
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn')) {
+                const btn = e.target.closest('.btn');
+                const btnText = btn.textContent.trim();
+                
+                if (btnText.includes('Mua lại') || btnText.includes('Đặt lại')) {
+                    showToast('Chức năng đang được phát triển!', 'info');
+                } else if (btnText.includes('Theo dõi')) {
+                    showToast('Chức năng theo dõi đơn hàng đang được phát triển!', 'info');
+                } else if (btnText.includes('Hủy đơn')) {
+                    if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
+                        showToast('Chức năng hủy đơn hàng đang được phát triển!', 'info');
+                    }
+                } else if (btnText.includes('Xem chi tiết')) {
+                    showToast('Chức năng xem chi tiết đơn hàng đang được phát triển!', 'info');
+                }
+            }
+        });
+    </script>
+}

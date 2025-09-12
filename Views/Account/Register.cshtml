@@ -1,0 +1,217 @@
+@model JohnHenryFashionWeb.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<style>
+    .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+    
+    .video-background video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+    }
+    
+    .video-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: -1;
+    }
+    
+    .auth-container {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 40px 0;
+    }
+    
+    .auth-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(15px);
+        border: none;
+        border-radius: 0;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .auth-container {
+            padding: 20px 0;
+        }
+        
+        .video-background {
+            display: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    }
+</style>
+
+<!-- Video Background -->
+<div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source src="~/videos/0_Woman_Shopping_3840x2160.mov" type="video/mp4">
+        <source src="~/videos/0_Woman_Shopping_3840x2160.mov" type="video/quicktime">
+        <!-- Fallback image for browsers that don't support video -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%;"></div>
+    </video>
+</div>
+<div class="video-overlay"></div>
+
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card auth-card shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <h2 class="card-title text-dark fw-bold">Đăng ký</h2>
+                            <p class="text-muted">Tạo tài khoản mới để trải nghiệm John Henry Fashion</p>
+                        </div>
+
+                        <form asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" role="form">
+                            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FirstName" class="form-label fw-semibold">Họ</label>
+                                    <input asp-for="FirstName" class="form-control form-control-lg" placeholder="Nhập họ" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="LastName" class="form-label fw-semibold">Tên</label>
+                                    <input asp-for="LastName" class="form-control form-control-lg" placeholder="Nhập tên" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                                <input asp-for="Email" class="form-control form-control-lg" placeholder="Nhập email của bạn" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label fw-semibold">Mật khẩu</label>
+                                <input asp-for="Password" class="form-control form-control-lg" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold">Xác nhận mật khẩu</label>
+                                <input asp-for="ConfirmPassword" class="form-control form-control-lg" placeholder="Nhập lại mật khẩu" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                                    <i class="fas fa-user-plus me-2"></i>Đăng ký
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="divider my-4">
+                            <span class="divider-text">Hoặc đăng ký với</span>
+                        </div>
+
+                        <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" role="form">
+                            <div class="d-grid mb-3">
+                                <button type="submit" name="provider" value="Google" class="btn btn-outline-danger btn-lg">
+                                    <i class="fab fa-google me-2"></i>Đăng ký với Google
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="mb-0">
+                                Đã có tài khoản? 
+                                <a asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" class="text-decoration-none fw-semibold">Đăng nhập ngay</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .divider {
+        position: relative;
+        text-align: center;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #dee2e6;
+    }
+    
+    .divider-text {
+        background: white;
+        padding: 0 1rem;
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .btn {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

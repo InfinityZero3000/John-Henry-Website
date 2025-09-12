@@ -1,0 +1,482 @@
+@model List<JohnHenryFashionWeb.Models.ShoppingCartItem>
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+    var cartTotal = ViewBag.CartTotal as decimal? ?? 0;
+    var cartCount = ViewBag.CartCount as int? ?? 0;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Giỏ hàng</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Cart Header -->
+            <div class="cart-header mb-4">
+                <h2 class="cart-title">Giỏ hàng của bạn</h2>
+                @if (cartCount > 0)
+                {
+                    <p class="text-muted">Bạn có @cartCount sản phẩm trong giỏ hàng</p>
+                }
+            </div>
+
+            @if (Model.Any())
+            {
+                <!-- Cart Items -->
+                <div class="cart-items">
+                    @foreach (var item in Model)
+                    {
+                        <div class="cart-item" data-cart-item-id="@item.Id">
+                            <div class="row align-items-center">
+                                <!-- Product Image -->
+                                <div class="col-md-2 col-3">
+                                    <div class="product-image">
+                                        <img src="@(!string.IsNullOrEmpty(item.Product.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "~/images/placeholder-product.jpg")" 
+                                             alt="@item.Product.Name" 
+                                             class="img-fluid rounded"
+                                             onerror="this.src='/images/placeholder-product.jpg'">
+                                    </div>
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="col-md-4 col-9">
+                                    <div class="product-info">
+                                        <h6 class="product-name">
+                                            <a href="/Products/Details/@item.Product.Id" class="text-decoration-none">
+                                                @item.Product.Name
+                                            </a>
+                                        </h6>
+                                        <div class="product-details">
+                                            @if (!string.IsNullOrEmpty(item.Size))
+                                            {
+                                                <span class="badge bg-light text-dark me-1">Size: @item.Size</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Color))
+                                            {
+                                                <span class="badge bg-light text-dark">Color: @item.Color</span>
+                                            }
+                                        </div>
+                                        <small class="text-muted">SKU: @item.Product.SKU</small>
+                                    </div>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="col-md-2 col-6">
+                                    <div class="item-price">
+                                        <span class="price">@item.Price.ToString("N0")₫</span>
+                                    </div>
+                                </div>
+
+                                <!-- Quantity -->
+                                <div class="col-md-2 col-6">
+                                    <div class="quantity-controls">
+                                        <button class="btn btn-outline-secondary btn-sm" 
+                                                onclick="updateQuantity('@item.Id', @(item.Quantity - 1))"
+                                                @(item.Quantity <= 1 ? "disabled" : "")>
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" 
+                                               class="form-control quantity-input" 
+                                               value="@item.Quantity" 
+                                               min="1" 
+                                               max="99"
+                                               onchange="updateQuantity('@item.Id', this.value)">
+                                        <button class="btn btn-outline-secondary btn-sm" 
+                                                onclick="updateQuantity('@item.Id', @(item.Quantity + 1))">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Total & Actions -->
+                                <div class="col-md-2 col-12">
+                                    <div class="item-actions">
+                                        <div class="item-total mb-2">
+                                            <strong class="total-price">@((item.Price * item.Quantity).ToString("N0"))₫</strong>
+                                        </div>
+                                        <button class="btn btn-outline-danger btn-sm" 
+                                                onclick="removeItem('@item.Id')"
+                                                title="Xóa sản phẩm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="cart-divider">
+                        </div>
+                    }
+                </div>
+
+                <!-- Cart Actions -->
+                <div class="cart-actions mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="/Products" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-outline-secondary me-2" onclick="clearCart()">
+                                <i class="fas fa-trash me-2"></i>Xóa tất cả
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Empty Cart -->
+                <div class="empty-cart text-center py-5">
+                    <div class="empty-cart-icon mb-4">
+                        <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+                    </div>
+                    <h4 class="mb-3">Giỏ hàng của bạn đang trống</h4>
+                    <p class="text-muted mb-4">Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!</p>
+                    <a href="/Products" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Bắt đầu mua sắm
+                    </a>
+                </div>
+            }
+        </div>
+
+        @if (Model.Any())
+        {
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="summary-row">
+                                <span>Tạm tính (@cartCount sản phẩm):</span>
+                                <span class="cart-subtotal">@cartTotal.ToString("N0")₫</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span class="shipping-fee">30.000₫</span>
+                            </div>
+                            <hr>
+                            <div class="summary-row total-row">
+                                <strong>
+                                    <span>Tổng cộng:</span>
+                                    <span class="cart-total">@((cartTotal + 30000).ToString("N0"))₫</span>
+                                </strong>
+                            </div>
+
+                            <!-- Checkout Button -->
+                            <div class="mt-4">
+                                <a href="/Cart/Checkout" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-credit-card me-2"></i>Thanh toán
+                                </a>
+                            </div>
+
+                            <!-- Free Shipping Notice -->
+                            @if (cartTotal < 299000)
+                            {
+                                <div class="free-shipping-notice mt-3">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-truck me-2"></i>
+                                        Mua thêm <strong>@((299000 - cartTotal).ToString("N0"))₫</strong> để được miễn phí vận chuyển!
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="free-shipping-notice mt-3">
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Bạn được miễn phí vận chuyển!
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Security Notice -->
+                            <div class="security-notice mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Thông tin thanh toán được bảo mật 100%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suggested Products -->
+                    <div class="suggested-products mt-4">
+                        <h6 class="mb-3">Có thể bạn quan tâm</h6>
+                        <div class="row g-2">
+                            <!-- Placeholder for suggested products -->
+                            <div class="col-6">
+                                <div class="card h-100">
+                                    <img src="~/images/placeholder-product.jpg" class="card-img-top" alt="Sản phẩm đề xuất">
+                                    <div class="card-body p-2">
+                                        <small class="card-title">Áo thun basic</small>
+                                        <div class="text-primary">
+                                            <small><strong>299.000₫</strong></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card h-100">
+                                    <img src="~/images/placeholder-product.jpg" class="card-img-top" alt="Sản phẩm đề xuất">
+                                    <div class="card-body p-2">
+                                        <small class="card-title">Quần jeans</small>
+                                        <div class="text-primary">
+                                            <small><strong>599.000₫</strong></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .cart-item {
+            padding: 1rem 0;
+        }
+        
+        .product-image img {
+            max-height: 80px;
+            object-fit: cover;
+        }
+        
+        .product-name a {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .product-name a:hover {
+            color: var(--jh-red);
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            padding: 0.25rem;
+        }
+        
+        .cart-summary {
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-row {
+            font-size: 1.1rem;
+        }
+        
+        .cart-divider {
+            margin: 1rem 0;
+            opacity: 0.3;
+        }
+        
+        .empty-cart-icon i {
+            opacity: 0.3;
+        }
+        
+        @@media (max-width: 768px) {
+            .quantity-controls {
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
+            .item-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 1rem;
+            }
+            
+            .cart-summary {
+                position: static;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Update quantity function
+        async function updateQuantity(cartItemId, quantity) {
+            if (quantity < 1) return;
+            
+            try {
+                const response = await fetch('/Cart/UpdateQuantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ cartItemId: cartItemId, quantity: parseInt(quantity) })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update item quantity input
+                    const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
+                    cartItem.querySelector('.quantity-input').value = quantity;
+                    
+                    // Update item total
+                    cartItem.querySelector('.total-price').textContent = result.itemTotal.toLocaleString() + '₫';
+                    
+                    // Update cart summary
+                    document.querySelector('.cart-subtotal').textContent = result.cartTotal.toLocaleString() + '₫';
+                    document.querySelector('.cart-total').textContent = (result.cartTotal + 30000).toLocaleString() + '₫';
+                    
+                    // Update cart count in header
+                    updateCartCount(result.cartCount);
+                    
+                    showToast(result.message, 'success');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                showToast('Có lỗi xảy ra khi cập nhật số lượng.', 'error');
+            }
+        }
+        
+        // Remove item function
+        async function removeItem(cartItemId) {
+            if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/Cart/RemoveItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(cartItemId)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove item from DOM
+                    const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
+                    cartItem.remove();
+                    
+                    // Update cart summary
+                    if (result.cartCount > 0) {
+                        document.querySelector('.cart-subtotal').textContent = result.cartTotal.toLocaleString() + '₫';
+                        document.querySelector('.cart-total').textContent = (result.cartTotal + 30000).toLocaleString() + '₫';
+                    } else {
+                        // Reload page if cart is empty
+                        location.reload();
+                    }
+                    
+                    // Update cart count in header
+                    updateCartCount(result.cartCount);
+                    
+                    showToast(result.message, 'success');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                showToast('Có lỗi xảy ra khi xóa sản phẩm.', 'error');
+            }
+        }
+        
+        // Clear cart function
+        async function clearCart() {
+            if (!confirm('Bạn có chắc muốn xóa tất cả sản phẩm trong giỏ hàng?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/Cart/ClearCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing cart:', error);
+                showToast('Có lỗi xảy ra khi xóa giỏ hàng.', 'error');
+            }
+        }
+        
+        // Utility functions
+        function updateCartCount(count) {
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(element => {
+                element.textContent = count;
+            });
+        }
+        
+        function showToast(message, type) {
+            // Create toast element if it doesn't exist
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0`;
+            toast.setAttribute('role', 'alert');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+    </script>
+}

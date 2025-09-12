@@ -1,0 +1,487 @@
+@{
+    ViewData["Title"] = "Chi tiết bài viết - John Henry Blog";
+    var blogId = ViewBag.Id ?? 1;
+}
+
+<!-- Blog Detail Hero -->
+<section class="blog-detail-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="/Blog">Blog</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Chi tiết bài viết</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Detail Content -->
+<section class="blog-detail-content py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <article class="blog-article">
+                    <!-- Article Header -->
+                    <header class="article-header mb-4">
+                        <div class="article-meta mb-3">
+                            <span class="article-category">GRAND OPENING</span>
+                            <span class="article-date">09/09/2025</span>
+                        </div>
+                        <h1 class="article-title">GRAND OPENING | JOHN HENRY CẦU GIẤY MỞ CỬA ĐỢT PHÒNG CÁCH MỚI</h1>
+                    </header>
+
+                    <!-- Featured Image -->
+                    <div class="article-featured-image mb-4">
+                        <img src="~/images/Banner/banner-man-main.jpg" alt="Grand Opening John Henry" class="img-fluid rounded">
+                    </div>
+
+                    <!-- Article Content -->
+                    <div class="article-content">
+                        <p class="lead">Chính thức có mặt tại 355 Cầu Giấy, P. Cầu Giấy, TP. Hà Nội, JOHN HENRY mang đến một không gian mua sắm hoàn toàn mới với phong cách thiết kế hiện đại và sang trọng.</p>
+
+                        <p>Với diện tích rộng rãi và thiết kế tối ưu, cửa hàng JOHN HENRY Cầu Giấy mang đến trải nghiệm mua sắm tuyệt vời cho khách hàng. Không gian được chia thành các khu vực riêng biệt cho từng dòng sản phẩm, giúp khách hàng dễ dàng tìm kiếm và lựa chọn.</p>
+
+                        <h3>Không gian mua sắm hiện đại</h3>
+                        <p>Cửa hàng được thiết kế theo phong cách tối giản nhưng không kém phần sang trọng, với tone màu chủ đạo là trắng và đỏ - biểu tượng của thương hiệu JOHN HENRY. Hệ thống ánh sáng được bố trí khéo léo, tạo cảm giác thoải mái và dễ chịu cho khách hàng khi mua sắm.</p>
+
+                        <h3>Bộ sưu tập đa dạng</h3>
+                        <p>Tại cửa hàng mới, khách hàng sẽ được trải nghiệm đầy đủ các dòng sản phẩm của JOHN HENRY:</p>
+                        <ul>
+                            <li>Dòng JOHN HENRY - Thời trang nam cao cấp</li>
+                            <li>Dòng FREELANCER - Thời trang nữ hiện đại</li>
+                            <li>Các sản phẩm Best Seller được ưa chuộng</li>
+                        </ul>
+
+                        <h3>Chương trình khuyến mãi đặc biệt</h3>
+                        <p>Nhân dịp khai trương, JOHN HENRY Cầu Giấy dành nhiều ưu đãi hấp dẫn cho khách hàng:</p>
+                        <ul>
+                            <li>Giảm giá lên đến 30% cho toàn bộ sản phẩm</li>
+                            <li>Tặng kèm phụ kiện thời trang cho đơn hàng từ 2 triệu</li>
+                            <li>Chương trình tích điểm đổi quà cho khách hàng thân thiết</li>
+                        </ul>
+
+                        <p>Hãy đến và trải nghiệm không gian mua sắm mới tại JOHN HENRY Cầu Giấy để cảm nhận sự khác biệt!</p>
+                    </div>
+
+                    <!-- Article Footer -->
+                    <footer class="article-footer mt-5">
+                        <div class="article-tags mb-3">
+                            <span class="tag-label">Tags:</span>
+                            <span class="tag">Grand Opening</span>
+                            <span class="tag">Cửa hàng mới</span>
+                            <span class="tag">Cầu Giấy</span>
+                            <span class="tag">Hà Nội</span>
+                        </div>
+                        <div class="article-share">
+                            <span class="share-label">Chia sẻ:</span>
+                            <a href="#" class="share-btn facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="share-btn twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="share-btn linkedin"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </footer>
+                </article>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <aside class="blog-sidebar">
+                    <!-- Recent Posts -->
+                    <div class="sidebar-widget">
+                        <h4 class="widget-title">Bài viết mới nhất</h4>
+                        <div class="recent-posts">
+                            <div class="recent-post-item">
+                                <div class="recent-post-image">
+                                    <img src="~/images/Banner/banner-women-1.jpg" alt="Recent post" class="img-fluid">
+                                </div>
+                                <div class="recent-post-content">
+                                    <h6><a href="/Blog/Details/2">NEW DROP JEANS</a></h6>
+                                    <span class="recent-post-date">08/09/2025</span>
+                                </div>
+                            </div>
+                            <div class="recent-post-item">
+                                <div class="recent-post-image">
+                                    <img src="~/images/Banner/banner-women-main.jpg" alt="Recent post" class="img-fluid">
+                                </div>
+                                <div class="recent-post-content">
+                                    <h6><a href="/Blog/Details/3">NEW PANTS | SHORTS ABOVE KNEE</a></h6>
+                                    <span class="recent-post-date">07/09/2025</span>
+                                </div>
+                            </div>
+                            <div class="recent-post-item">
+                                <div class="recent-post-image">
+                                    <img src="~/images/Banner/banner-man-0.jpg" alt="Recent post" class="img-fluid">
+                                </div>
+                                <div class="recent-post-content">
+                                    <h6><a href="/Blog/Details/4">COOL STYLE, EASY WEAR</a></h6>
+                                    <span class="recent-post-date">06/09/2025</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="sidebar-widget">
+                        <h4 class="widget-title">Danh mục</h4>
+                        <ul class="category-list">
+                            <li><a href="#">Grand Opening <span>(3)</span></a></li>
+                            <li><a href="#">New Collection <span>(8)</span></a></li>
+                            <li><a href="#">Style Guide <span>(12)</span></a></li>
+                            <li><a href="#">Fashion Trend <span>(6)</span></a></li>
+                            <li><a href="#">Work Outfit <span>(4)</span></a></li>
+                            <li><a href="#">Comfort Style <span>(5)</span></a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Newsletter -->
+                    <div class="sidebar-widget newsletter-widget">
+                        <h4 class="widget-title">Đăng ký nhận tin</h4>
+                        <p>Nhận thông tin về các bộ sưu tập mới và ưu đãi đặc biệt</p>
+                        <form class="newsletter-form">
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Email của bạn">
+                                <button class="btn btn-primary" type="submit">Đăng ký</button>
+                            </div>
+                        </form>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --jh-red: #CE193A;
+        --jh-dark-red: #95122A;
+        --primary-color: #CE193A;
+    }
+
+    /* Blog Detail Hero */
+    .blog-detail-hero {
+        background-color: #f8f9fa;
+        padding: 30px 0;
+    }
+
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+
+    /* Article Styles */
+    .blog-article {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .article-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .article-category {
+        background: var(--primary-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .article-date {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .article-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #333;
+        line-height: 1.3;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .article-featured-image img {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+    }
+
+    .article-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #444;
+    }
+
+    .article-content h3 {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin: 30px 0 15px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .article-content ul {
+        padding-left: 20px;
+    }
+
+    .article-content li {
+        margin-bottom: 8px;
+    }
+
+    .article-footer {
+        border-top: 1px solid #e9ecef;
+        padding-top: 20px;
+    }
+
+    .article-tags {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .tag-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .tag {
+        background: #f8f9fa;
+        color: #6c757d;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .article-share {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .share-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .share-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+    }
+
+    .share-btn:hover {
+        transform: scale(1.1);
+        color: white;
+    }
+
+    .share-btn.facebook { background: #3b5998; }
+    .share-btn.twitter { background: #1da1f2; }
+    .share-btn.linkedin { background: #0077b5; }
+
+    /* Sidebar */
+    .blog-sidebar {
+        padding-left: 30px;
+    }
+
+    .sidebar-widget {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+    }
+
+    .widget-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .widget-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: var(--primary-color);
+    }
+
+    .recent-post-item {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .recent-post-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .recent-post-image {
+        flex-shrink: 0;
+        width: 80px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .recent-post-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .recent-post-content h6 {
+        margin-bottom: 5px;
+        line-height: 1.3;
+    }
+
+    .recent-post-content h6 a {
+        color: #333;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .recent-post-content h6 a:hover {
+        color: var(--primary-color);
+    }
+
+    .recent-post-date {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .category-list li {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .category-list li a {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .category-list li a:hover {
+        color: var(--primary-color);
+    }
+
+    .category-list li a span {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .newsletter-widget {
+        background: linear-gradient(135deg, var(--primary-color), var(--jh-dark-red));
+        color: white;
+    }
+
+    .newsletter-widget .widget-title {
+        color: white;
+    }
+
+    .newsletter-widget .widget-title::after {
+        background: white;
+    }
+
+    .newsletter-widget p {
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .newsletter-form .form-control {
+        border: none;
+        border-radius: 8px 0 0 8px;
+        padding: 12px 15px;
+    }
+
+    .newsletter-form .btn {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+        border-radius: 0 8px 8px 0;
+        padding: 12px 20px;
+        font-weight: 600;
+    }
+
+    .newsletter-form .btn:hover {
+        background: #f8f9fa;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .blog-sidebar {
+            padding-left: 0;
+            margin-top: 40px;
+        }
+
+        .blog-article {
+            padding: 25px;
+        }
+
+        .article-title {
+            font-size: 1.8rem;
+        }
+
+        .article-content {
+            font-size: 1rem;
+        }
+
+        .article-tags,
+        .article-share {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+    }
+</style>
