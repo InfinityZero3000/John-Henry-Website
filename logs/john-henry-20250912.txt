@@ -1,0 +1,84 @@
+2025-09-12 00:06:03.286 +07:00 [INF] User profile is available. Using '/Users/nguyenhuuthang/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-09-12 00:06:04.789 +07:00 [INF] Executed DbCommand (70ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE WHEN COUNT(*) = 0 THEN FALSE ELSE TRUE END
+FROM pg_class AS cls
+JOIN pg_namespace AS ns ON ns.oid = cls.relnamespace
+WHERE
+        cls.relkind IN ('r', 'v', 'm', 'f', 'p') AND
+        ns.nspname NOT IN ('pg_catalog', 'information_schema') AND
+        -- Exclude tables which are members of PG extensions
+        NOT EXISTS (
+            SELECT 1 FROM pg_depend WHERE
+                classid=(
+                    SELECT cls.oid
+                    FROM pg_class AS cls
+                             JOIN pg_namespace AS ns ON ns.oid = cls.relnamespace
+                    WHERE relname='pg_class' AND ns.nspname='pg_catalog'
+                ) AND
+                objid=cls.oid AND
+                deptype IN ('e', 'x')
+        )
+2025-09-12 00:06:04.796 +07:00 [INF] Database ensured created successfully
+2025-09-12 00:06:05.235 +07:00 [INF] Executed DbCommand (25ms) [Parameters=[@__normalizedName_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+FROM "AspNetRoles" AS a
+WHERE a."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-09-12 00:06:05.303 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+FROM "AspNetRoles" AS a
+WHERE a."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-09-12 00:06:05.305 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+FROM "AspNetRoles" AS a
+WHERE a."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-09-12 00:06:05.306 +07:00 [INF] Roles seeded successfully
+2025-09-12 00:06:05.326 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT a."Id", a."AccessFailedCount", a."Address", a."ApprovedAt", a."ApprovedBy", a."Avatar", a."BusinessLicense", a."CompanyName", a."ConcurrencyStamp", a."CreatedAt", a."DateOfBirth", a."Email", a."EmailConfirmed", a."FirstName", a."Gender", a."IsActive", a."IsApproved", a."LastName", a."LockoutEnabled", a."LockoutEnd", a."NormalizedEmail", a."NormalizedUserName", a."Notes", a."PasswordHash", a."Phone", a."PhoneNumber", a."PhoneNumberConfirmed", a."SecurityStamp", a."TaxCode", a."TwoFactorEnabled", a."UpdatedAt", a."UserName"
+FROM "AspNetUsers" AS a
+WHERE a."NormalizedEmail" = @__normalizedEmail_0
+LIMIT 2
+2025-09-12 00:06:05.431 +07:00 [INF] Admin user seeded successfully
+2025-09-12 00:06:05.435 +07:00 [INF] Starting John Henry Fashion Web Application
+2025-09-12 00:06:05.745 +07:00 [INF] Now listening on: http://localhost:5101
+2025-09-12 00:06:05.747 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-12 00:06:05.747 +07:00 [INF] Hosting environment: Development
+2025-09-12 00:06:05.748 +07:00 [INF] Content root path: /Users/nguyenhuuthang/Documents/RepoGitHub/John Henry Website
+2025-09-12 00:06:12.648 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5101/ - null null
+2025-09-12 00:06:12.704 +07:00 [INF] No cached response available for this request.
+2025-09-12 00:06:12.707 +07:00 [WRN] Failed to determine the https port for redirect.
+2025-09-12 00:06:12.999 +07:00 [INF] Executing endpoint 'JohnHenryFashionWeb.Controllers.HomeController.Index (JohnHenryFashionWeb)'
+2025-09-12 00:06:13.012 +07:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller JohnHenryFashionWeb.Controllers.HomeController (JohnHenryFashionWeb).
+2025-09-12 00:06:13.100 +07:00 [INF] Executing ViewResult, running view Index.
+2025-09-12 00:06:13.440 +07:00 [INF] Executed ViewResult - view Index executed in 341.6985ms.
+2025-09-12 00:06:13.447 +07:00 [INF] Executed action JohnHenryFashionWeb.Controllers.HomeController.Index (JohnHenryFashionWeb) in 417.5225ms
+2025-09-12 00:06:13.448 +07:00 [INF] Executed endpoint 'JohnHenryFashionWeb.Controllers.HomeController.Index (JohnHenryFashionWeb)'
+2025-09-12 00:06:13.448 +07:00 [INF] The response has been cached.
+2025-09-12 00:06:13.454 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5101/ - 200 null text/html; charset=utf-8 812.0278ms
+2025-09-12 00:06:14.576 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5101/Products/IsInWishlist?productId=john-henry-polo-001 - null null
+2025-09-12 00:06:14.576 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5101/Products/IsInWishlist?productId=john-henry-hoodie-001 - null null
+2025-09-12 00:06:14.579 +07:00 [INF] No cached response available for this request.
+2025-09-12 00:06:14.579 +07:00 [INF] No cached response available for this request.
+2025-09-12 00:06:14.594 +07:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2025-09-12 00:06:14.594 +07:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2025-09-12 00:06:14.605 +07:00 [INF] AuthenticationScheme: Bearer was challenged.
+2025-09-12 00:06:14.605 +07:00 [INF] AuthenticationScheme: Bearer was challenged.
+2025-09-12 00:06:14.605 +07:00 [INF] The response could not be cached for this request.
+2025-09-12 00:06:14.605 +07:00 [INF] The response could not be cached for this request.
+2025-09-12 00:06:14.606 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5101/Products/IsInWishlist?productId=john-henry-polo-001 - 401 0 null 30.0609ms
+2025-09-12 00:06:14.606 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5101/Products/IsInWishlist?productId=john-henry-hoodie-001 - 401 0 null 30.0607ms
+2025-09-12 00:06:17.995 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5101/?id=ba9948bc-c5be-46de-8b4d-5c047ebaf403&vscodeBrowserReqId=1757610377978 - null null
+2025-09-12 00:06:18.000 +07:00 [INF] No cached response available for this request.
+2025-09-12 00:06:18.004 +07:00 [INF] Executing endpoint 'JohnHenryFashionWeb.Controllers.HomeController.Index (JohnHenryFashionWeb)'
+2025-09-12 00:06:18.005 +07:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller JohnHenryFashionWeb.Controllers.HomeController (JohnHenryFashionWeb).
+2025-09-12 00:06:18.006 +07:00 [INF] Executing ViewResult, running view Index.
+2025-09-12 00:06:18.022 +07:00 [INF] Executed ViewResult - view Index executed in 16.5597ms.
+2025-09-12 00:06:18.022 +07:00 [INF] Executed action JohnHenryFashionWeb.Controllers.HomeController.Index (JohnHenryFashionWeb) in 17.6542ms
+2025-09-12 00:06:18.023 +07:00 [INF] Executed endpoint 'JohnHenryFashionWeb.Controllers.HomeController.Index (JohnHenryFashionWeb)'
+2025-09-12 00:06:18.023 +07:00 [INF] The response has been cached.
+2025-09-12 00:06:18.024 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5101/?id=ba9948bc-c5be-46de-8b4d-5c047ebaf403&vscodeBrowserReqId=1757610377978 - 200 null text/html; charset=utf-8 28.6417ms
+2025-09-12 00:13:49.097 +07:00 [INF] Application is shutting down...

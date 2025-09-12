@@ -7,7 +7,7 @@
 │         Client (UI)         │
 │ - HTML5, CSS3, JS           │
 │ - Bootstrap 5 (layout)      │
-│ - GSAP, AOS, Lottie (anim)  │
+│ - GSAP, Lottie (anim)  │
 │ - Video.js (video bg)       │
 └─────────────┬───────────────┘
               │ HTTP/HTTPS
@@ -106,3 +106,8 @@
 * Dark mode luxury.
 * AI chatbot tư vấn sản phẩm.
 * Progressive Web App (PWA) để tăng tốc độ và trải nghiệm.
+
+admin@johnhenry.com
+Admin123!
+
+ASP.NET Identity - login
