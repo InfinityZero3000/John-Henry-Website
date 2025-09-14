@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using JohnHenryFashionWeb.Data;
 using JohnHenryFashionWeb.Models;
+using JohnHenryFashionWeb.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -26,28 +27,66 @@ builder.Host.UseSerilog();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity
+// Add Identity with enhanced security settings
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Password settings
+    // Password settings - Enhanced security
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 3;
 
-    // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
+    // Lockout settings - Enhanced protection
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.AllowedForNewUsers = true;
 
-    // User settings
+    // User settings - Security focused
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
+
+    // Sign-in settings - Enhanced security
+    options.SignIn.RequireConfirmedEmail = true;
+    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+
+    // Token settings
+    options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
+    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+    options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultEmailProvider;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("Custom");
+
+// Configure Cookie settings for enhanced security
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ReturnUrlParameter = "returnUrl";
+    
+    // Enhanced cookie security
+    options.Cookie.Name = "JohnHenryAuth";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+});
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -94,6 +133,16 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.ICacheService, JohnHenryFashionWeb.Services.CacheService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IImageOptimizationService, JohnHenryFashionWeb.Services.ImageOptimizationService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.ISeoService, JohnHenryFashionWeb.Services.SeoService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.SeoService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IPerformanceMonitorService, JohnHenryFashionWeb.Services.PerformanceMonitorService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IOptimizedDataService, JohnHenryFashionWeb.Services.OptimizedDataService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IEmailService, JohnHenryFashionWeb.Services.EmailService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.INotificationService, JohnHenryFashionWeb.Services.NotificationService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.ISecurityService, JohnHenryFashionWeb.Services.SecurityService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IAnalyticsService, JohnHenryFashionWeb.Services.AnalyticsService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IReportingService, JohnHenryFashionWeb.Services.ReportingService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IAuthService, JohnHenryFashionWeb.Services.AuthService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.IPaymentService, JohnHenryFashionWeb.Services.PaymentService>();
 
 // Add Application Insights
 builder.Services.AddApplicationInsightsTelemetry();
@@ -105,6 +154,10 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "JohnHenryFashion";
 });
+
+// Configure Email Settings
+builder.Services.Configure<JohnHenryFashionWeb.Services.EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
 // Add Response Caching
 builder.Services.AddResponseCaching();
@@ -145,6 +198,9 @@ builder.Services.AddControllersWithViews(options =>
 })
     .AddNewtonsoftJson();
 
+// Add HttpClient for Payment Service
+builder.Services.AddHttpClient();
+
 // Add API Explorer for Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -180,8 +236,6 @@ app.UseResponseCompression();
 
 // Add custom middleware
 app.UseMiddleware<JohnHenryFashionWeb.Middleware.PerformanceMiddleware>();
-app.UseMiddleware<JohnHenryFashionWeb.Middleware.SecurityHeadersMiddleware>();
-app.UseMiddleware<JohnHenryFashionWeb.Middleware.ImageOptimizationMiddleware>();
 
 // Enable response caching
 app.UseResponseCaching();
@@ -280,6 +334,31 @@ static async Task SeedAdminUser(UserManager<ApplicationUser> userManager)
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
+        }
+    }
+
+    // Create default seller user
+    var sellerEmail = "seller@johnhenry.com";
+    var sellerUser = await userManager.FindByEmailAsync(sellerEmail);
+    
+    if (sellerUser == null)
+    {
+        sellerUser = new ApplicationUser
+        {
+            UserName = sellerEmail,
+            Email = sellerEmail,
+            FirstName = "Seller",
+            LastName = "Demo",
+            EmailConfirmed = true,
+            IsActive = true,
+            IsApproved = true,
+            ApprovedAt = DateTime.UtcNow
+        };
+        
+        var result = await userManager.CreateAsync(sellerUser, "Seller123!");
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(sellerUser, UserRoles.Seller);
         }
     }
 }
