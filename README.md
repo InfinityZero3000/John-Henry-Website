@@ -31,22 +31,22 @@ This platform follows a modern **Model-View-Controller (MVC)** architecture with
 ### System Architecture Diagram
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client Side   │    │   Server Side   │    │   Data Layer    │
-│                 │    │                 │    │                 │
-│ • React/jQuery  │◄──►│ • ASP.NET Core  │◄──►│ • PostgreSQL    │
-│ • Bootstrap 5   │    │ • Entity Framework   │ • Redis Cache   │
-│ • Responsive UI │    │ • Identity System│    │ • File Storage  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌───────────────────┐    ┌─────────────────┐
+│   Client Side   │    │   Server Side     │    │   Data Layer    │
+│                 │    │                   │    │                 │
+│ • React/jQuery  │◄──►│ • ASP.NET Core    │◄──►│ • PostgreSQL    │
+│ • Bootstrap 5   │    │ • Entity Framework│    │ • Redis Cache   │
+│ • Responsive UI │    │ • Identity System │    │ • File Storage  │
+└─────────────────┘    └───────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  External APIs  │    │   Middleware    │    │   Monitoring    │
-│                 │    │                 │    │                 │
-│ • Google OAuth  │    │ • Authentication│    │ • Serilog       │
-│ • Payment APIs  │    │ • Authorization │    │ • App Insights  │
-│ • Email Service │    │ • Security      │    │ • Performance   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  External APIs  │     │   Middleware    │     │   Monitoring    │
+│                 │     │                 │     │                 │
+│ • Google OAuth  │     │ • Authentication│     │ • Serilog       │
+│ • Payment APIs  │     │ • Authorization │     │ • App Insights  │
+│ • Email Service │     │ • Security      │     │ • Performance   │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
 
 ## Technology Stack
