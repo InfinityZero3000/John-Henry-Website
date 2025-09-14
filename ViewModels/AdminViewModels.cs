@@ -49,6 +49,9 @@ namespace JohnHenryFashionWeb.ViewModels
         public string? FeaturedImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsFeatured { get; set; }
+        public bool IsActive { get; set; }
+        public string? Description { get; set; }
+        public Category? Category { get; set; }
     }
 
     public class ProductCreateEditViewModel
@@ -103,6 +106,16 @@ namespace JohnHenryFashionWeb.ViewModels
         public string? Dimensions { get; set; }
 
         public string Status { get; set; } = "active";
+
+        // SEO Fields
+        [StringLength(255)]
+        public string? MetaTitle { get; set; }
+        
+        [StringLength(500)]
+        public string? MetaDescription { get; set; }
+        
+        [StringLength(1000)]
+        public string? Tags { get; set; }
 
         // For file uploads
         public IFormFile? FeaturedImage { get; set; }
@@ -552,5 +565,168 @@ namespace JohnHenryFashionWeb.ViewModels
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; } = string.Empty;
+    }
+
+    // Blog Management ViewModels
+    public class AdminBlogViewModel
+    {
+        public List<BlogPost> Posts { get; set; } = new();
+        public List<BlogCategory> Categories { get; set; } = new();
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int TotalPosts { get; set; }
+        public string? StatusFilter { get; set; }
+        public string? CategoryFilter { get; set; }
+        public string? SearchTerm { get; set; }
+    }
+
+    // Seller Management ViewModels
+    public class SellerSalesViewModel
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public int TotalOrders { get; set; }
+        public List<DailySales> SalesData { get; set; } = new();
+    }
+
+    public class DailySales
+    {
+        public DateTime Date { get; set; }
+        public decimal Revenue { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class SellerAnalyticsViewModel
+    {
+        public List<TopSellingProduct> TopProducts { get; set; } = new();
+        public List<CategoryPerformance> CategoryPerformance { get; set; } = new();
+        public int TotalProductViews { get; set; }
+        public int ConversionRate { get; set; }
+    }
+
+    public class CategoryPerformance
+    {
+        public string CategoryName { get; set; } = string.Empty;
+        public decimal Revenue { get; set; }
+        public int ProductCount { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class SellerProfileViewModel
+    {
+        [Required(ErrorMessage = "Tên công ty là bắt buộc")]
+        [Display(Name = "Tên công ty")]
+        public string? CompanyName { get; set; }
+
+        [Display(Name = "Giấy phép kinh doanh")]
+        public string? BusinessLicense { get; set; }
+
+        [Display(Name = "Mã số thuế")]
+        public string? TaxCode { get; set; }
+
+        [Display(Name = "Địa chỉ")]
+        public string? Address { get; set; }
+
+        [Display(Name = "Số điện thoại")]
+        public string? Phone { get; set; }
+
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Họ là bắt buộc")]
+        [Display(Name = "Họ")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Tên là bắt buộc")]
+        [Display(Name = "Tên")]
+        public string LastName { get; set; } = string.Empty;
+
+        [Display(Name = "Trạng thái duyệt")]
+        public bool IsApproved { get; set; }
+
+        [Display(Name = "Ngày duyệt")]
+        public DateTime? ApprovedAt { get; set; }
+
+        [Display(Name = "Ghi chú")]
+        public string? Notes { get; set; }
+
+        [Display(Name = "Ngày tạo")]
+        public DateTime CreatedAt { get; set; }
+
+        [Display(Name = "Cập nhật lần cuối")]
+        public DateTime? UpdatedAt { get; set; }
+
+        [Display(Name = "Trạng thái tài khoản")]
+        public bool IsActive { get; set; } = true;
+    }
+
+    public class SellerSettingsViewModel
+    {
+        // Store Settings
+        [Display(Name = "Kích hoạt cửa hàng")]
+        public bool IsStoreActive { get; set; } = true;
+
+        [Display(Name = "Mô tả cửa hàng")]
+        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
+        public string? StoreDescription { get; set; }
+
+        // Business Hours
+        [Display(Name = "Giờ mở cửa")]
+        public TimeSpan? BusinessHoursStart { get; set; }
+
+        [Display(Name = "Giờ đóng cửa")]
+        public TimeSpan? BusinessHoursEnd { get; set; }
+
+        // Days of week
+        [Display(Name = "Nghỉ thứ Hai")]
+        public bool ClosedOnMonday { get; set; } = false;
+
+        [Display(Name = "Nghỉ thứ Ba")]
+        public bool ClosedOnTuesday { get; set; } = false;
+
+        [Display(Name = "Nghỉ thứ Tư")]
+        public bool ClosedOnWednesday { get; set; } = false;
+
+        [Display(Name = "Nghỉ thứ Năm")]
+        public bool ClosedOnThursday { get; set; } = false;
+
+        [Display(Name = "Nghỉ thứ Sáu")]
+        public bool ClosedOnFriday { get; set; } = false;
+
+        [Display(Name = "Nghỉ thứ Bảy")]
+        public bool ClosedOnSaturday { get; set; } = false;
+
+        [Display(Name = "Nghỉ chủ nhật")]
+        public bool ClosedOnSunday { get; set; } = false;
+
+        // Notification Settings
+        [Display(Name = "Cài đặt thông báo")]
+        public EmailNotificationSettings EmailNotifications { get; set; } = new();
+
+        [Display(Name = "Tần suất báo cáo")]
+        public string ReportFrequency { get; set; } = "Weekly";
+
+        // Inventory Settings
+        [Display(Name = "Ngưỡng cảnh báo hết hàng")]
+        [Range(0, int.MaxValue, ErrorMessage = "Ngưỡng phải lớn hơn hoặc bằng 0")]
+        public int LowStockThreshold { get; set; } = 10;
+
+        [Display(Name = "Tự động ẩn sản phẩm hết hàng")]
+        public bool AutoHideOutOfStock { get; set; } = false;
+
+        // Statistics
+        public int TotalProducts { get; set; }
+        public int TotalOrders { get; set; }
+    }
+
+    public class EmailNotificationSettings
+    {
+        public bool NewOrders { get; set; } = true;
+        public bool LowStock { get; set; } = true;
+        public bool ProductReviews { get; set; } = true;
+        public bool SystemUpdates { get; set; } = true;
     }
 }

@@ -16,6 +16,8 @@ namespace JohnHenryFashionWeb.ViewModels
 
         [Display(Name = "Ghi nhớ đăng nhập")]
         public bool RememberMe { get; set; }
+
+        public string? ReturnUrl { get; set; }
     }
 
     public class RegisterViewModel
@@ -35,8 +37,12 @@ namespace JohnHenryFashionWeb.ViewModels
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [Display(Name = "Số điện thoại")]
+        public string? PhoneNumber { get; set; }
+
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
-        [StringLength(100, ErrorMessage = "Mật khẩu phải có ít nhất {2} và tối đa {1} ký tự.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "Mật khẩu phải có ít nhất {2} và tối đa {1} ký tự.", MinimumLength = 8)]
         [DataType(DataType.Password)]
         [Display(Name = "Mật khẩu")]
         public string Password { get; set; } = string.Empty;
@@ -45,24 +51,64 @@ namespace JohnHenryFashionWeb.ViewModels
         [Display(Name = "Xác nhận mật khẩu")]
         [Compare("Password", ErrorMessage = "Mật khẩu và xác nhận mật khẩu không khớp.")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Bạn phải đồng ý với điều khoản sử dụng")]
+        [Display(Name = "Tôi đồng ý với điều khoản sử dụng")]
+        public bool AgreeToTerms { get; set; }
     }
 
     public class ExternalLoginViewModel
     {
         [Required(ErrorMessage = "Email là bắt buộc")]
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Họ là bắt buộc")]
         [Display(Name = "Họ")]
-        [StringLength(50, ErrorMessage = "Họ không được vượt quá 50 ký tự")]
         public string FirstName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Tên là bắt buộc")]
         [Display(Name = "Tên")]
-        [StringLength(50, ErrorMessage = "Tên không được vượt quá 50 ký tự")]
         public string LastName { get; set; } = string.Empty;
+    }
+
+    public class TwoFactorVerificationViewModel
+    {
+        [Required(ErrorMessage = "Mã xác thực là bắt buộc")]
+        [StringLength(6, ErrorMessage = "Mã xác thực phải có 6 ký tự")]
+        [Display(Name = "Mã xác thực")]
+        public string Code { get; set; } = string.Empty;
+
+        public string UserId { get; set; } = string.Empty;
+        public string Provider { get; set; } = string.Empty;
+        public bool RememberMe { get; set; }
+        public string? ReturnUrl { get; set; }
+    }
+
+    public class SecurityDashboardViewModel
+    {
+        public int SecurityScore { get; set; }
+        public bool IsTwoFactorEnabled { get; set; }
+        public List<ActiveSessionViewModel> ActiveSessions { get; set; } = new();
+        public List<SecurityLogViewModel> SecurityLogs { get; set; } = new();
+    }
+
+    public class ActiveSessionViewModel
+    {
+        public string SessionId { get; set; } = string.Empty;
+        public string DeviceType { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
+        public DateTime LastActivity { get; set; }
+        public bool IsCurrentSession { get; set; }
+    }
+
+    public class SecurityLogViewModel
+    {
+        public string Action { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+        public string IpAddress { get; set; } = string.Empty;
+        public bool IsSuccessful { get; set; }
+        public string? Details { get; set; }
     }
 
     public class LoginWith2faViewModel
