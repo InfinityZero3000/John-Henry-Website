@@ -2,8 +2,27 @@
    John Henry Fashion - Product Card Styles
    ======================================== */
 
-/* Standard Product Card */
-.product-card {
+/* Unified Product Card - Based on target layout */
+.product-card-unified {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card-unified:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Legacy classes for backward compatibility */
+.product-card, .product-card-modern {
     background: #fff;
     border: 1px solid #e8e8e8;
     border-radius: 8px;
@@ -13,30 +32,44 @@
     position: relative;
 }
 
-.product-card:hover {
+.product-card:hover, .product-card-modern:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     border-color: #3498db;
 }
 
-.product-image-wrapper {
+.product-image-wrapper, .product-image-container {
     position: relative;
-    height: 250px;
+    height: 300px;
     overflow: hidden;
+    background: #f8f9fa;
+    flex-shrink: 0;
 }
 
-.product-img {
+/* Unified layout image wrapper - compact size for better fit */
+.product-card-unified .product-image-wrapper {
+    height: 280px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.product-img, .product-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
+    object-fit: contain;
+    transition: transform 0.4s ease;
+    /* padding: 8px; */
 }
 
-.product-card:hover .product-img {
+.product-card:hover .product-img, .product-card-modern:hover .product-image {
     transform: scale(1.05);
 }
 
-.product-actions {
+.product-card-unified:hover .product-img {
+    transform: scale(1.02);
+}
+
+.product-actions, .product-actions-modern {
     position: absolute;
     top: 15px;
     right: 15px;
@@ -47,11 +80,22 @@
     transition: opacity 0.3s ease;
 }
 
-.product-card:hover .product-actions {
+/* Unified layout action buttons - compact positioning */
+.product-card-unified .product-actions {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    opacity: 1;
+    margin-top: 6px;
+    justify-content: flex-start;
+}
+
+.product-card:hover .product-actions, .product-card-modern:hover .product-actions-modern {
     opacity: 1;
 }
 
-.btn-action {
+.btn-action, .btn-action-modern {
     width: 40px;
     height: 40px;
     border: none;
@@ -66,32 +110,140 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.btn-action:hover {
-    background: #3498db;
+/* Unified layout action buttons - smaller, compact design */
+.product-card-unified .btn-action {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    box-shadow: none;
+}
+
+.btn-action:hover, .btn-action-modern:hover {
+    background: #e74c3c;
     color: white;
     transform: scale(1.1);
 }
 
-.product-details {
-    padding: 15px;
-    text-align: center;
+.product-card-unified .btn-action:hover {
+    background: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
 }
 
-.product-title {
-    font-size: 1rem;
+.product-details, .product-info {
+    padding: 15px;
+}
+
+/* Unified layout details - compact padding */
+.product-card-unified .product-details {
+    padding: 6px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #fff;
+}
+
+.product-title, .product-name {
+    font-size: 0.95rem;
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 8px;
     line-height: 1.4;
     text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.product-price {
+/* Unified layout title - compact spacing */
+.product-card-unified .product-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+    line-height: 1.2;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-price, .current-price {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #e74c3c;
+    color: #e74c3c !important;
     margin: 0;
     text-align: left;
+}
+
+/* Unified layout price - compact spacing */
+.product-card-unified .product-price {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e74c3c !important;
+    margin: 0;
+    text-align: left;
+    display: inline-block;
+}
+
+/* Price and actions container - same line layout */
+.product-card-unified .product-details {
+    z-index: 9;
+    width: 100%;
+    position: relative;
+}
+
+.product-card-unified .product-details::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+/* Unified layout action buttons - positioned on same line as price */
+.product-card-unified .product-actions {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    opacity: 1;
+    margin: 0;
+    justify-content: flex-end;
+}
+
+/* Unified layout action buttons - smaller, compact design */
+.product-card-unified .btn-action {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 11px;
+    box-shadow: none;
+}
+
+/* Hide extra elements for consistency */
+.product-category, .product-rating, .product-pricing .original-price, .product-badge, .product-overlay {
+    display: none;
 }
 
 /* Collection Banner */
@@ -120,22 +272,44 @@
         height: 200px;
     }
     
+    .product-card-unified .product-image-wrapper {
+        height: 280px;
+    }
+    
     .btn-action {
         width: 35px;
         height: 35px;
         font-size: 14px;
     }
     
+    .product-card-unified .btn-action {
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
+    }
+    
     .product-details {
         padding: 12px;
+    }
+    
+    .product-card-unified .product-details {
+        padding: 16px 14px;
     }
     
     .product-title {
         font-size: 0.9rem;
     }
     
+    .product-card-unified .product-title {
+        font-size: 1rem;
+    }
+    
     .product-price {
         font-size: 1rem;
+    }
+    
+    .product-card-unified .product-price {
+        font-size: 1.15rem;
     }
 }
 
@@ -144,8 +318,16 @@
         height: 180px;
     }
     
+    .product-card-unified .product-image-wrapper {
+        height: 250px;
+    }
+    
     .product-details {
         padding: 10px;
+    }
+    
+    .product-card-unified .product-details {
+        padding: 14px 12px;
     }
 }
 
@@ -165,12 +347,16 @@
     animation: fadeInUp 0.6s ease-out;
 }
 
+.product-card-unified {
+    animation: fadeInUp 0.6s ease-out;
+}
+
 /* Staggered animation for product cards */
-.col-lg-3:nth-child(1) .product-card { animation-delay: 0.1s; }
-.col-lg-3:nth-child(2) .product-card { animation-delay: 0.2s; }
-.col-lg-3:nth-child(3) .product-card { animation-delay: 0.3s; }
-.col-lg-3:nth-child(4) .product-card { animation-delay: 0.4s; }
-.col-lg-3:nth-child(5) .product-card { animation-delay: 0.5s; }
-.col-lg-3:nth-child(6) .product-card { animation-delay: 0.6s; }
-.col-lg-3:nth-child(7) .product-card { animation-delay: 0.7s; }
-.col-lg-3:nth-child(8) .product-card { animation-delay: 0.8s; }
+.col-lg-3:nth-child(1) .product-card, .col-lg-3:nth-child(1) .product-card-unified { animation-delay: 0.1s; }
+.col-lg-3:nth-child(2) .product-card, .col-lg-3:nth-child(2) .product-card-unified { animation-delay: 0.2s; }
+.col-lg-3:nth-child(3) .product-card, .col-lg-3:nth-child(3) .product-card-unified { animation-delay: 0.3s; }
+.col-lg-3:nth-child(4) .product-card, .col-lg-3:nth-child(4) .product-card-unified { animation-delay: 0.4s; }
+.col-lg-3:nth-child(5) .product-card, .col-lg-3:nth-child(5) .product-card-unified { animation-delay: 0.5s; }
+.col-lg-3:nth-child(6) .product-card, .col-lg-3:nth-child(6) .product-card-unified { animation-delay: 0.6s; }
+.col-lg-3:nth-child(7) .product-card, .col-lg-3:nth-child(7) .product-card-unified { animation-delay: 0.7s; }
+.col-lg-3:nth-child(8) .product-card, .col-lg-3:nth-child(8) .product-card-unified { animation-delay: 0.8s; }
