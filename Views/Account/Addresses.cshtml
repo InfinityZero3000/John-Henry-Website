@@ -1,0 +1,147 @@
+@model List<Address>
+@{
+    ViewData["Title"] = "Quản lý địa chỉ";
+}
+
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Quản lý địa chỉ</h1>
+                <a href="@Url.Action("AddAddress", "Account")" class="btn btn-primary">
+                    <i class="fas fa-plus fa-sm text-white-50"></i>
+                    Thêm địa chỉ mới
+                </a>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="row">
+                    @foreach (var address in Model)
+                    {
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card border-left-primary shadow h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title">
+                                            @address.FirstName @address.LastName
+                                            @if (address.IsDefault)
+                                            {
+                                                <span class="badge badge-primary ml-2">Mặc định</span>
+                                            }
+                                        </h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item" href="@Url.Action("EditAddress", "Account", new { id = address.Id })">
+                                                    <i class="fas fa-edit mr-2"></i>Chỉnh sửa
+                                                </a>
+                                                @if (!address.IsDefault)
+                                                {
+                                                    <button class="dropdown-item" onclick="setDefaultAddress('@address.Id')">
+                                                        <i class="fas fa-star mr-2"></i>Đặt làm mặc định
+                                                    </button>
+                                                    <div class="dropdown-divider"></div>
+                                                    <button class="dropdown-item text-danger" onclick="deleteAddress('@address.Id')">
+                                                        <i class="fas fa-trash mr-2"></i>Xóa
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(address.Company))
+                                    {
+                                        <p class="mb-1 text-muted">@address.Company</p>
+                                    }
+                                    
+                                    <p class="mb-1">@address.Address1</p>
+                                    @if (!string.IsNullOrEmpty(address.Address2))
+                                    {
+                                        <p class="mb-1">@address.Address2</p>
+                                    }
+                                    <p class="mb-1">@address.City, @address.State @address.PostalCode</p>
+                                    <p class="mb-1">@address.Country</p>
+                                    
+                                    @if (!string.IsNullOrEmpty(address.Phone))
+                                    {
+                                        <p class="mb-0 text-muted">
+                                            <i class="fas fa-phone fa-sm mr-1"></i>@address.Phone
+                                        </p>
+                                    }
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <small class="text-muted">
+                                        Cập nhật: @address.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="card shadow">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-map-marker-alt fa-3x text-gray-300 mb-4"></i>
+                        <h4 class="text-gray-600 mb-3">Chưa có địa chỉ nào</h4>
+                        <p class="text-gray-500 mb-4">Thêm địa chỉ đầu tiên để thuận tiện cho việc đặt hàng.</p>
+                        <a href="@Url.Action("AddAddress", "Account")" class="btn btn-primary">
+                            <i class="fas fa-plus fa-sm text-white-50"></i>
+                            Thêm địa chỉ mới
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+function setDefaultAddress(addressId) {
+    if (confirm('Bạn có chắc muốn đặt địa chỉ này làm mặc định?')) {
+        $.post('@Url.Action("SetDefaultAddress", "Account")', { id: addressId })
+            .done(function(data) {
+                if (data.success) {
+                    toastr.success(data.message);
+                    location.reload();
+                } else {
+                    toastr.error(data.message);
+                }
+            })
+            .fail(function() {
+                toastr.error('Có lỗi xảy ra. Vui lòng thử lại!');
+            });
+    }
+}
+
+function deleteAddress(addressId) {
+    if (confirm('Bạn có chắc muốn xóa địa chỉ này? Hành động này không thể hoàn tác.')) {
+        $.post('@Url.Action("DeleteAddress", "Account")', { id: addressId })
+            .done(function(data) {
+                if (data.success) {
+                    toastr.success(data.message);
+                    location.reload();
+                } else {
+                    toastr.error(data.message);
+                }
+            })
+            .fail(function() {
+                toastr.error('Có lỗi xảy ra. Vui lòng thử lại!');
+            });
+    }
+}
+</script>

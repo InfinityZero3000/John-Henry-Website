@@ -1,0 +1,357 @@
+@model JohnHenryFashionWeb.ViewModels.InventoryListViewModel
+@{
+    ViewData["Title"] = "Quản lý Tồn kho";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="page-title">Quản lý Tồn kho</h1>
+                    <p class="text-muted">Theo dõi và quản lý số lượng tồn kho của sản phẩm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title mb-0">@Model.Items.Count()</h4>
+                            <p class="card-text">Tổng sản phẩm</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-boxes fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title mb-0">@Model.Items.Count(i => i.IsLowStock)</h4>
+                            <p class="card-text">Sắp hết hàng</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title mb-0">@Model.Items.Count(i => i.IsOutOfStock)</h4>
+                            <p class="card-text">Hết hàng</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title mb-0">@Model.Items.Count(i => !i.IsLowStock)</h4>
+                            <p class="card-text">Còn hàng tốt</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Tìm kiếm</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="@Model.SearchTerm" placeholder="Tìm theo tên hoặc SKU...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lowStock" name="lowStock" 
+                                       value="true" @(Model.Filter == "low_stock" ? "checked" : "")>
+                                <label class="form-check-label" for="lowStock">
+                                    Chỉ hiển thị sản phẩm sắp hết hàng
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <a href="@Url.Action("Inventory")" class="btn btn-secondary">
+                                    <i class="fas fa-refresh"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Danh sách Tồn kho</h5>
+                    <a href="@Url.Action("CreateProduct", "Seller")" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Thêm sản phẩm
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Items.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Danh mục</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
+                                        <th>Cập nhật cuối</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Items)
+                                    {
+                                        <tr class="@(item.IsOutOfStock ? "table-danger" : item.IsLowStock ? "table-warning" : "")">
+                                            <td>
+                                                <code>@item.SKU</code>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>@item.ProductName</strong>
+                                                </div>
+                                            </td>
+                                            <td>@item.CategoryName</td>
+                                            <td>@item.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                            <td>
+                                                <span class="fw-bold inventory-stock" data-product-id="@item.ProductId">
+                                                    @item.CurrentStock
+                                                </span>
+                                                @if (item.IsOutOfStock)
+                                                {
+                                                    <i class="fas fa-times-circle text-danger ms-1" title="Hết hàng"></i>
+                                                }
+                                                else if (item.IsLowStock)
+                                                {
+                                                    <i class="fas fa-exclamation-triangle text-warning ms-1" title="Sắp hết hàng"></i>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @(item.IsOutOfStock ? "bg-danger" : item.IsLowStock ? "bg-warning" : "bg-success")">
+                                                    @(item.IsOutOfStock ? "Hết hàng" : item.IsLowStock ? "Sắp hết" : "Còn hàng")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    @item.LastUpdated.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            data-bs-toggle="modal" data-bs-target="#updateStockModal"
+                                                            data-product-id="@item.ProductId" 
+                                                            data-product-name="@item.ProductName"
+                                                            data-current-stock="@item.CurrentStock">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <a href="@Url.Action("EditProduct", "Seller", new { id = item.ProductId })" 
+                                                       class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-cog"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                            <h5>Không có sản phẩm nào</h5>
+                            <p class="text-muted">
+                                @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.Filter == "low_stock")
+                                {
+                                    @:Không tìm thấy sản phẩm nào với tiêu chí tìm kiếm hiện tại.
+                                }
+                                else
+                                {
+                                    @:Chưa có sản phẩm nào trong cửa hàng.
+                                }
+                            </p>
+                            <a href="@Url.Action("CreateProduct", "Seller")" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm sản phẩm đầu tiên
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Stock Modal -->
+<div class="modal fade" id="updateStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật tồn kho</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStockForm">
+                    <input type="hidden" id="modalProductId" />
+                    <div class="mb-3">
+                        <label class="form-label">Sản phẩm</label>
+                        <input type="text" class="form-control" id="modalProductName" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số lượng hiện tại</label>
+                        <input type="number" class="form-control" id="modalCurrentStock" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalNewStock" class="form-label">Số lượng mới <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="modalNewStock" min="0" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalReason" class="form-label">Lý do</label>
+                        <textarea class="form-control" id="modalReason" rows="3" placeholder="Nhập lý do thay đổi tồn kho..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveStockBtn">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle update stock modal
+            $('#updateStockModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var productId = button.data('product-id');
+                var productName = button.data('product-name');
+                var currentStock = button.data('current-stock');
+
+                $('#modalProductId').val(productId);
+                $('#modalProductName').val(productName);
+                $('#modalCurrentStock').val(currentStock);
+                $('#modalNewStock').val(currentStock);
+                $('#modalReason').val('');
+            });
+
+            // Handle save stock button
+            $('#saveStockBtn').click(function() {
+                var productId = $('#modalProductId').val();
+                var newStock = $('#modalNewStock').val();
+                var reason = $('#modalReason').val();
+
+                if (!newStock || newStock < 0) {
+                    alert('Vui lòng nhập số lượng hợp lệ');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("UpdateStock", "Seller")',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        newStock: newStock,
+                        reason: reason
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Update the display
+                            $('[data-product-id="' + productId + '"]').text(response.newStock);
+                            $('#updateStockModal').modal('hide');
+                            
+                            // Show success message
+                            showToast('success', response.message);
+                            
+                            // Reload page to update stats
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showToast('error', response.message);
+                        }
+                    },
+                    error: function() {
+                        showToast('error', 'Có lỗi xảy ra khi cập nhật tồn kho');
+                    }
+                });
+            });
+
+            function showToast(type, message) {
+                var toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
+                var toast = `
+                    <div class="toast ${toastClass} text-white" role="alert">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                `;
+                
+                if (!$('.toast-container').length) {
+                    $('body').append('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
+                }
+                
+                $('.toast-container').append(toast);
+                $('.toast').last().toast('show');
+                
+                setTimeout(function() {
+                    $('.toast').last().remove();
+                }, 3000);
+            }
+        });
+    </script>
+}

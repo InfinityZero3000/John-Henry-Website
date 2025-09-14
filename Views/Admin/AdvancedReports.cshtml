@@ -1,0 +1,1080 @@
+@model JohnHenryFashionWeb.ViewModels.AdvancedAnalyticsViewModel
+@{
+    ViewData["Title"] = "Báo cáo & Phân tích nâng cao";
+    ViewData["CurrentSection"] = "reports";
+    Layout = "~/Views/Shared/_AdminLayout_New.cshtml";
+}
+
+@section Styles {
+    <style>
+        .analytics-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analytics-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .kpi-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .kpi-change.increase {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .kpi-change.decrease {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .kpi-change.stable {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f1f5f9;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-control {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-control:hover,
+        .chart-control.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .analytics-tabs {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .tab-header {
+            background: #f8fafc;
+            padding: 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .nav-tabs {
+            border: none;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 0;
+            padding: 15px 25px;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: white;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            padding: 25px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .metric-trend {
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .trend-up {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .trend-down {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .filter-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .date-range-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .date-range-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-range-btn:hover,
+        .date-range-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .export-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background: #f8fafc;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .real-time-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #16a34a;
+            font-weight: 500;
+        }
+
+        .real-time-dot {
+            width: 8px;
+            height: 8px;
+            background: #16a34a;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .comparison-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-modern {
+            margin-bottom: 0;
+        }
+
+        .table-modern th {
+            background: #f8fafc;
+            border: none;
+            font-weight: 600;
+            color: #374151;
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .table-modern td {
+            border: none;
+            padding: 15px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .table-modern tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @@media (max-width: 1200px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range-selector {
+                flex-direction: column;
+            }
+            
+            .export-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<!-- Analytics Header -->
+<div class="analytics-header">
+    <div class="d-flex justify-content-between align-items-center position-relative">
+        <div>
+            <h1 class="h2 mb-2">📊 Báo cáo & Phân tích</h1>
+            <p class="mb-0 opacity-90">Phân tích chi tiết hiệu suất kinh doanh và xu hướng thị trường</p>
+        </div>
+        <div class="text-end">
+            <div class="real-time-indicator mb-2">
+                <div class="real-time-dot"></div>
+                <span>Dữ liệu thời gian thực</span>
+            </div>
+            <div class="small opacity-75">Cập nhật: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+    </div>
+</div>
+
+<!-- Date Range Filter -->
+<div class="filter-panel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">📅 Chọn khoảng thời gian</h6>
+        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#customDateModal">
+            <i class="fas fa-calendar-alt me-1"></i>Tùy chỉnh
+        </button>
+    </div>
+    <div class="date-range-selector">
+        <button class="date-range-btn active" data-range="today">Hôm nay</button>
+        <button class="date-range-btn" data-range="yesterday">Hôm qua</button>
+        <button class="date-range-btn" data-range="week">7 ngày qua</button>
+        <button class="date-range-btn" data-range="month">30 ngày qua</button>
+        <button class="date-range-btn" data-range="quarter">3 tháng qua</button>
+        <button class="date-range-btn" data-range="year">Năm nay</button>
+    </div>
+</div>
+
+<!-- Key Performance Indicators -->
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="kpi-value">2.4M</div>
+        <div class="kpi-label">Tổng doanh thu</div>
+        <div class="kpi-change increase">
+            <i class="fas fa-arrow-up"></i>
+            <span>+12.5%</span>
+            <span>so với kỳ trước</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="kpi-value">847</div>
+        <div class="kpi-label">Đơn hàng hoàn thành</div>
+        <div class="kpi-change increase">
+            <i class="fas fa-arrow-up"></i>
+            <span>+8.3%</span>
+            <span>so với kỳ trước</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: linear-gradient(45deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="kpi-value">1,234</div>
+        <div class="kpi-label">Khách hàng mới</div>
+        <div class="kpi-change increase">
+            <i class="fas fa-arrow-up"></i>
+            <span>+15.7%</span>
+            <span>so với kỳ trước</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="kpi-value">3.8%</div>
+        <div class="kpi-label">Tỷ lệ chuyển đổi</div>
+        <div class="kpi-change increase">
+            <i class="fas fa-arrow-up"></i>
+            <span>+0.5%</span>
+            <span>so với kỳ trước</span>
+        </div>
+    </div>
+</div>
+
+<!-- Export Panel -->
+<div class="export-panel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">📤 Xuất báo cáo</h6>
+        <button class="btn btn-success btn-sm" onclick="scheduleReport()">
+            <i class="fas fa-clock me-1"></i>Lập lịch tự động
+        </button>
+    </div>
+    <div class="export-options">
+        <a href="#" class="export-btn" onclick="exportReport('excel')">
+            <i class="fas fa-file-excel" style="color: #16a34a;"></i>
+            <span>Excel</span>
+        </a>
+        <a href="#" class="export-btn" onclick="exportReport('pdf')">
+            <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+            <span>PDF</span>
+        </a>
+        <a href="#" class="export-btn" onclick="exportReport('csv')">
+            <i class="fas fa-file-csv" style="color: #2563eb;"></i>
+            <span>CSV</span>
+        </a>
+        <a href="#" class="export-btn" onclick="exportReport('powerbi')">
+            <i class="fas fa-chart-bar" style="color: #f59e0b;"></i>
+            <span>Power BI</span>
+        </a>
+    </div>
+</div>
+
+<!-- Main Charts Grid -->
+<div class="chart-grid">
+    <!-- Revenue Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div>
+                <div class="chart-title">
+                    <i class="fas fa-chart-area text-primary"></i>
+                    Xu hướng doanh thu
+                </div>
+                <div class="chart-subtitle">Theo dõi doanh thu theo thời gian</div>
+            </div>
+            <div class="chart-controls">
+                <button class="chart-control active" data-metric="revenue">Doanh thu</button>
+                <button class="chart-control" data-metric="orders">Đơn hàng</button>
+                <button class="chart-control" data-metric="customers">Khách hàng</button>
+            </div>
+        </div>
+        <div style="height: 400px;">
+            <canvas id="revenueChart" width="100%" height="400"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div>
+                <div class="chart-title">
+                    <i class="fas fa-trophy text-warning"></i>
+                    Sản phẩm bán chạy
+                </div>
+                <div class="chart-subtitle">Top 5 sản phẩm trong kỳ</div>
+            </div>
+        </div>
+        <div style="height: 400px;">
+            <canvas id="topProductsChart" width="100%" height="400"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Tabs -->
+<div class="analytics-tabs">
+    <div class="tab-header">
+        <ul class="nav nav-tabs" id="analyticsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>Bán hàng
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab">
+                    <i class="fas fa-users me-2"></i>Khách hàng
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">
+                    <i class="fas fa-box me-2"></i>Sản phẩm
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="marketing-tab" data-bs-toggle="tab" data-bs-target="#marketing" type="button" role="tab">
+                    <i class="fas fa-bullhorn me-2"></i>Marketing
+                </button>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="tab-content" id="analyticsTabContent">
+        <!-- Sales Analytics Tab -->
+        <div class="tab-pane fade show active" id="sales" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">2.4M</div>
+                        <div class="metric-label">Doanh thu</div>
+                        <div class="metric-trend trend-up">+12.5%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">847</div>
+                        <div class="metric-label">Đơn hàng</div>
+                        <div class="metric-trend trend-up">+8.3%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">2.8M</div>
+                        <div class="metric-label">Giá trị trung bình</div>
+                        <div class="metric-trend trend-up">+4.2%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">15.7%</div>
+                        <div class="metric-label">Tăng trưởng</div>
+                        <div class="metric-trend trend-up">+2.3%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Doanh thu theo danh mục</div>
+                        </div>
+                        <canvas id="categorySalesChart" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Phương thức thanh toán</div>
+                        </div>
+                        <canvas id="paymentMethodChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Analytics Tab -->
+        <div class="tab-pane fade" id="customers" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">12,450</div>
+                        <div class="metric-label">Tổng khách hàng</div>
+                        <div class="metric-trend trend-up">+15.7%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">1,234</div>
+                        <div class="metric-label">Khách hàng mới</div>
+                        <div class="metric-trend trend-up">+22.1%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">68.5%</div>
+                        <div class="metric-label">Tỷ lệ quay lại</div>
+                        <div class="metric-trend trend-up">+5.2%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">4.2M</div>
+                        <div class="metric-label">Giá trị trọn đời</div>
+                        <div class="metric-trend trend-up">+8.7%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-table">
+                <table class="table table-modern">
+                    <thead>
+                        <tr>
+                            <th>Phân khúc khách hàng</th>
+                            <th>Số lượng</th>
+                            <th>Tỷ lệ</th>
+                            <th>Doanh thu</th>
+                            <th>AOV</th>
+                            <th>Xu hướng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>VIP</strong></td>
+                            <td>245</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                                <small>85%</small>
+                            </td>
+                            <td>1.2M VNĐ</td>
+                            <td>4.9M VNĐ</td>
+                            <td><span class="badge bg-success">+12%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Thường xuyên</strong></td>
+                            <td>1,567</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 65%;"></div>
+                                </div>
+                                <small>65%</small>
+                            </td>
+                            <td>800K VNĐ</td>
+                            <td>2.1M VNĐ</td>
+                            <td><span class="badge bg-success">+8%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mới</strong></td>
+                            <td>2,890</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 35%;"></div>
+                                </div>
+                                <small>35%</small>
+                            </td>
+                            <td>400K VNĐ</td>
+                            <td>890K VNĐ</td>
+                            <td><span class="badge bg-warning">+22%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Product Analytics Tab -->
+        <div class="tab-pane fade" id="products" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">1,247</div>
+                        <div class="metric-label">Tổng sản phẩm</div>
+                        <div class="metric-trend trend-up">+5.2%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">89</div>
+                        <div class="metric-label">Sản phẩm mới</div>
+                        <div class="metric-trend trend-up">+18.3%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">234</div>
+                        <div class="metric-label">Hết hàng</div>
+                        <div class="metric-trend trend-down">-12.1%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">92.5%</div>
+                        <div class="metric-label">Tỷ lệ có sẵn</div>
+                        <div class="metric-trend trend-up">+2.3%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Hiệu suất theo danh mục</div>
+                        </div>
+                        <canvas id="categoryPerformanceChart" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Vòng đời sản phẩm</div>
+                        </div>
+                        <canvas id="productLifecycleChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marketing Analytics Tab -->
+        <div class="tab-pane fade" id="marketing" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">125K</div>
+                        <div class="metric-label">Lượt truy cập</div>
+                        <div class="metric-trend trend-up">+18.5%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">4.8%</div>
+                        <div class="metric-label">Tỷ lệ chuyển đổi</div>
+                        <div class="metric-trend trend-up">+0.8%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">45.2K</div>
+                        <div class="metric-label">Chi phí quảng cáo</div>
+                        <div class="metric-trend trend-down">-5.2%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">8.7x</div>
+                        <div class="metric-label">ROAS</div>
+                        <div class="metric-trend trend-up">+1.2x</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Nguồn traffic</div>
+                        </div>
+                        <canvas id="trafficSourceChart" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">ROI theo kênh</div>
+                        </div>
+                        <canvas id="channelROIChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            setupEventHandlers();
+        });
+
+        function initializeCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6'],
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: [1200000, 1900000, 3000000, 5000000, 2000000, 3000000],
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                        minimumFractionDigits: 0
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Top Products Chart
+            const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+            new Chart(topProductsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Áo sơ mi', 'Quần jeans', 'Áo khoác', 'Váy', 'Phụ kiện'],
+                    datasets: [{
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: [
+                            '#10b981',
+                            '#3b82f6',
+                            '#8b5cf6',
+                            '#f59e0b',
+                            '#ef4444'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 20 }
+                        }
+                    }
+                }
+            });
+
+            // Category Sales Chart
+            const categorySalesCtx = document.getElementById('categorySalesChart').getContext('2d');
+            new Chart(categorySalesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Nam', 'Nữ', 'Trẻ em', 'Phụ kiện', 'Giày dép'],
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: [800000, 1200000, 600000, 400000, 500000],
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Payment Method Chart
+            const paymentCtx = document.getElementById('paymentMethodChart').getContext('2d');
+            new Chart(paymentCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Thẻ tín dụng', 'Chuyển khoản', 'COD', 'Ví điện tử'],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function setupEventHandlers() {
+            // Date range selector
+            document.querySelectorAll('.date-range-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.date-range-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const range = this.dataset.range;
+                    loadDataForRange(range);
+                });
+            });
+
+            // Chart controls
+            document.querySelectorAll('.chart-control').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parent = this.closest('.chart-controls');
+                    parent.querySelectorAll('.chart-control').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const metric = this.dataset.metric;
+                    updateChart(metric);
+                });
+            });
+        }
+
+        function loadDataForRange(range) {
+            // Simulate API call to load data for selected range
+            console.log('Loading data for range:', range);
+            
+            // Show loading indicator
+            showLoading();
+            
+            // Simulate network delay
+            setTimeout(() => {
+                hideLoading();
+                updateChartsWithNewData(range);
+            }, 1000);
+        }
+
+        function updateChart(metric) {
+            console.log('Updating chart for metric:', metric);
+            // Update chart based on selected metric
+        }
+
+        function exportReport(format) {
+            console.log('Exporting report in format:', format);
+            
+            // Show loading
+            showLoading();
+            
+            // Simulate export process
+            setTimeout(() => {
+                hideLoading();
+                alert(`Báo cáo ${format.toUpperCase()} đã được xuất thành công!`);
+            }, 2000);
+        }
+
+        function scheduleReport() {
+            // Open schedule modal or redirect to scheduling page
+            alert('Chức năng lập lịch báo cáo sẽ được triển khai sớm!');
+        }
+
+        function showLoading() {
+            // Implement loading indicator
+            console.log('Showing loading...');
+        }
+
+        function hideLoading() {
+            // Hide loading indicator
+            console.log('Hiding loading...');
+        }
+
+        function updateChartsWithNewData(range) {
+            // Update all charts with new data based on date range
+            console.log('Updating charts with new data for range:', range);
+        }
+
+        // Auto-refresh data every 5 minutes
+        setInterval(() => {
+            const activeRange = document.querySelector('.date-range-btn.active').dataset.range;
+            loadDataForRange(activeRange);
+        }, 300000);
+    </script>
+}

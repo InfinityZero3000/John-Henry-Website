@@ -1,4 +1,4 @@
-@model CreateProductViewModel
+@model JohnHenryFashionWeb.ViewModels.ProductCreateEditViewModel
 
 @{
     ViewData["Title"] = "Tạo sản phẩm mới";
@@ -20,6 +20,24 @@
             </ol>
         </nav>
     </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="row">
         <div class="col-lg-8">
@@ -67,12 +85,12 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
-                                    <label asp-for="OriginalPrice" class="form-label">Giá gốc</label>
+                                    <label asp-for="SalePrice" class="form-label">Giá khuyến mãi</label>
                                     <div class="input-group">
-                                        <input asp-for="OriginalPrice" class="form-control" placeholder="0" />
+                                        <input asp-for="SalePrice" class="form-control" placeholder="0" />
                                         <span class="input-group-text">VNĐ</span>
                                     </div>
-                                    <span asp-validation-for="OriginalPrice" class="text-danger"></span>
+                                    <span asp-validation-for="SalePrice" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -88,7 +106,7 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label asp-for="CategoryId" class="form-label">Danh mục <span class="text-danger">*</span></label>
-                                    <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select">
+                                    <select asp-for="CategoryId" asp-items="@(new SelectList(Model.Categories, "Id", "Name"))" class="form-select">
                                         <option value="">-- Chọn danh mục --</option>
                                     </select>
                                     <span asp-validation-for="CategoryId" class="text-danger"></span>

@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Tài khoản bị khóa";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-lock fa-2x"></i>
+                </h4>
+                <h5 class="mt-2">Tài khoản bị khóa tạm thời</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="alert alert-warning" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Tài khoản của bạn đã bị khóa tạm thời
+                    </h6>
+                    <p class="mb-2">
+                        Tài khoản của bạn đã bị khóa do một trong những lý do sau:
+                    </p>
+                    <ul class="text-left mb-0">
+                        <li>Đăng nhập sai quá nhiều lần</li>
+                        <li>Hoạt động đáng ngờ được phát hiện</li>
+                        <li>Vi phạm điều khoản sử dụng</li>
+                        <li>Yêu cầu từ quản trị viên</li>
+                    </ul>
+                </div>
+
+                <div class="my-4">
+                    <i class="fas fa-clock fa-3x text-muted"></i>
+                    <p class="mt-3 text-muted">
+                        Vui lòng thử lại sau một thời gian hoặc liên hệ với chúng tôi để được hỗ trợ.
+                    </p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary btn-block">
+                            <i class="fas fa-home"></i>
+                            Về trang chủ
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <a href="@Url.Action("Index", "Contact")" class="btn btn-primary btn-block">
+                            <i class="fas fa-envelope"></i>
+                            Liên hệ hỗ trợ
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Nếu bạn cho rằng đây là lỗi, vui lòng liên hệ với bộ phận hỗ trợ khách hàng.
+                    </small>
+                </div>
+            </div>
+            
+            <div class="card-footer text-center bg-light">
+                <small class="text-muted">
+                    <strong>Thời gian khóa:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                </small>
+            </div>
+        </div>
+
+        <!-- Thông tin liên hệ -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-headset"></i>
+                    Thông tin liên hệ hỗ trợ
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Email:</strong><br>
+                        <a href="mailto:support@johnhenry.com">support@johnhenry.com</a>
+                    </div>
+                    <div class="col-6">
+                        <strong>Hotline:</strong><br>
+                        <a href="tel:1900123456">1900 123 456</a>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Giờ làm việc:</strong><br>
+                        <small class="text-muted">
+                            Thứ 2 - Thứ 6: 8:00 - 18:00<br>
+                            Thứ 7 - Chủ nhật: 9:00 - 17:00
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tự động refresh trang sau 5 phút
+        setTimeout(function() {
+            if (confirm('Bạn có muốn thử đăng nhập lại không?')) {
+                window.location.href = '@Url.Action("Login", "Account")';
+            }
+        }, 300000); // 5 phút
+    </script>
+}

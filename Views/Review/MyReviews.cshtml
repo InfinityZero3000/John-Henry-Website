@@ -1,0 +1,356 @@
+@using JohnHenryFashionWeb.Models
+@model IEnumerable<ProductReview>
+@{
+    ViewData["Title"] = "Đánh giá của tôi";
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+}
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Đánh giá của tôi</h1>
+        <a href="/Account/Profile" class="btn btn-outline-primary">
+            <i class="fas fa-user"></i> Quay lại tài khoản
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var review in Model)
+            {
+                <div class="col-12 mb-4">
+                    <div class="card review-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Product Image -->
+                                <div class="col-md-2 col-sm-3">
+                                    <img src="@(!string.IsNullOrEmpty(review.Product?.FeaturedImageUrl) ? review.Product.FeaturedImageUrl : "/images/no-image.jpg")" 
+                                         alt="@review.Product?.Name" class="img-fluid rounded product-image">
+                                </div>
+                                
+                                <!-- Review Content -->
+                                <div class="col-md-10 col-sm-9">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h5 class="mb-1">
+                                                <a href="/Products/Details/@review.Product?.Id" class="text-decoration-none">
+                                                    @review.Product?.Name
+                                                </a>
+                                            </h5>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="star-rating me-2">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                                    }
+                                                </div>
+                                                <span class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                @if (review.UpdatedAt > review.CreatedAt)
+                                                {
+                                                    <span class="text-muted ms-2">(Đã chỉnh sửa: @review.UpdatedAt.ToString("dd/MM/yyyy"))</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="editReview('@review.Id', @review.Rating, '@Html.Raw(Html.Encode(review.Title ?? ""))', '@Html.Raw(Html.Encode(review.Comment ?? ""))')">
+                                                <i class="fas fa-edit"></i> Sửa
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteReview('@review.Id')">
+                                                <i class="fas fa-trash"></i> Xóa
+                                            </button>
+                                            <a href="/Review/Product/@review.ProductId" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> Xem
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(review.Title))
+                                    {
+                                        <h6 class="fw-bold mb-2">@review.Title</h6>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <p class="mb-0">@review.Comment</p>
+                                    }
+                                    
+                                    <!-- Status Badge -->
+                                    <div class="mt-2">
+                                        @if (review.IsApproved)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> Đã duyệt
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock"></i> Chờ duyệt
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav aria-label="Review pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(currentPage - 1)">
+                                <i class="fas fa-chevron-left"></i> Trước
+                            </a>
+                        </li>
+                    }
+                    
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="?page=@i">@i</a>
+                        </li>
+                    }
+                    
+                    @if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(currentPage + 1)">
+                                Sau <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-comment-alt fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">Bạn chưa có đánh giá nào</h4>
+            <p class="text-muted mb-4">Hãy mua sắm và chia sẻ trải nghiệm của bạn về sản phẩm!</p>
+            <a href="/Products" class="btn btn-primary">
+                <i class="fas fa-shopping-bag"></i> Khám phá sản phẩm
+            </a>
+        </div>
+    }
+</div>
+
+<!-- Edit Review Modal -->
+<div class="modal fade" id="editReviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editReviewForm">
+                <div class="modal-body">
+                    <input type="hidden" id="editReviewId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Đánh giá *</label>
+                        <div class="star-rating-input" id="editStarRating">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <input type="radio" name="editRating" value="@i" id="editStar@i" class="d-none" required>
+                                <label for="editStar@i" class="star-label">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editReviewTitle" class="form-label">Tiêu đề đánh giá</label>
+                        <input type="text" class="form-control" id="editReviewTitle" maxlength="100">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editReviewComment" class="form-label">Nội dung đánh giá</label>
+                        <textarea class="form-control" id="editReviewComment" rows="4" maxlength="500"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Star rating functionality
+        function initStarRating() {
+            $('.star-rating-input').each(function() {
+                const container = $(this);
+                const stars = container.find('.star-label');
+                
+                stars.hover(
+                    function() {
+                        const index = stars.index(this);
+                        stars.slice(0, index + 1).addClass('hover');
+                        stars.slice(index + 1).removeClass('hover');
+                    },
+                    function() {
+                        stars.removeClass('hover');
+                    }
+                );
+                
+                stars.click(function() {
+                    const index = stars.index(this);
+                    const radio = container.find(`input[value="${index + 1}"]`);
+                    radio.prop('checked', true);
+                    
+                    stars.removeClass('selected');
+                    stars.slice(0, index + 1).addClass('selected');
+                });
+            });
+        }
+
+        // Edit review
+        function editReview(reviewId, rating, title, comment) {
+            $('#editReviewId').val(reviewId);
+            $('#editReviewTitle').val(title || '');
+            $('#editReviewComment').val(comment || '');
+            
+            // Set rating
+            $(`#editStar${rating}`).prop('checked', true);
+            $('#editStarRating .star-label').removeClass('selected');
+            $('#editStarRating .star-label').slice(0, rating).addClass('selected');
+            
+            $('#editReviewModal').modal('show');
+        }
+
+        $('#editReviewForm').submit(function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                reviewId: $('#editReviewId').val(),
+                rating: $('input[name="editRating"]:checked').val(),
+                title: $('#editReviewTitle').val(),
+                comment: $('#editReviewComment').val()
+            };
+
+            $.post('/Review/Edit', formData)
+                .done(function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        $('#editReviewModal').modal('hide');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                })
+                .fail(function() {
+                    showAlert('danger', 'Có lỗi xảy ra khi cập nhật đánh giá');
+                });
+        });
+
+        // Delete review
+        function deleteReview(reviewId) {
+            if (confirm('Bạn có chắc muốn xóa đánh giá này?')) {
+                $.post('/Review/Delete', { reviewId: reviewId })
+                    .done(function(response) {
+                        if (response.success) {
+                            showAlert('success', response.message);
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showAlert('danger', response.message);
+                        }
+                    })
+                    .fail(function() {
+                        showAlert('danger', 'Có lỗi xảy ra khi xóa đánh giá');
+                    });
+            }
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                     style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+        }
+
+        // Initialize on page load
+        $(document).ready(function() {
+            initStarRating();
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .review-card {
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        
+        .review-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .product-image {
+            height: 80px;
+            width: 80px;
+            object-fit: cover;
+        }
+        
+        .star-rating .fa-star {
+            font-size: 1rem;
+        }
+        
+        .star-rating-input {
+            font-size: 1.5rem;
+        }
+        
+        .star-rating-input .star-label {
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        
+        .star-rating-input .star-label:hover,
+        .star-rating-input .star-label.hover {
+            color: #ffc107;
+        }
+        
+        .star-rating-input .star-label.selected {
+            color: #ffc107;
+        }
+        
+        .btn-group .btn {
+            margin-right: 0;
+        }
+        
+        @@media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn-group .btn {
+                margin-bottom: 5px;
+                border-radius: 4px !important;
+            }
+        }
+    </style>
+}

@@ -164,6 +164,33 @@
                                 <span>Phí vận chuyển:</span>
                                 <span class="shipping-fee">30.000₫</span>
                             </div>
+                            
+                            <!-- Coupon Section -->
+                            <div class="coupon-section mt-3">
+                                <div class="input-group">
+                                    <input type="text" id="couponCode" class="form-control" placeholder="Nhập mã giảm giá">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="applyCoupon()">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <div id="couponMessage" class="mt-2"></div>
+                                <div id="appliedCoupon" class="applied-coupon mt-2" style="display: none;">
+                                    <div class="alert alert-success d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            <span id="couponInfo"></span>
+                                        </div>
+                                        <button type="button" class="btn-close" onclick="removeCoupon()"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Discount Row -->
+                            <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                                <span>Giảm giá:</span>
+                                <span class="discount-amount text-success">-0₫</span>
+                            </div>
+                            
                             <hr>
                             <div class="summary-row total-row">
                                 <strong>
@@ -289,6 +316,44 @@
         
         .total-row {
             font-size: 1.1rem;
+        }
+        
+        /* Coupon styles */
+        .coupon-section {
+            padding: 1rem 0;
+        }
+        
+        .coupon-section .input-group {
+            margin-bottom: 0.5rem;
+        }
+        
+        .applied-coupon .alert {
+            margin-bottom: 0;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .discount-row {
+            color: #28a745;
+            font-weight: 500;
+        }
+        
+        .discount-amount {
+            color: #28a745 !important;
+        }
+        
+        .alert-sm {
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        #couponCode {
+            border-radius: 0.375rem 0 0 0.375rem;
+        }
+        
+        .coupon-section .btn {
+            border-radius: 0 0.375rem 0.375rem 0;
         }
         
         .cart-divider {
@@ -436,6 +501,147 @@
                 showToast('Có lỗi xảy ra khi xóa giỏ hàng.', 'error');
             }
         }
+        
+        // Coupon functions
+        let appliedCouponData = null;
+        
+        async function applyCoupon() {
+            const couponCode = document.getElementById('couponCode').value.trim();
+            const messageDiv = document.getElementById('couponMessage');
+            
+            if (!couponCode) {
+                showCouponMessage('Vui lòng nhập mã giảm giá', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/Coupon/Apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `couponCode=${encodeURIComponent(couponCode)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    appliedCouponData = result.coupon;
+                    showAppliedCoupon(result.coupon);
+                    calculateDiscount();
+                    showCouponMessage(result.message, 'success');
+                    document.getElementById('couponCode').value = '';
+                } else {
+                    showCouponMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error applying coupon:', error);
+                showCouponMessage('Có lỗi xảy ra khi áp dụng mã giảm giá', 'error');
+            }
+        }
+        
+        function removeCoupon() {
+            appliedCouponData = null;
+            document.getElementById('appliedCoupon').style.display = 'none';
+            document.getElementById('discountRow').style.display = 'none';
+            document.getElementById('couponMessage').innerHTML = '';
+            updateCartTotal();
+        }
+        
+        function showAppliedCoupon(coupon) {
+            const appliedDiv = document.getElementById('appliedCoupon');
+            const couponInfo = document.getElementById('couponInfo');
+            
+            let discountText = '';
+            if (coupon.type === 'percentage') {
+                discountText = `${coupon.value}%`;
+            } else {
+                discountText = `${coupon.value.toLocaleString()}₫`;
+            }
+            
+            couponInfo.textContent = `Mã ${coupon.code} - Giảm ${discountText}`;
+            appliedDiv.style.display = 'block';
+        }
+        
+        function calculateDiscount() {
+            if (!appliedCouponData) return;
+            
+            const subtotalText = document.querySelector('.cart-subtotal').textContent;
+            const subtotal = parseFloat(subtotalText.replace(/[₫,]/g, ''));
+            
+            fetch('/Coupon/Calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `couponId=${appliedCouponData.id}&subtotal=${subtotal}`
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showDiscount(result.discountAmount);
+                    updateCartTotal(result.finalTotal);
+                } else {
+                    showCouponMessage(result.message, 'error');
+                    removeCoupon();
+                }
+            })
+            .catch(error => {
+                console.error('Error calculating discount:', error);
+                showCouponMessage('Có lỗi khi tính toán giảm giá', 'error');
+            });
+        }
+        
+        function showDiscount(amount) {
+            const discountRow = document.getElementById('discountRow');
+            const discountAmount = discountRow.querySelector('.discount-amount');
+            
+            discountAmount.textContent = `-${amount.toLocaleString()}₫`;
+            discountRow.style.display = 'flex';
+        }
+        
+        function updateCartTotal(newTotal = null) {
+            const cartTotalElement = document.querySelector('.cart-total');
+            
+            if (newTotal !== null) {
+                // Add shipping fee to the discounted total
+                const finalTotal = newTotal + 30000;
+                cartTotalElement.textContent = finalTotal.toLocaleString() + '₫';
+            } else {
+                // Reset to original total
+                const subtotalText = document.querySelector('.cart-subtotal').textContent;
+                const subtotal = parseFloat(subtotalText.replace(/[₫,]/g, ''));
+                const finalTotal = subtotal + 30000;
+                cartTotalElement.textContent = finalTotal.toLocaleString() + '₫';
+            }
+        }
+        
+        function showCouponMessage(message, type) {
+            const messageDiv = document.getElementById('couponMessage');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            
+            messageDiv.innerHTML = `
+                <div class="alert ${alertClass} alert-sm">
+                    <i class="fas ${icon} me-2"></i>${message}
+                </div>
+            `;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Handle Enter key in coupon input
+        document.getElementById('couponCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyCoupon();
+            }
+        });
         
         // Utility functions
         function updateCartCount(count) {

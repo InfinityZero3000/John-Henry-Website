@@ -1,0 +1,391 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="~/css/checkout.css" rel="stylesheet" />
+}
+
+<div class="checkout-container">
+    <div class="container py-5">
+        <!-- Progress Steps -->
+        <div class="checkout-steps mb-5">
+            <div class="steps-container">
+                <div class="step active">
+                    <div class="step-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <span class="step-title">Thông tin</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span class="step-title">Thanh toán</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <span class="step-title">Hoàn thành</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Checkout Form -->
+            <div class="col-lg-8">
+                <div class="checkout-form">
+                    <form id="checkoutForm" asp-action="CreateSession" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- Customer Information -->
+                        <div class="form-section mb-4">
+                            <h4 class="section-title">
+                                <i class="fas fa-user me-2"></i>
+                                Thông tin khách hàng
+                            </h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Email" class="form-label required">Email</label>
+                                        <input asp-for="Email" class="form-control" placeholder="Nhập địa chỉ email">
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="FirstName" class="form-label">Họ</label>
+                                        <input asp-for="FirstName" class="form-control" placeholder="Nhập họ">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="LastName" class="form-label">Tên</label>
+                                        <input asp-for="LastName" class="form-control" placeholder="Nhập tên">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Address -->
+                        <div class="form-section mb-4">
+                            <h4 class="section-title">
+                                <i class="fas fa-truck me-2"></i>
+                                Địa chỉ giao hàng
+                            </h4>
+                            
+                            @if (Model.SavedAddresses.Any())
+                            {
+                                <div class="saved-addresses mb-3">
+                                    <label class="form-label">Chọn địa chỉ đã lưu</label>
+                                    <select class="form-select" id="savedAddressSelect">
+                                        <option value="">-- Chọn địa chỉ --</option>
+                                        @foreach (var address in Model.SavedAddresses)
+                                        {
+                                            <option value="@address.Id" 
+                                                    data-fullname="@address.FullName"
+                                                    data-phone="@address.PhoneNumber"
+                                                    data-address="@address.FullAddress"
+                                                    data-ward="@address.Ward"
+                                                    data-district="@address.District"
+                                                    data-city="@address.City"
+                                                    data-postalcode="@address.PostalCode">
+                                                @address.FullName - @address.FullAddress, @address.Ward, @address.District, @address.City
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="ShippingAddress.FullName" class="form-label required">Họ và tên</label>
+                                        <input asp-for="ShippingAddress.FullName" class="form-control" placeholder="Nhập họ và tên">
+                                        <span asp-validation-for="ShippingAddress.FullName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="ShippingAddress.PhoneNumber" class="form-label required">Số điện thoại</label>
+                                        <input asp-for="ShippingAddress.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại">
+                                        <span asp-validation-for="ShippingAddress.PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label asp-for="ShippingAddress.Address" class="form-label required">Địa chỉ</label>
+                                <input asp-for="ShippingAddress.Address" class="form-control" placeholder="Số nhà, tên đường">
+                                <span asp-validation-for="ShippingAddress.Address" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="ShippingAddress.Ward" class="form-label required">Phường/Xã</label>
+                                        <input asp-for="ShippingAddress.Ward" class="form-control" placeholder="Phường/Xã">
+                                        <span asp-validation-for="ShippingAddress.Ward" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="ShippingAddress.District" class="form-label required">Quận/Huyện</label>
+                                        <input asp-for="ShippingAddress.District" class="form-control" placeholder="Quận/Huyện">
+                                        <span asp-validation-for="ShippingAddress.District" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="ShippingAddress.City" class="form-label required">Tỉnh/Thành phố</label>
+                                        <input asp-for="ShippingAddress.City" class="form-control" placeholder="Tỉnh/Thành phố">
+                                        <span asp-validation-for="ShippingAddress.City" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Address -->
+                        <div class="form-section mb-4">
+                            <h4 class="section-title">
+                                <i class="fas fa-file-invoice me-2"></i>
+                                Địa chỉ thanh toán
+                            </h4>
+                            
+                            <div class="form-check mb-3">
+                                <input asp-for="UseSameAddressForBilling" class="form-check-input" type="checkbox" id="useSameAddress">
+                                <label class="form-check-label" for="useSameAddress">
+                                    Sử dụng địa chỉ giao hàng làm địa chỉ thanh toán
+                                </label>
+                            </div>
+                            
+                            <div id="billingAddressSection" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BillingAddress.FullName" class="form-label">Họ và tên</label>
+                                            <input asp-for="BillingAddress.FullName" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BillingAddress.PhoneNumber" class="form-label">Số điện thoại</label>
+                                            <input asp-for="BillingAddress.PhoneNumber" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label asp-for="BillingAddress.Address" class="form-label">Địa chỉ</label>
+                                    <input asp-for="BillingAddress.Address" class="form-control">
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BillingAddress.Ward" class="form-label">Phường/Xã</label>
+                                            <input asp-for="BillingAddress.Ward" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BillingAddress.District" class="form-label">Quận/Huyện</label>
+                                            <input asp-for="BillingAddress.District" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="BillingAddress.City" class="form-label">Tỉnh/Thành phố</label>
+                                            <input asp-for="BillingAddress.City" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Method -->
+                        <div class="form-section mb-4">
+                            <h4 class="section-title">
+                                <i class="fas fa-shipping-fast me-2"></i>
+                                Phương thức vận chuyển
+                            </h4>
+                            
+                            <div class="shipping-methods">
+                                @foreach (var method in Model.ShippingMethods)
+                                {
+                                    <div class="shipping-method">
+                                        <label class="shipping-method-label">
+                                            <input type="radio" asp-for="ShippingMethod" value="@method.Code" 
+                                                   data-cost="@method.Cost" data-delivery-time="@method.DeliveryTime"
+                                                   class="shipping-method-radio">
+                                            <div class="shipping-method-content">
+                                                <div class="shipping-method-info">
+                                                    <h6 class="shipping-method-name">@method.Name</h6>
+                                                    <p class="shipping-method-description">@method.Description</p>
+                                                    <small class="shipping-method-time">@method.DeliveryTime</small>
+                                                </div>
+                                                <div class="shipping-method-price">
+                                                    @if (method.Cost > 0)
+                                                    {
+                                                        <strong>@method.Cost.ToString("N0") ₫</strong>
+                                                    }
+                                                    else
+                                                    {
+                                                        <strong class="text-success">Miễn phí</strong>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Coupon Code -->
+                        <div class="form-section mb-4">
+                            <h4 class="section-title">
+                                <i class="fas fa-tag me-2"></i>
+                                Mã giảm giá
+                            </h4>
+                            
+                            <div class="coupon-section">
+                                <div class="input-group">
+                                    <input asp-for="CouponCode" class="form-control" placeholder="Nhập mã giảm giá">
+                                    <button type="button" class="btn btn-outline-primary" id="applyCouponBtn">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <div id="couponMessage" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-section mb-4">
+                            <h4 class="section-title">
+                                <i class="fas fa-comment me-2"></i>
+                                Ghi chú đơn hàng
+                            </h4>
+                            
+                            <div class="form-group">
+                                <textarea asp-for="Notes" class="form-control" rows="3" 
+                                         placeholder="Ghi chú đặc biệt cho đơn hàng (tùy chọn)"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="continueToPaymentBtn">
+                                <i class="fas fa-arrow-right me-2"></i>
+                                Tiếp tục thanh toán
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="order-summary sticky-top">
+                    <h4 class="summary-title">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Tóm tắt đơn hàng
+                    </h4>
+                    
+                    <!-- Cart Items -->
+                    <div class="cart-items">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="cart-item">
+                                <div class="item-image">
+                                    <img src="@(item.ImageUrl ?? "/images/placeholder.jpg")" alt="@item.ProductName">
+                                    <span class="item-quantity">@item.Quantity</span>
+                                </div>
+                                <div class="item-details">
+                                    <h6 class="item-name">@item.ProductName</h6>
+                                    @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
+                                    {
+                                        <p class="item-variants">
+                                            @if (!string.IsNullOrEmpty(item.Size))
+                                            {
+                                                <span>Size: @item.Size</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Color))
+                                            {
+                                                <span>Màu: @item.Color</span>
+                                            }
+                                        </p>
+                                    }
+                                </div>
+                                <div class="item-price">
+                                    <strong>@item.Total.ToString("N0") ₫</strong>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Price Breakdown -->
+                    <div class="price-breakdown">
+                        <div class="price-row">
+                            <span>Tạm tính:</span>
+                            <span id="subtotal">@Model.Subtotal.ToString("N0") ₫</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Phí vận chuyển:</span>
+                            <span id="shippingFee">Chọn phương thức vận chuyển</span>
+                        </div>
+                        <div class="price-row discount-row" id="discountRow" style="display: none;">
+                            <span>Giảm giá:</span>
+                            <span id="discountAmount" class="text-success">-0 ₫</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Thuế VAT (10%):</span>
+                            <span id="tax">@Model.Tax.ToString("N0") ₫</span>
+                        </div>
+                        <hr>
+                        <div class="price-row total-row">
+                            <strong>
+                                <span>Tổng cộng:</span>
+                                <span id="total">@Model.Total.ToString("N0") ₫</span>
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="trust-badges mt-4">
+                        <div class="trust-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Thanh toán an toàn</span>
+                        </div>
+                        <div class="trust-badge">
+                            <i class="fas fa-undo-alt"></i>
+                            <span>Đổi trả 30 ngày</span>
+                        </div>
+                        <div class="trust-badge">
+                            <i class="fas fa-truck"></i>
+                            <span>Giao hàng toàn quốc</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/checkout.js"></script>
+}

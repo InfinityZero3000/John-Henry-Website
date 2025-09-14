@@ -1,0 +1,131 @@
+@model Address
+@{
+    ViewData["Title"] = "Thêm địa chỉ mới";
+}
+
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-lg-8 col-xl-6 mx-auto">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thêm địa chỉ mới</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddAddress" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="FirstName" class="form-label required">Họ</label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Nhập họ" />
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LastName" class="form-label required">Tên</label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Nhập tên" />
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Company" class="form-label">Công ty (tùy chọn)</label>
+                            <input asp-for="Company" class="form-control" placeholder="Nhập tên công ty" />
+                            <span asp-validation-for="Company" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Address1" class="form-label required">Địa chỉ</label>
+                            <input asp-for="Address1" class="form-control" placeholder="Số nhà, tên đường" />
+                            <span asp-validation-for="Address1" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Address2" class="form-label">Địa chỉ 2 (tùy chọn)</label>
+                            <input asp-for="Address2" class="form-control" placeholder="Căn hộ, tầng, tòa nhà" />
+                            <span asp-validation-for="Address2" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="City" class="form-label required">Thành phố</label>
+                                    <input asp-for="City" class="form-control" placeholder="Nhập thành phố" />
+                                    <span asp-validation-for="City" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="State" class="form-label required">Tỉnh/Bang</label>
+                                    <input asp-for="State" class="form-control" placeholder="Nhập tỉnh/bang" />
+                                    <span asp-validation-for="State" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="PostalCode" class="form-label required">Mã bưu điện</label>
+                                    <input asp-for="PostalCode" class="form-control" placeholder="Nhập mã bưu điện" />
+                                    <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Country" class="form-label required">Quốc gia</label>
+                                    <select asp-for="Country" class="form-control">
+                                        <option value="">Chọn quốc gia</option>
+                                        <option value="Vietnam">Việt Nam</option>
+                                        <option value="United States">Hoa Kỳ</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="United Kingdom">Vương quốc Anh</option>
+                                        <option value="Australia">Úc</option>
+                                        <option value="Singapore">Singapore</option>
+                                        <option value="Thailand">Thái Lan</option>
+                                        <option value="Malaysia">Malaysia</option>
+                                        <option value="Indonesia">Indonesia</option>
+                                        <option value="Philippines">Philippines</option>
+                                        <option value="Japan">Nhật Bản</option>
+                                        <option value="South Korea">Hàn Quốc</option>
+                                        <option value="China">Trung Quốc</option>
+                                    </select>
+                                    <span asp-validation-for="Country" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Phone" class="form-label">Số điện thoại (tùy chọn)</label>
+                            <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group pt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>Lưu địa chỉ
+                            </button>
+                            <a href="@Url.Action("Addresses", "Account")" class="btn btn-secondary ml-2">
+                                <i class="fas fa-times mr-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-label.required::after {
+    content: ' *';
+    color: #e74a3b;
+}
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,3 +1,4 @@
+@model IEnumerable<JohnHenryFashionWeb.Models.BlogPost>
 @{
     ViewData["Title"] = "John Henry - Blog Thời Trang";
 }
@@ -6,6 +7,11 @@
 <section class="blog-hero-banner">
     <div class="blog-banner-container">
         <img src="~/images/Banner/banner-blog.jpg" alt="John Henry Blog" class="blog-banner-img">
+        <div class="blog-banner-overlay">
+            <div class="blog-banner-content text-center text-white">
+                <h1 class="blog-banner-title">John Henry Blog</h1>
+                <p class="blog-banner-subtitle">Khám phá những xu hướng thời trang mới nhất và bí quyết phối đồ</p>
+            </div>
         </div>
     </div>
 </section>
@@ -13,259 +19,174 @@
 <!-- Blog Content Section -->
 <section class="blog-content-section py-5">
     <div class="container">
-        <!-- Blog Grid -->
-        <div class="row g-4">
-            <!-- Blog Post 1 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-man-main.jpg" alt="Grand Opening" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">09</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">GRAND OPENING</span>
-                        </div>
-                        <h3 class="blog-post-title">GRAND OPENING | JOHN HENRY CẦU GIẤY MỞ CỬA ĐỢT PHÒNG CÁCH MỚI</h3>
-                        <p class="blog-post-excerpt">Chính thức có mặt tại 355 Cầu Giấy, P. Cầu Giấy, TP. Hà Nội, JOHN HENRY mang đến một không gian mua sắm...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">09/09/2025</span>
-                            <a href="/Blog/Details/1" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 2 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-women-1.jpg" alt="New Drop Jeans" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">08</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">NEW COLLECTION</span>
-                        </div>
-                        <h3 class="blog-post-title">NEW DROP JEANS</h3>
-                        <p class="blog-post-excerpt">Muốn để vibe nữ văn thoái mái cả ngày? Quần jeans ống rộng darkwash mới của Freelancer giúp nàng g...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">08/09/2025</span>
-                            <a href="/Blog/Details/2" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 3 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-women-main.jpg" alt="New Pants Shorts" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">07</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">NEW ARRIVAL</span>
-                        </div>
-                        <h3 class="blog-post-title">NEW PANTS | SHORTS ABOVE KNEE</h3>
-                        <p class="blog-post-excerpt">Một chiếc quần short vừa vặn, đơn giản nhưng hợp gu - đó là điều ta cần và còn có thể phối nhiều mu...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">07/09/2025</span>
-                            <a href="/Blog/Details/3" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 4 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-man-0.jpg" alt="Cool Style Easy Wear" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">06</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">STYLE GUIDE</span>
-                        </div>
-                        <h3 class="blog-post-title">COOL STYLE, EASY WEAR</h3>
-                        <p class="blog-post-excerpt">Chỉ cần một chiếc áo polo basic, một chiếc quần short năng động, thêm đôi giày là đã có ng...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">06/09/2025</span>
-                            <a href="/Blog/Details/4" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 5 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-man-bestseller.jpg" alt="Signature Brown Trousers" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">05</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">FASHION TREND</span>
-                        </div>
-                        <h3 class="blog-post-title">SIGNATURE BROWN TROUSERS</h3>
-                        <p class="blog-post-excerpt">Ngày hôm tìm lịch, tôi vẫn có thần - nâng câu quần tây nữ vừa lịch sự, vừa tính tế thoải mái suốt kể AM đến P...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">05/09/2025</span>
-                            <a href="/Blog/Details/5" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 6 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-man-bestseller.jpg" alt="Light Peach Shirt" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">04</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">STYLE TIP</span>
-                        </div>
-                        <h3 class="blog-post-title">ÁO SƠ MI NỮ LIGHT PEACH SHIRT</h3>
-                        <p class="blog-post-excerpt">THÀNH LỊCH, TINH TẾ, MẶC ĐẸP TỪ CÔNG SỞ ĐẾN BUỔI HẸN Bộ sưu tập thang, nâng cẩm một chiếc sơ mi vừa...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">04/09/2025</span>
-                            <a href="/Blog/Details/6" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 7 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-man-main.jpg" alt="Grand Opening Ha Noi" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">04</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">GRAND OPENING</span>
-                        </div>
-                        <h3 class="blog-post-title">GRAND OPENING | JOHN HENRY NGUYỄN TRÃI - HÀ NỘI</h3>
-                        <p class="blog-post-excerpt">Tiếp nối chuỗi cửa hàng mới tại Hà Nội, JOHN HENRY chính thức có mặt tại 294 Nguyễn Trãi, TP...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">04/09/2025</span>
-                            <a href="/Blog/Details/7" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 8 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-women-1.jpg" alt="Back to Work" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">03</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">WORK OUTFIT</span>
-                        </div>
-                        <h3 class="blog-post-title">BACK TO WORK | ELEGANT OUTFIT</h3>
-                        <p class="blog-post-excerpt">Trở lại giường quậy công việc sau kỳ nghỉ, bạn cần một outfit vừa gọn gàng vừa thể hiện cá tín...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">03/09/2025</span>
-                            <a href="/Blog/Details/8" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blog Post 9 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-post-card">
-                    <div class="blog-post-image">
-                        <img src="~/images/Banner/banner-man-0.jpg" alt="Go Easy Stay Comfy" class="img-fluid">
-                        <div class="blog-post-date">
-                            <span class="date-day">02</span>
-                            <span class="date-month">SEP</span>
-                            <span class="date-year">2025</span>
-                        </div>
-                    </div>
-                    <div class="blog-post-content">
-                        <div class="blog-post-meta">
-                            <span class="blog-category">COMFORT STYLE</span>
-                        </div>
-                        <h3 class="blog-post-title">GO EASY, STAY COMFY</h3>
-                        <p class="blog-post-excerpt">Kỳ nghỉ lễ là lúc tương đế bản làm rơi khởi động quay bản rồn, thảnh thơi nhưng vẫn muốn có...</p>
-                        <div class="blog-post-footer">
-                            <span class="blog-post-date-text">02/09/2025</span>
-                            <a href="/Blog/Details/9" class="blog-read-more">Xem thêm »</a>
-                        </div>
-                    </div>
-                </div>
+        <!-- Search Form -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mx-auto">
+                <form asp-action="Index" method="get" class="d-flex">
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control me-2" placeholder="Tìm kiếm bài viết...">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
             </div>
         </div>
+
+        <!-- Categories Filter -->
+        @if (ViewBag.Categories != null && ((List<JohnHenryFashionWeb.Models.BlogCategory>)ViewBag.Categories).Any())
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a asp-action="Index" class="btn @(string.IsNullOrEmpty(ViewBag.Category as string) ? "btn-primary" : "btn-outline-primary") btn-sm">
+                            Tất cả
+                        </a>
+                        @foreach (var category in (List<JohnHenryFashionWeb.Models.BlogCategory>)ViewBag.Categories)
+                        {
+                            <a asp-action="Category" asp-route-slug="@category.Slug" 
+                               class="btn @(ViewBag.Category as string == category.Slug ? "btn-primary" : "btn-outline-primary") btn-sm">
+                                @category.Name
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Search Results Info -->
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+        {
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-search me-2"></i>
+                Kết quả tìm kiếm cho: <strong>"@ViewBag.Search"</strong>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-2">Xóa bộ lọc</a>
+            </div>
+        }
+
+        <!-- Blog Grid -->
+        @if (Model.Any())
+        {
+            <div class="row g-4">
+                @foreach (var post in Model)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="blog-post-card">
+                            <div class="blog-post-image">
+                                @if (!string.IsNullOrEmpty(post.FeaturedImageUrl))
+                                {
+                                    <img src="@post.FeaturedImageUrl" alt="@post.Title" class="img-fluid">
+                                }
+                                else
+                                {
+                                    <img src="~/images/Banner/banner-blog.jpg" alt="@post.Title" class="img-fluid">
+                                }
+                                <div class="blog-post-date">
+                                    <span class="date-day">@((post.PublishedAt ?? post.CreatedAt).ToString("dd"))</span>
+                                    <span class="date-month">@((post.PublishedAt ?? post.CreatedAt).ToString("MMM").ToUpper())</span>
+                                    <span class="date-year">@((post.PublishedAt ?? post.CreatedAt).ToString("yyyy"))</span>
+                                </div>
+                            </div>
+                            <div class="blog-post-content">
+                                <div class="blog-post-meta">
+                                    @if (post.Category != null)
+                                    {
+                                        <span class="blog-category">@post.Category.Name.ToUpper()</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="blog-category">BLOG</span>
+                                    }
+                                </div>
+                                <h3 class="blog-post-title">@post.Title</h3>
+                                <p class="blog-post-excerpt">
+                                    @if (!string.IsNullOrEmpty(post.Excerpt))
+                                    {
+                                        @(post.Excerpt.Length > 120 ? post.Excerpt.Substring(0, 120) + "..." : post.Excerpt)
+                                    }
+                                    else if (!string.IsNullOrEmpty(post.Content))
+                                    {
+                                        var plainContent = System.Text.RegularExpressions.Regex.Replace(post.Content, "<.*?>", "");
+                                        @(plainContent.Length > 120 ? plainContent.Substring(0, 120) + "..." : plainContent)
+                                    }
+                                </p>
+                                <div class="blog-post-footer">
+                                    <span class="blog-post-date-text">@((post.PublishedAt ?? post.CreatedAt).ToString("dd/MM/yyyy"))</span>
+                                    <a href="@Url.Action("Details", "Blog", new { id = post.Id })" class="blog-read-more">Xem thêm »</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-blog fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Không có bài viết nào</h5>
+                <p class="text-muted">
+                    @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+                    {
+                        @:Không tìm thấy bài viết nào phù hợp với từ khóa "@ViewBag.Search".
+                    }
+                    else
+                    {
+                        @:Hiện tại chưa có bài viết nào được đăng.
+                    }
+                </p>
+            </div>
+        }
 
         <!-- Pagination -->
-        <div class="blog-pagination mt-5">
-            <nav aria-label="Blog pagination">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <span class="page-link">« Trước</span>
-                    </li>
-                    <li class="page-item active">
-                        <span class="page-link">1</span>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">2</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                    </li>
-                    <li class="page-item">
-                        <span class="page-link">...</span>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Tiếp »</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
+        @if (ViewBag.TotalPages != null && (int)ViewBag.TotalPages > 1)
+        {
+            <div class="blog-pagination mt-5">
+                <nav aria-label="Blog pagination">
+                    <ul class="pagination justify-content-center">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, category = ViewBag.Category, search = ViewBag.Search })">« Trước</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">« Trước</span>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            @if (i == ViewBag.CurrentPage)
+                            {
+                                <li class="page-item active">
+                                    <span class="page-link">@i</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = i, category = ViewBag.Category, search = ViewBag.Search })">@i</a>
+                                </li>
+                            }
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, category = ViewBag.Category, search = ViewBag.Search })">Tiếp »</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">Tiếp »</span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
     </div>
 </section>
 
@@ -501,6 +422,54 @@
         color: #6c757d;
         background-color: #f8f9fa;
         border-color: #dee2e6;
+    }
+
+    /* Sidebar Styles */
+    .card {
+        border: none !important;
+        border-radius: 12px;
+    }
+
+    .card-title {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+    }
+
+    .list-group-item.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 8px;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--jh-dark-red);
+        border-color: var(--jh-dark-red);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
     }
 
     /* Responsive Design */

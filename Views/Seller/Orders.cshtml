@@ -1,0 +1,287 @@
+@model JohnHenryFashionWeb.ViewModels.OrderListViewModel
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Quản lý đơn hàng</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download"></i> Xuất báo cáo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="searchTerm" class="form-label">Tìm kiếm</label>
+                            <input type="text" class="form-control" id="searchTerm" name="search" 
+                                   placeholder="Mã đơn, tên khách hàng..." value="@Model.SearchTerm">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            @{
+                                string GetSelectedAttribute(string value) => Model.Status == value ? "selected" : "";
+                            }
+                            @Html.Raw(@"<select class=""form-select"" id=""status"" name=""status"">")
+                                @Html.Raw(@"<option value="""">Tất cả trạng thái</option>")
+                                @Html.Raw($@"<option value=""pending"" {GetSelectedAttribute("pending")}>Chờ xử lý</option>")
+                                @Html.Raw($@"<option value=""processing"" {GetSelectedAttribute("processing")}>Đang xử lý</option>")
+                                @Html.Raw($@"<option value=""shipped"" {GetSelectedAttribute("shipped")}>Đã gửi</option>")
+                                @Html.Raw($@"<option value=""delivered"" {GetSelectedAttribute("delivered")}>Đã giao</option>")
+                                @Html.Raw($@"<option value=""cancelled"" {GetSelectedAttribute("cancelled")}>Đã hủy</option>")
+                            @Html.Raw("</select>")
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dateFrom" class="form-label">Từ ngày</label>
+                            <input type="date" class="form-control" id="dateFrom" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dateTo" class="form-label">Đến ngày</label>
+                            <input type="date" class="form-control" id="dateTo" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                            <a href="@Url.Action("Orders")" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo"></i> Đặt lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn hàng</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Orders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="ordersTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Khách hàng</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thanh toán</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.Orders)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@order.OrderNumber</strong>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>@order.CustomerName</strong>
+                                                    <br><small class="text-muted">@order.CustomerEmail</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <strong>@order.Total.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-@GetStatusBadgeClass(order.Status)">
+                                                    @GetStatusText(order.Status)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-@GetPaymentStatusBadgeClass(order.PaymentStatus)">
+                                                    @GetPaymentStatusText(order.PaymentStatus)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-controller="Seller" asp-action="OrderDetails" asp-route-id="@order.Id" 
+                                                       class="btn btn-sm btn-outline-primary" title="Chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if (order.Status == "pending")
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-success" 
+                                                                onclick="updateOrderStatus('@order.Id', 'processing')" title="Xử lý">
+                                                            <i class="fas fa-play"></i>
+                                                        </button>
+                                                    }
+                                                    @if (order.Status == "processing")
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-info" 
+                                                                onclick="updateOrderStatus('@order.Id', 'shipped')" title="Gửi hàng">
+                                                            <i class="fas fa-shipping-fast"></i>
+                                                        </button>
+                                                    }
+                                                    @if (order.Status == "shipped")
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-success" 
+                                                                onclick="updateOrderStatus('@order.Id', 'delivered')" title="Đã giao">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mt-4">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Orders", new { page = Model.CurrentPage - 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })">Previous</a>
+                                    </li>
+                                }
+                                
+                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Orders", new { page = i, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })">@i</a>
+                                    </li>
+                                }
+                                
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Orders", new { page = Model.CurrentPage + 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateOrderStatus(orderId, newStatus) {
+            const statusText = {
+                'processing': 'đang xử lý',
+                'shipped': 'đã gửi hàng',
+                'delivered': 'đã giao hàng'
+            };
+
+            if (confirm(`Bạn có chắc chắn muốn cập nhật đơn hàng thành "${statusText[newStatus]}"?`)) {
+                fetch(`/seller/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật đơn hàng: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Có lỗi xảy ra khi cập nhật đơn hàng');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        $(document).ready(function() {
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $('#ordersTable').DataTable({
+                    "order": [[ 5, "desc" ]],
+                    "pageLength": 25,
+                    "responsive": true
+                });
+            }
+        });
+    </script>
+}
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "pending" => "warning",
+            "processing" => "info",
+            "shipped" => "primary",
+            "delivered" => "success",
+            "cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "pending" => "Chờ xử lý",
+            "processing" => "Đang xử lý",
+            "shipped" => "Đã gửi",
+            "delivered" => "Đã giao",
+            "cancelled" => "Đã hủy",
+            _ => status
+        };
+    }
+
+    private string GetPaymentStatusBadgeClass(string paymentStatus)
+    {
+        return paymentStatus switch
+        {
+            "pending" => "warning",
+            "paid" => "success",
+            "failed" => "danger",
+            "refunded" => "info",
+            _ => "secondary"
+        };
+    }
+
+    private string GetPaymentStatusText(string paymentStatus)
+    {
+        return paymentStatus switch
+        {
+            "pending" => "Chờ thanh toán",
+            "paid" => "Đã thanh toán",
+            "failed" => "Thất bại",
+            "refunded" => "Đã hoàn tiền",
+            _ => paymentStatus
+        };
+    }
+}

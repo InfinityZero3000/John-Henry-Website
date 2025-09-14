@@ -1,0 +1,38 @@
+@model JohnHenryFashionWeb.Models.Product
+
+<div class="d-flex flex-wrap gap-1">
+    <!-- Status Badge -->
+    <span class="badge bg-@(Model.IsActive ? "success" : "secondary")">
+        @(Model.IsActive ? "Hoạt động" : "Không hoạt động")
+    </span>
+    
+    <!-- Stock Status Badge -->
+    @if (Model.StockQuantity <= 0)
+    {
+        <span class="badge bg-danger">Hết hàng</span>
+    }
+    else if (Model.StockQuantity <= 10)
+    {
+        <span class="badge bg-warning text-dark">Sắp hết</span>
+    }
+    else
+    {
+        <span class="badge bg-success">Còn hàng</span>
+    }
+    
+    <!-- Featured Badge -->
+    @if (Model.IsFeatured)
+    {
+        <span class="badge bg-primary">
+            <i class="fas fa-star me-1"></i>Nổi bật
+        </span>
+    }
+    
+    <!-- Sale Badge -->
+    @if (Model.SalePrice.HasValue && Model.SalePrice > 0 && Model.SalePrice < Model.Price)
+    {
+        <span class="badge bg-info">
+            <i class="fas fa-percentage me-1"></i>Sale
+        </span>
+    }
+</div>

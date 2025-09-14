@@ -1,0 +1,206 @@
+@model JohnHenryFashionWeb.ViewModels.UserSecurityViewModel
+@{
+    ViewData["Title"] = "Quản lý bảo mật";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-shield-alt me-2"></i>Bảo mật
+                </a>
+                <a asp-action="Profile" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                </a>
+                <a asp-action="ChangePassword" class="list-group-item list-group-item-action">
+                    <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            @if (!string.IsNullOrEmpty(Model.StatusMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @Model.StatusMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>Cài đặt bảo mật
+                    </h3>
+
+                    <!-- Two Factor Authentication -->
+                    <div class="security-section mb-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5>Xác thực 2 bước</h5>
+                                <p class="text-muted mb-0">Tăng cường bảo mật tài khoản với xác thực 2 bước</p>
+                            </div>
+                            <div class="col-auto">
+                                @if (Model.TwoFactorEnabled)
+                                {
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check me-1"></i>Đã kích hoạt
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Chưa kích hoạt
+                                    </span>
+                                }
+                            </div>
+                            <div class="col-auto">
+                                @if (Model.TwoFactorEnabled)
+                                {
+                                    <a href="#" class="btn btn-outline-danger btn-sm">Tắt</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="EnableAuthenticator" class="btn btn-primary btn-sm">Kích hoạt</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Email Confirmation -->
+                    <div class="security-section mb-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5>Xác thực email</h5>
+                                <p class="text-muted mb-0">Trạng thái xác thực địa chỉ email</p>
+                            </div>
+                            <div class="col-auto">
+                                @if (Model.EmailConfirmed)
+                                {
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check me-1"></i>Đã xác thực
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="fas fa-times me-1"></i>Chưa xác thực
+                                    </span>
+                                }
+                            </div>
+                            <div class="col-auto">
+                                @if (!Model.EmailConfirmed)
+                                {
+                                    <a href="#" class="btn btn-outline-primary btn-sm">Gửi lại email</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Phone Number -->
+                    <div class="security-section mb-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5>Số điện thoại</h5>
+                                <p class="text-muted mb-0">
+                                    @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                                    {
+                                        @Model.PhoneNumber
+                                    }
+                                    else
+                                    {
+                                        <em>Chưa cập nhật</em>
+                                    }
+                                </p>
+                            </div>
+                            <div class="col-auto">
+                                @if (Model.PhoneNumberConfirmed)
+                                {
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check me-1"></i>Đã xác thực
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Chưa xác thực
+                                    </span>
+                                }
+                            </div>
+                            <div class="col-auto">
+                                <a href="#" class="btn btn-outline-primary btn-sm">Cập nhật</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- External Logins -->
+                    <div class="security-section mb-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5>Đăng nhập bên ngoài</h5>
+                                <p class="text-muted mb-0">Quản lý các tài khoản liên kết</p>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-info fs-6">@Model.Logins.Count tài khoản</span>
+                            </div>
+                            <div class="col-auto">
+                                <a href="#" class="btn btn-outline-primary btn-sm">Quản lý</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.IsLockedOut)
+                    {
+                        <hr>
+                        <div class="alert alert-danger">
+                            <h5><i class="fas fa-lock me-2"></i>Tài khoản bị khóa</h5>
+                            <p class="mb-0">
+                                Tài khoản của bạn đã bị khóa đến @Model.LockoutEnd?.ToString("dd/MM/yyyy HH:mm") 
+                                do quá nhiều lần đăng nhập sai.
+                            </p>
+                        </div>
+                    }
+
+                    @if (Model.ShowRecoveryCodes && Model.RecoveryCodes.Any())
+                    {
+                        <hr>
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-key me-2"></i>Mã khôi phục</h5>
+                            <p>Lưu trữ những mã này ở nơi an toàn. Bạn có thể sử dụng chúng để truy cập tài khoản khi mất thiết bị xác thực.</p>
+                            <div class="row">
+                                @foreach (var code in Model.RecoveryCodes)
+                                {
+                                    <div class="col-md-6 mb-2">
+                                        <code class="p-2 bg-light rounded d-block">@code</code>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .security-section {
+        padding: 1rem 0;
+    }
+    
+    .security-section h5 {
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+    }
+</style>

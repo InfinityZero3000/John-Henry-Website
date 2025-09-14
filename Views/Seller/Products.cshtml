@@ -1,0 +1,218 @@
+@model JohnHenryFashionWeb.ViewModels.ProductListViewModel
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Quản lý sản phẩm</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a asp-controller="Seller" asp-action="CreateProduct" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Thêm sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="searchTerm" class="form-label">Tìm kiếm</label>
+                            <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                                   placeholder="Tên sản phẩm, SKU..." value="@ViewBag.SearchTerm">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="categoryId" class="form-label">Danh mục</label>
+                            <select class="form-select" id="categoryId" name="categoryId">
+                                <option value="">Tất cả danh mục</option>
+                                <!-- Categories will be populated from ViewBag -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">Tất cả</option>
+                                <option value="active">Đang bán</option>
+                                <option value="inactive">Tạm dừng</option>
+                                <option value="out_of_stock">Hết hàng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i> Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Danh sách sản phẩm</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Hình ảnh</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>SKU</th>
+                                        <th>Danh mục</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
+                                        <th>Nổi bật</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(product.FeaturedImageUrl))
+                                                {
+                                                    <img src="@product.FeaturedImageUrl" alt="@product.Name" 
+                                                         class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@product.Name</strong>
+                                            </td>
+                                            <td><code>@product.SKU</code></td>
+                                            <td>@product.CategoryName</td>
+                                            <td>
+                                                @if (product.SalePrice.HasValue && product.SalePrice < product.Price)
+                                                {
+                                                    <del class="text-muted">@product.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</del><br>
+                                                    <strong class="text-danger">@product.SalePrice.Value.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                                }
+                                                else
+                                                {
+                                                    <strong>@product.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-@(product.StockQuantity > 0 ? "success" : "danger")">
+                                                    @product.StockQuantity
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-@(product.Status == "active" ? "success" : product.Status == "inactive" ? "warning" : "danger")">
+                                                    @(product.Status == "active" ? "Đang bán" : product.Status == "inactive" ? "Tạm dừng" : "Hết hàng")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (product.IsFeatured)
+                                                {
+                                                    <i class="fas fa-star text-warning"></i>
+                                                }
+                                            </td>
+                                            <td>@product.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-controller="Seller" asp-action="EditProduct" asp-route-id="@product.Id" 
+                                                       class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" 
+                                                       class="btn btn-sm btn-outline-info" title="Xem chi tiết" target="_blank">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="deleteProduct('@product.Id')" title="Xóa">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có sản phẩm nào</h5>
+                            <p class="text-muted">Bắt đầu bán hàng bằng cách thêm sản phẩm đầu tiên.</p>
+                            <a asp-controller="Seller" asp-action="CreateProduct" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm sản phẩm đầu tiên
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteProduct(productId) {
+            if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                // Add AJAX call to delete product
+                fetch(`/seller/products/delete/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa sản phẩm: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Có lỗi xảy ra khi xóa sản phẩm');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        $(document).ready(function() {
+            // Initialize DataTable if you have it
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $('#dataTable').DataTable({
+                    "order": [[ 8, "desc" ]],
+                    "pageLength": 25,
+                    "responsive": true
+                });
+            }
+        });
+    </script>
+}

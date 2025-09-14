@@ -1,0 +1,410 @@
+@model SystemSettingsViewModel
+@{
+    ViewData["Title"] = "Cài đặt hệ thống";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Cài đặt hệ thống</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Cài đặt</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="UpdateSettings" method="post">
+        <div class="row">
+            <!-- General Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-cog me-2"></i>Cài đặt chung
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="SiteName" class="form-label">Tên trang web</label>
+                                    <input asp-for="SiteName" class="form-control" placeholder="Nhập tên trang web">
+                                    <span asp-validation-for="SiteName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="SiteDescription" class="form-label">Mô tả trang web</label>
+                                    <textarea asp-for="SiteDescription" class="form-control" rows="3" placeholder="Mô tả ngắn về trang web"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="SiteUrl" class="form-label">URL trang web</label>
+                                    <input asp-for="SiteUrl" class="form-control" placeholder="https://example.com">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="AdminEmail" class="form-label">Email admin</label>
+                                    <input asp-for="AdminEmail" class="form-control" placeholder="admin@example.com">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="SupportEmail" class="form-label">Email hỗ trợ</label>
+                                    <input asp-for="SupportEmail" class="form-control" placeholder="support@example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-shield-check me-2"></i>Cài đặt bảo mật
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-check form-switch mb-3">
+                                    <input asp-for="EnableTwoFactorAuth" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableTwoFactorAuth" class="form-check-label">Bật xác thực 2 lớp</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="PasswordExpirationDays" class="form-label">Mật khẩu hết hạn (ngày)</label>
+                                    <input asp-for="PasswordExpirationDays" class="form-control" type="number" min="0" max="365">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="MaxLoginAttempts" class="form-label">Số lần đăng nhập sai tối đa</label>
+                                    <input asp-for="MaxLoginAttempts" class="form-control" type="number" min="1" max="10">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="SessionTimeoutMinutes" class="form-label">Thời gian hết hạn phiên (phút)</label>
+                                    <input asp-for="SessionTimeoutMinutes" class="form-control" type="number" min="5" max="480">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-commerce & Payment Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-store me-2"></i>Cài đặt thương mại điện tử
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="Currency" class="form-label">Đơn vị tiền tệ</label>
+                                    <select asp-for="Currency" class="form-select">
+                                        <option value="VND">VND - Việt Nam Đồng</option>
+                                        <option value="USD">USD - US Dollar</option>
+                                        <option value="EUR">EUR - Euro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="TaxRate" class="form-label">Thuế (%)</label>
+                                    <input asp-for="TaxRate" class="form-control" type="number" step="0.1" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="ShippingFee" class="form-label">Phí vận chuyển</label>
+                                    <input asp-for="ShippingFee" class="form-control" type="number" step="1000" min="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="FreeShippingThreshold" class="form-label">Miễn phí vận chuyển từ</label>
+                                    <input asp-for="FreeShippingThreshold" class="form-control" type="number" step="10000" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-3 mb-2">Phương thức thanh toán</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnableCashOnDelivery" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableCashOnDelivery" class="form-check-label">Thanh toán khi nhận hàng</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnableBankTransfer" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableBankTransfer" class="form-check-label">Chuyển khoản ngân hàng</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnablePayPal" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnablePayPal" class="form-check-label">PayPal</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnableStripe" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableStripe" class="form-check-label">Stripe</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-email me-2"></i>Cài đặt email
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="mb-3">
+                                    <label asp-for="SmtpServer" class="form-label">SMTP Server</label>
+                                    <input asp-for="SmtpServer" class="form-control" placeholder="smtp.gmail.com">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label asp-for="SmtpPort" class="form-label">Port</label>
+                                    <input asp-for="SmtpPort" class="form-control" type="number" placeholder="587">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="SmtpUsername" class="form-label">Username</label>
+                                    <input asp-for="SmtpUsername" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="SmtpPassword" class="form-label">Password</label>
+                                    <input asp-for="SmtpPassword" class="form-control" type="password">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-3 mb-2">Thông báo</h6>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnableEmailNotifications" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableEmailNotifications" class="form-check-label">Email</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnableSmsNotifications" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableSmsNotifications" class="form-check-label">SMS</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="EnablePushNotifications" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnablePushNotifications" class="form-check-label">Push</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Settings Row -->
+        <div class="row">
+            <!-- Inventory Settings -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-package-variant me-2"></i>Quản lý kho
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="LowStockThreshold" class="form-label">Ngưỡng hàng tồn kho thấp</label>
+                            <input asp-for="LowStockThreshold" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input asp-for="AutoReduceStock" class="form-check-input" type="checkbox">
+                            <label asp-for="AutoReduceStock" class="form-check-label">Tự động giảm tồn kho</label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input asp-for="AllowBackorders" class="form-check-input" type="checkbox">
+                            <label asp-for="AllowBackorders" class="form-check-label">Cho phép đặt hàng khi hết hàng</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Settings -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-chart-line me-2"></i>Analytics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input asp-for="EnableAnalytics" class="form-check-input" type="checkbox">
+                            <label asp-for="EnableAnalytics" class="form-check-label">Bật analytics</label>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="GoogleAnalyticsId" class="form-label">Google Analytics ID</label>
+                            <input asp-for="GoogleAnalyticsId" class="form-control" placeholder="GA-XXXXXX-X">
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="FacebookPixelId" class="form-label">Facebook Pixel ID</label>
+                            <input asp-for="FacebookPixelId" class="form-control" placeholder="123456789">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Settings -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-search-web me-2"></i>SEO
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="DefaultMetaTitle" class="form-label">Meta Title mặc định</label>
+                            <input asp-for="DefaultMetaTitle" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="DefaultMetaDescription" class="form-label">Meta Description mặc định</label>
+                            <textarea asp-for="DefaultMetaDescription" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="DefaultMetaKeywords" class="form-label">Meta Keywords mặc định</label>
+                            <input asp-for="DefaultMetaKeywords" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Settings -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="mdi mdi-wrench me-2"></i>Bảo trì hệ thống
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-check form-switch mb-3">
+                                    <input asp-for="MaintenanceMode" class="form-check-input" type="checkbox">
+                                    <label asp-for="MaintenanceMode" class="form-check-label">Chế độ bảo trì</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-9">
+                                <div class="mb-3">
+                                    <label asp-for="MaintenanceMessage" class="form-label">Thông báo bảo trì</label>
+                                    <input asp-for="MaintenanceMessage" class="form-control" placeholder="Trang web đang bảo trì. Vui lòng quay lại sau.">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary me-2" onclick="window.history.back()">
+                        <i class="mdi mdi-arrow-left me-1"></i>Quay lại
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="mdi mdi-content-save me-1"></i>Lưu cài đặt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-save draft every 30 seconds
+            let saveTimer;
+            
+            $('input, textarea, select').on('change input', function() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(function() {
+                    // Auto-save draft logic here
+                    console.log('Auto-saving draft...');
+                }, 30000);
+            });
+
+            // Maintenance mode warning
+            $('#MaintenanceMode').on('change', function() {
+                if ($(this).is(':checked')) {
+                    if (!confirm('Bật chế độ bảo trì sẽ khiến trang web không thể truy cập bởi người dùng thường. Bạn có chắc chắn?')) {
+                        $(this).prop('checked', false);
+                    }
+                }
+            });
+
+            // Form validation
+            $('form').on('submit', function(e) {
+                let isValid = true;
+                
+                // Check required fields
+                $('input[required], textarea[required], select[required]').each(function() {
+                    if (!$(this).val().trim()) {
+                        isValid = false;
+                        $(this).addClass('is-invalid');
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                }
+            });
+        });
+    </script>
+}

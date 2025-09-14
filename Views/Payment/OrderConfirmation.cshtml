@@ -1,0 +1,254 @@
+@model JohnHenryFashionWeb.Models.Order
+@{
+    ViewData["Title"] = "Xác nhận đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Message -->
+            <div class="text-center mb-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h1 class="h2 mb-3">Đặt hàng thành công!</h1>
+                <p class="lead text-muted">
+                    Cảm ơn bạn đã mua sắm tại John Henry Fashion. 
+                    Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.
+                </p>
+            </div>
+
+            <!-- Order Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>
+                        Thông tin đơn hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Mã đơn hàng:</strong> @Model.OrderNumber</p>
+                            <p><strong>Ngày đặt:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p><strong>Trạng thái:</strong> 
+                                <span class="badge badge-@(Model.Status == "processing" ? "info" : "warning")">
+                                    @(Model.Status == "processing" ? "Đang xử lý" : "Chờ xử lý")
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Phương thức thanh toán:</strong> 
+                                @switch (Model.PaymentMethod)
+                                {
+                                    case "cod":
+                                        <span>Thanh toán khi nhận hàng</span>
+                                        break;
+                                    case "bank_transfer":
+                                        <span>Chuyển khoản ngân hàng</span>
+                                        break;
+                                    case "vnpay":
+                                        <span>VNPay</span>
+                                        break;
+                                    case "momo":
+                                        <span>MoMo</span>
+                                        break;
+                                    default:
+                                        <span>@Model.PaymentMethod</span>
+                                        break;
+                                }
+                            </p>
+                            <p><strong>Trạng thái thanh toán:</strong> 
+                                <span class="badge badge-@(Model.PaymentStatus == "paid" ? "success" : "warning")">
+                                    @(Model.PaymentStatus == "paid" ? "Đã thanh toán" : "Chờ thanh toán")
+                                </span>
+                            </p>
+                            <p><strong>Tổng tiền:</strong> 
+                                <span class="text-danger fw-bold">@Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <hr>
+                        <p><strong>Ghi chú:</strong> @Model.Notes</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Shipping Address -->
+            @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-shipping-fast me-2"></i>
+                            Địa chỉ giao hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.ShippingAddress</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Order Items -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Sản phẩm đã đặt
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="d-flex align-items-center mb-3 @(item != Model.OrderItems.Last() ? "border-bottom pb-3" : "")">
+                            <div class="me-3">
+                                @if (!string.IsNullOrEmpty(item.ProductImage))
+                                {
+                                    <img src="@item.ProductImage" alt="@item.ProductName" 
+                                         class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                         style="width: 80px; height: 80px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">@item.ProductName</h6>
+                                @if (!string.IsNullOrEmpty(item.ProductSKU))
+                                {
+                                    <small class="text-muted d-block">SKU: @item.ProductSKU</small>
+                                }
+                                <div class="d-flex align-items-center">
+                                    <span class="text-muted">@item.Quantity × @item.UnitPrice.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <strong>@item.TotalPrice.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Order Total -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+                        <span>@Model.OrderItems.Sum(i => i.TotalPrice).ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                    </div>
+                    
+                    @if (Model.ShippingFee > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí vận chuyển:</span>
+                            <span>@Model.ShippingFee.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                        </div>
+                    }
+                    
+                    @if (Model.Tax > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Thuế VAT:</span>
+                            <span>@Model.Tax.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                        </div>
+                    }
+                    
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Giảm giá:</span>
+                            <span>-@Model.DiscountAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                        </div>
+                    }
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <strong>Tổng cộng:</strong>
+                        <strong class="text-danger">@Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Instructions (if applicable) -->
+            @if (Model.PaymentMethod == "bank_transfer" && Model.PaymentStatus == "pending")
+            {
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Hoàn tất thanh toán
+                    </h6>
+                    <p class="mb-3">Để hoàn tất đơn hàng, vui lòng chuyển khoản theo thông tin dưới đây:</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Ngân hàng:</strong> Vietcombank</p>
+                            <p class="mb-2"><strong>Số tài khoản:</strong> 1234567890</p>
+                            <p class="mb-2"><strong>Chủ tài khoản:</strong> JOHN HENRY FASHION</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Số tiền:</strong> @Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</p>
+                            <p class="mb-2"><strong>Nội dung:</strong> @Model.OrderNumber</p>
+                        </div>
+                    </div>
+                    
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            Sau khi chuyển khoản, đơn hàng sẽ được xử lý trong vòng 1-2 giờ làm việc.
+                        </small>
+                    </p>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-home me-2"></i>
+                        Tiếp tục mua sắm
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a asp-controller="Account" asp-action="Orders" class="btn btn-primary w-100">
+                        <i class="fas fa-list-alt me-2"></i>
+                        Xem đơn hàng của tôi
+                    </a>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Có thắc mắc về đơn hàng? 
+                    <a asp-controller="Contact" asp-action="Index" class="text-decoration-none">Liên hệ với chúng tôi</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-refresh page every 30 seconds for payment status update (for bank transfer)
+            @if (Model.PaymentMethod == "bank_transfer" && Model.PaymentStatus == "pending")
+            {
+                <text>
+                setInterval(function() {
+                    // You could implement AJAX call to check payment status
+                    console.log('Checking payment status...');
+                }, 30000);
+                </text>
+            }
+        });
+    </script>
+}

@@ -1,33 +1,212 @@
+@model ContactViewModel
 @{
     ViewData["Title"] = "Liên hệ";
 }
 
 <div class="container py-5">
     <h1 class="display-4 text-center mb-5" data-aos="fade-down">Liên hệ với chúng tôi</h1>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" data-aos="fade-up">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row justify-content-center">
-        <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
-            <form>
-                <div class="mb-3">
-                    <label for="name" class="form-label">Họ và tên</label>
-                    <input type="text" class="form-control" id="name" placeholder="Nhập họ và tên">
+        <div class="col-lg-8">
+            <div class="row">
+                <!-- Contact Form -->
+                <div class="col-md-8" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-4">
+                                <i class="fas fa-envelope me-2 text-primary"></i>Gửi tin nhắn
+                            </h4>
+                            
+                            <form asp-action="Index" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="Name" class="form-label required">Họ và tên</label>
+                                            <input asp-for="Name" class="form-control" placeholder="Nhập họ và tên">
+                                            <span asp-validation-for="Name" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="Phone" class="form-label">Số điện thoại</label>
+                                            <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại">
+                                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label required">Email</label>
+                                    <input asp-for="Email" class="form-control" placeholder="Nhập email">
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Subject" class="form-label required">Chủ đề</label>
+                                    <input asp-for="Subject" class="form-control" placeholder="Nhập chủ đề">
+                                    <span asp-validation-for="Subject" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label asp-for="Message" class="form-label required">Nội dung</label>
+                                    <textarea asp-for="Message" class="form-control" rows="6" placeholder="Nhập nội dung liên hệ của bạn..."></textarea>
+                                    <span asp-validation-for="Message" class="text-danger small"></span>
+                                    <div class="form-text">Tối thiểu 10 ký tự, tối đa 5000 ký tự</div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi tin nhắn
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="Nhập email">
+
+                <!-- Contact Info -->
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-4">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>Thông tin liên hệ
+                            </h4>
+                            
+                            <div class="contact-info">
+                                <div class="contact-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-map-marker-alt text-primary me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Địa chỉ</h6>
+                                            <p class="text-muted mb-0">123 Đường ABC, Quận 1<br>TP. Hồ Chí Minh, Việt Nam</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-phone text-primary me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Điện thoại</h6>
+                                            <p class="text-muted mb-0">
+                                                <a href="tel:+84123456789" class="text-decoration-none">+84 123 456 789</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-envelope text-primary me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Email</h6>
+                                            <p class="text-muted mb-0">
+                                                <a href="mailto:info@johnhenryfashion.com" class="text-decoration-none">info@johnhenryfashion.com</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-clock text-primary me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Giờ làm việc</h6>
+                                            <p class="text-muted mb-0">
+                                                Thứ 2 - Chủ nhật<br>
+                                                8:00 AM - 10:00 PM
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="message" class="form-label">Nội dung</label>
-                    <textarea class="form-control" id="message" rows="5" placeholder="Nhập nội dung liên hệ"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Gửi</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
+@section Styles {
+    <style>
+        .form-label.required::after {
+            content: ' *';
+            color: #dc3545;
+        }
+        
+        .contact-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+        
+        .contact-item h6 {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
+}
+
 @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script>
-        gsap.from("form", { duration: 1, y: 50, opacity: 0, ease: "power2.out" });
+        // Character counter for message textarea
+        const messageTextarea = document.querySelector('textarea[name="Message"]');
+        if (messageTextarea) {
+            const maxLength = 5000;
+            const minLength = 10;
+            
+            // Create counter element
+            const counter = document.createElement('small');
+            counter.className = 'form-text text-muted';
+            messageTextarea.parentNode.appendChild(counter);
+            
+            function updateCounter() {
+                const currentLength = messageTextarea.value.length;
+                counter.textContent = `${currentLength}/${maxLength} ký tự`;
+                
+                if (currentLength < minLength) {
+                    counter.className = 'form-text text-warning';
+                } else if (currentLength > maxLength * 0.9) {
+                    counter.className = 'form-text text-danger';
+                } else {
+                    counter.className = 'form-text text-muted';
+                }
+            }
+            
+            messageTextarea.addEventListener('input', updateCounter);
+            updateCounter(); // Initial call
+        }
+        
+        // GSAP animations
+        gsap.from(".card", { 
+            duration: 1, 
+            y: 50, 
+            opacity: 0, 
+            ease: "power2.out",
+            stagger: 0.2
+        });
     </script>
 }

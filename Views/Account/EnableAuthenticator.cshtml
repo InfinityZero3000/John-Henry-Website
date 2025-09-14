@@ -1,0 +1,106 @@
+@model JohnHenryFashionWeb.ViewModels.EnableAuthenticatorViewModel
+@{
+    ViewData["Title"] = "Cấu hình xác thực 2 bước";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">Cấu hình xác thực 2 bước</h2>
+                        <p class="text-muted">Tăng cường bảo mật tài khoản với ứng dụng xác thực</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5>Bước 1: Quét mã QR</h5>
+                            <p class="text-muted">Sử dụng ứng dụng như Google Authenticator, Microsoft Authenticator để quét mã QR này:</p>
+                            
+                            <div class="text-center p-3 bg-light rounded">
+                                <div id="qrCode"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Bước 2: Nhập khóa thủ công (nếu cần)</h5>
+                            <p class="text-muted">Nếu không thể quét QR, hãy nhập khóa này vào ứng dụng:</p>
+                            
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" value="@Model.SharedKey" readonly id="sharedKey" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('sharedKey')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <form asp-action="EnableAuthenticator" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <input asp-for="SharedKey" type="hidden" />
+                        <input asp-for="AuthenticatorUri" type="hidden" />
+                        
+                        <h5>Bước 3: Xác minh mã</h5>
+                        <p class="text-muted">Nhập mã 6 chữ số từ ứng dụng xác thực:</p>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Code" class="form-label">Mã xác thực</label>
+                            <input asp-for="Code" class="form-control form-control-lg text-center" maxlength="6" placeholder="000000" style="letter-spacing: 0.5em;" />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-shield-alt me-2"></i>Kích hoạt xác thực 2 bước
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a asp-action="TwoFactorAuthentication" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>Quay lại cài đặt bảo mật
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // Generate QR Code
+        QRCode.toCanvas(document.getElementById('qrCode'), '@Model.AuthenticatorUri', {
+            width: 200,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            element.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(element.value);
+            
+            // Show toast or alert
+            alert('Đã sao chép khóa vào clipboard!');
+        }
+
+        // Auto-format verification code
+        document.getElementById('Code').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 6) {
+                value = value.slice(0, 6);
+            }
+            e.target.value = value;
+        });
+    </script>
+}

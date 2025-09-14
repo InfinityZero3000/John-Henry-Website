@@ -5,260 +5,324 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - John Henry Admin</title>
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="~/css/admin-style.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar .logo {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar .logo h4 {
+            color: white;
+            margin: 0;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .admin-sidebar .logo small {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+        }
+        
+        .nav-menu {
+            padding: 10px 0;
+        }
+        
+        .nav-group {
+            margin: 25px 0 15px 0;
+        }
+        
+        .nav-group-title {
+            padding: 8px 25px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .nav-item {
+            margin: 2px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            text-decoration: none !important;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .nav-link i {
+            margin-right: 12px;
+            width: 18px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .admin-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            padding: 25px;
+            background-color: #f8f9fa;
+        }
+        
+        .admin-header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-info .dropdown-toggle {
+            border: none;
+            background: #f8f9fa;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info .dropdown-toggle:hover {
+            background: #e9ecef;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 15px 20px;
+        }
+        
+        @@media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .admin-header {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+    
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="admin-layout">
-    <div class="admin-wrapper">
-        <!-- Sidebar -->
-        <nav class="admin-sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-brand">
-                    <img src="~/images/logo.png" alt="John Henry" class="brand-logo">
-                    <span class="brand-text">John Henry Admin</span>
-                </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="sidebar-content">
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="user-details">
-                        <span class="user-name">@User.Identity?.Name</span>
-                        <span class="user-role">@(User.IsInRole("Admin") ? "Quản trị viên" : "Người bán")</span>
-                    </div>
-                </div>
-
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="@Url.Action("Dashboard", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <li class="menu-header">QUẢN LÝ SẢN PHẨM</li>
-                        
-                        <li class="menu-item">
-                            <a href="@Url.Action("Categories", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Categories" ? "active" : "")">
-                                <i class="fas fa-layer-group"></i>
-                                <span>Danh mục</span>
-                            </a>
-                        </li>
-
-                        <li class="menu-item">
-                            <a href="@Url.Action("Brands", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Brands" ? "active" : "")">
-                                <i class="fas fa-tag"></i>
-                                <span>Thương hiệu</span>
-                            </a>
-                        </li>
-                    }
-
-                    <li class="menu-item">
-                        <a href="@Url.Action("Products", User.IsInRole("Admin") ? "Admin" : "Seller")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
-                            <i class="fas fa-box"></i>
-                            <span>Sản phẩm</span>
-                        </a>
-                    </li>
-
-                    <li class="menu-header">QUẢN LÝ ĐỠN HÀNG</li>
-                    
-                    <li class="menu-item">
-                        <a href="@Url.Action("Orders", User.IsInRole("Admin") ? "Admin" : "Seller")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Đơn hàng</span>
-                        </a>
-                    </li>
-
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <li class="menu-header">QUẢN LÝ KHO</li>
-                        
-                        <li class="menu-item">
-                            <a href="@Url.Action("Inventory", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Inventory" ? "active" : "")">
-                                <i class="fas fa-warehouse"></i>
-                                <span>Tồn kho</span>
-                            </a>
-                        </li>
-
-                        <li class="menu-item">
-                            <a href="@Url.Action("StockMovements", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "StockMovements" ? "active" : "")">
-                                <i class="fas fa-exchange-alt"></i>
-                                <span>Xuất nhập kho</span>
-                            </a>
-                        </li>
-
-                        <li class="menu-header">QUẢN LÝ NGƯỜI DÙNG</li>
-                        
-                        <li class="menu-item">
-                            <a href="@Url.Action("Customers", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Customers" ? "active" : "")">
-                                <i class="fas fa-users"></i>
-                                <span>Khách hàng</span>
-                            </a>
-                        </li>
-
-                        <li class="menu-item">
-                            <a href="@Url.Action("Sellers", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Sellers" ? "active" : "")">
-                                <i class="fas fa-store"></i>
-                                <span>Người bán</span>
-                            </a>
-                        </li>
-
-                        <li class="menu-header">BÁO CÁO & THỐNG KÊ</li>
-                        
-                        <li class="menu-item">
-                            <a href="@Url.Action("Reports", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Reports" ? "active" : "")">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Báo cáo</span>
-                            </a>
-                        </li>
-
-                        <li class="menu-item">
-                            <a href="@Url.Action("Analytics", "Admin")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")">
-                                <i class="fas fa-analytics"></i>
-                                <span>Phân tích</span>
-                            </a>
-                        </li>
-                    }
-
-                    <li class="menu-header">CÀI ĐẶT</li>
-                    
-                    <li class="menu-item">
-                        <a href="@Url.Action("Profile", "Admin")" class="menu-link">
-                            <i class="fas fa-user-cog"></i>
-                            <span>Hồ sơ</span>
-                        </a>
-                    </li>
-
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <li class="menu-item">
-                            <a href="@Url.Action("Settings", "Admin")" class="menu-link">
-                                <i class="fas fa-cog"></i>
-                                <span>Cài đặt hệ thống</span>
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </div>
-
-            <div class="sidebar-footer">
-                <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
-                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Đăng xuất
-                    </button>
-                </form>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="admin-main">
-            <!-- Top Header -->
-            <header class="admin-header">
-                <div class="header-left">
-                    <button class="sidebar-toggle" id="sidebarToggleTop">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="breadcrumb-wrapper">
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
-                                @if (ViewData["Breadcrumb"] != null)
-                                {
-                                    @Html.Raw(ViewData["Breadcrumb"])
-                                }
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-
-                <div class="header-right">
-                    <div class="header-notifications">
-                        <div class="dropdown">
-                            <button class="btn btn-link notification-btn" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-bell"></i>
-                                <span class="notification-badge">3</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
-                                <li><h6 class="dropdown-header">Thông báo</h6></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-circle text-warning"></i> Sản phẩm sắp hết hàng</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-cart text-info"></i> Đơn hàng mới</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-user text-success"></i> Khách hàng mới đăng ký</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-center" href="#">Xem tất cả</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="header-user">
-                        <div class="dropdown">
-                            <button class="btn btn-link user-btn" type="button" data-bs-toggle="dropdown">
-                                <div class="user-info">
-                                    <span class="user-name">@User.Identity?.Name</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user-circle"></i> Hồ sơ</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("Settings", "Admin")"><i class="fas fa-cog"></i> Cài đặt</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Page Content -->
-            <main class="admin-content">
-                @if (TempData["Success"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i>
-                        @TempData["Success"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                @if (TempData["Error"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i>
-                        @TempData["Error"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                @if (TempData["Warning"] != null)
-                {
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        @TempData["Warning"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                @RenderBody()
-            </main>
+<body>
+    <!-- Admin Sidebar -->
+    <div class="admin-sidebar">
+        <div class="logo">
+            <h4><i class="fas fa-gem"></i> John Henry</h4>
+            <small>Admin Panel</small>
         </div>
+        
+        <div class="nav-menu">
+            <!-- Dashboard -->
+            <div class="nav-group">
+                <div class="nav-group-title">Dashboard</div>
+                <div class="nav-item">
+                    <a href="/Admin/Dashboard" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Tổng quan</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quản lý sản phẩm -->
+            <div class="nav-group">
+                <div class="nav-group-title">Sản phẩm</div>
+                <div class="nav-item">
+                    <a href="/Admin/Products" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
+                        <i class="fas fa-box"></i>
+                        <span>Danh sách sản phẩm</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/Admin/CreateProduct" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "CreateProduct" ? "active" : "")">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Thêm sản phẩm</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/Admin/Categories" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Categories" ? "active" : "")">
+                        <i class="fas fa-tags"></i>
+                        <span>Danh mục</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/Admin/Brands" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Brands" || ViewContext.RouteData.Values["action"]?.ToString() == "CreateBrand" || ViewContext.RouteData.Values["action"]?.ToString() == "EditBrand" ? "active" : "")">
+                        <i class="fas fa-award"></i>
+                        <span>Thương hiệu</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/Admin/Inventory" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Inventory" ? "active" : "")">
+                        <i class="fas fa-warehouse"></i>
+                        <span>Kho hàng</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quản lý đơn hàng -->
+            <div class="nav-group">
+                <div class="nav-group-title">Đơn hàng</div>
+                <div class="nav-item">
+                    <a href="/Admin/Orders" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Đơn hàng</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quản lý người dùng -->
+            <div class="nav-group">
+                <div class="nav-group-title">Người dùng</div>
+                <div class="nav-item">
+                    <a href="/Admin/Users" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")">
+                        <i class="fas fa-users"></i>
+                        <span>Khách hàng</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Báo cáo -->
+            <div class="nav-group">
+                <div class="nav-group-title">Báo cáo</div>
+                <div class="nav-item">
+                    <a href="/Admin/Reports" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Báo cáo</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <!-- Cài đặt -->
+            <div class="nav-group">
+                <div class="nav-group-title">Hệ thống</div>
+                <div class="nav-item">
+                    <a href="/" class="nav-link" target="_blank">
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>Xem website</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/Account/Logout" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    
+    <!-- Main Content -->
+    <div class="admin-content">
+        <div class="admin-header">
+            <h1>@ViewData["Title"]</h1>
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle fa-lg"></i>
+                        <span>@User.Identity?.Name</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Account/Profile"><i class="fas fa-user"></i> Hồ sơ</a></li>
+                        <li><a class="dropdown-item" href="/Account/ChangePassword"><i class="fas fa-key"></i> Đổi mật khẩu</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Account/Logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <main role="main">
+            @RenderBody()
+        </main>
     </div>
-
+    
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="~/js/admin.js"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

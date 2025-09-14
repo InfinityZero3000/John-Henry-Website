@@ -1,0 +1,271 @@
+@model JohnHenryFashionWeb.Models.BlogPost
+@{
+    ViewData["Title"] = "Tạo bài viết mới";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Tạo bài viết mới</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a asp-controller="Blog" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Nội dung bài viết</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Tiêu đề</label>
+                            <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài viết...">
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Excerpt" class="form-label">Tóm tắt</label>
+                            <textarea asp-for="Excerpt" class="form-control" rows="3" placeholder="Tóm tắt ngắn gọn về bài viết..."></textarea>
+                            <span asp-validation-for="Excerpt" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label">Nội dung</label>
+                            <textarea asp-for="Content" class="form-control" rows="15" placeholder="Nhập nội dung bài viết..."></textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO Settings -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Cài đặt SEO</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="MetaTitle" class="form-label">Meta Title</label>
+                            <input asp-for="MetaTitle" class="form-control" placeholder="Tiêu đề SEO (để trống sẽ dùng tiêu đề bài viết)">
+                            <span asp-validation-for="MetaTitle" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MetaDescription" class="form-label">Meta Description</label>
+                            <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="Mô tả SEO (để trống sẽ dùng tóm tắt)"></textarea>
+                            <span asp-validation-for="MetaDescription" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Publish Settings -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Xuất bản</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Trạng thái</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="draft">Bản nháp</option>
+                                <option value="published">Xuất bản</option>
+                                <option value="archived">Lưu trữ</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsFeatured" class="form-check-input" type="checkbox">
+                                <label asp-for="IsFeatured" class="form-check-label">
+                                    Bài viết nổi bật
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu bài viết
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                Hủy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Danh mục</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Chọn danh mục</label>
+                            <select asp-for="CategoryId" class="form-select">
+                                <option value="">-- Chọn danh mục --</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    @foreach (var category in (List<JohnHenryFashionWeb.Models.BlogCategory>)ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Image -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Hình ảnh đại diện</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="FeaturedImageUrl" class="form-label">URL hình ảnh</label>
+                            <input asp-for="FeaturedImageUrl" class="form-control" placeholder="https://example.com/image.jpg">
+                            <span asp-validation-for="FeaturedImageUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imageUpload" class="form-label">Hoặc tải lên hình ảnh</label>
+                            <input type="file" id="imageUpload" class="form-control" accept="image/*">
+                            <small class="form-text text-muted">Chấp nhận: JPG, PNG, GIF. Tối đa 5MB.</small>
+                        </div>
+
+                        <div id="imagePreview" class="text-center" style="display: none;">
+                            <img id="previewImg" src="" class="img-fluid rounded" style="max-height: 200px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">
+                                <i class="fas fa-trash"></i> Xóa hình
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Tags</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="tagsInput" class="form-label">Thêm tags</label>
+                            <input type="text" id="tagsInput" class="form-control" placeholder="Nhập tag và nhấn Enter">
+                            <small class="form-text text-muted">Nhấn Enter để thêm tag</small>
+                        </div>
+
+                        <div id="tagsList" class="mb-3">
+                            <!-- Tags will be displayed here -->
+                        </div>
+
+                        <input type="hidden" asp-for="Tags" id="tagsHidden">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let tags = [];
+
+        $(document).ready(function() {
+            // Image upload preview
+            $('#imageUpload').change(function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewImg').attr('src', e.target.result);
+                        $('#imagePreview').show();
+                        $('#FeaturedImageUrl').val(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // URL image preview
+            $('#FeaturedImageUrl').on('input', function() {
+                const url = $(this).val();
+                if (url) {
+                    $('#previewImg').attr('src', url);
+                    $('#imagePreview').show();
+                }
+            });
+
+            // Tags functionality
+            $('#tagsInput').keypress(function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    const tag = $(this).val().trim();
+                    if (tag && !tags.includes(tag)) {
+                        addTag(tag);
+                        $(this).val('');
+                    }
+                }
+            });
+
+            // Initialize rich text editor for content
+            if (typeof tinymce !== 'undefined') {
+                tinymce.init({
+                    selector: '#Content',
+                    height: 400,
+                    plugins: 'link image lists',
+                    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image'
+                });
+            }
+        });
+
+        function addTag(tag) {
+            tags.push(tag);
+            updateTagsDisplay();
+            updateTagsInput();
+        }
+
+        function removeTag(tag) {
+            tags = tags.filter(t => t !== tag);
+            updateTagsDisplay();
+            updateTagsInput();
+        }
+
+        function updateTagsDisplay() {
+            const tagsList = $('#tagsList');
+            tagsList.empty();
+            tags.forEach(tag => {
+                tagsList.append(`
+                    <span class="badge bg-secondary me-1 mb-1">
+                        ${tag}
+                        <button type="button" class="btn-close btn-close-white ms-1" onclick="removeTag('${tag}')" aria-label="Remove tag"></button>
+                    </span>
+                `);
+            });
+        }
+
+        function updateTagsInput() {
+            $('#tagsHidden').val(JSON.stringify(tags));
+        }
+
+        function removeImage() {
+            $('#FeaturedImageUrl').val('');
+            $('#imagePreview').hide();
+            $('#imageUpload').val('');
+        }
+    </script>
+}

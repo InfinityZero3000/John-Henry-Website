@@ -1,0 +1,216 @@
+@model Order
+@{
+    ViewData["Title"] = "Thanh toán thất bại";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="~/css/checkout.css" rel="stylesheet" />
+}
+
+<div class="checkout-container">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Failed Message -->
+                <div class="failed-container text-center mb-5">
+                    <div class="failed-icon mb-4">
+                        <i class="fas fa-times-circle text-danger"></i>
+                    </div>
+                    <h1 class="failed-title">Thanh toán thất bại!</h1>
+                    <p class="failed-message">
+                        Rất tiếc, có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại hoặc chọn phương thức thanh toán khác.
+                    </p>
+                </div>
+
+                @if (Model != null)
+                {
+                    <!-- Order Information -->
+                    <div class="order-info-card mb-4">
+                        <div class="card-header">
+                            <h4>
+                                <i class="fas fa-receipt me-2"></i>
+                                Thông tin đơn hàng
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="info-group">
+                                        <label>Mã đơn hàng:</label>
+                                        <span class="order-number">#@Model.OrderNumber</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-group">
+                                        <label>Tổng giá trị:</label>
+                                        <span class="order-total">@Model.TotalAmount.ToString("N0") ₫</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-group">
+                                        <label>Phương thức thanh toán:</label>
+                                        <span>@Model.PaymentMethod</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-group">
+                                        <label>Trạng thái:</label>
+                                        <span class="text-danger">
+                                            <i class="fas fa-times-circle"></i>
+                                            Thanh toán thất bại
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Failure Reasons -->
+                <div class="failure-reasons mb-4">
+                    <h5>Có thể do các nguyên nhân sau:</h5>
+                    <ul class="reasons-list">
+                        <li>Thông tin thẻ tín dụng không chính xác</li>
+                        <li>Tài khoản ngân hàng không đủ số dư</li>
+                        <li>Kết nối mạng không ổn định</li>
+                        <li>Thẻ đã hết hạn hoặc bị khóa</li>
+                        <li>Vượt quá giới hạn giao dịch trong ngày</li>
+                    </ul>
+                </div>
+
+                <!-- Alternative Payment Methods -->
+                <div class="alternative-payments mb-5">
+                    <h5>Phương thức thanh toán khác:</h5>
+                    <div class="payment-options">
+                        <div class="payment-option">
+                            <i class="fas fa-money-bill-wave text-success"></i>
+                            <div class="option-info">
+                                <h6>Thanh toán khi nhận hàng (COD)</h6>
+                                <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
+                            </div>
+                        </div>
+                        <div class="payment-option">
+                            <i class="fas fa-university text-primary"></i>
+                            <div class="option-info">
+                                <h6>Chuyển khoản ngân hàng</h6>
+                                <p>Chuyển khoản trực tiếp vào tài khoản của chúng tôi</p>
+                            </div>
+                        </div>
+                        <div class="payment-option">
+                            <i class="fas fa-credit-card text-info"></i>
+                            <div class="option-info">
+                                <h6>Thẻ tín dụng/ghi nợ khác</h6>
+                                <p>Sử dụng thẻ ngân hàng khác</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="fas fa-home me-2"></i>
+                                Trang chủ
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Giỏ hàng
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", "Checkout")" class="btn btn-warning btn-lg w-100">
+                                <i class="fas fa-redo me-2"></i>
+                                Thử lại
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="mailto:support@johnhenry.com" class="btn btn-info btn-lg w-100">
+                                <i class="fas fa-envelope me-2"></i>
+                                Liên hệ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Information -->
+                <div class="support-info mt-5">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="support-card">
+                                <i class="fas fa-phone text-primary"></i>
+                                <h6>Hotline hỗ trợ</h6>
+                                <p><strong>1900 123 456</strong></p>
+                                <small class="text-muted">8:00 - 22:00 (T2-CN)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="support-card">
+                                <i class="fas fa-envelope text-success"></i>
+                                <h6>Email hỗ trợ</h6>
+                                <p><strong>support@johnhenry.com</strong></p>
+                                <small class="text-muted">Phản hồi trong 24h</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="faq-section mt-5">
+                    <h5>Câu hỏi thường gặp</h5>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse1">
+                                    Tại sao thanh toán của tôi bị từ chối?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Thanh toán có thể bị từ chối do nhiều lý do như thông tin thẻ không chính xác, 
+                                    không đủ số dư, hoặc thẻ bị khóa. Vui lòng kiểm tra lại thông tin và thử lại.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse2">
+                                    Làm thế nào để thanh toán bằng phương thức khác?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Bạn có thể quay lại giỏ hàng và chọn phương thức thanh toán khác như COD, 
+                                    chuyển khoản ngân hàng, hoặc sử dụng thẻ tín dụng khác.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse3">
+                                    Đơn hàng có bị hủy khi thanh toán thất bại?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Đơn hàng sẽ được giữ lại trong 24 giờ. Bạn có thể thử thanh toán lại 
+                                    trong thời gian này hoặc liên hệ với chúng tôi để được hỗ trợ.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,3 +1,4 @@
+@model List<Order>
 @{
     ViewData["Title"] = "Lịch sử mua hàng";
 }
@@ -35,7 +36,7 @@
                         <a href="/Wishlist" class="list-group-item list-group-item-action">
                             <i class="fas fa-heart me-2"></i>Sản phẩm yêu thích
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a asp-action="Addresses" class="list-group-item list-group-item-action">
                             <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ
                         </a>
                     </div>
@@ -45,6 +46,126 @@
 
         <!-- Main Content -->
         <div class="col-lg-9 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i>Lịch sử mua hàng
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="order-history">
+                            @foreach (var order in Model)
+                            {
+                                <div class="order-item mb-4">
+                                    <div class="order-header p-3 bg-light rounded-top">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <h6 class="mb-1">Đơn hàng #@order.OrderNumber</h6>
+                                                <small class="text-muted">Đặt ngày: @order.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                @{
+                                                    var badgeClass = order.Status switch
+                                                    {
+                                                        "delivered" => "bg-success",
+                                                        "shipped" => "bg-info",
+                                                        "processing" => "bg-warning",
+                                                        "cancelled" => "bg-danger",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                    
+                                                    var statusText = order.Status switch
+                                                    {
+                                                        "pending" => "Chờ xử lý",
+                                                        "processing" => "Đang xử lý", 
+                                                        "shipped" => "Đã giao hàng",
+                                                        "delivered" => "Đã nhận hàng",
+                                                        "cancelled" => "Đã hủy",
+                                                        _ => "Không xác định"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@statusText</span>
+                                            </div>
+                                            <div class="col-md-3 text-end">
+                                                <strong class="text-primary">@order.TotalAmount.ToString("N0")₫</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="order-body border border-top-0 rounded-bottom p-3">
+                                        @if (order.OrderItems?.Any() == true)
+                                        {
+                                            @foreach (var item in order.OrderItems.Take(2))
+                                            {
+                                                <div class="product-item d-flex align-items-center mb-3">
+                                                    <img src="@(!string.IsNullOrEmpty(item.ProductImage) ? item.ProductImage : (!string.IsNullOrEmpty(item.Product?.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "/images/placeholder.jpg"))" 
+                                                         alt="@(item.ProductName ?? item.Product?.Name)" 
+                                                         class="product-thumb me-3" 
+                                                         width="60" height="60">
+                                                    <div>
+                                                        <h6 class="mb-1">@(item.ProductName ?? item.Product?.Name)</h6>
+                                                        <small class="text-muted">
+                                                            SKU: @(item.ProductSKU ?? item.Product?.SKU ?? "N/A") | SL: @item.Quantity
+                                                        </small>
+                                                        <div class="price">@item.UnitPrice.ToString("N0")₫</div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (order.OrderItems.Count > 2)
+                                            {
+                                                <small class="text-muted">Và @(order.OrderItems.Count - 2) sản phẩm khác...</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">Không có sản phẩm</small>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Empty State -->
+                        <div class="empty-orders text-center py-5">
+                            <div class="empty-icon mb-4">
+                                <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                            </div>
+                            <h5 class="mb-3">Chưa có đơn hàng nào</h5>
+                            <p class="text-muted mb-4">Bạn chưa thực hiện đơn hàng nào. Hãy khám phá sản phẩm và mua sắm ngay!</p>
+                            <a href="/Products" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i>Mua sắm ngay
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .product-thumb {
+            border-radius: 0.25rem;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+        }
+        
+        .price {
+            font-weight: 600;
+            color: #dc3545;
+            font-size: 0.9rem;
+        }
+        
+        .list-group-item.active {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
+}
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
                     <div class="row align-items-center">

@@ -1,0 +1,464 @@
+@model JohnHenryFashionWeb.ViewModels.SellerSettingsViewModel
+@{
+    ViewData["Title"] = "Cài đặt Cửa hàng";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="page-title">Cài đặt Cửa hàng</h1>
+                    <p class="text-muted">Quản lý cài đặt và tùy chọn cho cửa hàng của bạn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Settings" method="post">
+        <div class="row">
+            <!-- Main Settings -->
+            <div class="col-md-8">
+                <!-- Business Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-store me-2"></i>Cài đặt Kinh doanh
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Trạng thái cửa hàng</label>
+                            <div class="form-check form-switch">
+                                <input asp-for="IsStoreActive" class="form-check-input" type="checkbox" id="storeActiveSwitch">
+                                <label class="form-check-label" for="storeActiveSwitch">
+                                    Kích hoạt cửa hàng
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                Khi tắt, khách hàng sẽ không thể xem sản phẩm của bạn
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="StoreDescription" class="form-label fw-bold">
+                                Mô tả cửa hàng
+                            </label>
+                            <textarea asp-for="StoreDescription" class="form-control" rows="4" 
+                                      placeholder="Mô tả ngắn gọn về cửa hàng và sản phẩm của bạn"></textarea>
+                            <span asp-validation-for="StoreDescription" class="text-danger"></span>
+                            <small class="text-muted">Tối đa 500 ký tự</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="BusinessHoursStart" class="form-label fw-bold">
+                                        Giờ mở cửa
+                                    </label>
+                                    <input asp-for="BusinessHoursStart" type="time" class="form-control" />
+                                    <span asp-validation-for="BusinessHoursStart" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="BusinessHoursEnd" class="form-label fw-bold">
+                                        Giờ đóng cửa
+                                    </label>
+                                    <input asp-for="BusinessHoursEnd" type="time" class="form-control" />
+                                    <span asp-validation-for="BusinessHoursEnd" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ngày nghỉ trong tuần</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnMonday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnMonday" class="form-check-label">Thứ Hai</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnTuesday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnTuesday" class="form-check-label">Thứ Ba</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnWednesday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnWednesday" class="form-check-label">Thứ Tư</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnThursday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnThursday" class="form-check-label">Thứ Năm</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnFriday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnFriday" class="form-check-label">Thứ Sáu</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnSaturday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnSaturday" class="form-check-label">Thứ Bảy</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="ClosedOnSunday" class="form-check-input" type="checkbox">
+                                        <label asp-for="ClosedOnSunday" class="form-check-label">Chủ Nhật</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-bell me-2"></i>Cài đặt Thông báo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Thông báo Email</label>
+                            <div class="form-check">
+                                <input asp-for="EmailNotifications.NewOrders" class="form-check-input" type="checkbox">
+                                <label asp-for="EmailNotifications.NewOrders" class="form-check-label">
+                                    Đơn hàng mới
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="EmailNotifications.LowStock" class="form-check-input" type="checkbox">
+                                <label asp-for="EmailNotifications.LowStock" class="form-check-label">
+                                    Hàng sắp hết
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="EmailNotifications.ProductReviews" class="form-check-input" type="checkbox">
+                                <label asp-for="EmailNotifications.ProductReviews" class="form-check-label">
+                                    Đánh giá sản phẩm mới
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="EmailNotifications.SystemUpdates" class="form-check-input" type="checkbox">
+                                <label asp-for="EmailNotifications.SystemUpdates" class="form-check-label">
+                                    Cập nhật hệ thống
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tần suất báo cáo</label>
+                            <select asp-for="ReportFrequency" class="form-select">
+                                <option value="Daily">Hằng ngày</option>
+                                <option value="Weekly">Hằng tuần</option>
+                                <option value="Monthly">Hằng tháng</option>
+                                <option value="Never">Không nhận</option>
+                            </select>
+                            <small class="text-muted">
+                                Bạn sẽ nhận báo cáo doanh số qua email theo tần suất này
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Settings -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-boxes me-2"></i>Cài đặt Kho hàng
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="LowStockThreshold" class="form-label fw-bold">
+                                        Ngưỡng cảnh báo hết hàng
+                                    </label>
+                                    <input asp-for="LowStockThreshold" type="number" class="form-control" min="0" />
+                                    <span asp-validation-for="LowStockThreshold" class="text-danger"></span>
+                                    <small class="text-muted">
+                                        Cảnh báo khi số lượng sản phẩm dưới ngưỡng này
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AutoHideOutOfStock" class="form-label fw-bold">
+                                        Ẩn sản phẩm hết hàng
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input asp-for="AutoHideOutOfStock" class="form-check-input" type="checkbox">
+                                        <label asp-for="AutoHideOutOfStock" class="form-check-label">
+                                            Tự động ẩn
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">
+                                        Tự động ẩn sản phẩm khi hết hàng
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Lưu cài đặt
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo me-2"></i>Khôi phục
+                            </button>
+                            <a href="@Url.Action("Dashboard", "Seller")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Hủy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Stats -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Thống kê nhanh
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h4 class="mb-1 text-primary">@Model.TotalProducts</h4>
+                                    <small class="text-muted">Sản phẩm</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="mb-1 text-success">@Model.TotalOrders</h4>
+                                <small class="text-muted">Đơn hàng</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Store Status -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Trạng thái Cửa hàng
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái hiện tại</label>
+                            <div>
+                                @if (Model.IsStoreActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>Đang hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i>Đã tắt
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Cập nhật cuối</label>
+                            <p class="text-muted mb-0">
+                                @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-question-circle me-2"></i>Trợ giúp
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Cần hỗ trợ về cài đặt cửa hàng?
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
+                                <i class="fas fa-book me-2"></i>Hướng dẫn
+                            </a>
+                            <a href="mailto:support@johnhenry.vn" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-envelope me-2"></i>Liên hệ hỗ trợ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle me-2"></i>Hướng dẫn Cài đặt
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="accordion" id="helpAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#help1">
+                                Cài đặt Kinh doanh
+                            </button>
+                        </h2>
+                        <div id="help1" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <p><strong>Trạng thái cửa hàng:</strong> Bật/tắt để khách hàng có thể xem sản phẩm của bạn.</p>
+                                <p><strong>Giờ hoạt động:</strong> Thiết lập giờ mở cửa và đóng cửa để khách hàng biết khi nào liên hệ.</p>
+                                <p><strong>Ngày nghỉ:</strong> Chọn những ngày trong tuần mà cửa hàng không hoạt động.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help2">
+                                Thông báo
+                            </button>
+                        </h2>
+                        <div id="help2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <p><strong>Email thông báo:</strong> Chọn loại thông báo bạn muốn nhận qua email.</p>
+                                <p><strong>Báo cáo:</strong> Thiết lập tần suất nhận báo cáo doanh số.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help3">
+                                Quản lý Kho
+                            </button>
+                        </h2>
+                        <div id="help3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <p><strong>Ngưỡng cảnh báo:</strong> Đặt số lượng tối thiểu để nhận cảnh báo hết hàng.</p>
+                                <p><strong>Ẩn hết hàng:</strong> Tự động ẩn sản phẩm khi hết hàng khỏi trang công khai.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Form handling
+        function resetForm() {
+            if (confirm('Bạn có chắc muốn khôi phục lại cài đặt ban đầu?')) {
+                window.location.reload();
+            }
+        }
+
+        // Real-time validation
+        $(document).ready(function() {
+            // Store description character counter
+            $('#StoreDescription').on('input', function() {
+                var current = $(this).val().length;
+                var max = 500;
+                var remaining = max - current;
+                
+                var counterEl = $(this).siblings('.char-counter');
+                if (counterEl.length === 0) {
+                    counterEl = $('<small class="char-counter text-muted"></small>');
+                    $(this).after(counterEl);
+                }
+                
+                counterEl.text(remaining + ' ký tự còn lại');
+                
+                if (remaining < 0) {
+                    counterEl.removeClass('text-muted').addClass('text-danger');
+                } else {
+                    counterEl.removeClass('text-danger').addClass('text-muted');
+                }
+            });
+
+            // Business hours validation
+            $('#BusinessHoursStart, #BusinessHoursEnd').on('change', function() {
+                var start = $('#BusinessHoursStart').val();
+                var end = $('#BusinessHoursEnd').val();
+                
+                if (start && end && start >= end) {
+                    alert('Giờ đóng cửa phải sau giờ mở cửa');
+                    $(this).focus();
+                }
+            });
+
+            // Auto-save settings (optional)
+            var autoSaveTimeout;
+            $('input[type="checkbox"], select').on('change', function() {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(function() {
+                    // TODO: Implement auto-save functionality
+                    console.log('Auto-saving settings...');
+                }, 2000);
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card-title {
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-check-label {
+            font-weight: normal;
+        }
+        
+        .badge {
+            font-size: 0.875rem;
+        }
+        
+        .border-end {
+            border-right: 1px solid #dee2e6 !important;
+        }
+        
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .form-switch .form-check-input {
+            width: 2.5em;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+    </style>
+}

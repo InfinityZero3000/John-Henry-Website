@@ -1,0 +1,334 @@
+@model JohnHenryFashionWeb.Models.BlogPost
+@{
+    ViewData["Title"] = "Tạo bài viết mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Tạo bài viết mới</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Blog", "Admin")">Quản lý Blog</a></li>
+                    <li class="breadcrumb-item active">Tạo bài viết</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="@Url.Action("Blog", "Admin")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="CreateBlogPost" method="post" enctype="multipart/form-data" id="blogForm">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Thông tin cơ bản</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài viết..." id="titleInput">
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Slug" class="form-label">Slug (URL thân thiện)</label>
+                            <input asp-for="Slug" class="form-control" placeholder="slug-bai-viet" id="slugInput">
+                            <small class="form-text text-muted">URL: /blog/<span id="slugPreview">slug-bai-viet</span></small>
+                            <span asp-validation-for="Slug" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Excerpt" class="form-label">Mô tả ngắn</label>
+                            <textarea asp-for="Excerpt" class="form-control" rows="3" placeholder="Nhập mô tả ngắn cho bài viết..."></textarea>
+                            <small class="form-text text-muted">Mô tả này sẽ hiển thị trong danh sách bài viết và kết quả tìm kiếm.</small>
+                            <span asp-validation-for="Excerpt" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Nội dung bài viết</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label">Nội dung <span class="text-danger">*</span></label>
+                            <textarea asp-for="Content" class="form-control" rows="15" id="contentEditor"></textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO Settings -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Cài đặt SEO</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="MetaTitle" class="form-label">Meta Title</label>
+                            <input asp-for="MetaTitle" class="form-control" placeholder="Tiêu đề tối ưu SEO...">
+                            <small class="form-text text-muted">Để trống để sử dụng tiêu đề bài viết. Nên giữ dưới 60 ký tự.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MetaDescription" class="form-label">Meta Description</label>
+                            <textarea asp-for="MetaDescription" class="form-control" rows="2" placeholder="Mô tả cho search engine..."></textarea>
+                            <small class="form-text text-muted">Nên giữ dưới 160 ký tự.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Tags" class="form-label">Tags</label>
+                            <input asp-for="Tags" class="form-control" placeholder="tag1, tag2, tag3...">
+                            <small class="form-text text-muted">Các từ khóa phân cách bằng dấu phẩy.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Publish Settings -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Xuất bản</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Trạng thái</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="draft">Bản nháp</option>
+                                <option value="published">Xuất bản</option>
+                                <option value="archived">Lưu trữ</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PublishedAt" class="form-label">Ngày xuất bản</label>
+                            <input asp-for="PublishedAt" type="datetime-local" class="form-control">
+                            <small class="form-text text-muted">Để trống để sử dụng thời gian hiện tại khi xuất bản.</small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="IsFeatured" class="form-check-input" type="checkbox">
+                            <label asp-for="IsFeatured" class="form-check-label">
+                                Bài viết nổi bật
+                            </label>
+                            <small class="form-text text-muted d-block">Hiển thị bài viết này ở vị trí ưu tiên.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Danh mục</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Chọn danh mục</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="@ViewBag.Categories">
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Image -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Ảnh đại diện (Banner)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn ảnh</label>
+                            <input type="file" name="FeaturedImage" class="form-control" accept="image/*" id="featuredImageInput">
+                            <small class="form-text text-muted">Kích thước khuyến nghị: 1200x630px</small>
+                        </div>
+
+                        <div id="imagePreview" class="mt-3" style="display: none;">
+                            <img id="previewImg" src="" class="img-fluid rounded" style="max-height: 200px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">
+                                <i class="fas fa-trash"></i> Xóa ảnh
+                            </button>
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Alt text cho ảnh</label>
+                            <input name="FeaturedImageAlt" class="form-control" placeholder="Mô tả ảnh...">
+                            <small class="form-text text-muted">Giúp tối ưu SEO và hỗ trợ người khuyết tật.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="action" value="publish" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Xuất bản ngay
+                            </button>
+                            <button type="submit" name="action" value="draft" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu bản nháp
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="previewPost()">
+                                <i class="fas fa-eye"></i> Xem trước
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    
+    <script>
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#contentEditor',
+            height: 400,
+            menubar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }'
+        });
+
+        // Auto-generate slug from title
+        document.getElementById('titleInput').addEventListener('input', function() {
+            const title = this.value;
+            const slug = generateSlug(title);
+            document.getElementById('slugInput').value = slug;
+            document.getElementById('slugPreview').textContent = slug;
+        });
+
+        // Update slug preview when manually edited
+        document.getElementById('slugInput').addEventListener('input', function() {
+            document.getElementById('slugPreview').textContent = this.value;
+        });
+
+        function generateSlug(text) {
+            return text
+                .toLowerCase()
+                .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+                .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+                .replace(/[ìíịỉĩ]/g, 'i')
+                .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+                .replace(/[ùúụủũưừứựửữ]/g, 'u')
+                .replace(/[ỳýỵỷỹ]/g, 'y')
+                .replace(/[đ]/g, 'd')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+        }
+
+        // Image preview
+        document.getElementById('featuredImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removeImage() {
+            document.getElementById('featuredImageInput').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+
+        function previewPost() {
+            // Get form data
+            const title = document.getElementById('titleInput').value;
+            const content = tinymce.get('contentEditor').getContent();
+            
+            if (!title || !content) {
+                alert('Vui lòng nhập tiêu đề và nội dung trước khi xem trước.');
+                return;
+            }
+
+            // Open preview in new window
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <html>
+                <head>
+                    <title>Preview: ${title}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                </head>
+                <body>
+                    <div class="container mt-4">
+                        <h1>${title}</h1>
+                        <hr>
+                        <div>${content}</div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        // Form validation
+        document.getElementById('blogForm').addEventListener('submit', function(e) {
+            const title = document.getElementById('titleInput').value.trim();
+            const content = tinymce.get('contentEditor').getContent().trim();
+
+            if (!title) {
+                alert('Vui lòng nhập tiêu đề bài viết.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!content) {
+                alert('Vui lòng nhập nội dung bài viết.');
+                e.preventDefault();
+                return;
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card-header h6 {
+            color: #5a5c69 !important;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #5a5c69;
+        }
+
+        .text-danger {
+            font-size: 0.875rem;
+        }
+
+        #imagePreview img {
+            border: 2px solid #e3e6f0;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.35rem;
+        }
+    </style>
+}

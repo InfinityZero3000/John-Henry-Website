@@ -1,0 +1,429 @@
+@model JohnHenryFashionWeb.ViewModels.ProductCreateEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa sản phẩm</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Seller")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Products", "Seller")">Sản phẩm</a></li>
+                    <li class="breadcrumb-item active">Chỉnh sửa</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="@Url.Action("Products", "Seller")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+            <a href="@Url.Action("Details", "Products", new { id = Model.Id })" class="btn btn-info" target="_blank">
+                <i class="fas fa-external-link-alt"></i> Xem trên web
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Alert -->
+    @if (!string.IsNullOrEmpty(ViewBag.Message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @ViewBag.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="EditProduct" method="post" enctype="multipart/form-data" id="productForm">
+        <input asp-for="Id" type="hidden" />
+        
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Thông tin cơ bản</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="Nhập tên sản phẩm...">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label asp-for="SKU" class="form-label">SKU <span class="text-danger">*</span></label>
+                                <input asp-for="SKU" class="form-control" placeholder="Mã sản phẩm...">
+                                <span asp-validation-for="SKU" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label">Trạng thái</label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="active">Đang bán</option>
+                                    <option value="inactive">Tạm dừng</option>
+                                    <option value="out_of_stock">Hết hàng</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label asp-for="ShortDescription" class="form-label">Mô tả ngắn</label>
+                            <textarea asp-for="ShortDescription" class="form-control" rows="3" placeholder="Mô tả ngắn gọn về sản phẩm..."></textarea>
+                            <span asp-validation-for="ShortDescription" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả chi tiết</label>
+                            <textarea asp-for="Description" class="form-control" rows="8" id="descriptionEditor"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Giá bán</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label asp-for="Price" class="form-label">Giá gốc <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input asp-for="Price" class="form-control" type="number" step="1000" min="0">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SalePrice" class="form-label">Giá khuyến mãi</label>
+                                <div class="input-group">
+                                    <input asp-for="SalePrice" class="form-control" type="number" step="1000" min="0">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <small class="form-text text-muted">Để trống nếu không có khuyến mãi</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Attributes -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Thuộc tính sản phẩm</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label asp-for="Size" class="form-label">Kích thước</label>
+                                <input asp-for="Size" class="form-control" placeholder="S, M, L, XL...">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Color" class="form-label">Màu sắc</label>
+                                <input asp-for="Color" class="form-control" placeholder="Đen, Trắng, Xanh...">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Material" class="form-label">Chất liệu</label>
+                                <input asp-for="Material" class="form-control" placeholder="Cotton, Polyester...">
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label asp-for="Weight" class="form-label">Trọng lượng</label>
+                                <div class="input-group">
+                                    <input asp-for="Weight" class="form-control" type="number" step="0.1" min="0">
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Dimensions" class="form-label">Kích thước (DxRxC)</label>
+                                <input asp-for="Dimensions" class="form-control" placeholder="30x40x5 cm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">SEO & Marketing</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="MetaTitle" class="form-label">Meta Title</label>
+                            <input asp-for="MetaTitle" class="form-control" placeholder="Tiêu đề SEO...">
+                            <small class="form-text text-muted">Để trống để sử dụng tên sản phẩm</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MetaDescription" class="form-label">Meta Description</label>
+                            <textarea asp-for="MetaDescription" class="form-control" rows="2" placeholder="Mô tả cho search engine..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Tags" class="form-label">Tags</label>
+                            <input asp-for="Tags" class="form-control" placeholder="tag1, tag2, tag3...">
+                            <small class="form-text text-muted">Các từ khóa phân cách bằng dấu phẩy</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Product Status -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Trạng thái sản phẩm</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="p-2 bg-light rounded">
+                                    <i class="fas fa-tag text-primary"></i>
+                                    <div class="small">SKU</div>
+                                    <div class="font-weight-bold">@Model.SKU</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 bg-light rounded">
+                                    <i class="fas fa-box text-info"></i>
+                                    <div class="small">Tồn kho</div>
+                                    <div class="font-weight-bold">@Model.StockQuantity</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category & Brand -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Phân loại</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="@ViewBag.Categories">
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="BrandId" class="form-label">Thương hiệu</label>
+                            <select asp-for="BrandId" class="form-select" asp-items="@ViewBag.Brands">
+                                <option value="">-- Chọn thương hiệu --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Tồn kho</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="StockQuantity" class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                            <input asp-for="StockQuantity" class="form-control" type="number" min="0">
+                            <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="ManageStock" class="form-check-input" type="checkbox">
+                            <label asp-for="ManageStock" class="form-check-label">
+                                Quản lý tồn kho
+                            </label>
+                            <small class="form-text text-muted d-block">Tự động cập nhật khi có đơn hàng</small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="InStock" class="form-check-input" type="checkbox">
+                            <label asp-for="InStock" class="form-check-label">
+                                Còn hàng
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Image -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Hình ảnh chính</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
+                        {
+                            <div class="mb-3">
+                                <img src="@Model.FeaturedImageUrl" class="img-fluid rounded" style="max-height: 200px;" alt="Current Image">
+                                <div class="small text-muted mt-1">Ảnh hiện tại</div>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Thay đổi ảnh chính</label>
+                            <input type="file" name="FeaturedImage" class="form-control" accept="image/*" id="featuredImageInput">
+                            <small class="form-text text-muted">Kích thước khuyến nghị: 800x800px</small>
+                        </div>
+
+                        <div id="imagePreview" class="mt-3" style="display: none;">
+                            <img id="previewImg" src="" class="img-fluid rounded" style="max-height: 200px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">
+                                <i class="fas fa-trash"></i> Xóa ảnh mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Cài đặt</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input asp-for="IsFeatured" class="form-check-input" type="checkbox">
+                            <label asp-for="IsFeatured" class="form-check-label">
+                                Sản phẩm nổi bật
+                            </label>
+                            <small class="form-text text-muted d-block">Hiển thị ở vị trí ưu tiên</small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox">
+                            <label asp-for="IsActive" class="form-check-label">
+                                Kích hoạt
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Cập nhật sản phẩm
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                                <i class="fas fa-trash"></i> Xóa sản phẩm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Delete Form -->
+    <form id="deleteForm" asp-action="DeleteProduct" method="post" style="display: none;">
+        <input asp-for="Id" type="hidden" />
+    </form>
+</div>
+
+@section Scripts {
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    
+    <script>
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#descriptionEditor',
+            height: 300,
+            menubar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                'anchor', 'searchreplace', 'visualblocks', 'code',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }'
+        });
+
+        // Image preview
+        document.getElementById('featuredImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removeImage() {
+            document.getElementById('featuredImageInput').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này không? Hành động này không thể hoàn tác.')) {
+                document.getElementById('deleteForm').submit();
+            }
+        }
+
+        // Form validation
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            const name = document.querySelector('[name="Name"]').value.trim();
+            const sku = document.querySelector('[name="SKU"]').value.trim();
+            const price = document.querySelector('[name="Price"]').value;
+
+            if (!name) {
+                alert('Vui lòng nhập tên sản phẩm.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!sku) {
+                alert('Vui lòng nhập SKU.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!price || price <= 0) {
+                alert('Vui lòng nhập giá sản phẩm hợp lệ.');
+                e.preventDefault();
+                return;
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card-header h6 {
+            color: #5a5c69 !important;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #5a5c69;
+        }
+
+        .text-danger {
+            font-size: 0.875rem;
+        }
+
+        #imagePreview img {
+            border: 2px solid #e3e6f0;
+        }
+
+        .input-group-text {
+            background-color: #f8f9fc;
+            border-color: #d1d3e2;
+        }
+
+        .bg-light {
+            background-color: #f8f9fc !important;
+        }
+    </style>
+}

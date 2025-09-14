@@ -1,0 +1,274 @@
+@model JohnHenryFashionWeb.ViewModels.TwoFactorVerificationViewModel
+@{
+    ViewData["Title"] = "Xác thực hai yếu tố";
+}
+
+<style>
+    .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+    
+    .video-background video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+    }
+    
+    .video-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: -1;
+    }
+    
+    .auth-container {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 40px 0;
+    }
+    
+    .auth-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(15px);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .security-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        color: white;
+        font-size: 2rem;
+    }
+    
+    .verification-code-input {
+        text-align: center;
+        font-size: 1.5rem;
+        letter-spacing: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .countdown-timer {
+        font-size: 1.1rem;
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .expired-timer {
+        color: #dc3545;
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .auth-container {
+            padding: 20px 0;
+        }
+        
+        .video-background {
+            display: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    }
+</style>
+
+<!-- Video Background -->
+<div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source src="~/videos/0_Woman_Shopping_3840x2160.mov" type="video/mp4">
+        <source src="~/videos/0_Woman_Shopping_3840x2160.mov" type="video/quicktime">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%;"></div>
+    </video>
+</div>
+<div class="video-overlay"></div>
+
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="card auth-card shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="text-center">
+                            <div class="security-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h2 class="card-title text-dark fw-bold mb-2">Xác thực hai yếu tố</h2>
+                            <p class="text-muted mb-4">
+                                Chúng tôi đã gửi mã xác thực đến email của bạn<br>
+                                <strong>@ViewBag.MaskedEmail</strong>
+                            </p>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                @ViewBag.ErrorMessage
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <form asp-action="VerifyTwoFactor" method="post" role="form" id="twoFactorForm">
+                            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                            <input type="hidden" asp-for="UserId" />
+                            <input type="hidden" asp-for="Provider" />
+                            
+                            <div class="mb-4">
+                                <label asp-for="Code" class="form-label fw-semibold text-center d-block">Mã xác thực</label>
+                                <input asp-for="Code" class="form-control form-control-lg verification-code-input" 
+                                       placeholder="000000" maxlength="6" autocomplete="off" />
+                                <span asp-validation-for="Code" class="text-danger"></span>
+                            </div>
+
+                            <div class="text-center mb-4">
+                                <div class="countdown-timer" id="countdownTimer">
+                                    Mã có hiệu lực trong: <span id="timeLeft">05:00</span>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary btn-lg fw-semibold" id="verifyBtn">
+                                    <i class="fas fa-check-circle me-2"></i>Xác thực
+                                </button>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="button" class="btn btn-outline-secondary" id="resendBtn" onclick="resendCode()">
+                                    <i class="fas fa-redo-alt me-2"></i>Gửi lại mã
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="mb-0">
+                                <a asp-action="Login" class="text-decoration-none">
+                                    <i class="fas fa-arrow-left me-1"></i>Quay lại đăng nhập
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let timeLeft = 300; // 5 minutes in seconds
+        let timer;
+        
+        function startCountdown() {
+            timer = setInterval(function() {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('timeLeft').textContent = '00:00';
+                    document.getElementById('countdownTimer').classList.add('expired-timer');
+                    document.getElementById('countdownTimer').innerHTML = 
+                        '<i class="fas fa-exclamation-triangle me-1"></i>Mã đã hết hiệu lực';
+                    document.getElementById('verifyBtn').disabled = true;
+                    document.getElementById('resendBtn').style.display = 'block';
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timeLeft').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        function resendCode() {
+            fetch('/Account/ResendTwoFactorCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    userId: '@Model.UserId',
+                    provider: '@Model.Provider'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    timeLeft = 300;
+                    document.getElementById('countdownTimer').classList.remove('expired-timer');
+                    document.getElementById('verifyBtn').disabled = false;
+                    startCountdown();
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>
+                        Mã xác thực mới đã được gửi!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+                    
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 5000);
+                } else {
+                    alert('Có lỗi xảy ra khi gửi lại mã. Vui lòng thử lại.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi lại mã. Vui lòng thử lại.');
+            });
+        }
+        
+        // Auto-format verification code input
+        document.getElementById('Code').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 6) {
+                value = value.substring(0, 6);
+            }
+            e.target.value = value;
+        });
+        
+        // Start countdown when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            startCountdown();
+        });
+    </script>
+}

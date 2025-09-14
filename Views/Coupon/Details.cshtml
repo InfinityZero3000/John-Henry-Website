@@ -1,0 +1,239 @@
+@model JohnHenryFashionWeb.Models.Coupon
+
+@{
+    ViewData["Title"] = "Chi tiết mã giảm giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Chi tiết mã giảm giá</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Manage", "Coupon")">Quản lý mã giảm giá</a></li>
+                        <li class="breadcrumb-item active">Chi tiết</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <strong>@Model.Code</strong> - @Model.Name
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge badge-success ml-2">Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger ml-2">Tạm dừng</span>
+                                }
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Mã giảm giá:</dt>
+                                        <dd class="col-sm-8"><code>@Model.Code</code></dd>
+                                        
+                                        <dt class="col-sm-4">Tên:</dt>
+                                        <dd class="col-sm-8">@Model.Name</dd>
+                                        
+                                        <dt class="col-sm-4">Mô tả:</dt>
+                                        <dd class="col-sm-8">@(Model.Description ?? "Không có mô tả")</dd>
+                                        
+                                        <dt class="col-sm-4">Loại giảm:</dt>
+                                        <dd class="col-sm-8">
+                                            @if (Model.Type == "percentage")
+                                            {
+                                                <span class="badge badge-info">Phần trăm</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning">Số tiền cố định</span>
+                                            }
+                                        </dd>
+                                        
+                                        <dt class="col-sm-4">Giá trị:</dt>
+                                        <dd class="col-sm-8">
+                                            @if (Model.Type == "percentage")
+                                            {
+                                                <strong>@Model.Value%</strong>
+                                            }
+                                            else
+                                            {
+                                                <strong>@Model.Value.ToString("N0") VNĐ</strong>
+                                            }
+                                        </dd>
+                                    </dl>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-5">Đơn tối thiểu:</dt>
+                                        <dd class="col-sm-7">
+                                            @if (Model.MinOrderAmount.HasValue)
+                                            {
+                                                @Model.MinOrderAmount.Value.ToString("N0") @:VNĐ
+                                            }
+                                            else
+                                            {
+                                                <em>Không giới hạn</em>
+                                            }
+                                        </dd>
+                                        
+                                        <dt class="col-sm-5">Giới hạn sử dụng:</dt>
+                                        <dd class="col-sm-7">
+                                            @if (Model.UsageLimit.HasValue)
+                                            {
+                                                @Model.UsageLimit.Value.ToString("N0") @:lần
+                                            }
+                                            else
+                                            {
+                                                <em>Không giới hạn</em>
+                                            }
+                                        </dd>
+                                        
+                                        <dt class="col-sm-5">Đã sử dụng:</dt>
+                                        <dd class="col-sm-7">
+                                            <strong>@Model.UsageCount lần</strong>
+                                        </dd>
+                                        
+                                        <dt class="col-sm-5">Thời gian:</dt>
+                                        <dd class="col-sm-7">
+                                            @if (Model.StartDate.HasValue && Model.EndDate.HasValue)
+                                            {
+                                                @Model.StartDate.Value.ToString("dd/MM/yyyy") @:- @Model.EndDate.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else if (Model.StartDate.HasValue)
+                                            {
+                                                @:Từ @Model.StartDate.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else if (Model.EndDate.HasValue)
+                                            {
+                                                @:Đến @Model.EndDate.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <em>Không giới hạn thời gian</em>
+                                            }
+                                        </dd>
+                                        
+                                        <dt class="col-sm-5">Ngày tạo:</dt>
+                                        <dd class="col-sm-7">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Chỉnh sửa
+                            </a>
+                            <a href="@Url.Action("Manage")" class="btn btn-secondary">
+                                <i class="fas fa-list"></i> Quay lại danh sách
+                            </a>
+                            <a href="@Url.Action("ToggleStatus", new { id = Model.Id })" 
+                               class="btn @(Model.IsActive ? "btn-warning" : "btn-success")"
+                               onclick="return confirm('@(Model.IsActive ? "Bạn có muốn tạm dừng mã giảm giá này?" : "Bạn có muốn kích hoạt mã giảm giá này?")')">
+                                <i class="fas @(Model.IsActive ? "fa-pause" : "fa-play")"></i> 
+                                @(Model.IsActive ? "Tạm dừng" : "Kích hoạt")
+                            </a>
+                            <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger" 
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')">
+                                <i class="fas fa-trash"></i> Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Thống kê sử dụng</h3>
+                        </div>
+                        <div class="card-body">
+                            @{
+                                var usagePercent = Model.UsageLimit.HasValue && Model.UsageLimit > 0 
+                                    ? (Model.UsageCount * 100.0 / Model.UsageLimit.Value) 
+                                    : 0;
+                            }
+                            
+                            <div class="progress-group">
+                                Tỷ lệ sử dụng
+                                <span class="float-right">
+                                    <b>@Model.UsageCount</b>/@(Model.UsageLimit?.ToString() ?? "∞")
+                                </span>
+                                <div class="progress progress-sm">
+                                    <div class="progress-bar bg-primary" style="width: @usagePercent%"></div>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <h5>Trạng thái mã giảm giá</h5>
+                            <ul class="list-unstyled">
+                                <li>
+                                    <i class="fas fa-circle @(Model.IsActive ? "text-success" : "text-danger")"></i>
+                                    @(Model.IsActive ? "Đang hoạt động" : "Tạm dừng")
+                                </li>
+                                
+                                @if (Model.StartDate.HasValue && Model.StartDate > DateTime.UtcNow)
+                                {
+                                    <li><i class="fas fa-clock text-warning"></i> Chưa bắt đầu</li>
+                                }
+                                else if (Model.EndDate.HasValue && Model.EndDate < DateTime.UtcNow)
+                                {
+                                    <li><i class="fas fa-times-circle text-danger"></i> Đã hết hạn</li>
+                                }
+                                else
+                                {
+                                    <li><i class="fas fa-check-circle text-success"></i> Trong thời gian hiệu lực</li>
+                                }
+                                
+                                @if (Model.UsageLimit.HasValue && Model.UsageCount >= Model.UsageLimit.Value)
+                                {
+                                    <li><i class="fas fa-ban text-danger"></i> Đã hết lượt sử dụng</li>
+                                }
+                                else
+                                {
+                                    <li><i class="fas fa-check text-success"></i> Còn lượt sử dụng</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Hướng dẫn sử dụng</h3>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Khách hàng có thể sử dụng mã này khi:</strong></p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Mã đang được kích hoạt</li>
+                                <li>✓ Trong thời gian hiệu lực</li>
+                                <li>✓ Còn lượt sử dụng</li>
+                                @if (Model.MinOrderAmount.HasValue)
+                                {
+                                    <li>✓ Đơn hàng tối thiểu @Model.MinOrderAmount.Value.ToString("N0") VNĐ</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

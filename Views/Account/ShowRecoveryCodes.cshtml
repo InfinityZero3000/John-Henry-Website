@@ -1,0 +1,363 @@
+@model JohnHenryFashionWeb.ViewModels.UserSecurityViewModel
+
+@{
+    ViewData["Title"] = "Mã khôi phục";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-shield-alt"></i>
+                    Mã khôi phục xác thực hai yếu tố
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Quan trọng - Vui lòng lưu trữ an toàn!
+                    </h6>
+                    <p class="mb-0">
+                        Đây là những mã khôi phục duy nhất cho tài khoản của bạn. 
+                        <strong>Mỗi mã chỉ có thể sử dụng một lần</strong> và sẽ giúp bạn truy cập vào tài khoản 
+                        khi không thể sử dụng ứng dụng xác thực.
+                    </p>
+                </div>
+
+                <div class="recovery-codes-container">
+                    <h6>
+                        <i class="fas fa-key"></i>
+                        Các mã khôi phục của bạn:
+                    </h6>
+                    
+                    <div class="row">
+                        @if (Model.RecoveryCodes != null)
+                        {
+                            @for (int i = 0; i < Model.RecoveryCodes.Count; i++)
+                            {
+                                <div class="col-md-6 mb-2">
+                                    <div class="recovery-code-item">
+                                        <code class="recovery-code">@Model.RecoveryCodes[i]</code>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" 
+                                                data-code="@Model.RecoveryCodes[i]" title="Sao chép">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb"></i> Hướng dẫn sử dụng:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Lưu trữ an toàn:</strong> In ra giấy hoặc lưu vào nơi an toàn</li>
+                            <li><strong>Không chia sẻ:</strong> Đừng chia sẻ mã này với bất kỳ ai</li>
+                            <li><strong>Sử dụng khi cần:</strong> Dùng khi mất điện thoại hoặc không thể xác thực</li>
+                            <li><strong>Mỗi mã một lần:</strong> Mỗi mã chỉ sử dụng được một lần duy nhất</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button type="button" class="btn btn-primary mr-2" onclick="printCodes()">
+                        <i class="fas fa-print"></i>
+                        In mã khôi phục
+                    </button>
+                    <button type="button" class="btn btn-success mr-2" onclick="downloadCodes()">
+                        <i class="fas fa-download"></i>
+                        Tải xuống
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="copyAllCodes()">
+                        <i class="fas fa-copy"></i>
+                        Sao chép tất cả
+                    </button>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Bạn có thể tạo mã khôi phục mới bất kỳ lúc nào trong phần cài đặt bảo mật.
+                    </small>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <a href="@Url.Action("TwoFactorAuthentication", "Account")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Quay lại cài đặt
+                        </a>
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        <a href="@Url.Action("Profile", "Account")" class="btn btn-primary">
+                            <i class="fas fa-user"></i>
+                            Đến hồ sơ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hướng dẫn chi tiết -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-question-circle"></i>
+                    Câu hỏi thường gặp
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="faqAccordion">
+                    <div class="card">
+                        <div class="card-header" id="faq1">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" 
+                                        data-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                                    Khi nào tôi cần sử dụng mã khôi phục?
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapse1" class="collapse show" aria-labelledby="faq1" data-parent="#faqAccordion">
+                            <div class="card-body">
+                                Bạn cần sử dụng mã khôi phục khi:
+                                <ul>
+                                    <li>Mất điện thoại có cài ứng dụng xác thực</li>
+                                    <li>Ứng dụng xác thực không hoạt động</li>
+                                    <li>Không thể nhận mã xác thực qua SMS</li>
+                                    <li>Thay đổi thiết bị mới</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header" id="faq2">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" 
+                                        data-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                                    Tôi có thể tạo mã khôi phục mới không?
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapse2" class="collapse" aria-labelledby="faq2" data-parent="#faqAccordion">
+                            <div class="card-body">
+                                Có, bạn có thể tạo mã khôi phục mới bất kỳ lúc nào. Lưu ý rằng việc tạo mã mới 
+                                sẽ vô hiệu hóa tất cả các mã cũ chưa sử dụng.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header" id="faq3">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" 
+                                        data-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                                    Làm sao để sử dụng mã khôi phục?
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapse3" class="collapse" aria-labelledby="faq3" data-parent="#faqAccordion">
+                            <div class="card-body">
+                                Khi đăng nhập, chọn "Sử dụng mã khôi phục" thay vì nhập mã từ ứng dụng xác thực, 
+                                sau đó nhập một trong các mã khôi phục của bạn.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template in ẩn -->
+<div id="printTemplate" style="display: none;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2>Mã khôi phục xác thực hai yếu tố</h2>
+        <p><strong>Tài khoản:</strong> @User.Identity?.Name</p>
+        <p><strong>Ngày tạo:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <h3>Các mã khôi phục:</h3>
+        @if (Model.RecoveryCodes != null)
+        {
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: monospace; font-size: 14px;">
+                @foreach (var code in Model.RecoveryCodes)
+                {
+                    <div style="padding: 5px; border: 1px solid #ccc; text-align: center;">@code</div>
+                }
+            </div>
+        }
+    </div>
+    
+    <div style="margin-top: 30px; font-size: 12px;">
+        <h4>Lưu ý quan trọng:</h4>
+        <ul>
+            <li>Mỗi mã chỉ có thể sử dụng một lần</li>
+            <li>Lưu trữ ở nơi an toàn</li>
+            <li>Không chia sẻ với người khác</li>
+            <li>Sử dụng khi không thể xác thực bằng ứng dụng</li>
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Sao chép mã đơn lẻ
+            $('.copy-btn').click(function() {
+                var code = $(this).data('code');
+                copyToClipboard(code);
+                showToast('Đã sao chép mã: ' + code);
+            });
+        });
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                console.log('Copied to clipboard');
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                // Fallback method
+                var textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Fallback copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+
+        function copyAllCodes() {
+            var codes = @Html.Raw(Json.Serialize(Model.RecoveryCodes ?? new string[0]));
+            var allCodes = codes.join('\n');
+            copyToClipboard(allCodes);
+            showToast('Đã sao chép tất cả mã khôi phục!');
+        }
+
+        function printCodes() {
+            var printContent = document.getElementById('printTemplate').innerHTML;
+            var newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Mã khôi phục - John Henry Fashion</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            h2, h3, h4 { color: #333; }
+                            .recovery-code { 
+                                padding: 8px; 
+                                border: 1px solid #ccc; 
+                                margin: 2px; 
+                                display: inline-block; 
+                                font-family: monospace;
+                                background: #f8f9fa;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${printContent}
+                    </body>
+                </html>
+            `);
+            newWindow.document.close();
+            newWindow.print();
+        }
+
+        function downloadCodes() {
+            var codes = @Html.Raw(Json.Serialize(Model.RecoveryCodes ?? new string[0]));
+            var content = `Mã khôi phục xác thực hai yếu tố - John Henry Fashion
+Tài khoản: @User.Identity?.Name
+Ngày tạo: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+
+Các mã khôi phục:
+$${codes.map((code, index) => `$${index + 1}. $${code}`).join('\n')}
+
+Lưu ý quan trọng:
+- Mỗi mã chỉ có thể sử dụng một lần
+- Lưu trữ ở nơi an toàn
+- Không chia sẻ với người khác
+- Sử dụng khi không thể xác thực bằng ứng dụng`;
+
+            var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'recovery-codes-' + new Date().getTime() + '.txt';
+            link.click();
+            showToast('Đã tải xuống file mã khôi phục!');
+        }
+
+        function showToast(message) {
+            // Simple toast notification
+            var toast = $(`<div class="alert alert-success alert-dismissible fade show position-fixed" 
+                             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                             ${message}
+                             <button type="button" class="close" data-dismiss="alert">
+                                 <span>&times;</span>
+                             </button>
+                         </div>`);
+            $('body').append(toast);
+            setTimeout(() => toast.alert('close'), 3000);
+        }
+    </script>
+    
+    <style>
+        .recovery-code-item {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .recovery-code {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .copy-btn {
+            margin-left: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .recovery-codes-container {
+            background: #fff;
+            border: 2px dashed #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        @@media print {
+            body * {
+                visibility: hidden;
+            }
+            #printTemplate, #printTemplate * {
+                visibility: visible;
+            }
+            #printTemplate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                display: block !important;
+            }
+        }
+    </style>
+}

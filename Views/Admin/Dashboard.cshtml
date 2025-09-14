@@ -1,0 +1,564 @@
+@model JohnHenryFashionWeb.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan hệ thống";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["CurrentSection"] = "dashboard";
+}
+
+<!-- Header Section with Quick Actions -->
+<div class="dashboard-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">
+                <i class="fas fa-tachometer-alt text-primary me-2"></i>
+                Dashboard Admin
+            </h1>
+            <p class="text-muted mb-0">Tổng quan toàn diện về hệ thống John Henry Fashion</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Làm mới
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-calendar-alt"></i> Hôm nay
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-period="today">Hôm nay</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="yesterday">Hôm qua</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="week">7 ngày qua</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="month">30 ngày qua</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Performance Indicators -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 kpi-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Doanh thu hôm nay
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(Model.DashboardSummary?.TodayRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN")) ?? "0 ₫")
+                        </div>
+                        <div class="small text-success mt-1">
+                            <i class="fas fa-arrow-up"></i>
+                            @{
+                                var revenueChange = (Model.WeeklyComparison?.LastWeekRevenue ?? 0) > 0 
+                                    ? ((Model.WeeklyComparison?.ThisWeekRevenue ?? 0) - (Model.WeeklyComparison?.LastWeekRevenue ?? 0)) / (Model.WeeklyComparison?.LastWeekRevenue ?? 1) * 100
+                                    : 0;
+                            }
+                            @($"{revenueChange:F1}%") so với tuần trước
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 kpi-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Đơn hàng hôm nay
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model.DashboardSummary?.TodayOrders ?? 0)</div>
+                        <div class="small text-success mt-1">
+                            <i class="fas fa-arrow-up"></i>
+                            @{
+                                var orderChange = (Model.WeeklyComparison?.LastWeekOrders ?? 0) > 0 
+                                    ? ((Model.WeeklyComparison?.ThisWeekOrders ?? 0) - (Model.WeeklyComparison?.LastWeekOrders ?? 0)) / (double)(Model.WeeklyComparison?.LastWeekOrders ?? 1) * 100
+                                    : 0;
+                            }
+                            @($"{orderChange:F1}%") so với tuần trước
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2 kpi-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Khách truy cập
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model.DashboardSummary?.TodayVisitors ?? 0)</div>
+                        <div class="small text-info mt-1">
+                            <i class="fas fa-eye"></i>
+                            Lượt xem hôm nay
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2 kpi-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Người dùng hoạt động
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model.DashboardSummary?.ActiveUsers ?? 0)</div>
+                        <div class="small text-muted mt-1">
+                            <i class="fas fa-user-check"></i>
+                            Tài khoản active
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-friends fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Alerts -->
+@if (Model.SystemAlerts.Count > 0)
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-light border-left-warning shadow-sm">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-bell text-warning fa-lg me-3"></i>
+                    <div class="flex-grow-1">
+                        <h6 class="alert-heading mb-2">Thông báo hệ thống</h6>
+                        <div class="alert-items">
+                            @foreach (var alert in Model.SystemAlerts)
+                            {
+                                <div class="alert-item d-flex align-items-center mb-1">
+                                    <i class="@alert.Icon text-@alert.Type me-2"></i>
+                                    <span class="flex-grow-1">@alert.Message</span>
+                                    <a href="@alert.Action" class="btn btn-sm btn-outline-@alert.Type">Xem chi tiết</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Quick Actions Panel -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bolt me-2"></i>Thao tác nhanh
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var action in Model.QuickActions)
+                    {
+                        <div class="col-xl-2 col-md-4 col-6 mb-3">
+                            <a href="@action.Url" class="quick-action-card text-decoration-none">
+                                <div class="card border-left-@action.Color h-100 hover-shadow">
+                                    <div class="card-body text-center py-3">
+                                        <i class="@action.Icon fa-2x text-@action.Color mb-2"></i>
+                                        <div class="small font-weight-bold text-gray-800">@action.Title</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Content -->
+<div class="row">
+    <!-- Revenue Chart -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-area me-2"></i>Biểu đồ doanh thu
+                </h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow">
+                        <a class="dropdown-item" href="#">Xuất Excel</a>
+                        <a class="dropdown-item" href="#">Xuất PDF</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="revenueChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie Chart -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-pie me-2"></i>Phân khúc doanh thu
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="mt-4 text-center small">
+                    @if (Model.CategoryPerformance?.Any() == true)
+                    {
+                        @foreach (var category in Model.CategoryPerformance.Take(3))
+                        {
+                            <span class="me-4">
+                                <i class="fas fa-circle text-primary"></i> @category.CategoryName
+                            </span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities and Data Tables -->
+<div class="row">
+    <!-- Recent Orders -->
+    <div class="col-xl-6 col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-shopping-bag me-2"></i>Đơn hàng gần đây
+                </h6>
+                <a href="/Admin/Orders" class="btn btn-sm btn-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.RecentOrders.Take(8))
+                            {
+                                <tr>
+                                    <td class="font-weight-bold">#@order.Id.ToString().Substring(0, 8)</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                @(order.User?.FirstName?.Substring(0, 1) ?? "U")
+                                            </div>
+                                            <div>
+                                                <div class="font-weight-bold">@(order.User?.FirstName ?? "Unknown") @(order.User?.LastName ?? "")</div>
+                                                <div class="small text-muted">@order.CreatedAt.ToString("dd/MM HH:mm")</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="font-weight-bold text-success">@order.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = order.Status switch {
+                                                "completed" => "badge-success",
+                                                "pending" => "badge-warning",
+                                                "processing" => "badge-info",
+                                                "cancelled" => "badge-danger",
+                                                _ => "badge-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@order.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users & Low Stock -->
+    <div class="col-xl-6 col-lg-6">
+        <!-- New Users -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-plus me-2"></i>Người dùng mới
+                </h6>
+                <a href="/Admin/Users" class="btn btn-sm btn-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body">
+                @foreach (var user in Model.RecentUsers)
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-md bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                            @(user.FirstName?.Substring(0, 1) ?? "U")
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="font-weight-bold">@user.FirstName @user.LastName</div>
+                            <div class="small text-muted">@user.Email</div>
+                            <div class="small text-muted">Đăng ký: @user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                        <div class="badge badge-success">Mới</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        @if (Model.LowStockProducts.Count > 0)
+        {
+            <div class="card shadow mb-4 border-left-warning">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Cảnh báo tồn kho
+                    </h6>
+                    <a href="/Admin/Inventory" class="btn btn-sm btn-warning">Quản lý kho</a>
+                </div>
+                <div class="card-body">
+                    @foreach (var product in Model.LowStockProducts.Take(5))
+                    {
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <div class="font-weight-bold">@product.Name</div>
+                                <div class="small text-muted">SKU: @product.SKU</div>
+                            </div>
+                            <div class="badge badge-warning">@product.StockQuantity còn lại</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.RevenueTimeSeriesData?.Select(x => $"'{x.Date.ToString("dd/MM")}'") ?? new string[0]))],
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: [@Html.Raw(string.Join(",", Model.RevenueTimeSeriesData?.Select(x => x.Value) ?? new decimal[0]))],
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.CategoryPerformance?.Select(x => $"'{x.CategoryName}'") ?? new string[0]))],
+                datasets: [{
+                    data: [@Html.Raw(string.Join(",", Model.CategoryPerformance?.Select(x => x.Revenue) ?? new decimal[0]))],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Refresh Dashboard
+        function refreshDashboard() {
+            location.reload();
+        }
+
+        // Period change
+        document.querySelectorAll('[data-period]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const period = this.dataset.period;
+                // Add period change logic here
+                console.log('Changing period to:', period);
+            });
+        });
+
+        // Auto refresh every 5 minutes
+        setTimeout(function() {
+            location.reload();
+        }, 300000);
+    </script>
+}
+
+@section Styles {
+    <style>
+        .kpi-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+        }
+        
+        .quick-action-card:hover .card {
+            transform: translateY(-2px);
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+        }
+        
+        .border-left-primary {
+            border-left: 0.25rem solid #4e73df !important;
+        }
+        
+        .border-left-success {
+            border-left: 0.25rem solid #1cc88a !important;
+        }
+        
+        .border-left-info {
+            border-left: 0.25rem solid #36b9cc !important;
+        }
+        
+        .border-left-warning {
+            border-left: 0.25rem solid #f6c23e !important;
+        }
+        
+        .border-left-purple {
+            border-left: 0.25rem solid #6f42c1 !important;
+        }
+        
+        .text-purple {
+            color: #6f42c1 !important;
+        }
+        
+        .btn-outline-purple {
+            color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        
+        .btn-outline-purple:hover {
+            color: #fff;
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        
+        .avatar-sm {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.875rem;
+        }
+        
+        .avatar-md {
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1rem;
+        }
+        
+        .hover-shadow {
+            transition: all 0.2s;
+        }
+        
+        .alert-item {
+            padding: 0.25rem 0;
+        }
+        
+        .dashboard-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-area {
+            position: relative;
+            height: 20rem;
+        }
+        
+        .chart-pie {
+            position: relative;
+            height: 15rem;
+        }
+        
+        .badge-success {
+            background-color: #1cc88a;
+        }
+        
+        .badge-warning {
+            background-color: #f6c23e;
+        }
+        
+        .badge-info {
+            background-color: #36b9cc;
+        }
+        
+        .badge-danger {
+            background-color: #e74a3b;
+        }
+        
+        .badge-secondary {
+            background-color: #858796;
+        }
+    </style>
+}

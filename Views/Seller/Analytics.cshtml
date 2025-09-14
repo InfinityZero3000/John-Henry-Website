@@ -1,0 +1,311 @@
+@model JohnHenryFashionWeb.ViewModels.SellerAnalyticsViewModel
+@{
+    ViewData["Title"] = "Phân tích & Thống kê";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="page-title">Phân tích & Thống kê</h1>
+                    <p class="text-muted">Phân tích chi tiết hiệu suất kinh doanh</p>
+                </div>
+                <div>
+                    <select class="form-select" id="periodSelect">
+                        <option value="7">7 ngày qua</option>
+                        <option value="30" selected>30 ngày qua</option>
+                        <option value="90">90 ngày qua</option>
+                        <option value="365">1 năm qua</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-eye fa-2x"></i>
+                    </div>
+                    <h4>@Model.TotalProductViews</h4>
+                    <p class="text-muted mb-0">Lượt xem sản phẩm</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                    <h4>@Model.ConversionRate%</h4>
+                    <p class="text-muted mb-0">Tỷ lệ chuyển đổi</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                    <h4>@Model.TopProducts.Count</h4>
+                    <p class="text-muted mb-0">Sản phẩm bán chạy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                    <h4>+15%</h4>
+                    <p class="text-muted mb-0">Tăng trưởng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Biểu đồ Doanh thu theo thời gian</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Phân bố theo danh mục</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Sản phẩm bán chạy nhất</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopProducts.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Thứ hạng</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Số lượng bán</th>
+                                        <th>Doanh thu</th>
+                                        <th>Tỷ lệ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var totalRevenue = Model.TopProducts.Sum(p => p.Revenue);
+                                        var rank = 1;
+                                    }
+                                    @foreach (var product in Model.TopProducts)
+                                    {
+                                        var percentage = totalRevenue > 0 ? (product.Revenue / totalRevenue * 100) : 0;
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary">#@rank</span>
+                                            </td>
+                                            <td>
+                                                <strong>@product.ProductName</strong>
+                                            </td>
+                                            <td>@product.QuantitySold</td>
+                                            <td>@product.Revenue.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar" role="progressbar" 
+                                                         style="width: @percentage.ToString("F1")%" 
+                                                         aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100">
+                                                        @percentage.ToString("F1")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        rank++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                            <h5>Chưa có dữ liệu</h5>
+                            <p class="text-muted">Chưa có dữ liệu sản phẩm bán chạy.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Hiệu suất theo kênh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Bán hàng trực tiếp</span>
+                        <span class="text-success">85%</span>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Bán hàng online</span>
+                        <span class="text-info">65%</span>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" style="width: 65%"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Mạng xã hội</span>
+                        <span class="text-warning">45%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: 45%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Xu hướng khách hàng</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="customerTrendChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Revenue Chart
+        var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        var revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                datasets: [{
+                    label: 'Doanh thu (VND)',
+                    data: [120000, 190000, 300000, 500000, 200000, 300000, 450000],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Category Chart
+        var categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        var categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Áo thun', 'Quần jean', 'Váy đầm', 'Phụ kiện'],
+                datasets: [{
+                    data: [35, 25, 25, 15],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)',
+                        'rgb(75, 192, 192)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Customer Trend Chart
+        var customerCtx = document.getElementById('customerTrendChart').getContext('2d');
+        var customerChart = new Chart(customerCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
+                datasets: [{
+                    label: 'Khách hàng mới',
+                    data: [12, 19, 15, 25],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                }, {
+                    label: 'Khách hàng quay lại',
+                    data: [8, 14, 20, 18],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Period selector
+        document.getElementById('periodSelect').addEventListener('change', function() {
+            // TODO: Implement period change functionality
+            console.log('Period changed to:', this.value);
+        });
+    </script>
+}

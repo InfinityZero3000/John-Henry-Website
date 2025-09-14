@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã xác thực đăng nhập</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .verification-code {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        .security-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        .security-notice .icon {
+            color: #856404;
+            margin-right: 10px;
+        }
+        .timer-info {
+            background-color: #d1ecf1;
+            border-left: 4px solid #bee5eb;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 4px;
+            color: #0c5460;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .social-links {
+            margin-top: 20px;
+        }
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin: 0 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .social-links a:hover {
+            background-color: #764ba2;
+            transform: translateY(-2px);
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .header, .footer {
+                padding: 20px;
+            }
+            .verification-code {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Xác thực bảo mật</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">{{CompanyName}}</p>
+        </div>
+        
+        <div class="content">
+            <h2 style="color: #333; margin-bottom: 20px;">Xin chào {{UserName}}!</h2>
+            
+            <p>Chúng tôi nhận được yêu cầu đăng nhập vào tài khoản của bạn. Để bảo vệ tài khoản, vui lòng sử dụng mã xác thực dưới đây:</p>
+            
+            <div class="verification-code">
+                {{VerificationCode}}
+            </div>
+            
+            <div class="timer-info">
+                <strong>⏰ Lưu ý:</strong> Mã xác thực này chỉ có hiệu lực trong <strong>5 phút</strong>. Vui lòng nhập mã ngay để hoàn tất quá trình đăng nhập.
+            </div>
+            
+            <div class="security-notice">
+                <span class="icon">🛡️</span>
+                <strong>Bảo mật tài khoản:</strong> 
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Không chia sẻ mã này với bất kỳ ai</li>
+                    <li>Nếu bạn không yêu cầu đăng nhập, vui lòng liên hệ ngay với chúng tôi</li>
+                    <li>Luôn đăng xuất sau khi sử dụng trên thiết bị chung</li>
+                </ul>
+            </div>
+            
+            <p>Nếu bạn gặp khó khăn trong việc đăng nhập, đừng ngại liên hệ với đội ngũ hỗ trợ của chúng tôi.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{BaseUrl}}/contact" class="btn">Liên hệ hỗ trợ</a>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="color: #6c757d; font-size: 14px;">
+                <strong>Không phải bạn?</strong> Nếu bạn không yêu cầu mã xác thực này, có thể ai đó đang cố gắng truy cập vào tài khoản của bạn. 
+                Vui lòng thay đổi mật khẩu ngay và liên hệ với chúng tôi.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{CompanyName}}</strong></p>
+            <p>Fashion that defines your style</p>
+            
+            <div class="social-links">
+                <a href="#" title="Facebook">📘</a>
+                <a href="#" title="Instagram">📷</a>
+                <a href="#" title="Twitter">🐦</a>
+                <a href="#" title="YouTube">📹</a>
+            </div>
+            
+            <p style="margin-top: 20px;">
+                <a href="{{BaseUrl}}">Trang chủ</a> |
+                <a href="{{BaseUrl}}/contact">Liên hệ</a> |
+                <a href="{{BaseUrl}}/privacy">Chính sách bảo mật</a>
+            </p>
+            
+            <p style="font-size: 12px; color: #999; margin-top: 20px;">
+                Email này được gửi tự động, vui lòng không trả lời trực tiếp.<br>
+                © 2024 {{CompanyName}}. Tất cả quyền được bảo lưu.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

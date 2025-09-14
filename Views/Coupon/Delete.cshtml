@@ -1,0 +1,169 @@
+@model JohnHenryFashionWeb.Models.Coupon
+
+@{
+    ViewData["Title"] = "Xác nhận xóa mã giảm giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Xác nhận xóa mã giảm giá</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Manage", "Coupon")">Quản lý mã giảm giá</a></li>
+                        <li class="breadcrumb-item active">Xóa</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card card-danger">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Xác nhận xóa mã giảm giá
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Cảnh báo!</strong> Bạn đang thực hiện xóa mã giảm giá. Hành động này không thể hoàn tác.
+                            </div>
+                            
+                            <h5>Thông tin mã giảm giá sẽ bị xóa:</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Mã:</dt>
+                                        <dd class="col-sm-8"><code>@Model.Code</code></dd>
+                                        
+                                        <dt class="col-sm-4">Tên:</dt>
+                                        <dd class="col-sm-8">@Model.Name</dd>
+                                        
+                                        <dt class="col-sm-4">Loại:</dt>
+                                        <dd class="col-sm-8">
+                                            @if (Model.Type == "percentage")
+                                            {
+                                                @:Phần trăm (@Model.Value%)
+                                            }
+                                            else
+                                            {
+                                                @:Số tiền cố định (@Model.Value.ToString("N0") VNĐ)
+                                            }
+                                        </dd>
+                                        
+                                        <dt class="col-sm-4">Trạng thái:</dt>
+                                        <dd class="col-sm-8">
+                                            @if (Model.IsActive)
+                                            {
+                                                <span class="badge badge-success">Đang hoạt động</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">Tạm dừng</span>
+                                            }
+                                        </dd>
+                                    </dl>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-5">Đã sử dụng:</dt>
+                                        <dd class="col-sm-7">
+                                            <strong>@Model.UsageCount lần</strong>
+                                        </dd>
+                                        
+                                        <dt class="col-sm-5">Giới hạn:</dt>
+                                        <dd class="col-sm-7">
+                                            @if (Model.UsageLimit.HasValue)
+                                            {
+                                                @Model.UsageLimit.Value.ToString("N0") @:lần
+                                            }
+                                            else
+                                            {
+                                                <em>Không giới hạn</em>
+                                            }
+                                        </dd>
+                                        
+                                        <dt class="col-sm-5">Ngày tạo:</dt>
+                                        <dd class="col-sm-7">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
+                                        
+                                        <dt class="col-sm-5">Cập nhật:</dt>
+                                        <dd class="col-sm-7">@Model.UpdatedAt.ToString("dd/MM/yyyy")</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            
+                            @if (Model.UsageCount > 0)
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Lưu ý:</strong> Mã giảm giá này đã được sử dụng @Model.UsageCount lần. 
+                                    Việc xóa có thể ảnh hưởng đến lịch sử đơn hàng của khách hàng.
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="card-footer">
+                            <form asp-action="Delete" method="post" class="d-inline">
+                                <input asp-for="Id" type="hidden" />
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có CHẮC CHẮN muốn xóa mã giảm giá này không? Hành động này không thể hoàn tác!')">
+                                    <i class="fas fa-trash"></i> Xác nhận xóa
+                                </button>
+                            </form>
+                            
+                            <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </a>
+                            
+                            <a href="@Url.Action("Manage")" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Hủy bỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card card-warning">
+                        <div class="card-header">
+                            <h3 class="card-title">Các tùy chọn khác</h3>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Thay vì xóa, bạn có thể:</strong></p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a href="@Url.Action("ToggleStatus", new { id = Model.Id })" class="btn btn-sm btn-warning btn-block">
+                                        <i class="fas fa-pause"></i> Tạm dừng mã giảm giá
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-sm btn-primary btn-block">
+                                        <i class="fas fa-edit"></i> Chỉnh sửa thông tin
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <hr>
+                            
+                            <small class="text-muted">
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>Gợi ý:</strong> Tạm dừng mã giảm giá sẽ giữ lại dữ liệu và có thể kích hoạt lại sau.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

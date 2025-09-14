@@ -1,0 +1,253 @@
+@model JohnHenryFashionWeb.ViewModels.SellerProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cửa hàng";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Hồ sơ Seller</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin cá nhân</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateProfile" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FirstName" class="form-label">Họ</label>
+                                    <input asp-for="FirstName" class="form-control" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="LastName" class="form-label">Tên</label>
+                                    <input asp-for="LastName" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label">Email</label>
+                                    <input asp-for="Email" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Phone" class="form-label">Số điện thoại</label>
+                                    <input asp-for="Phone" class="form-control" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label asp-for="Address" class="form-label">Địa chỉ</label>
+                                    <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cập nhật thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Information -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin kinh doanh</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateBusinessInfo" method="post">
+                        <div class="mb-3">
+                            <label asp-for="CompanyName" class="form-label">Tên công ty/cửa hàng</label>
+                            <input asp-for="CompanyName" class="form-control" />
+                            <span asp-validation-for="CompanyName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="BusinessLicense" class="form-label">Giấy phép kinh doanh</label>
+                            <input asp-for="BusinessLicense" class="form-control" />
+                            <span asp-validation-for="BusinessLicense" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TaxCode" class="form-label">Mã số thuế</label>
+                            <input asp-for="TaxCode" class="form-control" />
+                            <span asp-validation-for="TaxCode" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái phê duyệt</label>
+                            <div>
+                                @if (Model.IsApproved)
+                                {
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check-circle"></i> Đã phê duyệt
+                                    </span>
+                                    @if (Model.ApprovedAt.HasValue)
+                                    {
+                                        <small class="d-block text-muted mt-1">
+                                            Ngày phê duyệt: @Model.ApprovedAt.Value.ToString("dd/MM/yyyy")
+                                        </small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge badge-warning">
+                                        <i class="fas fa-clock"></i> Chờ phê duyệt
+                                    </span>
+                                    <small class="d-block text-muted mt-1">
+                                        Vui lòng hoàn thiện thông tin để được phê duyệt
+                                    </small>
+                                }
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Ghi chú từ admin</label>
+                                <div class="alert alert-info">
+                                    @Model.Notes
+                                </div>
+                            </div>
+                        }
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cập nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Security -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Đổi mật khẩu</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ChangePassword" method="post">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Mật khẩu hiện tại</label>
+                            <input type="password" id="currentPassword" name="CurrentPassword" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                            <input type="password" id="newPassword" name="NewPassword" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                            <input type="password" id="confirmPassword" name="ConfirmPassword" class="form-control" required />
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-key"></i> Đổi mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Statistics -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thống kê tài khoản</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Ngày tham gia:</span>
+                            <strong>@Model.CreatedAt.ToString("dd/MM/yyyy")</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Lần đăng nhập cuối:</span>
+                            <strong>@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa cập nhật")</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Trạng thái tài khoản:</span>
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge badge-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Bị khóa</span>
+                            }
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <a asp-controller="Seller" asp-action="Dashboard" class="btn btn-outline-primary">
+                            <i class="fas fa-chart-line"></i> Xem thống kê bán hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Password confirmation validation
+        $('#confirmPassword').on('keyup', function() {
+            const newPassword = $('#newPassword').val();
+            const confirmPassword = $(this).val();
+            
+            if (newPassword !== confirmPassword) {
+                $(this).addClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $(this).after('<div class="invalid-feedback">Mật khẩu xác nhận không khớp</div>');
+            } else {
+                $(this).removeClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+            }
+        });
+    </script>
+}

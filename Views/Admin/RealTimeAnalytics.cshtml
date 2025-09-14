@@ -1,0 +1,693 @@
+@{
+    ViewData["Title"] = "Real-time Analytics - Theo dõi thời gian thực";
+    ViewData["CurrentSection"] = "realtime";
+    Layout = "~/Views/Shared/_AdminLayout_New.cshtml";
+}
+
+<div class="admin-content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="admin-page-title">
+                <i class="fas fa-broadcast-tower text-success"></i>
+                Real-time Analytics
+                <span class="live-indicator"></span>
+            </h2>
+            <p class="admin-page-subtitle">Theo dõi hoạt động kinh doanh thời gian thực</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="status-indicator online">
+                <span class="status-dot"></span>
+                <span class="status-text">Đang kết nối</span>
+            </div>
+            <button class="btn btn-outline-danger btn-sm" onclick="pauseRealTime()">
+                <i class="fas fa-pause"></i> Tạm dừng
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="admin-content-body">
+    <!-- Real-time KPIs -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="realtime-kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon bg-primary">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Người đang online</span>
+                        <div class="kpi-trend">
+                            <span class="trend-value" id="onlineUsers">247</span>
+                            <span class="trend-change positive">+12</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-chart">
+                    <canvas id="onlineChart" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="realtime-kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon bg-success">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Đơn hàng/giờ</span>
+                        <div class="kpi-trend">
+                            <span class="trend-value" id="ordersPerHour">23</span>
+                            <span class="trend-change positive">+5</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-chart">
+                    <canvas id="ordersChart" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="realtime-kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon bg-warning">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Doanh thu hôm nay</span>
+                        <div class="kpi-trend">
+                            <span class="trend-value" id="todayRevenue">₫45.2M</span>
+                            <span class="trend-change positive">+₫2.1M</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-chart">
+                    <canvas id="revenueChart" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="realtime-kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon bg-info">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="kpi-meta">
+                        <span class="kpi-label">Tỷ lệ chuyển đổi</span>
+                        <div class="kpi-trend">
+                            <span class="trend-value" id="conversionRate">3.8%</span>
+                            <span class="trend-change negative">-0.2%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-chart">
+                    <canvas id="conversionChart" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="realtime-chart-card">
+                <div class="chart-header">
+                    <h5 class="chart-title">
+                        <i class="fas fa-chart-line text-primary"></i>
+                        Hoạt động theo thời gian thực
+                    </h5>
+                    <div class="chart-controls">
+                        <select class="form-select form-select-sm" id="timeRange">
+                            <option value="5m">5 phút</option>
+                            <option value="15m" selected>15 phút</option>
+                            <option value="1h">1 giờ</option>
+                            <option value="4h">4 giờ</option>
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportRealTimeData()">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <canvas id="mainRealTimeChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="realtime-chart-card">
+                <div class="chart-header">
+                    <h5 class="chart-title">
+                        <i class="fas fa-globe text-info"></i>
+                        Nguồn truy cập
+                    </h5>
+                </div>
+                <div class="chart-body">
+                    <canvas id="trafficSourceChart" height="250"></canvas>
+                    <div class="traffic-legends">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: var(--primary-color)"></span>
+                            <span class="legend-text">Direct (45%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: var(--accent-color)"></span>
+                            <span class="legend-text">Social (28%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #10b981"></span>
+                            <span class="legend-text">Search (22%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #f59e0b"></span>
+                            <span class="legend-text">Khác (5%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Activity Feed -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="realtime-activity-card">
+                <div class="activity-header">
+                    <h5 class="activity-title">
+                        <i class="fas fa-stream text-success"></i>
+                        Hoạt động mới nhất
+                    </h5>
+                    <div class="activity-controls">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoScroll" checked>
+                            <label class="form-check-label" for="autoScroll">Auto scroll</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-feed" id="activityFeed">
+                    <!-- Activity items will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="realtime-alerts-card">
+                <div class="alerts-header">
+                    <h5 class="alerts-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        Cảnh báo hệ thống
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearAlerts()">
+                        <i class="fas fa-broom"></i> Xóa tất cả
+                    </button>
+                </div>
+                <div class="alerts-list" id="alertsList">
+                    <div class="alert-item warning">
+                        <div class="alert-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">Tồn kho thấp</div>
+                            <div class="alert-message">5 sản phẩm có tồn kho dưới 10 chiếc</div>
+                            <div class="alert-time">2 phút trước</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-item info">
+                        <div class="alert-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">Đơn hàng lớn</div>
+                            <div class="alert-message">Đơn hàng #12847 trị giá ₫2.5M</div>
+                            <div class="alert-time">5 phút trước</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-item success">
+                        <div class="alert-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">Mục tiêu đạt được</div>
+                            <div class="alert-message">Doanh thu hôm nay vượt 120%</div>
+                            <div class="alert-time">15 phút trước</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .live-indicator {
+        width: 12px;
+        height: 12px;
+        background: #16a34a;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 10px;
+        animation: pulse 2s infinite;
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        border-radius: 20px;
+        background: rgba(22, 163, 74, 0.1);
+    }
+
+    .status-indicator.online .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #16a34a;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .status-text {
+        font-size: 12px;
+        color: #16a34a;
+        font-weight: 500;
+    }
+
+    .realtime-kpi-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        height: 120px;
+    }
+
+    .kpi-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .kpi-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .kpi-meta {
+        flex: 1;
+    }
+
+    .kpi-label {
+        font-size: 12px;
+        color: #64748b;
+        display: block;
+    }
+
+    .kpi-trend {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .trend-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .trend-change {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .trend-change.positive {
+        background: rgba(22, 163, 74, 0.1);
+        color: #16a34a;
+    }
+
+    .trend-change.negative {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+    }
+
+    .realtime-chart-card,
+    .realtime-activity-card,
+    .realtime-alerts-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        height: 400px;
+    }
+
+    .chart-header,
+    .activity-header,
+    .alerts-header {
+        padding: 20px 25px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chart-title,
+    .activity-title,
+    .alerts-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .chart-body {
+        padding: 25px;
+        height: calc(100% - 80px);
+    }
+
+    .activity-feed {
+        height: calc(100% - 80px);
+        overflow-y: auto;
+        padding: 0;
+    }
+
+    .activity-item {
+        padding: 15px 25px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: background-color 0.2s ease;
+    }
+
+    .activity-item:hover {
+        background: #f8fafc;
+    }
+
+    .activity-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .activity-desc {
+        font-size: 12px;
+        color: #64748b;
+        margin: 2px 0 0 0;
+    }
+
+    .activity-time {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    .alerts-list {
+        height: calc(100% - 80px);
+        overflow-y: auto;
+        padding: 0;
+    }
+
+    .alert-item {
+        padding: 15px 25px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .alert-item.warning .alert-icon {
+        color: #f59e0b;
+    }
+
+    .alert-item.info .alert-icon {
+        color: #3b82f6;
+    }
+
+    .alert-item.success .alert-icon {
+        color: #16a34a;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 5px 0;
+    }
+
+    .alert-message {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0 0 5px 0;
+    }
+
+    .alert-time {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    .traffic-legends {
+        margin-top: 20px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+    }
+
+    .legend-text {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    @@keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.1); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+</style>
+
+<script>
+    let realTimeInterval;
+    let isPaused = false;
+
+    // Initialize real-time monitoring
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeRealTimeCharts();
+        startRealTimeUpdates();
+        initializeActivityFeed();
+    });
+
+    function initializeRealTimeCharts() {
+        // Main real-time chart
+        const mainCtx = document.getElementById('mainRealTimeChart').getContext('2d');
+        window.mainRealTimeChart = new Chart(mainCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Người dùng online',
+                    data: [],
+                    borderColor: 'var(--primary-color)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Đơn hàng',
+                    data: [],
+                    borderColor: 'var(--accent-color)',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Traffic source chart
+        const trafficCtx = document.getElementById('trafficSourceChart').getContext('2d');
+        new Chart(trafficCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Direct', 'Social', 'Search', 'Khác'],
+                datasets: [{
+                    data: [45, 28, 22, 5],
+                    backgroundColor: [
+                        'var(--primary-color)',
+                        'var(--accent-color)',
+                        '#10b981',
+                        '#f59e0b'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    function startRealTimeUpdates() {
+        realTimeInterval = setInterval(() => {
+            if (!isPaused) {
+                updateRealTimeData();
+            }
+        }, 5000); // Update every 5 seconds
+    }
+
+    function updateRealTimeData() {
+        // Simulate real-time data updates
+        const now = new Date();
+        
+        // Update main chart
+        if (window.mainRealTimeChart) {
+            const chart = window.mainRealTimeChart;
+            chart.data.labels.push(now);
+            chart.data.datasets[0].data.push(Math.floor(Math.random() * 50) + 200);
+            chart.data.datasets[1].data.push(Math.floor(Math.random() * 10) + 15);
+            
+            // Keep only last 20 data points
+            if (chart.data.labels.length > 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+                chart.data.datasets[1].data.shift();
+            }
+            
+            chart.update('none');
+        }
+
+        // Update KPI values
+        document.getElementById('onlineUsers').textContent = Math.floor(Math.random() * 50) + 200;
+        document.getElementById('ordersPerHour').textContent = Math.floor(Math.random() * 10) + 15;
+        
+        // Add new activity
+        addNewActivity();
+    }
+
+    function addNewActivity() {
+        const activities = [
+            { icon: 'fas fa-shopping-cart', color: 'bg-success', title: 'Đơn hàng mới', desc: 'Khách hàng đã đặt đơn hàng #' + Math.floor(Math.random() * 10000) },
+            { icon: 'fas fa-user-plus', color: 'bg-info', title: 'Đăng ký mới', desc: 'Thành viên mới tham gia hệ thống' },
+            { icon: 'fas fa-star', color: 'bg-warning', title: 'Đánh giá mới', desc: 'Sản phẩm nhận đánh giá 5 sao' },
+            { icon: 'fas fa-comment', color: 'bg-primary', title: 'Bình luận mới', desc: 'Khách hàng bình luận về sản phẩm' }
+        ];
+
+        const activity = activities[Math.floor(Math.random() * activities.length)];
+        const activityHtml = `
+            <div class="activity-item">
+                <div class="activity-icon ${activity.color}">
+                    <i class="${activity.icon}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-desc">${activity.desc}</div>
+                </div>
+                <div class="activity-time">Vừa xong</div>
+            </div>
+        `;
+
+        const feed = document.getElementById('activityFeed');
+        feed.insertAdjacentHTML('afterbegin', activityHtml);
+
+        // Auto scroll if enabled
+        if (document.getElementById('autoScroll').checked) {
+            feed.scrollTop = 0;
+        }
+
+        // Remove old activities (keep only last 10)
+        const items = feed.querySelectorAll('.activity-item');
+        if (items.length > 10) {
+            items[items.length - 1].remove();
+        }
+    }
+
+    function pauseRealTime() {
+        isPaused = !isPaused;
+        const btn = event.target.closest('button');
+        if (isPaused) {
+            btn.innerHTML = '<i class="fas fa-play"></i> Tiếp tục';
+            btn.classList.remove('btn-outline-danger');
+            btn.classList.add('btn-outline-success');
+        } else {
+            btn.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
+            btn.classList.remove('btn-outline-success');
+            btn.classList.add('btn-outline-danger');
+        }
+    }
+
+    function exportRealTimeData() {
+        alert('Export real-time data functionality');
+    }
+
+    function clearAlerts() {
+        document.getElementById('alertsList').innerHTML = '';
+    }
+
+    function initializeActivityFeed() {
+        // Add some initial activities
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => addNewActivity(), i * 1000);
+        }
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (realTimeInterval) {
+            clearInterval(realTimeInterval);
+        }
+    });
+</script>

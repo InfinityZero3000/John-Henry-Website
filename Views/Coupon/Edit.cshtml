@@ -1,0 +1,198 @@
+@model JohnHenryFashionWeb.Models.Coupon
+
+@{
+    ViewData["Title"] = "Chỉnh sửa mã giảm giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Chỉnh sửa mã giảm giá</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Manage", "Coupon")">Quản lý mã giảm giá</a></li>
+                        <li class="breadcrumb-item active">Chỉnh sửa</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Thông tin mã giảm giá</h3>
+                        </div>
+                        <form asp-action="Edit" method="post">
+                            <input asp-for="Id" type="hidden" />
+                            <input asp-for="UsageCount" type="hidden" />
+                            <input asp-for="CreatedAt" type="hidden" />
+                            
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label asp-for="Code" class="control-label">Mã giảm giá *</label>
+                                    <input asp-for="Code" class="form-control" />
+                                    <span asp-validation-for="Code" class="text-danger"></span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label asp-for="Name" class="control-label">Tên mã giảm giá *</label>
+                                    <input asp-for="Name" class="form-control" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label asp-for="Description" class="control-label">Mô tả</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Type" class="control-label">Loại giảm giá *</label>
+                                            <select asp-for="Type" class="form-control">
+                                                <option value="percentage">Phần trăm (%)</option>
+                                                <option value="fixed_amount">Số tiền cố định (VNĐ)</option>
+                                            </select>
+                                            <span asp-validation-for="Type" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Value" class="control-label">Giá trị giảm *</label>
+                                            <input asp-for="Value" type="number" step="0.01" class="form-control" />
+                                            <span asp-validation-for="Value" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="MinOrderAmount" class="control-label">Số tiền đơn hàng tối thiểu</label>
+                                            <input asp-for="MinOrderAmount" type="number" step="0.01" class="form-control" />
+                                            <span asp-validation-for="MinOrderAmount" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="UsageLimit" class="control-label">Giới hạn sử dụng</label>
+                                            <input asp-for="UsageLimit" type="number" class="form-control" />
+                                            <span asp-validation-for="UsageLimit" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="StartDate" class="control-label">Ngày bắt đầu</label>
+                                            <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="EndDate" class="control-label">Ngày kết thúc</label>
+                                            <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsActive" class="form-check-label">Kích hoạt mã giảm giá</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Đã sử dụng</label>
+                                            <input value="@Model.UsageCount" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">Ngày tạo</label>
+                                            <input value="@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Cập nhật
+                                </button>
+                                <a href="@Url.Action("Manage")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Hủy
+                                </a>
+                                <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Thống kê</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="progress-group">
+                                        Đã sử dụng
+                                        <span class="float-right"><b>@Model.UsageCount</b>/@(Model.UsageLimit?.ToString() ?? "∞")</span>
+                                        <div class="progress progress-sm">
+                                            @{
+                                                var usagePercent = Model.UsageLimit.HasValue && Model.UsageLimit > 0 
+                                                    ? (Model.UsageCount * 100.0 / Model.UsageLimit.Value) 
+                                                    : 0;
+                                            }
+                                            <div class="progress-bar bg-success" style="width: @usagePercent%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <strong>Trạng thái:</strong>
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge badge-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Tạm dừng</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

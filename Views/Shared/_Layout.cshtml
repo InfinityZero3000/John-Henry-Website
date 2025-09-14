@@ -5,14 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     @{
-        var seoService = ViewContext.HttpContext.RequestServices.GetService<JohnHenryFashionWeb.Services.ISeoService>();
-        var seoData = ViewData["SeoData"] as JohnHenryFashionWeb.Services.SeoData ?? seoService?.GetDefaultSeoData() ?? new JohnHenryFashionWeb.Services.SeoData { Title = ViewData["Title"]?.ToString() ?? "John Henry Fashion" };
+        var pageTitle = ViewBag.MetaTitle as string ?? ViewData["Title"]?.ToString() ?? "John Henry Fashion";
+        var pageDescription = ViewBag.MetaDescription as string ?? "Thời trang nam nữ cao cấp với phong cách hiện đại và chất lượng tuyệt vời";
     }
     
-    @Html.GenerateMetaTags(seoData)
+    <title>@pageTitle</title>
+    <meta name="description" content="@pageDescription" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@pageDescription" />
+    <meta property="og:image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}/images/og-image.jpg")" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <meta property="twitter:title" content="@pageTitle" />
+    <meta property="twitter:description" content="@pageDescription" />
+    <meta property="twitter:image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}/images/og-image.jpg")" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    
+    <!-- Robots meta tag -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- JSON-LD Structured Data -->
+    @if (ViewBag.ProductJsonLd != null)
+    {
+        <script type="application/ld+json">@Html.Raw(ViewBag.ProductJsonLd)</script>
+    }
+    @if (ViewBag.WebsiteJsonLd != null)
+    {
+        <script type="application/ld+json">@Html.Raw(ViewBag.WebsiteJsonLd)</script>
+    }
+    @if (ViewBag.OrganizationJsonLd != null)
+    {
+        <script type="application/ld+json">@Html.Raw(ViewBag.OrganizationJsonLd)</script>
+    }
+    @if (ViewBag.BreadcrumbJsonLd != null)
+    {
+        <script type="application/ld+json">@Html.Raw(ViewBag.BreadcrumbJsonLd)</script>
+    }
     
     <!-- Preload critical resources -->
     <link rel="preload" href="~/css/site.css" as="style">
+    <link rel="preload" href="~/css/john-henry-style.css" as="style">
     <link rel="preload" href="~/lib/bootstrap/dist/css/bootstrap.min.css" as="style">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
     
@@ -28,12 +68,15 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/john-henry-style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JohnHenryFashionWeb.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
     
-    <!-- Lazy load non-critical resources -->
-    <script async src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Load Lucide synchronously for icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script async src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
+    
+    @await RenderSectionAsync("Styles", required: false)
     <style>
         :root {
             --jh-red: #CE193A;
@@ -912,14 +955,7 @@
         
     </style>
     
-    <!-- Structured Data for SEO -->
-    @Html.GenerateStructuredData(seoData)
-    
-    <!-- Google Analytics or other tracking code would go here -->
-    @if (ViewData["BreadcrumbItems"] is List<JohnHenryFashionWeb.Helpers.BreadcrumbItem> breadcrumbs)
-    {
-        @Html.GenerateBreadcrumbStructuredData(breadcrumbs)
-    }
+    <!-- Additional JSON-LD structured data already included in head section above -->
 </head>
 <body>
     <!-- Top Red Line -->
@@ -982,6 +1018,24 @@
                                         <i class="fas fa-heart"></i>
                                         Sản phẩm yêu thích
                                     </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a href="@Url.Action("Dashboard", "Admin")" class="account-link">
+                                            <i class="fas fa-cogs"></i>
+                                            Quản trị hệ thống
+                                        </a>
+                                        <a href="@Url.Action("Manage", "Coupon")" class="account-link">
+                                            <i class="fas fa-ticket-alt"></i>
+                                            Quản lý mã giảm giá
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
+                                    {
+                                        <a href="@Url.Action("Dashboard", "Seller")" class="account-link">
+                                            <i class="fas fa-store"></i>
+                                            Kênh bán hàng
+                                        </a>
+                                    }
                                     <a href="#" class="account-link">
                                         <i class="fas fa-cog"></i>
                                         Cài đặt
@@ -1136,6 +1190,26 @@
 
     <div class="main-wrapper">
         <div class="container-fluid p-0">
+            @if (ViewBag.Breadcrumbs != null && ((List<JohnHenryFashionWeb.Services.BreadcrumbItem>)ViewBag.Breadcrumbs).Count > 1)
+            {
+                <nav aria-label="breadcrumb" class="breadcrumb-container">
+                    <div class="container">
+                        <ol class="breadcrumb bg-light py-2 px-3 rounded mb-4">
+                            @foreach (var breadcrumb in (List<JohnHenryFashionWeb.Services.BreadcrumbItem>)ViewBag.Breadcrumbs)
+                            {
+                                @if (string.IsNullOrEmpty(breadcrumb.Url))
+                                {
+                                    <li class="breadcrumb-item active" aria-current="page">@breadcrumb.Name</li>
+                                }
+                                else
+                                {
+                                    <li class="breadcrumb-item"><a href="@breadcrumb.Url">@breadcrumb.Name</a></li>
+                                }
+                            }
+                        </ol>
+                    </div>
+                </nav>
+            }
             <main role="main" class="pb-3">
                 @RenderBody()
             </main>
@@ -1482,10 +1556,26 @@
         }
     </style>
     <script>
-        // Initialize Lucide icons
+        // Initialize Lucide icons when library is loaded
+        function initializeLucide() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                // Retry after a short delay if lucide is not loaded yet
+                setTimeout(initializeLucide, 100);
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
+            initializeLucide();
         });
+        
+        // Also initialize after any dynamic content changes
+        window.initializeLucideIcons = function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        };
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

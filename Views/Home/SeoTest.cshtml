@@ -1,0 +1,115 @@
+@{
+    ViewData["Title"] = "SEO Test Page";
+    ViewBag.MetaTitle = "SEO Test - John Henry Fashion";
+    ViewBag.MetaDescription = "This is a test page to demonstrate SEO implementation with structured data and meta tags";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>SEO System Test Page</h1>
+            <p class="lead">This page demonstrates the SEO enhancements implemented in the John Henry Fashion website.</p>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>SEO Features Implemented</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Meta Tags:</strong> Dynamic title and description generation
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Open Graph:</strong> Facebook and social media sharing optimization
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Twitter Cards:</strong> Twitter sharing optimization
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Structured Data:</strong> JSON-LD schema markup for search engines
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Breadcrumbs:</strong> Navigation and structured data support
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Canonical URLs:</strong> Duplicate content prevention
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Robots Meta:</strong> Search engine crawling control
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>View Page Source</h3>
+                </div>
+                <div class="card-body">
+                    <p>To see the SEO implementation in action:</p>
+                    <ol>
+                        <li>Right-click on this page and select "View Page Source"</li>
+                        <li>Look for the <code>&lt;head&gt;</code> section</li>
+                        <li>You'll find meta tags, Open Graph tags, and JSON-LD structured data</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>SEO Testing Tools</h3>
+                </div>
+                <div class="card-body">
+                    <p>You can test this page with these tools:</p>
+                    <ul>
+                        <li><a href="https://search.google.com/test/rich-results" target="_blank">Google Rich Results Test</a></li>
+                        <li><a href="https://developers.facebook.com/tools/debug/" target="_blank">Facebook Sharing Debugger</a></li>
+                        <li><a href="https://cards-dev.twitter.com/validator" target="_blank">Twitter Card Validator</a></li>
+                        <li><a href="https://www.linkedin.com/post-inspector/" target="_blank">LinkedIn Post Inspector</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Current Page SEO Data</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Title:</strong><br>
+                        <small class="text-muted">@ViewBag.MetaTitle</small>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong><br>
+                        <small class="text-muted">@ViewBag.MetaDescription</small>
+                    </div>
+                    <div class="mb-3">
+                        <strong>URL:</strong><br>
+                        <small class="text-muted">@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    code {
+        color: #e83e8c;
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+    }
+</style>

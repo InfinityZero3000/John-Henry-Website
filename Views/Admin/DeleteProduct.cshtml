@@ -1,0 +1,198 @@
+@model JohnHenryFashionWeb.Models.Product
+
+@{
+    ViewData["Title"] = "Xóa sản phẩm";
+    ViewData["ActivePage"] = "Products";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-trash-alt me-2 text-danger"></i>
+            Xóa sản phẩm
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Products", "Admin")">Sản phẩm</a></li>
+                <li class="breadcrumb-item active">Xóa</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Xác nhận xóa sản phẩm
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Cảnh báo!
+                        </h6>
+                        <p class="mb-0">
+                            Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác!
+                        </p>
+                    </div>
+
+                    <!-- Product Information -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
+                            {
+                                <img src="@Model.FeaturedImageUrl" alt="@Model.Name" class="img-fluid rounded border">
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h4 class="text-dark mb-3">@Model.Name</h4>
+                            
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>SKU:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <code>@Model.SKU</code>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>Giá:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    @if (Model.SalePrice.HasValue && Model.SalePrice > 0)
+                                    {
+                                        <span class="text-decoration-line-through text-muted">@Model.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                        <span class="text-danger fw-bold ms-2">@Model.SalePrice.Value.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-bold">@Model.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>Tồn kho:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <span class="badge @(Model.StockQuantity > 10 ? "bg-success" : Model.StockQuantity > 0 ? "bg-warning" : "bg-danger")">
+                                        @Model.StockQuantity sản phẩm
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-sm-4">
+                                    <strong>Trạng thái:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary")">
+                                        @(Model.IsActive ? "Đang hoạt động" : "Ngừng hoạt động")
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                            {
+                                <div class="row mb-2">
+                                    <div class="col-sm-4">
+                                        <strong>Mô tả ngắn:</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <p class="text-muted mb-0">@Model.ShortDescription</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="border-top pt-3">
+                                <form asp-action="DeleteProductConfirmed" method="post" class="d-inline">
+                                    <input type="hidden" asp-for="Id" />
+                                    <button type="submit" class="btn btn-danger me-2" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                        <i class="fas fa-trash-alt me-1"></i>
+                                        Xác nhận xóa
+                                    </button>
+                                </form>
+                                <a href="@Url.Action("Products", "Admin")" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Hủy bỏ
+                                </a>
+                                <a href="@Url.Action("EditProduct", "Admin", new { id = Model.Id })" class="btn btn-primary ms-2">
+                                    <i class="fas fa-edit me-1"></i>
+                                    Chỉnh sửa thay vì xóa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Thông tin bổ sung
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                <strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                            <small class="text-muted d-block">
+                                <strong>Cập nhật cuối:</strong> @Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                <strong>Lượt xem:</strong> @Model.ViewCount
+                            </small>
+                            @if (Model.Rating.HasValue)
+                            {
+                                <small class="text-muted d-block">
+                                    <strong>Đánh giá:</strong> 
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= Model.Rating ? "text-warning" : "text-muted")"></i>
+                                    }
+                                    (@Model.ReviewCount đánh giá)
+                                </small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Additional confirmation dialog
+        document.querySelector('form[asp-action="DeleteProductConfirmed"]').addEventListener('submit', function(e) {
+            if (!confirm('Việc xóa sản phẩm này sẽ ảnh hưởng đến các đơn hàng đã có. Bạn có chắc chắn muốn tiếp tục?')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

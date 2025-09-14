@@ -1,0 +1,237 @@
+@model Brand
+@{
+    ViewData["Title"] = "Thêm Thương hiệu";
+    ViewData["CurrentSection"] = "brands";
+}
+
+<div class="admin-header">
+    <h2>
+        <i class="fas fa-plus"></i>
+        Thêm Thương hiệu
+    </h2>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Dashboard")">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Brands")">Thương hiệu</a>
+            </li>
+            <li class="breadcrumb-item active">Thêm mới</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="admin-content">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        Thông tin thương hiệu
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateBrand" method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger" style="display: none;"></div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Name" class="form-label required">Tên thương hiệu</label>
+                            <input asp-for="Name" class="form-control" placeholder="Nhập tên thương hiệu...">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Nhập mô tả về thương hiệu..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="form-text text-muted">Mô tả ngắn gọn về thương hiệu</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="LogoUrl" class="form-label">URL Logo</label>
+                            <input asp-for="LogoUrl" class="form-control" type="url" 
+                                   placeholder="https://example.com/logo.png">
+                            <span asp-validation-for="LogoUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">Đường dẫn đến logo của thương hiệu</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Website" class="form-label">Website</label>
+                            <input asp-for="Website" class="form-control" type="url" 
+                                   placeholder="https://www.example.com">
+                            <span asp-validation-for="Website" class="text-danger"></span>
+                            <small class="form-text text-muted">Website chính thức của thương hiệu</small>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked>
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Kích hoạt thương hiệu
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Thương hiệu được kích hoạt sẽ hiển thị trong danh sách lựa chọn</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Lưu thương hiệu
+                            </button>
+                            <a href="@Url.Action("Brands")" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Hủy bỏ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb"></i>
+                        Hướng dẫn
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="help-content">
+                        <h6>Tên thương hiệu</h6>
+                        <p class="small text-muted">
+                            Tên thương hiệu sẽ được hiển thị trong danh sách sản phẩm và trang chi tiết sản phẩm.
+                        </p>
+
+                        <h6>Mô tả</h6>
+                        <p class="small text-muted">
+                            Mô tả ngắn gọn về thương hiệu, lịch sử, đặc điểm nổi bật.
+                        </p>
+
+                        <h6>Logo</h6>
+                        <p class="small text-muted">
+                            Sử dụng URL của logo thương hiệu. Kích thước khuyến nghị: 200x200px, định dạng PNG hoặc JPG.
+                        </p>
+
+                        <h6>Website</h6>
+                        <p class="small text-muted">
+                            Website chính thức của thương hiệu để khách hàng có thể tham khảo thêm thông tin.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Card -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-eye"></i>
+                        Xem trước
+                    </h6>
+                </div>
+                <div class="card-body" id="brand-preview">
+                    <div class="text-center">
+                        <div class="brand-logo-preview mb-2">
+                            <img id="logo-preview" src="" alt="Logo" style="max-width: 100px; max-height: 100px; object-fit: contain; display: none;">
+                            <div id="logo-placeholder" class="bg-light d-flex align-items-center justify-content-center" 
+                                 style="width: 100px; height: 100px; margin: 0 auto; border-radius: 4px;">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        </div>
+                        <h6 id="name-preview" class="brand-name-preview text-muted">Tên thương hiệu</h6>
+                        <p id="description-preview" class="small text-muted">Mô tả thương hiệu sẽ hiển thị ở đây...</p>
+                        <div id="website-preview" style="display: none;">
+                            <a href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i>
+                                Website
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Real-time preview
+            function updatePreview() {
+                var name = $('#Name').val() || 'Tên thương hiệu';
+                var description = $('#Description').val() || 'Mô tả thương hiệu sẽ hiển thị ở đây...';
+                var logoUrl = $('#LogoUrl').val();
+                var website = $('#Website').val();
+
+                $('#name-preview').text(name);
+                $('#description-preview').text(description.length > 100 ? description.substring(0, 100) + '...' : description);
+                
+                if (logoUrl) {
+                    $('#logo-preview').attr('src', logoUrl).show();
+                    $('#logo-placeholder').hide();
+                } else {
+                    $('#logo-preview').hide();
+                    $('#logo-placeholder').show();
+                }
+                
+                if (website) {
+                    $('#website-preview a').attr('href', website);
+                    $('#website-preview').show();
+                } else {
+                    $('#website-preview').hide();
+                }
+            }
+
+            // Bind preview updates
+            $('#Name, #Description, #LogoUrl, #Website').on('input', updatePreview);
+            
+            // Initial preview
+            updatePreview();
+
+            // Handle logo load error
+            $('#logo-preview').on('error', function() {
+                $(this).hide();
+                $('#logo-placeholder').show();
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+        
+        .form-actions {
+            border-top: 1px solid #dee2e6;
+            padding-top: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .help-content h6 {
+            color: #495057;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .help-content h6:first-child {
+            margin-top: 0;
+        }
+        
+        .brand-logo-preview {
+            position: relative;
+        }
+        
+        #logo-placeholder {
+            border: 2px dashed #dee2e6;
+        }
+    </style>
+}

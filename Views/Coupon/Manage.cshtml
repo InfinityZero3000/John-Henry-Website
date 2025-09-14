@@ -1,0 +1,307 @@
+@using JohnHenryFashionWeb.Models
+@model IEnumerable<Coupon>
+@{
+    ViewData["Title"] = "Quản lý mã giảm giá";
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+    var search = ViewBag.Search as string;
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Quản lý mã giảm giá</h1>
+            <p class="text-muted">Tạo và quản lý mã giảm giá cho cửa hàng</p>
+        </div>
+        <a href="/Coupon/Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Tạo mã giảm giá
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" value="@search" 
+                               placeholder="Tìm kiếm theo mã, tiêu đề hoặc mô tả...">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    @if (!string.IsNullOrEmpty(search))
+                    {
+                        <a href="/Coupon/Manage" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Coupons Table -->
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tiêu đề</th>
+                                <th>Loại giảm giá</th>
+                                <th>Giá trị</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                                <th>Lượt sử dụng</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var coupon in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <code class="fw-bold">@coupon.Code</code>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">@coupon.Name</div>
+                                        @if (!string.IsNullOrEmpty(coupon.Description))
+                                        {
+                                            <small class="text-muted">@coupon.Description</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (coupon.Type == "percentage")
+                                        {
+                                            <span class="badge bg-success">Phần trăm</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Số tiền</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (coupon.Type == "percentage")
+                                        {
+                                            <span class="fw-bold">@coupon.Value%</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold">@coupon.Value.ToString("C")</span>
+                                        }
+                                        
+                                        @if (coupon.MinOrderAmount.HasValue)
+                                        {
+                                            <br><small class="text-muted">Tối thiểu: @coupon.MinOrderAmount.Value.ToString("C")</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            @if (coupon.StartDate.HasValue)
+                                            {
+                                                <div><strong>Từ:</strong> @coupon.StartDate.Value.ToString("dd/MM/yyyy")</div>
+                                            }
+                                            @if (coupon.EndDate.HasValue)
+                                            {
+                                                <div><strong>Đến:</strong> @coupon.EndDate.Value.ToString("dd/MM/yyyy")</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-muted">Không giới hạn</div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (coupon.IsActive)
+                                        {
+                                            @if (coupon.EndDate.HasValue && coupon.EndDate.Value < DateTime.UtcNow)
+                                            {
+                                                <span class="badge bg-secondary">Hết hạn</span>
+                                            }
+                                            else if (coupon.StartDate > DateTime.UtcNow)
+                                            {
+                                                <span class="badge bg-warning">Sắp diễn ra</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Hoạt động</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Vô hiệu</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div>@coupon.UsageCount lần</div>
+                                            @if (coupon.UsageLimit.HasValue)
+                                            {
+                                                <div class="text-muted">Giới hạn: @coupon.UsageLimit</div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/Coupon/Details/@coupon.Id" class="btn btn-sm btn-outline-info" title="Chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="/Coupon/Edit/@coupon.Id" class="btn btn-sm btn-outline-primary" title="Sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="toggleStatus('@coupon.Id')" title="Thay đổi trạng thái">
+                                                <i class="fas fa-toggle-@(coupon.IsActive ? "on" : "off")"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteCoupon('@coupon.Id')" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Coupon pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @if (currentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(currentPage - 1)@(!string.IsNullOrEmpty(search) ? "&search=" + search : "")">
+                                        <i class="fas fa-chevron-left"></i> Trước
+                                    </a>
+                                </li>
+                            }
+                            
+                            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="?page=@i@(!string.IsNullOrEmpty(search) ? "&search=" + search : "")">@i</a>
+                                </li>
+                            }
+                            
+                            @if (currentPage < totalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(currentPage + 1)@(!string.IsNullOrEmpty(search) ? "&search=" + search : "")">
+                                        Sau <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-ticket-alt fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted mb-3">
+                        @if (!string.IsNullOrEmpty(search))
+                        {
+                            <span>Không tìm thấy mã giảm giá nào</span>
+                        }
+                        else
+                        {
+                            <span>Chưa có mã giảm giá nào</span>
+                        }
+                    </h4>
+                    <p class="text-muted mb-4">
+                        @if (!string.IsNullOrEmpty(search))
+                        {
+                            <span>Thử thay đổi từ khóa tìm kiếm của bạn</span>
+                        }
+                        else
+                        {
+                            <span>Tạo mã giảm giá đầu tiên để bắt đầu!</span>
+                        }
+                    </p>
+                    <a href="/Coupon/Create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tạo mã giảm giá
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Load usage statistics for each coupon
+        $(document).ready(function() {
+            @foreach (var coupon in Model)
+            {
+                <text>loadUsageStats('@coupon.Id');</text>
+            }
+        });
+
+        function loadUsageStats(couponId) {
+            $.get(`/api/coupon/${couponId}/usage`)
+                .done(function(data) {
+                    const usageHtml = `<div>${data.totalUses} lần</div>`;
+                    $(`#usage-${couponId}`).html(usageHtml);
+                })
+                .fail(function() {
+                    $(`#usage-${couponId}`).html('<div class="text-muted">N/A</div>');
+                });
+        }
+
+        function toggleStatus(couponId) {
+            if (confirm('Bạn có chắc muốn thay đổi trạng thái mã giảm giá này?')) {
+                $.post('/Coupon/ToggleStatus', { id: couponId })
+                    .done(function(response) {
+                        if (response.success) {
+                            showAlert('success', response.message);
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showAlert('danger', response.message);
+                        }
+                    })
+                    .fail(function() {
+                        showAlert('danger', 'Có lỗi xảy ra khi thay đổi trạng thái');
+                    });
+            }
+        }
+
+        function deleteCoupon(couponId) {
+            if (confirm('Bạn có chắc muốn xóa mã giảm giá này?\n\nLưu ý: Nếu mã đã được sử dụng, nó sẽ chỉ được vô hiệu hóa thay vì xóa hoàn toàn.')) {
+                $.post('/Coupon/Delete', { id: couponId })
+                    .done(function(response) {
+                        if (response.success) {
+                            showAlert('success', response.message);
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showAlert('danger', response.message);
+                        }
+                    })
+                    .fail(function() {
+                        showAlert('danger', 'Có lỗi xảy ra khi xóa mã giảm giá');
+                    });
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                     style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+        }
+    </script>
+}

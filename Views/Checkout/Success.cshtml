@@ -1,0 +1,346 @@
+@model Order
+@{
+    ViewData["Title"] = "Thanh toán thành công";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="~/css/checkout.css" rel="stylesheet" />
+}
+
+<div class="checkout-container">
+    <div class="container py-5">
+        <!-- Progress Steps -->
+        <div class="checkout-steps mb-5">
+            <div class="steps-container">
+                <div class="step completed">
+                    <div class="step-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="step-title">Thông tin</span>
+                </div>
+                <div class="step-line completed"></div>
+                <div class="step completed">
+                    <div class="step-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="step-title">Thanh toán</span>
+                </div>
+                <div class="step-line completed"></div>
+                <div class="step completed active">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <span class="step-title">Hoàn thành</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Success Message -->
+                <div class="success-container text-center mb-5">
+                    <div class="success-icon mb-4">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    <h1 class="success-title">Đặt hàng thành công!</h1>
+                    <p class="success-message">
+                        Cảm ơn bạn đã mua sắm tại John Henry. Đơn hàng của bạn đã được xác nhận và đang được xử lý.
+                    </p>
+                </div>
+
+                <!-- Order Information -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h4>
+                            <i class="fas fa-receipt me-2"></i>
+                            Thông tin đơn hàng
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="info-group">
+                                    <label>Mã đơn hàng:</label>
+                                    <span class="order-number">#@Model.OrderNumber</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-group">
+                                    <label>Ngày đặt hàng:</label>
+                                    <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="info-group">
+                                    <label>Phương thức thanh toán:</label>
+                                    <span class="payment-method">
+                                        @switch (Model.PaymentMethod?.ToLower())
+                                        {
+                                            case "vnpay":
+                                                <i class="payment-icon vnpay"></i>
+                                                <span>VNPay</span>
+                                                break;
+                                            case "momo":
+                                                <i class="payment-icon momo"></i>
+                                                <span>MoMo</span>
+                                                break;
+                                            case "stripe":
+                                                <i class="payment-icon stripe"></i>
+                                                <span>Stripe</span>
+                                                break;
+                                            case "cod":
+                                                <i class="fas fa-money-bill-wave"></i>
+                                                <span>Thanh toán khi nhận hàng</span>
+                                                break;
+                                            case "bank_transfer":
+                                                <i class="fas fa-university"></i>
+                                                <span>Chuyển khoản ngân hàng</span>
+                                                break;
+                                            default:
+                                                <span>@Model.PaymentMethod</span>
+                                                break;
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-group">
+                                    <label>Trạng thái thanh toán:</label>
+                                    <span class="payment-status @Model.PaymentStatus">
+                                        @switch (Model.PaymentStatus?.ToLower())
+                                        {
+                                            case "paid":
+                                                <i class="fas fa-check-circle text-success"></i>
+                                                <span>Đã thanh toán</span>
+                                                break;
+                                            case "pending":
+                                                <i class="fas fa-clock text-warning"></i>
+                                                <span>Chờ thanh toán</span>
+                                                break;
+                                            case "failed":
+                                                <i class="fas fa-times-circle text-danger"></i>
+                                                <span>Thanh toán thất bại</span>
+                                                break;
+                                            default:
+                                                <span>@Model.PaymentStatus</span>
+                                                break;
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Address -->
+                        @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+                        {
+                            var shippingAddress = System.Text.Json.JsonSerializer.Deserialize<AddressViewModel>(Model.ShippingAddress);
+                            <div class="shipping-info mb-4">
+                                <h6>
+                                    <i class="fas fa-truck me-2"></i>
+                                    Địa chỉ giao hàng
+                                </h6>
+                                <div class="address-details">
+                                    <p class="mb-1"><strong>@shippingAddress.FullName</strong></p>
+                                    <p class="mb-1">@shippingAddress.PhoneNumber</p>
+                                    <p class="mb-0">
+                                        @shippingAddress.Address, @shippingAddress.Ward, 
+                                        @shippingAddress.District, @shippingAddress.City
+                                    </p>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Order Items -->
+                        <div class="order-items">
+                            <h6>
+                                <i class="fas fa-shopping-bag me-2"></i>
+                                Sản phẩm đã đặt
+                            </h6>
+                            <div class="items-list">
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <div class="order-item">
+                                        <div class="item-image">
+                                            <img src="@(item.ProductImage ?? "/images/placeholder.jpg")" alt="@item.ProductName">
+                                        </div>
+                                        <div class="item-details">
+                                            <h6 class="item-name">@item.ProductName</h6>
+                                            <p class="item-quantity">Số lượng: @item.Quantity</p>
+                                            <p class="item-price">@item.UnitPrice.ToString("N0") ₫</p>
+                                        </div>
+                                        <div class="item-total">
+                                            <strong>@item.TotalPrice.ToString("N0") ₫</strong>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Tạm tính:</span>
+                                <span>@(Model.TotalAmount - Model.ShippingFee - Model.Tax + Model.DiscountAmount).ToString("N0") ₫</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span>@Model.ShippingFee.ToString("N0") ₫</span>
+                            </div>
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <div class="summary-row discount">
+                                    <span>Giảm giá:</span>
+                                    <span class="text-success">-@Model.DiscountAmount.ToString("N0") ₫</span>
+                                </div>
+                            }
+                            <div class="summary-row">
+                                <span>Thuế VAT:</span>
+                                <span>@Model.Tax.ToString("N0") ₫</span>
+                            </div>
+                            <hr>
+                            <div class="summary-row total">
+                                <strong>
+                                    <span>Tổng cộng:</span>
+                                    <span>@Model.TotalAmount.ToString("N0") ₫</span>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <!-- Bank Transfer Instructions -->
+                        @if (Model.PaymentMethod?.ToLower() == "bank_transfer" && Model.PaymentStatus?.ToLower() == "pending")
+                        {
+                            <div class="bank-transfer-instruction mt-4">
+                                <div class="alert alert-info">
+                                    <h6>
+                                        <i class="fas fa-university me-2"></i>
+                                        Hướng dẫn chuyển khoản
+                                    </h6>
+                                    <p>Vui lòng chuyển khoản vào một trong các tài khoản sau và ghi chú mã đơn hàng:</p>
+                                    
+                                    <div class="bank-accounts">
+                                        <div class="bank-account">
+                                            <strong>Vietcombank</strong><br>
+                                            STK: 1234567890<br>
+                                            Chủ TK: JOHN HENRY FASHION<br>
+                                            Nội dung: Thanh toan don hang @Model.OrderNumber
+                                        </div>
+                                        <div class="bank-account">
+                                            <strong>Techcombank</strong><br>
+                                            STK: 0987654321<br>
+                                            Chủ TK: JOHN HENRY FASHION<br>
+                                            Nội dung: Thanh toan don hang @Model.OrderNumber
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- COD Instructions -->
+                        @if (Model.PaymentMethod?.ToLower() == "cod")
+                        {
+                            <div class="cod-instruction mt-4">
+                                <div class="alert alert-warning">
+                                    <h6>
+                                        <i class="fas fa-money-bill-wave me-2"></i>
+                                        Lưu ý thanh toán khi nhận hàng
+                                    </h6>
+                                    <p>
+                                        Vui lòng chuẩn bị số tiền chính xác: <strong>@Model.TotalAmount.ToString("N0") ₫</strong><br>
+                                        Shipper sẽ liên hệ với bạn trước khi giao hàng.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons mt-5">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-home me-2"></i>
+                                Trang chủ
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="@Url.Action("Index", "Products")" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="fas fa-shopping-bag me-2"></i>
+                                Tiếp tục mua sắm
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a href="@Url.Action("Orders", "Account")" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-list me-2"></i>
+                                    Xem đơn hàng
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Orders", "Account") })" 
+                                   class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-sign-in-alt me-2"></i>
+                                    Đăng nhập
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="additional-info mt-5">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <i class="fas fa-envelope text-primary"></i>
+                                <h6>Email xác nhận</h6>
+                                <p>Chúng tôi đã gửi email xác nhận đơn hàng đến địa chỉ email của bạn.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <i class="fas fa-truck text-success"></i>
+                                <h6>Giao hàng</h6>
+                                <p>Đơn hàng sẽ được giao trong 2-5 ngày làm việc tùy thuộc vào khu vực.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <i class="fas fa-headset text-info"></i>
+                                <h6>Hỗ trợ</h6>
+                                <p>Liên hệ <strong>1900 123 456</strong> nếu bạn cần hỗ trợ về đơn hàng.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Track successful order for analytics
+        if (typeof gtag !== 'undefined') {
+            var purchaseItems = @Html.Raw(Json.Serialize(Model.OrderItems.Select(item => new {
+                item_id = item.ProductId,
+                item_name = item.ProductName,
+                quantity = item.Quantity,
+                price = item.UnitPrice
+            })));
+            
+            gtag('event', 'purchase', {
+                'transaction_id': '@Model.OrderNumber',
+                'value': @Model.TotalAmount,
+                'currency': 'VND',
+                'items': purchaseItems
+            });
+        }
+    </script>
+}
