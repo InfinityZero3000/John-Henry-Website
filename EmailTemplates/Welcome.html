@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chào mừng đến với John Henry Fashion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-message h2 {
+            color: #dc3545;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+        
+        .benefits {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-left: 4px solid #dc3545;
+            margin: 25px 0;
+        }
+        
+        .benefits h3 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        
+        .benefits ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .benefits li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .benefits li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .cta-button {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .cta-button a {
+            display: inline-block;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button a:hover {
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            background-color: #333;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        
+        .social-links {
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            opacity: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .header {
+                padding: 30px 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>John Henry</h1>
+            <p>Thời trang cao cấp dành cho phái mạnh</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-message">
+                <h2>Chào mừng {{UserName}}!</h2>
+                <p>Cảm ơn bạn đã đăng ký tài khoản tại John Henry Fashion. Chúng tôi rất vui mừng được chào đón bạn vào cộng đồng những người yêu thích thời trang.</p>
+            </div>
+            
+            <div class="benefits">
+                <h3>Những lợi ích dành cho thành viên:</h3>
+                <ul>
+                    <li>Ưu đãi đặc biệt và giảm giá độc quyền</li>
+                    <li>Thông báo sớm về các sản phẩm mới</li>
+                    <li>Tích điểm và đổi quà hấp dẫn</li>
+                    <li>Miễn phí vận chuyển cho đơn hàng trên 500.000đ</li>
+                    <li>Hỗ trợ khách hàng 24/7</li>
+                </ul>
+            </div>
+            
+            <div class="cta-button">
+                <a href="{{LoginUrl}}">Bắt đầu mua sắm ngay</a>
+            </div>
+            
+            <p style="text-align: center; color: #666; margin-top: 25px;">
+                Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi qua email hoặc hotline.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 {{CompanyName}}. Tất cả quyền được bảo lưu.</p>
+            <p>Địa chỉ: 123 Đường Thời Trang, Quận 1, TP. Hồ Chí Minh</p>
+            <p>Hotline: 0123 456 789 | Email: support@johnhenry.com</p>
+            
+            <div class="social-links">
+                <a href="#">Facebook</a>
+                <a href="#">Instagram</a>
+                <a href="#">YouTube</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

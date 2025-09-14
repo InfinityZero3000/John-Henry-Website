@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập nhật đơn hàng #{{OrderNumber}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .status-pending { background-color: #ffc107; color: #856404; }
+        .status-confirmed { background-color: #17a2b8; color: white; }
+        .status-processing { background-color: #fd7e14; color: white; }
+        .status-shipped { background-color: #6f42c1; color: white; }
+        .status-delivered { background-color: #28a745; color: white; }
+        .status-cancelled { background-color: #dc3545; color: white; }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .order-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .order-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9em;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .status-message {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .status-message h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .timeline {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .timeline h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-item {
+            padding: 10px 0;
+            border-left: 3px solid #dee2e6;
+            padding-left: 15px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .timeline-item.active {
+            border-left-color: #007bff;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #dee2e6;
+        }
+        
+        .timeline-item.active::before {
+            background-color: #007bff;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            background-color: #333;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .order-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>📦 Cập nhật đơn hàng</h1>
+            <p>Đơn hàng #{{OrderNumber}}</p>
+            <div class="status-badge status-{{OrderStatus}}">{{OrderStatus}}</div>
+        </div>
+        
+        <div class="content">
+            <div class="order-info">
+                <h2 style="color: #333; margin-bottom: 15px;">Thông tin đơn hàng</h2>
+                <div class="order-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Khách hàng:</span>
+                        <span class="detail-value">{{CustomerName}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Trạng thái mới:</span>
+                        <span class="detail-value">{{OrderStatus}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-message">
+                <h3>Thông báo cập nhật</h3>
+                <p>{{StatusMessage}}</p>
+            </div>
+            
+            <div class="timeline">
+                <h3>Tiến trình đơn hàng</h3>
+                <div class="timeline-item active">
+                    <strong>Đã đặt hàng</strong>
+                    <small style="display: block; color: #666;">Đơn hàng đã được tạo thành công</small>
+                </div>
+                <div class="timeline-item">
+                    <strong>Xác nhận</strong>
+                    <small style="display: block; color: #666;">Xác nhận thông tin và thanh toán</small>
+                </div>
+                <div class="timeline-item">
+                    <strong>Đang xử lý</strong>
+                    <small style="display: block; color: #666;">Chuẩn bị sản phẩm và đóng gói</small>
+                </div>
+                <div class="timeline-item">
+                    <strong>Đang giao</strong>
+                    <small style="display: block; color: #666;">Đơn hàng đang được vận chuyển</small>
+                </div>
+                <div class="timeline-item">
+                    <strong>Hoàn thành</strong>
+                    <small style="display: block; color: #666;">Đã giao hàng thành công</small>
+                </div>
+            </div>
+            
+            <div class="cta-section">
+                <h3 style="margin-bottom: 15px; color: #333;">Theo dõi chi tiết</h3>
+                <p style="margin-bottom: 20px; color: #666;">
+                    Nhấp vào nút bên dưới để xem chi tiết đơn hàng và theo dõi tiến trình giao hàng.
+                </p>
+                <a href="{{OrderTrackingUrl}}" class="cta-button">Xem chi tiết đơn hàng</a>
+            </div>
+            
+            <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h4 style="color: #0c5460; margin-bottom: 10px;">💡 Lưu ý quan trọng:</h4>
+                <ul style="color: #0c5460; margin-left: 20px;">
+                    <li>Vui lòng kiểm tra thông tin giao hàng kỹ càng</li>
+                    <li>Liên hệ hotline 0123 456 789 nếu cần hỗ trợ</li>
+                    <li>Đơn hàng có thể được đổi trả trong vòng 30 ngày</li>
+                    <li>Giữ lại email này để tham khảo khi cần</li>
+                </ul>
+            </div>
+            
+            <p style="text-align: center; color: #666; margin-top: 25px;">
+                Cảm ơn bạn đã tin tương và mua sắm tại John Henry Fashion!
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 John Henry Fashion. Tất cả quyền được bảo lưu.</p>
+            <p>Địa chỉ: 123 Đường Thời Trang, Quận 1, TP. Hồ Chí Minh</p>
+            <p>Hotline: 0123 456 789 | Email: support@johnhenry.com</p>
+        </div>
+    </div>
+</body>
+</html>
