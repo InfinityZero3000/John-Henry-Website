@@ -3,6 +3,7 @@ using System;
 using JohnHenryFashionWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JohnHenryFashionWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250912090829_UpdateActiveSessionFields")]
+    partial class UpdateActiveSessionFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,48 +155,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.AnalyticsData", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Campaign")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Data")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EntityId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Medium")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AnalyticsData");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -248,9 +209,6 @@ namespace JohnHenryFashionWeb.Migrations
 
                     b.Property<bool>("IsApproved")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text");
@@ -558,130 +516,6 @@ namespace JohnHenryFashionWeb.Migrations
                         });
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CheckoutSession", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("BillingAddress")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CouponCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PaymentMethod")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("ShippingAddress")
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("ShippingFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ShippingMethod")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExpiresAt");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CheckoutSessions");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CheckoutSessionItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("CheckoutSessionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Color")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ProductImage")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("ProductName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Size")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CheckoutSessionId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("CheckoutSessionItems");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ContactMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -748,59 +582,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ContactMessages");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.ConversionEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AdditionalData")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Campaign")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ConversionType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ConvertedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Medium")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PaymentMethod")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProductIds")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ConversionEvents");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.Coupon", b =>
@@ -1079,105 +860,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.OrderStatusHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ChangedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChangedBy");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("OrderStatusHistories");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.PageView", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Campaign")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ExitPage")
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Medium")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Page")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Referrer")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("SessionId1")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("TimeOnPage")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ViewedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SessionId1");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PageViews");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.PasswordHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -1250,160 +932,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("Payments");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.PaymentAttempt", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)")
-                        .HasDefaultValue("VND");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)");
-
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<Guid>("OrderId1")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PaymentId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("TransactionId")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("OrderId1");
-
-                    b.HasIndex("PaymentId")
-                        .IsUnique();
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PaymentAttempts");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.PaymentMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("IconUrl")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal?>("MaxAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("MinAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<bool>("RequiresRedirect")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SupportedCurrencies")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("SortOrder");
-
-                    b.ToTable("PaymentMethods");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.Product", b =>
@@ -1589,266 +1117,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.ToTable("ProductReviews");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.Promotion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ApplicableCategoryIds")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ApplicableProductIds")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal?>("MaxDiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("MinOrderAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("UsageCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("UsageLimit")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("EndDate");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("StartDate");
-
-                    b.ToTable("Promotions");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.RefundRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AdminNotes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<Guid>("OrderId1")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PaymentId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ProcessedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("RefundTransactionId")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("RequestedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("OrderId1");
-
-                    b.HasIndex("PaymentId");
-
-                    b.HasIndex("RequestedBy");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("RefundRequests");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.ReportTemplate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Configuration")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedByUserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Format")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Frequency")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LastRunDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("NextRunDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Parameters")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReportType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.ToTable("ReportTemplates");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.SalesReport", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("AverageOrderValue")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("GeneratedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("GeneratedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("GeneratedByUserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReportData")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReportType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("TotalOrders")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TotalProducts")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("TotalRevenue")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GeneratedByUserId");
-
-                    b.ToTable("SalesReports");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.SecurityLog", b =>
                 {
                     b.Property<int>("Id")
@@ -1898,73 +1166,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.HasIndex("UserId", "EventType");
 
                     b.ToTable("SecurityLogs");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.ShippingMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AvailableRegions")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("EstimatedDays")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal?>("MaxWeight")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal?>("MinOrderAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("SortOrder");
-
-                    b.ToTable("ShippingMethods");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ShoppingCartItem", b =>
@@ -2099,64 +1300,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.HasIndex("UserId", "Purpose");
 
                     b.ToTable("TwoFactorTokens");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.UserSession", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Browser")
-                        .HasColumnType("text");
-
-                    b.Property<string>("City")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DeviceType")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Duration")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("OperatingSystem")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserSessions");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.Wishlist", b =>
@@ -2338,15 +1481,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.AnalyticsData", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.BlogPost", b =>
                 {
                     b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "Author")
@@ -2375,57 +1509,12 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CheckoutSession", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany("CheckoutSessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CheckoutSessionItem", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.CheckoutSession", "CheckoutSession")
-                        .WithMany("Items")
-                        .HasForeignKey("CheckoutSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CheckoutSession");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ContactMessage", b =>
                 {
                     b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.ConversionEvent", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId");
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Order");
 
                     b.Navigation("User");
                 });
@@ -2482,39 +1571,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.OrderStatusHistory", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "ChangedByUser")
-                        .WithMany()
-                        .HasForeignKey("ChangedBy")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("JohnHenryFashionWeb.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChangedByUser");
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.PageView", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.UserSession", "Session")
-                        .WithMany("PageViews")
-                        .HasForeignKey("SessionId1");
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Session");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.PasswordHistory", b =>
                 {
                     b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
@@ -2535,25 +1591,6 @@ namespace JohnHenryFashionWeb.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.PaymentAttempt", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany("PaymentAttempts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.Product", b =>
@@ -2602,43 +1639,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.RefundRequest", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "RequestedByUser")
-                        .WithMany("RefundRequests")
-                        .HasForeignKey("RequestedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("RequestedByUser");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.ReportTemplate", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId");
-
-                    b.Navigation("CreatedByUser");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.SalesReport", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "GeneratedByUser")
-                        .WithMany()
-                        .HasForeignKey("GeneratedByUserId");
-
-                    b.Navigation("GeneratedByUser");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.SecurityLog", b =>
@@ -2701,15 +1701,6 @@ namespace JohnHenryFashionWeb.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.UserSession", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -2792,19 +1783,13 @@ namespace JohnHenryFashionWeb.Migrations
 
                     b.Navigation("BlogPosts");
 
-                    b.Navigation("CheckoutSessions");
-
                     b.Navigation("Notifications");
 
                     b.Navigation("Orders");
 
                     b.Navigation("PasswordHistories");
 
-                    b.Navigation("PaymentAttempts");
-
                     b.Navigation("ProductReviews");
-
-                    b.Navigation("RefundRequests");
 
                     b.Navigation("SecurityLogs");
 
@@ -2832,11 +1817,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CheckoutSession", b =>
-                {
-                    b.Navigation("Items");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.InventoryItem", b =>
                 {
                     b.Navigation("StockMovements");
@@ -2860,11 +1840,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("ShoppingCartItems");
 
                     b.Navigation("Wishlists");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.UserSession", b =>
-                {
-                    b.Navigation("PageViews");
                 });
 #pragma warning restore 612, 618
         }

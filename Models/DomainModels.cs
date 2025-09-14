@@ -13,6 +13,10 @@ namespace JohnHenryFashionWeb.Models
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? LastLoginDate { get; set; }
+
+        // Computed properties
+        public string FullName => $"{FirstName} {LastName}".Trim();
 
         // Navigation properties
         public ICollection<Order> Orders { get; set; } = new List<Order>();
@@ -21,6 +25,14 @@ namespace JohnHenryFashionWeb.Models
         public ICollection<ShoppingCartItem> ShoppingCartItems { get; set; } = new List<ShoppingCartItem>();
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public ICollection<SecurityLog> SecurityLogs { get; set; } = new List<SecurityLog>();
+        public ICollection<PasswordHistory> PasswordHistories { get; set; } = new List<PasswordHistory>();
+        public ICollection<ActiveSession> ActiveSessions { get; set; } = new List<ActiveSession>();
+        public ICollection<TwoFactorToken> TwoFactorTokens { get; set; } = new List<TwoFactorToken>();
+        public ICollection<PaymentAttempt> PaymentAttempts { get; set; } = new List<PaymentAttempt>();
+        public ICollection<CheckoutSession> CheckoutSessions { get; set; } = new List<CheckoutSession>();
+        public ICollection<RefundRequest> RefundRequests { get; set; } = new List<RefundRequest>();
     }
 
     public class Category
@@ -97,6 +109,9 @@ namespace JohnHenryFashionWeb.Models
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public ICollection<ShoppingCartItem> ShoppingCartItems { get; set; } = new List<ShoppingCartItem>();
         public ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+
+        // Computed properties
+        public string MainImageUrl => FeaturedImageUrl ?? "/images/default-product.jpg";
     }
 
     public class ProductImage
@@ -134,10 +149,16 @@ namespace JohnHenryFashionWeb.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        // Computed properties
+        public string? ShippingCity => ShippingAddress; // Simplified mapping
+
         // Navigation properties
         public ApplicationUser User { get; set; } = null!;
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+        // Computed properties
+        public decimal Total => TotalAmount;
     }
 
     public class OrderItem
@@ -155,6 +176,9 @@ namespace JohnHenryFashionWeb.Models
         // Navigation properties
         public Order Order { get; set; } = null!;
         public Product Product { get; set; } = null!;
+
+        // Computed properties
+        public decimal Price => UnitPrice;
     }
 
     public class ShoppingCartItem
@@ -242,6 +266,13 @@ namespace JohnHenryFashionWeb.Models
 
         // Navigation properties
         public ApplicationUser User { get; set; } = null!;
+
+        // Computed properties
+        public string FullName => $"{FirstName} {LastName}".Trim();
+        public string PhoneNumber => Phone ?? "";
+        public string Ward => ""; // Thêm thuộc tính nếu cần
+        public string District => State; // Hoặc mapping phù hợp
+        public string FullAddress => Address1 + (string.IsNullOrEmpty(Address2) ? "" : ", " + Address2);
     }
 
     public class Payment
@@ -299,5 +330,390 @@ namespace JohnHenryFashionWeb.Models
         // Navigation properties
         public BlogCategory? Category { get; set; }
         public ApplicationUser Author { get; set; } = null!;
+    }
+
+    public class ContactMessage
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string Subject { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public bool IsRead { get; set; } = false;
+        public bool IsReplied { get; set; } = false;
+        public string? AdminNotes { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? RepliedAt { get; set; }
+        public string? RepliedBy { get; set; }
+
+        // Optional user reference if logged in user contacts
+        public string? UserId { get; set; }
+        public ApplicationUser? User { get; set; }
+    }
+
+    public class Notification
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty; // order, product, system, welcome, admin_order
+        public string? ActionUrl { get; set; }
+        public bool IsRead { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ReadAt { get; set; }
+
+        // Navigation property
+        public ApplicationUser User { get; set; } = null!;
+    }
+
+    public class SecurityLog
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string EventType { get; set; } = string.Empty; // LoginSuccess, LoginFailed, PasswordChange, etc.
+        public string Description { get; set; } = string.Empty;
+        public string? IpAddress { get; set; }
+        public string? UserAgent { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation property
+        public ApplicationUser User { get; set; } = null!;
+    }
+
+    public class PasswordHistory
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation property
+        public ApplicationUser User { get; set; } = null!;
+    }
+
+    public class ActiveSession
+    {
+        public int Id { get; set; }
+        public string SessionId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
+        public string? IpAddress { get; set; }
+        public string? UserAgent { get; set; }
+        public string? DeviceType { get; set; }
+        public string? Location { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastActivity { get; set; } = DateTime.UtcNow;
+        public DateTime ExpiresAt { get; set; }
+        public bool IsActive { get; set; } = true;
+
+        // Navigation property
+        public ApplicationUser User { get; set; } = null!;
+    }
+
+    public class TwoFactorToken
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+        public string Purpose { get; set; } = string.Empty; // Login, PasswordReset, etc.
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime ExpiresAt { get; set; }
+        public bool IsUsed { get; set; } = false;
+
+        // Navigation property
+        public ApplicationUser User { get; set; } = null!;
+    }
+
+    // Payment & Checkout Models
+    public class PaymentAttempt
+    {
+        public int Id { get; set; }
+        public string PaymentId { get; set; } = string.Empty;
+        public string OrderId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string Currency { get; set; } = "VND";
+        public string PaymentMethod { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty; // pending, completed, failed, cancelled
+        public string? TransactionId { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? IpAddress { get; set; }
+        public string? UserAgent { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CompletedAt { get; set; }
+
+        // Navigation properties
+        public ApplicationUser User { get; set; } = null!;
+        public Order Order { get; set; } = null!;
+    }
+
+    public class PaymentMethod
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string? IconUrl { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool RequiresRedirect { get; set; } = false;
+        public decimal? MinAmount { get; set; }
+        public decimal? MaxAmount { get; set; }
+        public string? SupportedCurrencies { get; set; }
+        public int SortOrder { get; set; } = 0;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Computed properties
+        public string Gateway => Code;
+        public string DisplayName => Name;
+        public decimal ServiceFee => 0; // Có thể thêm logic tính phí
+    }
+
+    public class CheckoutSession
+    {
+        public Guid Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string Status { get; set; } = "active"; // active, completed, expired, cancelled
+        public decimal TotalAmount { get; set; }
+        public decimal ShippingFee { get; set; } = 0;
+        public decimal Tax { get; set; } = 0;
+        public decimal DiscountAmount { get; set; } = 0;
+        public string? CouponCode { get; set; }
+        public string? ShippingMethod { get; set; }
+        public string? PaymentMethod { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? BillingAddress { get; set; }
+        public string? Notes { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime ExpiresAt { get; set; }
+
+        // Navigation properties
+        public ApplicationUser? User { get; set; }
+        public ICollection<CheckoutSessionItem> Items { get; set; } = new List<CheckoutSessionItem>();
+    }
+
+    public class CheckoutSessionItem
+    {
+        public int Id { get; set; }
+        public Guid CheckoutSessionId { get; set; }
+        public Guid ProductId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? Size { get; set; }
+        public string? Color { get; set; }
+        public string? ProductName { get; set; }
+        public string? ProductImage { get; set; }
+
+        // Navigation properties
+        public CheckoutSession CheckoutSession { get; set; } = null!;
+        public Product Product { get; set; } = null!;
+    }
+
+    public class RefundRequest
+    {
+        public Guid Id { get; set; }
+        public string PaymentId { get; set; } = string.Empty;
+        public string OrderId { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string Reason { get; set; } = string.Empty;
+        public string Status { get; set; } = "pending"; // pending, approved, rejected, completed
+        public string? AdminNotes { get; set; }
+        public string? RefundTransactionId { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ProcessedAt { get; set; }
+        public string RequestedBy { get; set; } = string.Empty;
+        public string? ProcessedBy { get; set; }
+
+        // Navigation properties
+        public Order Order { get; set; } = null!;
+        public ApplicationUser RequestedByUser { get; set; } = null!;
+    }
+
+    public class ShippingMethod
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Cost { get; set; }
+        public int EstimatedDays { get; set; }
+        public bool IsActive { get; set; } = true;
+        public decimal? MinOrderAmount { get; set; }
+        public decimal? MaxWeight { get; set; }
+        public string? AvailableRegions { get; set; }
+        public int SortOrder { get; set; } = 0;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Computed properties
+        public string DeliveryTime => $"{EstimatedDays} ngày";
+    }
+
+    public class OrderStatusHistory
+    {
+        public int Id { get; set; }
+        public Guid OrderId { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string? Notes { get; set; }
+        public string? ChangedBy { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        public Order Order { get; set; } = null!;
+        public ApplicationUser? ChangedByUser { get; set; }
+    }
+
+    public class Promotion
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string Type { get; set; } = "percentage"; // percentage, fixed_amount, free_shipping
+        public decimal Value { get; set; }
+        public decimal? MinOrderAmount { get; set; }
+        public decimal? MaxDiscountAmount { get; set; }
+        public int? UsageLimit { get; set; }
+        public int UsageCount { get; set; } = 0;
+        public bool IsActive { get; set; } = true;
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? Description { get; set; }
+        public string? ApplicableProductIds { get; set; } // JSON array of product IDs
+        public string? ApplicableCategoryIds { get; set; } // JSON array of category IDs
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    // Analytics and Reporting Models
+    public class UserSession
+    {
+        public Guid Id { get; set; }
+        public string SessionId { get; set; } = "";
+        public string? UserId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
+        public int? Duration { get; set; } // in minutes
+        public string UserAgent { get; set; } = "";
+        public string IpAddress { get; set; } = "";
+        public bool IsActive { get; set; }
+        public string? DeviceType { get; set; }
+        public string? Browser { get; set; }
+        public string? OperatingSystem { get; set; }
+        public string? Country { get; set; }
+        public string? City { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        // Navigation properties
+        public ApplicationUser? User { get; set; }
+        public List<PageView> PageViews { get; set; } = new();
+    }
+
+    public class PageView
+    {
+        public Guid Id { get; set; }
+        public string? UserId { get; set; }
+        public string SessionId { get; set; } = "";
+        public string Page { get; set; } = "";
+        public string? Referrer { get; set; }
+        public string UserAgent { get; set; } = "";
+        public string IpAddress { get; set; } = "";
+        public DateTime ViewedAt { get; set; }
+        public int? TimeOnPage { get; set; } // in seconds
+        public string? ExitPage { get; set; }
+        public string? Source { get; set; }
+        public string? Medium { get; set; }
+        public string? Campaign { get; set; }
+
+        // Navigation properties
+        public ApplicationUser? User { get; set; }
+        public UserSession? Session { get; set; }
+    }
+
+    public class ConversionEvent
+    {
+        public Guid Id { get; set; }
+        public string? UserId { get; set; }
+        public string SessionId { get; set; } = "";
+        public string ConversionType { get; set; } = ""; // purchase, signup, newsletter, etc.
+        public decimal Value { get; set; }
+        public string? PaymentMethod { get; set; }
+        public string? Source { get; set; }
+        public string? Medium { get; set; }
+        public string? Campaign { get; set; }
+        public Guid? OrderId { get; set; }
+        public string? ProductIds { get; set; } // JSON array
+        public DateTime ConvertedAt { get; set; }
+        public string? AdditionalData { get; set; } // JSON
+
+        // Navigation properties
+        public ApplicationUser? User { get; set; }
+        public Order? Order { get; set; }
+    }
+
+    public class AnalyticsData
+    {
+        public Guid Id { get; set; }
+        public string EventType { get; set; } = "";
+        public string? EntityId { get; set; }
+        public string? UserId { get; set; }
+        public string SessionId { get; set; } = "";
+        public string? Source { get; set; }
+        public string? Medium { get; set; }
+        public string? Campaign { get; set; }
+        public string? Data { get; set; } // JSON
+        public DateTime CreatedAt { get; set; }
+
+        // Navigation properties
+        public ApplicationUser? User { get; set; }
+    }
+
+    public class SalesReport
+    {
+        public Guid Id { get; set; }
+        public string ReportType { get; set; } = "";
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public int TotalOrders { get; set; }
+        public int TotalProducts { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public string? ReportData { get; set; } // JSON
+        public DateTime GeneratedAt { get; set; }
+        public string? GeneratedBy { get; set; }
+        public string Status { get; set; } = ""; // generating, completed, failed
+
+        // Navigation properties
+        public ApplicationUser? GeneratedByUser { get; set; }
+
+        // Computed properties for backward compatibility
+        public static string Title => "Sales Report";
+        public static string Description => "Sales performance report";
+        public DateTime CreatedAt => GeneratedAt;
+        public string? Data => ReportData;
+    }
+
+    public class ReportTemplate
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string ReportType { get; set; } = "";
+        public string Format { get; set; } = "excel"; // excel, pdf, csv, json
+        public string Frequency { get; set; } = "monthly"; // daily, weekly, monthly, quarterly, yearly
+        public string? Parameters { get; set; } // JSON
+        public string? Configuration { get; set; } // JSON
+        public bool IsActive { get; set; }
+        public string? CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime? LastRunDate { get; set; }
+        public DateTime? NextRunDate { get; set; }
+
+        // Navigation properties
+        public ApplicationUser? CreatedByUser { get; set; }
     }
 }

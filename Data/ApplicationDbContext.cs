@@ -11,7 +11,7 @@ namespace JohnHenryFashionWeb.Data
         {
         }
 
-        // DbSets cho các bảng chính
+                // DbSets cho các bảng chính
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
@@ -26,10 +26,34 @@ namespace JohnHenryFashionWeb.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<BlogPost> BlogPosts { get; set; }
         public DbSet<BlogCategory> BlogCategories { get; set; }
+        public DbSet<ContactMessage> ContactMessages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SecurityLog> SecurityLogs { get; set; }
+        public DbSet<PasswordHistory> PasswordHistories { get; set; }
+        public DbSet<ActiveSession> ActiveSessions { get; set; }
+        public DbSet<TwoFactorToken> TwoFactorTokens { get; set; }
+        
+        // Payment entities
+        public DbSet<PaymentAttempt> PaymentAttempts { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<CheckoutSession> CheckoutSessions { get; set; }
+        public DbSet<CheckoutSessionItem> CheckoutSessionItems { get; set; }
+        public DbSet<RefundRequest> RefundRequests { get; set; }
+        public DbSet<ShippingMethod> ShippingMethods { get; set; }
+        public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
         
         // DbSets cho admin/inventory management
         public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
+        
+        // Analytics and Reporting entities
+        public DbSet<UserSession> UserSessions { get; set; }
+        public DbSet<PageView> PageViews { get; set; }
+        public DbSet<ConversionEvent> ConversionEvents { get; set; }
+        public DbSet<AnalyticsData> AnalyticsData { get; set; }
+        public DbSet<SalesReport> SalesReports { get; set; }
+        public DbSet<ReportTemplate> ReportTemplates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -180,6 +204,147 @@ namespace JohnHenryFashionWeb.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            // Cấu hình cho bảng ContactMessages
+            modelBuilder.Entity<ContactMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Phone).HasMaxLength(20);
+                entity.Property(e => e.Subject).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Message).IsRequired().HasMaxLength(5000);
+                entity.Property(e => e.AdminNotes).HasMaxLength(2000);
+                entity.Property(e => e.RepliedBy).HasMaxLength(255);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                
+                // Optional user reference
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                    
+                // Indexes
+                entity.HasIndex(e => e.Email);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.IsRead);
+            });
+
+            // Cấu hình cho bảng Notifications
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Message).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.ActionUrl).HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                
+                // Foreign key relationship
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.Notifications)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Indexes
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.IsRead);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => new { e.UserId, e.IsRead });
+            });
+
+            // Cấu hình cho bảng SecurityLogs
+            modelBuilder.Entity<SecurityLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.EventType).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.IpAddress).HasMaxLength(45);
+                entity.Property(e => e.UserAgent).HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                
+                // Foreign key relationship
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.SecurityLogs)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Indexes
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.EventType);
+                entity.HasIndex(e => e.IpAddress);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => new { e.UserId, e.EventType });
+            });
+
+            // Cấu hình cho bảng PasswordHistories
+            modelBuilder.Entity<PasswordHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                
+                // Foreign key relationship
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.PasswordHistories)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Indexes
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CreatedAt);
+            });
+
+            // Cấu hình cho bảng ActiveSessions
+            modelBuilder.Entity<ActiveSession>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SessionId).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.IpAddress).HasMaxLength(45);
+                entity.Property(e => e.UserAgent).HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.LastActivity).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                
+                // Foreign key relationship
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.ActiveSessions)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Indexes
+                entity.HasIndex(e => e.SessionId).IsUnique();
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.ExpiresAt);
+                entity.HasIndex(e => e.IsActive);
+            });
+
+            // Cấu hình cho bảng TwoFactorTokens
+            modelBuilder.Entity<TwoFactorToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.Token).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Purpose).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                
+                // Foreign key relationship
+                entity.HasOne(d => d.User)
+                    .WithMany(u => u.TwoFactorTokens)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Indexes
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Token);
+                entity.HasIndex(e => e.ExpiresAt);
+                entity.HasIndex(e => e.IsUsed);
+                entity.HasIndex(e => new { e.UserId, e.Purpose });
+            });
+
             // Seed data
             SeedData(modelBuilder);
         }
@@ -243,6 +408,195 @@ namespace JohnHenryFashionWeb.Data
                     UpdatedAt = seedDateTime
                 }
             );
+            
+            // Payment entity configurations
+            ConfigurePaymentEntities(modelBuilder);
+        }
+
+        private void ConfigurePaymentEntities(ModelBuilder modelBuilder)
+        {
+            // PaymentAttempt configuration
+            modelBuilder.Entity<PaymentAttempt>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.PaymentId).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.OrderId).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Currency).HasMaxLength(3).HasDefaultValue("VND");
+                entity.Property(e => e.PaymentMethod).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.TransactionId).HasMaxLength(255);
+                entity.Property(e => e.IpAddress).HasMaxLength(45);
+                entity.Property(e => e.UserAgent).HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.PaymentId).IsUnique();
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.PaymentAttempts)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // PaymentMethod configuration
+            modelBuilder.Entity<PaymentMethod>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.IconUrl).HasMaxLength(255);
+                entity.Property(e => e.MinAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.MaxAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.SupportedCurrencies).HasMaxLength(100);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.SortOrder);
+            });
+
+            // CheckoutSession configuration
+            modelBuilder.Entity<CheckoutSession>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Email).HasMaxLength(255);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.ShippingFee).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Tax).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CouponCode).HasMaxLength(50);
+                entity.Property(e => e.ShippingMethod).HasMaxLength(50);
+                entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.ExpiresAt);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.CheckoutSessions)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // CheckoutSessionItem configuration
+            modelBuilder.Entity<CheckoutSessionItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Size).HasMaxLength(20);
+                entity.Property(e => e.Color).HasMaxLength(50);
+                entity.Property(e => e.ProductName).HasMaxLength(255);
+                entity.Property(e => e.ProductImage).HasMaxLength(500);
+
+                entity.HasIndex(e => e.CheckoutSessionId);
+                entity.HasIndex(e => e.ProductId);
+
+                entity.HasOne(e => e.CheckoutSession)
+                    .WithMany(cs => cs.Items)
+                    .HasForeignKey(e => e.CheckoutSessionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // RefundRequest configuration
+            modelBuilder.Entity<RefundRequest>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.PaymentId).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.OrderId).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Reason).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.AdminNotes).HasMaxLength(1000);
+                entity.Property(e => e.RefundTransactionId).HasMaxLength(255);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.PaymentId);
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.RequestedBy);
+
+                entity.HasOne(e => e.RequestedByUser)
+                    .WithMany(u => u.RefundRequests)
+                    .HasForeignKey(e => e.RequestedBy)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ShippingMethod configuration
+            modelBuilder.Entity<ShippingMethod>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Cost).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.MinOrderAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.MaxWeight).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.AvailableRegions).HasMaxLength(1000);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.SortOrder);
+            });
+
+            // OrderStatusHistory configuration
+            modelBuilder.Entity<OrderStatusHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ChangedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ChangedBy)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Promotion configuration
+            modelBuilder.Entity<Promotion>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Value).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.MinOrderAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.MaxDiscountAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.StartDate);
+                entity.HasIndex(e => e.EndDate);
+            });
         }
     }
 }
