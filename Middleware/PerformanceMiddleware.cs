@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Primitives;
+using JohnHenryFashionWeb.Services;
+using System.Security.Claims;
 
 namespace JohnHenryFashionWeb.Middleware
 {
@@ -17,26 +19,55 @@ namespace JohnHenryFashionWeb.Middleware
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
+            // Track memory at start
+            var memoryBefore = GC.GetTotalMemory(false);
+            
             // Add performance headers
             context.Response.OnStarting(() =>
             {
                 stopwatch.Stop();
                 var responseTime = stopwatch.ElapsedMilliseconds;
+                var memoryAfter = GC.GetTotalMemory(false);
+                var memoryUsed = memoryAfter - memoryBefore;
                 
                 context.Response.Headers["X-Response-Time"] = responseTime.ToString() + "ms";
+                context.Response.Headers["X-Memory-Used"] = (memoryUsed / 1024).ToString() + "KB";
                 context.Response.Headers["X-Powered-By"] = "John Henry Fashion";
                 
-                // Log slow requests
+                // Log performance metrics
                 if (responseTime > 1000)
                 {
-                    _logger.LogWarning("Slow request: {Method} {Path} took {ResponseTime}ms", 
-                        context.Request.Method, context.Request.Path, responseTime);
+                    _logger.LogWarning("Slow request: {Method} {Path} took {ResponseTime}ms, Memory: {MemoryUsed}KB", 
+                        context.Request.Method, context.Request.Path, responseTime, memoryUsed / 1024);
                 }
                 
                 return Task.CompletedTask;
             });
 
-            await _next(context);
+            try
+            {
+                await _next(context);
+                
+                stopwatch.Stop();
+                
+                // Log to performance monitor service if available
+                var performanceService = context.RequestServices.GetService<IPerformanceMonitorService>();
+                if (performanceService != null)
+                {
+                    var userId = context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                    await performanceService.LogPageLoadAsync(
+                        context.Request.Path, 
+                        stopwatch.Elapsed, 
+                        userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                stopwatch.Stop();
+                _logger.LogError(ex, "Request failed: {Method} {Path} after {ResponseTime}ms", 
+                    context.Request.Method, context.Request.Path, stopwatch.ElapsedMilliseconds);
+                throw;
+            }
         }
     }
 

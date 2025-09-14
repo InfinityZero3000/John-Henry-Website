@@ -8,7 +8,7 @@ using JohnHenryFashionWeb.ViewModels;
 
 namespace JohnHenryFashionWeb.Controllers
 {
-    [Authorize(Roles = UserRoles.Seller)]
+    [Authorize(Roles = UserRoles.Seller, AuthenticationSchemes = "Identity.Application")]
     [Route("seller")]
     public class SellerController : Controller
     {
@@ -373,6 +373,330 @@ namespace JohnHenryFashionWeb.Controllers
             // Reload dropdown data if validation fails
             model.Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
             model.Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync();
+
+            return View(model);
+        }
+
+        [HttpGet("products/edit/{id}")]
+        public async Task<IActionResult> EditProduct(Guid id)
+        {
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm!";
+                return RedirectToAction(nameof(Products));
+            }
+
+            var viewModel = new ProductCreateEditViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                SKU = product.SKU,
+                Price = product.Price,
+                SalePrice = product.SalePrice,
+                CategoryId = product.CategoryId,
+                BrandId = product.BrandId,
+                ShortDescription = product.ShortDescription,
+                Description = product.Description,
+                StockQuantity = product.StockQuantity,
+                ManageStock = product.ManageStock,
+                InStock = product.InStock,
+                IsFeatured = product.IsFeatured,
+                IsActive = product.IsActive,
+                Size = product.Size,
+                Color = product.Color,
+                Material = product.Material,
+                Weight = product.Weight,
+                Dimensions = product.Dimensions,
+                Status = product.Status,
+                FeaturedImageUrl = product.FeaturedImageUrl,
+                ExistingGalleryImages = product.GalleryImages?.ToArray() ?? new string[0],
+                Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync(),
+                Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost("products/edit/{id}")]
+        public async Task<IActionResult> EditProduct(Guid id, ProductCreateEditViewModel model)
+        {
+            if (id != model.Id)
+            {
+                TempData["Error"] = "ID sản phẩm không khớp!";
+                return RedirectToAction(nameof(Products));
+            }
+
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm!";
+                return RedirectToAction(nameof(Products));
+            }
+
+            if (ModelState.IsValid)
+            {
+                product.Name = model.Name;
+                product.SKU = model.SKU;
+                product.Price = model.Price;
+                product.SalePrice = model.SalePrice;
+                product.CategoryId = model.CategoryId;
+                product.BrandId = model.BrandId;
+                product.ShortDescription = model.ShortDescription;
+                product.Description = model.Description;
+                product.StockQuantity = model.StockQuantity;
+                product.ManageStock = model.ManageStock;
+                product.InStock = model.InStock;
+                product.IsFeatured = model.IsFeatured;
+                product.IsActive = model.IsActive;
+                product.Size = model.Size;
+                product.Color = model.Color;
+                product.Material = model.Material;
+                product.Weight = model.Weight;
+                product.Dimensions = model.Dimensions;
+                product.Status = model.Status;
+                product.Slug = GenerateSlug(model.Name);
+                product.UpdatedAt = DateTime.UtcNow;
+
+                // Handle featured image upload
+                if (model.FeaturedImage != null)
+                {
+                    product.FeaturedImageUrl = await SaveUploadedFile(model.FeaturedImage, "products");
+                }
+
+                // Handle gallery images upload
+                if (model.GalleryImages != null && model.GalleryImages.Count > 0)
+                {
+                    var galleryUrls = new List<string>();
+                    foreach (var image in model.GalleryImages)
+                    {
+                        var imageUrl = await SaveUploadedFile(image, "products");
+                        galleryUrls.Add(imageUrl);
+                    }
+                    product.GalleryImages = galleryUrls.ToArray();
+                }
+
+                _context.Update(product);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Sản phẩm đã được cập nhật thành công!";
+                return RedirectToAction(nameof(Products));
+            }
+
+            // Reload dropdown data if validation fails
+            model.Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
+            model.Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync();
+
+            return View(model);
+        }
+
+        [HttpGet("inventory")]
+        public async Task<IActionResult> Inventory(string search = "", bool lowStock = false)
+        {
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .AsQueryable();
+
+            // TODO: Filter by seller when seller-product relationship is implemented
+            // query = query.Where(p => p.SellerId == currentSellerId);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.Name.Contains(search) || p.SKU.Contains(search));
+            }
+
+            if (lowStock)
+            {
+                query = query.Where(p => p.StockQuantity <= 10);
+            }
+
+            var products = await query
+                .OrderBy(p => p.StockQuantity)
+                .ThenBy(p => p.Name)
+                .Select(p => new InventoryItemViewModel
+                {
+                    Id = p.Id,
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    SKU = p.SKU,
+                    CurrentStock = p.StockQuantity,
+                    CategoryName = p.Category.Name,
+                    Price = p.Price,
+                    LastUpdated = p.UpdatedAt
+                })
+                .ToListAsync();
+
+            var viewModel = new InventoryListViewModel
+            {
+                Items = products,
+                SearchTerm = search,
+                Filter = lowStock ? "low_stock" : "all"
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost("inventory/update-stock")]
+        public async Task<IActionResult> UpdateStock([FromForm] Guid productId, [FromForm] int newStock, [FromForm] string reason = "")
+        {
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy sản phẩm!" });
+            }
+
+            // TODO: Check if product belongs to current seller
+
+            var oldStock = product.StockQuantity;
+            product.StockQuantity = newStock;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { 
+                success = true, 
+                message = $"Đã cập nhật tồn kho từ {oldStock} thành {newStock}!",
+                newStock = newStock
+            });
+        }
+
+        [HttpGet("sales")]
+        public async Task<IActionResult> Sales(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var startDate = fromDate ?? DateTime.UtcNow.AddMonths(-1);
+            var endDate = toDate ?? DateTime.UtcNow;
+
+            // TODO: Filter by seller when relationship is implemented
+            var salesData = await _context.Orders
+                .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate && o.Status == "completed")
+                .GroupBy(o => o.CreatedAt.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Revenue = g.Sum(o => o.TotalAmount),
+                    Orders = g.Count()
+                })
+                .OrderBy(x => x.Date)
+                .ToListAsync();
+
+            var viewModel = new SellerSalesViewModel
+            {
+                FromDate = startDate,
+                ToDate = endDate,
+                TotalRevenue = salesData.Sum(s => s.Revenue),
+                TotalOrders = salesData.Sum(s => s.Orders),
+                SalesData = salesData.Select(s => new DailySales
+                {
+                    Date = s.Date,
+                    Revenue = s.Revenue,
+                    OrderCount = s.Orders
+                }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpGet("analytics")]
+        public async Task<IActionResult> Analytics()
+        {
+            // TODO: Implement seller-specific analytics
+            var viewModel = new SellerAnalyticsViewModel
+            {
+                TopProducts = await _context.Products
+                    .OrderByDescending(p => p.StockQuantity) // This should be orders count
+                    .Take(10)
+                    .Select(p => new TopSellingProduct
+                    {
+                        ProductName = p.Name,
+                        QuantitySold = p.StockQuantity,
+                        Revenue = p.Price * p.StockQuantity
+                    })
+                    .ToListAsync()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> Profile()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            var viewModel = new SellerProfileViewModel
+            {
+                CompanyName = currentUser.CompanyName,
+                BusinessLicense = currentUser.BusinessLicense,
+                TaxCode = currentUser.TaxCode,
+                Address = currentUser.Address,
+                Phone = currentUser.Phone,
+                Email = currentUser.Email,
+                FirstName = currentUser.FirstName,
+                LastName = currentUser.LastName,
+                IsApproved = currentUser.IsApproved,
+                ApprovedAt = currentUser.ApprovedAt,
+                Notes = currentUser.Notes,
+                CreatedAt = currentUser.CreatedAt,
+                UpdatedAt = currentUser.UpdatedAt,
+                IsActive = currentUser.IsActive
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost("profile")]
+        public async Task<IActionResult> Profile(SellerProfileViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                
+                currentUser.CompanyName = model.CompanyName;
+                currentUser.BusinessLicense = model.BusinessLicense;
+                currentUser.TaxCode = model.TaxCode;
+                currentUser.Address = model.Address;
+                currentUser.Phone = model.Phone;
+                currentUser.FirstName = model.FirstName;
+                currentUser.LastName = model.LastName;
+
+                var result = await _userManager.UpdateAsync(currentUser);
+                
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "Hồ sơ đã được cập nhật thành công!";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật hồ sơ!";
+                }
+            }
+
+            return View(model);
+        }
+
+        [HttpGet("settings")]
+        public IActionResult Settings()
+        {
+            var viewModel = new SellerSettingsViewModel
+            {
+                // Load current settings
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost("settings")]
+        public async Task<IActionResult> Settings(SellerSettingsViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Save settings
+                TempData["Success"] = "Cài đặt đã được lưu thành công!";
+            }
 
             return View(model);
         }

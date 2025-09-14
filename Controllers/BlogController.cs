@@ -1,18 +1,325 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using JohnHenryFashionWeb.Data;
+using JohnHenryFashionWeb.Models;
+using JohnHenryFashionWeb.ViewModels;
+using System.Security.Claims;
 
 namespace JohnHenryFashionWeb.Controllers
 {
     public class BlogController : Controller
     {
-        public IActionResult Index()
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public BlogController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
+            _context = context;
+            _userManager = userManager;
+        }
+
+        // GET: Blog
+        public async Task<IActionResult> Index(int page = 1, string? category = null, string? search = null)
+        {
+            const int pageSize = 9;
+            
+            var query = _context.BlogPosts
+                .Include(b => b.Category)
+                .Include(b => b.Author)
+                .Where(b => b.Status == "published")
+                .AsQueryable();
+
+            // Filter by category
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(b => b.Category != null && b.Category.Slug == category);
+            }
+
+            // Search functionality
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(b => b.Title.Contains(search) || 
+                                       b.Content.Contains(search) ||
+                                       (b.Excerpt != null && b.Excerpt.Contains(search)));
+            }
+
+            var totalPosts = await query.CountAsync();
+            var posts = await query
+                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize);
+            ViewBag.Category = category;
+            ViewBag.Search = search;
+
+            // Get categories for sidebar
+            ViewBag.Categories = await _context.BlogCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.SortOrder)
+                .ToListAsync();
+
+            // Get featured posts
+            ViewBag.FeaturedPosts = await _context.BlogPosts
+                .Include(b => b.Category)
+                .Where(b => b.Status == "published" && b.IsFeatured)
+                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                .Take(3)
+                .ToListAsync();
+
+            return View(posts);
+        }
+
+        // GET: Blog/Details/5
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var post = await _context.BlogPosts
+                .Include(b => b.Category)
+                .Include(b => b.Author)
+                .FirstOrDefaultAsync(b => b.Id == id && b.Status == "published");
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            // Increment view count
+            post.ViewCount++;
+            await _context.SaveChangesAsync();
+
+            // Get related posts
+            ViewBag.RelatedPosts = await _context.BlogPosts
+                .Include(b => b.Category)
+                .Where(b => b.Id != post.Id && 
+                           b.Status == "published" && 
+                           (b.CategoryId == post.CategoryId || b.Tags!.Any(t => post.Tags!.Contains(t))))
+                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                .Take(3)
+                .ToListAsync();
+
+            return View(post);
+        }
+
+        // GET: Blog/Category/fashion
+        public async Task<IActionResult> Category(string slug, int page = 1)
+        {
+            const int pageSize = 9;
+            
+            var category = await _context.BlogCategories
+                .FirstOrDefaultAsync(c => c.Slug == slug && c.IsActive);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            // Get posts for this category
+            var query = _context.BlogPosts
+                .Include(b => b.Category)
+                .Include(b => b.Author)
+                .Where(b => b.Status == "published" && b.Category != null && b.Category.Slug == slug);
+
+            var totalPosts = await query.CountAsync();
+            var posts = await query
+                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Get all categories for sidebar
+            var allCategories = await _context.BlogCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.SortOrder)
+                .ToListAsync();
+
+            // Get featured posts for sidebar
+            var featuredPosts = await _context.BlogPosts
+                .Include(b => b.Category)
+                .Where(b => b.Status == "published" && b.IsFeatured)
+                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+
+            var viewModel = new BlogCategoryViewModel
+            {
+                Category = category,
+                Posts = posts,
+                AllCategories = allCategories,
+                FeaturedPosts = featuredPosts,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize),
+                TotalPosts = totalPosts
+            };
+
+            return View(viewModel);
+        }
+
+        // GET: Blog/Create
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.Categories = await _context.BlogCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
             return View();
         }
 
-        public IActionResult Details(int id)
+        // POST: Blog/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> Create(BlogPost post)
         {
-            ViewBag.Id = id;
-            return View();
+            if (ModelState.IsValid)
+            {
+                post.Id = Guid.NewGuid();
+                post.AuthorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                post.CreatedAt = DateTime.UtcNow;
+                post.UpdatedAt = DateTime.UtcNow;
+                
+                // Generate slug from title
+                post.Slug = GenerateSlug(post.Title);
+
+                // Set published date if status is published
+                if (post.Status == "published" && !post.PublishedAt.HasValue)
+                {
+                    post.PublishedAt = DateTime.UtcNow;
+                }
+
+                _context.BlogPosts.Add(post);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Bài viết đã được tạo thành công!";
+                return RedirectToAction(nameof(Details), new { id = post.Id });
+            }
+
+            ViewBag.Categories = await _context.BlogCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            return View(post);
+        }
+
+        // GET: Blog/Edit/5
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var post = await _context.BlogPosts.FindAsync(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Categories = await _context.BlogCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            return View(post);
+        }
+
+        // POST: Blog/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> Edit(Guid id, BlogPost post)
+        {
+            if (id != post.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var existingPost = await _context.BlogPosts.FindAsync(id);
+                    if (existingPost == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Update fields
+                    existingPost.Title = post.Title;
+                    existingPost.Slug = GenerateSlug(post.Title);
+                    existingPost.Excerpt = post.Excerpt;
+                    existingPost.Content = post.Content;
+                    existingPost.FeaturedImageUrl = post.FeaturedImageUrl;
+                    existingPost.Status = post.Status;
+                    existingPost.IsFeatured = post.IsFeatured;
+                    existingPost.Tags = post.Tags;
+                    existingPost.MetaTitle = post.MetaTitle;
+                    existingPost.MetaDescription = post.MetaDescription;
+                    existingPost.CategoryId = post.CategoryId;
+                    existingPost.UpdatedAt = DateTime.UtcNow;
+
+                    // Set published date if status changed to published
+                    if (post.Status == "published" && existingPost.Status != "published")
+                    {
+                        existingPost.PublishedAt = DateTime.UtcNow;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    
+                    TempData["Success"] = "Bài viết đã được cập nhật thành công!";
+                    return RedirectToAction(nameof(Details), new { id = post.Id });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BlogPostExists(post.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            ViewBag.Categories = await _context.BlogCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            return View(post);
+        }
+
+        // POST: Blog/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var post = await _context.BlogPosts.FindAsync(id);
+            if (post != null)
+            {
+                _context.BlogPosts.Remove(post);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Bài viết đã được xóa thành công!";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool BlogPostExists(Guid id)
+        {
+            return _context.BlogPosts.Any(e => e.Id == id);
+        }
+
+        private string GenerateSlug(string title)
+        {
+            return title.ToLower()
+                       .Replace(" ", "-")
+                       .Replace("--", "-")
+                       .Trim('-');
         }
     }
 }
