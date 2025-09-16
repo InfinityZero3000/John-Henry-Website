@@ -1,0 +1,756 @@
+@{
+    ViewData["Title"] = "Quản lý bảo mật";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Quản lý bảo mật
+                </h1>
+                <p class="text-muted mb-0">Cài đặt bảo mật và giám sát hoạt động hệ thống</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline-primary" onclick="exportSecurityReport()">
+                    <i class="fas fa-download me-1"></i>Xuất báo cáo
+                </button>
+                <button class="btn btn-primary" onclick="runSecurityScan()">
+                    <i class="fas fa-search me-1"></i>Quét bảo mật
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Status Overview -->
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">Cao</h4>
+                                <p class="card-text">Mức độ bảo mật</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-shield-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">12</h4>
+                                <p class="card-text">Cảnh báo bảo mật</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">45</h4>
+                                <p class="card-text">Lần đăng nhập thất bại</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-ban fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">234</h4>
+                                <p class="card-text">Phiên đăng nhập</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Security Settings -->
+            <div class="col-lg-8">
+                <!-- Password Policy -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Chính sách mật khẩu</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="passwordPolicyForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Độ dài tối thiểu</label>
+                                        <select class="form-select" id="minPasswordLength">
+                                            <option value="6">6 ký tự</option>
+                                            <option value="8" selected>8 ký tự</option>
+                                            <option value="10">10 ký tự</option>
+                                            <option value="12">12 ký tự</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Thời gian hết hạn</label>
+                                        <select class="form-select" id="passwordExpiry">
+                                            <option value="0">Không hết hạn</option>
+                                            <option value="30">30 ngày</option>
+                                            <option value="60">60 ngày</option>
+                                            <option value="90" selected>90 ngày</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="requireUppercase" checked>
+                                        <label class="form-check-label" for="requireUppercase">
+                                            Yêu cầu chữ hoa
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="requireLowercase" checked>
+                                        <label class="form-check-label" for="requireLowercase">
+                                            Yêu cầu chữ thường
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="requireNumbers" checked>
+                                        <label class="form-check-label" for="requireNumbers">
+                                            Yêu cầu số
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="requireSpecialChars" checked>
+                                        <label class="form-check-label" for="requireSpecialChars">
+                                            Yêu cầu ký tự đặc biệt
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary" onclick="savePasswordPolicy()">
+                                    <i class="fas fa-save me-1"></i>Lưu chính sách
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Login Security -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Bảo mật đăng nhập</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginSecurityForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Số lần thử tối đa</label>
+                                        <select class="form-select" id="maxLoginAttempts">
+                                            <option value="3">3 lần</option>
+                                            <option value="5" selected>5 lần</option>
+                                            <option value="10">10 lần</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Thời gian khóa</label>
+                                        <select class="form-select" id="lockoutDuration">
+                                            <option value="5">5 phút</option>
+                                            <option value="15" selected>15 phút</option>
+                                            <option value="30">30 phút</option>
+                                            <option value="60">1 giờ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="enable2FA">
+                                        <label class="form-check-label" for="enable2FA">
+                                            Bật xác thực 2 bước (2FA)
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="enableCaptcha" checked>
+                                        <label class="form-check-label" for="enableCaptcha">
+                                            Yêu cầu CAPTCHA sau 3 lần thất bại
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailNotification" checked>
+                                        <label class="form-check-label" for="emailNotification">
+                                            Gửi email cảnh báo
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="logSuspiciousActivity" checked>
+                                        <label class="form-check-label" for="logSuspiciousActivity">
+                                            Ghi log hoạt động đáng nghi
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary" onclick="saveLoginSecurity()">
+                                    <i class="fas fa-save me-1"></i>Lưu cài đặt
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Recent Security Events -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Sự kiện bảo mật gần đây</h5>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshSecurityEvents()">
+                                <i class="fas fa-sync"></i> Làm mới
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Sự kiện</th>
+                                        <th>Người dùng</th>
+                                        <th>IP Address</th>
+                                        <th>Mức độ</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div>15/09/2024</div>
+                                            <small class="text-muted">14:30</small>
+                                        </td>
+                                        <td>Đăng nhập thất bại nhiều lần</td>
+                                        <td>hacker@example.com</td>
+                                        <td>203.171.29.45</td>
+                                        <td><span class="badge bg-danger">Cao</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="blockIP('203.171.29.45')">
+                                                <i class="fas fa-ban"></i> Chặn IP
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>15/09/2024</div>
+                                            <small class="text-muted">13:25</small>
+                                        </td>
+                                        <td>Đăng nhập từ thiết bị mới</td>
+                                        <td>admin@example.com</td>
+                                        <td>192.168.1.100</td>
+                                        <td><span class="badge bg-warning">Trung bình</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewEventDetails('event-2')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>15/09/2024</div>
+                                            <small class="text-muted">12:15</small>
+                                        </td>
+                                        <td>Truy cập trang admin không được phép</td>
+                                        <td>user@example.com</td>
+                                        <td>192.168.1.101</td>
+                                        <td><span class="badge bg-warning">Trung bình</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewEventDetails('event-3')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>15/09/2024</div>
+                                            <small class="text-muted">11:45</small>
+                                        </td>
+                                        <td>Đăng nhập thành công</td>
+                                        <td>admin@example.com</td>
+                                        <td>192.168.1.100</td>
+                                        <td><span class="badge bg-success">Thấp</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewEventDetails('event-4')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Monitoring Sidebar -->
+            <div class="col-lg-4">
+                <!-- Active Sessions -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Phiên đăng nhập hoạt động</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">admin@example.com</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-desktop me-1"></i>Chrome • 192.168.1.100
+                                    </small>
+                                    <div><small class="text-muted">Hoạt động: 5 phút trước</small></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="terminateSession('session-1')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">seller@example.com</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-mobile-alt me-1"></i>Safari • 192.168.1.101
+                                    </small>
+                                    <div><small class="text-muted">Hoạt động: 15 phút trước</small></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="terminateSession('session-2')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">user@example.com</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-desktop me-1"></i>Firefox • 192.168.1.102
+                                    </small>
+                                    <div><small class="text-muted">Hoạt động: 30 phút trước</small></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="terminateSession('session-3')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button class="btn btn-outline-danger btn-sm" onclick="terminateAllSessions()">
+                            <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất tất cả
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Blocked IPs -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">IP bị chặn</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">203.171.29.45</h6>
+                                    <small class="text-muted">Lý do: Brute force attack</small>
+                                    <div><small class="text-muted">Chặn: 2 giờ trước</small></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success" onclick="unblockIP('203.171.29.45')">
+                                    <i class="fas fa-unlock"></i>
+                                </button>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">45.124.68.91</h6>
+                                    <small class="text-muted">Lý do: Spam attempts</small>
+                                    <div><small class="text-muted">Chặn: 1 ngày trước</small></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success" onclick="unblockIP('45.124.68.91')">
+                                    <i class="fas fa-unlock"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" placeholder="IP address" id="newBlockedIP">
+                            <button class="btn btn-outline-danger" onclick="blockNewIP()">
+                                <i class="fas fa-ban"></i> Chặn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Scan Results -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Kết quả quét bảo mật</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="security-score-circle">
+                                <div class="score-text">
+                                    <h3 class="text-success">85</h3>
+                                    <small class="text-muted">Điểm bảo mật</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Lỗ hổng nghiêm trọng</span>
+                                <strong class="text-success">0</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Cảnh báo trung bình</span>
+                                <strong class="text-warning">3</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Khuyến nghị</span>
+                                <strong class="text-info">7</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Lần quét cuối</span>
+                                <strong>15/09/2024 14:30</strong>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="viewFullScanReport()">
+                            <i class="fas fa-file-alt me-1"></i>Xem báo cáo đầy đủ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Security Scan Progress Modal -->
+<div class="modal fade" id="securityScanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đang quét bảo mật</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-search fa-3x text-primary"></i>
+                    <h5 class="mt-2">Đang thực hiện quét bảo mật toàn diện...</h5>
+                </div>
+                <div class="progress mb-3" style="height: 20px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         id="scanProgress" style="width: 0%">0%</div>
+                </div>
+                <div class="text-center">
+                    <strong id="scanStep">Khởi tạo quét...</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function savePasswordPolicy() {
+        // Collect form data
+        const policy = {
+            minLength: document.getElementById('minPasswordLength').value,
+            expiry: document.getElementById('passwordExpiry').value,
+            requireUppercase: document.getElementById('requireUppercase').checked,
+            requireLowercase: document.getElementById('requireLowercase').checked,
+            requireNumbers: document.getElementById('requireNumbers').checked,
+            requireSpecialChars: document.getElementById('requireSpecialChars').checked
+        };
+
+        // Save to server
+        fetch('/admin/api/security/password-policy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(policy)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã lưu chính sách mật khẩu thành công!');
+            } else {
+                alert('Có lỗi xảy ra: ' + data.message);
+            }
+        });
+    }
+
+    function saveLoginSecurity() {
+        // Collect form data
+        const settings = {
+            maxAttempts: document.getElementById('maxLoginAttempts').value,
+            lockoutDuration: document.getElementById('lockoutDuration').value,
+            enable2FA: document.getElementById('enable2FA').checked,
+            enableCaptcha: document.getElementById('enableCaptcha').checked,
+            emailNotification: document.getElementById('emailNotification').checked,
+            logSuspiciousActivity: document.getElementById('logSuspiciousActivity').checked
+        };
+
+        // Save to server
+        fetch('/admin/api/security/login-settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(settings)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã lưu cài đặt bảo mật đăng nhập thành công!');
+            } else {
+                alert('Có lỗi xảy ra: ' + data.message);
+            }
+        });
+    }
+
+    function runSecurityScan() {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('securityScanModal')).show();
+        
+        // Simulate security scan progress
+        let progress = 0;
+        const steps = [
+            'Khởi tạo quét...',
+            'Quét lỗ hổng SQL injection...',
+            'Kiểm tra XSS vulnerabilities...',
+            'Quét file permissions...',
+            'Kiểm tra cấu hình server...',
+            'Phân tích logs bảo mật...',
+            'Hoàn thành quét bảo mật'
+        ];
+        let currentStepIndex = 0;
+
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 100) progress = 100;
+
+            document.getElementById('scanProgress').style.width = progress + '%';
+            document.getElementById('scanProgress').textContent = Math.round(progress) + '%';
+            
+            // Update current step
+            const stepIndex = Math.floor((progress / 100) * steps.length);
+            if (stepIndex < steps.length && stepIndex !== currentStepIndex) {
+                currentStepIndex = stepIndex;
+                document.getElementById('scanStep').textContent = steps[stepIndex];
+            }
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('securityScanModal')).hide();
+                    alert('Quét bảo mật hoàn thành! Điểm bảo mật: 85/100');
+                }, 1000);
+            }
+        }, 800);
+    }
+
+    function blockIP(ip) {
+        if (confirm(`Bạn có chắc chắn muốn chặn IP ${ip}?`)) {
+            fetch('/admin/api/security/block-ip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ ip: ip })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã chặn IP thành công!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function unblockIP(ip) {
+        if (confirm(`Bạn có chắc chắn muốn bỏ chặn IP ${ip}?`)) {
+            fetch('/admin/api/security/unblock-ip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ ip: ip })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã bỏ chặn IP thành công!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function blockNewIP() {
+        const ip = document.getElementById('newBlockedIP').value;
+        if (!ip) {
+            alert('Vui lòng nhập IP address');
+            return;
+        }
+        
+        blockIP(ip);
+        document.getElementById('newBlockedIP').value = '';
+    }
+
+    function terminateSession(sessionId) {
+        if (confirm('Bạn có chắc chắn muốn kết thúc phiên đăng nhập này?')) {
+            fetch(`/admin/api/security/terminate-session/${sessionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã kết thúc phiên đăng nhập!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function terminateAllSessions() {
+        if (confirm('Bạn có chắc chắn muốn đăng xuất tất cả người dùng? (Trừ phiên hiện tại)')) {
+            fetch('/admin/api/security/terminate-all-sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã đăng xuất tất cả người dùng!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function viewEventDetails(eventId) {
+        // Implementation for viewing security event details
+        alert('Hiển thị chi tiết sự kiện: ' + eventId);
+    }
+
+    function refreshSecurityEvents() {
+        location.reload();
+    }
+
+    function viewFullScanReport() {
+        window.open('/admin/security/scan-report', '_blank');
+    }
+
+    function exportSecurityReport() {
+        window.location.href = '/admin/security/export-report';
+    }
+</script>
+
+<style>
+    .security-score-circle {
+        width: 120px;
+        height: 120px;
+        border: 8px solid #e9ecef;
+        border-top: 8px solid #28a745;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .score-text {
+        text-align: center;
+    }
+
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+
+    .progress {
+        height: 8px;
+    }
+
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+    }
+
+    .list-group-item:first-child {
+        border-top: none;
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+</style>

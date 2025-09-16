@@ -31,6 +31,11 @@ namespace JohnHenryFashionWeb.Controllers
         public async Task<IActionResult> Dashboard()
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
             var stats = await GetSellerDashboardStats(currentUser.Id);
             
             return View(stats);
@@ -690,7 +695,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("settings")]
-        public async Task<IActionResult> Settings(SellerSettingsViewModel model)
+        public IActionResult Settings(SellerSettingsViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -698,6 +703,628 @@ namespace JohnHenryFashionWeb.Controllers
                 TempData["Success"] = "Cài đặt đã được lưu thành công!";
             }
 
+            return View(model);
+        }
+
+        // MARK: - Quản lý Coupons/Discounts
+        [HttpGet("coupons")]
+        public async Task<IActionResult> Coupons(int page = 1, int pageSize = 10, string search = "", string status = "")
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            var query = _context.Coupons.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c => c.Code.Contains(search) || c.Description.Contains(search));
+            }
+            
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(c => c.IsActive == (status == "active"));
+            }
+            
+            var totalCount = await query.CountAsync();
+            var coupons = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            
+            var model = new SellerCouponsViewModel
+            {
+                Coupons = coupons,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                PageSize = pageSize,
+                Search = search,
+                Status = status,
+                TotalCount = totalCount
+            };
+            
+            return View(model);
+        }
+
+        [HttpGet("coupons/create")]
+        public IActionResult CreateCoupon()
+        {
+            return View(new CouponCreateEditViewModel());
+        }
+
+        [HttpPost("coupons/create")]
+        public async Task<IActionResult> CreateCoupon(CouponCreateEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            var coupon = new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = model.Code.ToUpper(),
+                Description = model.Description,
+                Type = model.DiscountType,
+                Value = model.DiscountValue,
+                MinOrderAmount = model.MinOrderAmount,
+                UsageLimit = model.UsageLimit,
+                EndDate = model.ExpiryDate,
+                IsActive = model.IsActive,
+                CreatedAt = DateTime.UtcNow
+            };
+            
+            _context.Coupons.Add(coupon);
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Tạo mã giảm giá thành công!";
+            return RedirectToAction("Coupons");
+        }
+
+        [HttpGet("coupons/edit/{id}")]
+        public async Task<IActionResult> EditCoupon(Guid id)
+        {
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+            {
+                return NotFound();
+            }
+            
+            var model = new CouponCreateEditViewModel
+            {
+                Id = coupon.Id,
+                Code = coupon.Code,
+                Description = coupon.Description ?? "",
+                DiscountType = coupon.Type,
+                DiscountValue = coupon.Value,
+                MinOrderAmount = coupon.MinOrderAmount,
+                UsageLimit = coupon.UsageLimit,
+                ExpiryDate = coupon.EndDate ?? DateTime.Now.AddDays(30),
+                IsActive = coupon.IsActive
+            };
+            
+            return View(model);
+        }
+
+        [HttpPost("coupons/edit/{id}")]
+        public async Task<IActionResult> EditCoupon(Guid id, CouponCreateEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+            {
+                return NotFound();
+            }
+            
+            coupon.Code = model.Code.ToUpper();
+            coupon.Description = model.Description;
+            coupon.Type = model.DiscountType;
+            coupon.Value = model.DiscountValue;
+            coupon.MinOrderAmount = model.MinOrderAmount;
+            coupon.UsageLimit = model.UsageLimit;
+            coupon.EndDate = model.ExpiryDate;
+            coupon.IsActive = model.IsActive;
+            coupon.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Cập nhật mã giảm giá thành công!";
+            return RedirectToAction("Coupons");
+        }
+
+        [HttpPost("coupons/delete/{id}")]
+        public async Task<IActionResult> DeleteCoupon(Guid id)
+        {
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+            {
+                return NotFound();
+            }
+            
+            _context.Coupons.Remove(coupon);
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Xóa mã giảm giá thành công!";
+            return RedirectToAction("Coupons");
+        }
+
+        // MARK: - Quản lý Reviews
+        [HttpGet("reviews")]
+        public async Task<IActionResult> Reviews(int page = 1, int pageSize = 10, string search = "", int? rating = null, string status = "")
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            var query = _context.ProductReviews
+                .Include(r => r.Product)
+                .Include(r => r.User)
+                .AsQueryable();
+            
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(r => r.Product.Name.Contains(search) || 
+                                        (r.User.FirstName != null && r.User.FirstName.Contains(search)) || 
+                                        (r.User.LastName != null && r.User.LastName.Contains(search)));
+            }
+            
+            if (rating.HasValue)
+            {
+                query = query.Where(r => r.Rating == rating.Value);
+            }
+            
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(r => r.IsApproved == (status == "approved"));
+            }
+            
+            var totalCount = await query.CountAsync();
+            var reviews = await query
+                .OrderByDescending(r => r.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            
+            var model = new SellerReviewsViewModel
+            {
+                Reviews = reviews,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                PageSize = pageSize,
+                Search = search,
+                Rating = rating,
+                Status = status,
+                TotalCount = totalCount
+            };
+            
+            return View(model);
+        }
+
+        [HttpPost("reviews/approve/{id}")]
+        public async Task<IActionResult> ApproveReview(Guid id)
+        {
+            var review = await _context.ProductReviews.FindAsync(id);
+            if (review == null)
+            {
+                return NotFound();
+            }
+            
+            review.IsApproved = true;
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Phê duyệt đánh giá thành công!";
+            return RedirectToAction("Reviews");
+        }
+
+        [HttpPost("reviews/reject/{id}")]
+        public async Task<IActionResult> RejectReview(Guid id)
+        {
+            var review = await _context.ProductReviews.FindAsync(id);
+            if (review == null)
+            {
+                return NotFound();
+            }
+            
+            review.IsApproved = false;
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Từ chối đánh giá thành công!";
+            return RedirectToAction("Reviews");
+        }
+
+        // MARK: - Quản lý Notifications
+        [HttpGet("notifications")]
+        public async Task<IActionResult> Notifications(int page = 1, int pageSize = 10, string type = "", bool? isRead = null)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Challenge();
+            
+            var query = _context.Notifications
+                .Where(n => n.UserId == currentUser.Id)
+                .AsQueryable();
+            
+            if (!string.IsNullOrEmpty(type))
+            {
+                query = query.Where(n => n.Type == type);
+            }
+            
+            if (isRead.HasValue)
+            {
+                query = query.Where(n => n.IsRead == isRead.Value);
+            }
+            
+            var totalCount = await query.CountAsync();
+            var notifications = await query
+                .OrderByDescending(n => n.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            
+            var model = new SellerNotificationsViewModel
+            {
+                Notifications = notifications,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                PageSize = pageSize,
+                Type = type,
+                IsRead = isRead,
+                TotalCount = totalCount,
+                UnreadCount = await _context.Notifications.CountAsync(n => n.UserId == currentUser.Id && !n.IsRead)
+            };
+            
+            return View(model);
+        }
+
+        [HttpPost("notifications/mark-read/{id}")]
+        public async Task<IActionResult> MarkNotificationAsRead(Guid id)
+        {
+            var notification = await _context.Notifications.FindAsync(id);
+            if (notification == null)
+            {
+                return NotFound();
+            }
+            
+            notification.IsRead = true;
+            notification.ReadAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            
+            return Json(new { success = true });
+        }
+
+        [HttpPost("notifications/mark-all-read")]
+        public async Task<IActionResult> MarkAllNotificationsAsRead()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return Challenge();
+            
+            var unreadNotifications = await _context.Notifications
+                .Where(n => n.UserId == currentUser.Id && !n.IsRead)
+                .ToListAsync();
+            
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+                notification.ReadAt = DateTime.UtcNow;
+            }
+            
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Đã đánh dấu tất cả thông báo là đã đọc!";
+            return RedirectToAction("Notifications");
+        }
+
+        // MARK: - Commission Management
+        [HttpGet("commissions")]
+        public async Task<IActionResult> Commissions(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            if (!fromDate.HasValue)
+                fromDate = DateTime.Now.AddMonths(-3);
+            if (!toDate.HasValue)
+                toDate = DateTime.Now;
+            
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Where(o => o.CreatedAt >= fromDate && o.CreatedAt <= toDate && o.Status == "completed")
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+            
+            var commissionRate = 0.15m; // 15% commission rate
+            var totalSales = orders.Sum(o => o.TotalAmount);
+            var totalCommission = totalSales * commissionRate;
+            var totalOrders = orders.Count;
+            
+            var monthlyData = orders
+                .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
+                .Select(g => new MonthlyCommissionData
+                {
+                    Month = $"{g.Key.Month:D2}/{g.Key.Year}",
+                    Sales = g.Sum(o => o.TotalAmount),
+                    Commission = g.Sum(o => o.TotalAmount) * commissionRate,
+                    OrderCount = g.Count()
+                })
+                .OrderBy(x => x.Month)
+                .ToList();
+            
+            var model = new SellerCommissionsViewModel
+            {
+                FromDate = fromDate.Value,
+                ToDate = toDate.Value,
+                TotalSales = totalSales,
+                TotalCommission = totalCommission,
+                TotalOrders = totalOrders,
+                CommissionRate = commissionRate,
+                MonthlyData = monthlyData,
+                RecentOrders = orders.Take(10).ToList()
+            };
+            
+            return View(model);
+        }
+
+        // MARK: - Quản lý Customers
+        [HttpGet("customers")]
+        public async Task<IActionResult> Customers(int page = 1, int pageSize = 10, string search = "", string sortBy = "totalSpent")
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            // Get customers who have placed orders
+            var customersQuery = _context.Orders
+                .Include(o => o.User)
+                .Where(o => o.Status == "completed")
+                .GroupBy(o => o.UserId)
+                .Select(g => new CustomerInfo
+                {
+                    UserId = g.Key,
+                    FullName = g.First().User.FirstName + " " + g.First().User.LastName,
+                    Email = g.First().User.Email ?? "",
+                    Phone = g.First().User.PhoneNumber ?? "",
+                    FirstOrderDate = g.Min(o => o.CreatedAt),
+                    LastOrderDate = g.Max(o => o.CreatedAt),
+                    TotalOrders = g.Count(),
+                    TotalSpent = g.Sum(o => o.TotalAmount),
+                    AverageOrderValue = (double)g.Average(o => o.TotalAmount),
+                    Status = g.Any(o => o.CreatedAt > DateTime.Now.AddDays(-30)) ? "Active" : "Inactive"
+                })
+                .AsQueryable();
+            
+            if (!string.IsNullOrEmpty(search))
+            {
+                customersQuery = customersQuery.Where(c => 
+                    c.FullName.Contains(search) || 
+                    c.Email.Contains(search) || 
+                    c.Phone.Contains(search));
+            }
+            
+            switch (sortBy.ToLower())
+            {
+                case "name":
+                    customersQuery = customersQuery.OrderBy(c => c.FullName);
+                    break;
+                case "orders":
+                    customersQuery = customersQuery.OrderByDescending(c => c.TotalOrders);
+                    break;
+                case "recent":
+                    customersQuery = customersQuery.OrderByDescending(c => c.LastOrderDate);
+                    break;
+                default: // totalSpent
+                    customersQuery = customersQuery.OrderByDescending(c => c.TotalSpent);
+                    break;
+            }
+            
+            var totalCount = await customersQuery.CountAsync();
+            var customers = await customersQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            
+            // Get top customers
+            var topCustomers = await _context.Orders
+                .Include(o => o.User)
+                .Where(o => o.Status == "completed")
+                .GroupBy(o => o.UserId)
+                .Select(g => new CustomerInfo
+                {
+                    UserId = g.Key,
+                    FullName = g.First().User.FirstName + " " + g.First().User.LastName,
+                    Email = g.First().User.Email ?? "",
+                    TotalOrders = g.Count(),
+                    TotalSpent = g.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(c => c.TotalSpent)
+                .Take(5)
+                .ToListAsync();
+            
+            // Get new customers (last 30 days)
+            var newCustomers = await _context.Orders
+                .Include(o => o.User)
+                .Where(o => o.CreatedAt > DateTime.Now.AddDays(-30))
+                .GroupBy(o => o.UserId)
+                .Where(g => g.Min(o => o.CreatedAt) > DateTime.Now.AddDays(-30))
+                .Select(g => new CustomerInfo
+                {
+                    UserId = g.Key,
+                    FullName = g.First().User.FirstName + " " + g.First().User.LastName,
+                    Email = g.First().User.Email ?? "",
+                    FirstOrderDate = g.Min(o => o.CreatedAt),
+                    TotalOrders = g.Count(),
+                    TotalSpent = g.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(c => c.FirstOrderDate)
+                .Take(10)
+                .ToListAsync();
+            
+            var model = new SellerCustomersViewModel
+            {
+                Customers = customers,
+                TopCustomers = topCustomers,
+                NewCustomers = newCustomers,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                PageSize = pageSize,
+                Search = search,
+                TotalCount = totalCount
+            };
+            
+            return View(model);
+        }
+
+        // MARK: - Advanced Reports
+        [HttpGet("reports")]
+        public async Task<IActionResult> Reports(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            if (!fromDate.HasValue)
+                fromDate = DateTime.Now.AddMonths(-3);
+            if (!toDate.HasValue)
+                toDate = DateTime.Now;
+            
+            // Get orders for the period
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.User)
+                .Where(o => o.CreatedAt >= fromDate && o.CreatedAt <= toDate)
+                .ToListAsync();
+            
+            var completedOrders = orders.Where(o => o.Status == "completed").ToList();
+            
+            // Calculate metrics
+            var totalRevenue = completedOrders.Sum(o => o.TotalAmount);
+            var totalOrders = completedOrders.Count;
+            var totalCustomers = completedOrders.Select(o => o.UserId).Distinct().Count();
+            
+            var monthlyRevenue = completedOrders
+                .Where(o => o.CreatedAt >= DateTime.Now.AddDays(-30))
+                .Sum(o => o.TotalAmount);
+            
+            var monthlyOrders = completedOrders
+                .Where(o => o.CreatedAt >= DateTime.Now.AddDays(-30))
+                .Count();
+            
+            var newCustomers = await _context.Orders
+                .Where(o => o.CreatedAt >= DateTime.Now.AddDays(-30))
+                .GroupBy(o => o.UserId)
+                .Where(g => g.Min(x => x.CreatedAt) >= DateTime.Now.AddDays(-30))
+                .CountAsync();
+            
+            // Get products count
+            var totalProducts = await _context.Products.CountAsync();
+            var activeProducts = await _context.Products.CountAsync(p => p.IsActive);
+            
+            // Calculate rates
+            var averageOrderValue = totalOrders > 0 ? (double)(totalRevenue / totalOrders) : 0;
+            var conversionRate = 0.0; // This would need page view tracking
+            
+            // Sales chart data (last 7 days)
+            var salesChartData = new List<decimal>();
+            var salesChartLabels = new List<string>();
+            
+            for (int i = 6; i >= 0; i--)
+            {
+                var date = DateTime.Now.AddDays(-i);
+                var dayRevenue = completedOrders
+                    .Where(o => o.CreatedAt.Date == date.Date)
+                    .Sum(o => o.TotalAmount);
+                
+                salesChartData.Add(dayRevenue);
+                salesChartLabels.Add(date.ToString("dd/MM"));
+            }
+            
+            // Orders chart data (last 7 days)
+            var ordersChartData = new List<int>();
+            var ordersChartLabels = new List<string>();
+            
+            for (int i = 6; i >= 0; i--)
+            {
+                var date = DateTime.Now.AddDays(-i);
+                var dayOrders = completedOrders
+                    .Where(o => o.CreatedAt.Date == date.Date)
+                    .Count();
+                
+                ordersChartData.Add(dayOrders);
+                ordersChartLabels.Add(date.ToString("dd/MM"));
+            }
+            
+            var model = new SellerReportsViewModel
+            {
+                TotalRevenue = totalRevenue,
+                MonthlyRevenue = monthlyRevenue,
+                TotalOrders = totalOrders,
+                MonthlyOrders = monthlyOrders,
+                TotalProducts = totalProducts,
+                ActiveProducts = activeProducts,
+                TotalCustomers = totalCustomers,
+                NewCustomers = newCustomers,
+                AverageOrderValue = averageOrderValue,
+                ConversionRate = conversionRate,
+                SalesChartLabels = salesChartLabels,
+                SalesChartData = salesChartData,
+                OrdersChartLabels = ordersChartLabels,
+                OrdersChartData = ordersChartData,
+                FromDate = fromDate.Value,
+                ToDate = toDate.Value
+            };
+            
+            return View(model);
+        }
+
+        // MARK: - Product Performance
+        [HttpGet("product-performance")]
+        public async Task<IActionResult> ProductPerformance(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            if (!fromDate.HasValue)
+                fromDate = DateTime.Now.AddMonths(-3);
+            if (!toDate.HasValue)
+                toDate = DateTime.Now;
+            
+            // Get product performance data
+            var productPerformance = await _context.OrderItems
+                .Include(oi => oi.Order)
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Order.CreatedAt >= fromDate && 
+                            oi.Order.CreatedAt <= toDate && 
+                            oi.Order.Status == "completed")
+                .GroupBy(oi => oi.ProductId)
+                .Select(g => new ProductPerformanceItem
+                {
+                    ProductId = g.Key,
+                    ProductName = g.First().Product.Name,
+                    ImageUrl = g.First().Product.FeaturedImageUrl ?? "",
+                    Price = g.First().Product.Price,
+                    TotalSold = g.Sum(x => x.Quantity),
+                    Revenue = g.Sum(x => x.Price * x.Quantity),
+                    ReviewCount = g.First().Product.ProductReviews.Count,
+                    AverageRating = g.First().Product.ProductReviews.Any() ? g.First().Product.ProductReviews.Average(r => r.Rating) : 0
+                })
+                .ToListAsync();
+            
+            var topProducts = productPerformance
+                .OrderByDescending(p => p.Revenue)
+                .Take(10)
+                .ToList();
+            
+            var lowPerformingProducts = productPerformance
+                .OrderBy(p => p.TotalSold)
+                .Take(10)
+                .ToList();
+            
+            var model = new SellerProductPerformanceViewModel
+            {
+                TopProducts = topProducts,
+                LowPerformingProducts = lowPerformingProducts,
+                FromDate = fromDate.Value,
+                ToDate = toDate.Value
+            };
+            
             return View(model);
         }
 

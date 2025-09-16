@@ -2,13 +2,22 @@
 @{
     ViewData["Title"] = "Dashboard Quản trị";
     ViewData["CurrentSection"] = "dashboard";
-    Layout = "~/Views/Shared/_AdminLayout_New.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 @section Styles {
     <style>
         .dashboard-header {
-            background: linear-gradient(        .live-indicator {
+            background: linear-gradient(135deg, #FF4747 0%, #CC3636 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .live-indicator {
             width: 8px;
             height: 8px;
             background: #16a34a;
@@ -20,13 +29,6 @@
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
-        }ea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
         }
 
         .dashboard-header::before {
@@ -104,7 +106,7 @@
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 5px;
@@ -429,10 +431,6 @@
 <div class="dashboard-header">
     <div class="content">
         <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h2 mb-2">Chào mừng trở lại! 👋</h1>
-                <p class="mb-0 opacity-90">Đây là tổng quan về hoạt động hệ thống John Henry Fashion</p>
-            </div>
             <div class="text-end">
                 <div class="real-time-indicator mb-2">
                     <div class="real-time-dot"></div>
@@ -501,13 +499,6 @@
 
 <!-- Quick Actions -->
 <div class="quick-actions">
-    <a href="@Url.Action("CreateProduct", "Admin")" class="quick-action">
-        <div class="quick-action-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
-            <i class="fas fa-plus"></i>
-        </div>
-        <div class="quick-action-title">Thêm sản phẩm</div>
-    </a>
-
     <a href="@Url.Action("Orders", "Admin")" class="quick-action">
         <div class="quick-action-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
             <i class="fas fa-shopping-cart"></i>
@@ -661,58 +652,6 @@
                     }
                 }
             </div>
-        </div>
-    </div>
-
-    <div class="col-lg-6">
-        <div class="chart-container">
-            <div class="chart-header">
-                <h5 class="chart-title">Sản phẩm bán chạy</h5>
-            </div>
-            @if (Model.LowStockProducts?.Any() == true)
-            {
-                <div class="table-responsive">
-                    <table class="table table-modern">
-                        <thead>
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th>Tồn kho</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var product in Model.LowStockProducts.Take(6))
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            @if (!string.IsNullOrEmpty(product.FeaturedImageUrl))
-                                            {
-                                                <img src="@product.FeaturedImageUrl" alt="@product.Name" 
-                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
-                                            }
-                                            <div>
-                                                <div style="font-weight: 600;">@product.Name</div>
-                                                <div class="small text-muted">@product.SKU</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge @(product.StockQuantity <= 5 ? "bg-danger" : "bg-warning")">
-                                            @product.StockQuantity
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @(product.StockQuantity <= 5 ? "bg-danger" : "bg-warning")">
-                                            @(product.StockQuantity <= 5 ? "Cần nhập" : "Sắp hết")
-                                        </span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
         </div>
     </div>
 </div>

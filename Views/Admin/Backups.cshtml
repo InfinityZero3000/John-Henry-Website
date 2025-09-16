@@ -1,0 +1,733 @@
+@{
+    ViewData["Title"] = "Quản lý sao lưu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-database me-2"></i>Quản lý sao lưu
+                </h1>
+                <p class="text-muted mb-0">Sao lưu và khôi phục dữ liệu hệ thống</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline-primary" onclick="scheduleBackup()">
+                    <i class="fas fa-calendar-alt me-1"></i>Lên lịch sao lưu
+                </button>
+                <button class="btn btn-primary" onclick="createBackup()">
+                    <i class="fas fa-plus me-1"></i>Tạo sao lưu ngay
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">12</h4>
+                                <p class="card-text">Tổng số backup</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-archive fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">18:30</h4>
+                                <p class="card-text">Backup cuối hôm nay</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">2.3GB</h4>
+                                <p class="card-text">Dung lượng backup</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-hdd fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">98.5%</h4>
+                                <p class="card-text">Tỷ lệ thành công</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Backup List -->
+            <div class="col-lg-8">
+                <!-- Current Backup Progress -->
+                <div class="card mb-4" id="backupProgressCard" style="display: none;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Đang thực hiện sao lưu...
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress mb-3" style="height: 20px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 id="backupProgress" style="width: 0%">0%</div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <strong id="currentStep">Khởi tạo...</strong>
+                                <div class="small text-muted">Bước hiện tại</div>
+                            </div>
+                            <div class="col-md-3">
+                                <strong id="processedSize">0 MB</strong>
+                                <div class="small text-muted">Đã xử lý</div>
+                            </div>
+                            <div class="col-md-3">
+                                <strong id="remainingTime">--:--</strong>
+                                <div class="small text-muted">Thời gian còn lại</div>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-danger btn-sm" onclick="cancelBackup()">
+                                    <i class="fas fa-stop me-1"></i>Hủy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup List -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Danh sách sao lưu</h5>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" onclick="refreshBackups()">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="cleanupOldBackups()">
+                                    <i class="fas fa-trash"></i> Dọn dẹp
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tên backup</th>
+                                        <th>Loại</th>
+                                        <th>Kích thước</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0">backup_20240915_183045.sql</h6>
+                                                <small class="text-muted">Sao lưu tự động hàng ngày</small>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">Toàn bộ</span></td>
+                                        <td>245.7 MB</td>
+                                        <td>
+                                            <div>15/09/2024</div>
+                                            <small class="text-muted">18:30:45</small>
+                                        </td>
+                                        <td><span class="badge bg-success">Thành công</span></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" onclick="downloadBackup('backup_20240915_183045')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" onclick="restoreBackup('backup_20240915_183045')">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="viewBackupDetails('backup_20240915_183045')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteBackup('backup_20240915_183045')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0">backup_20240914_183042.sql</h6>
+                                                <small class="text-muted">Sao lưu tự động hàng ngày</small>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">Toàn bộ</span></td>
+                                        <td>244.1 MB</td>
+                                        <td>
+                                            <div>14/09/2024</div>
+                                            <small class="text-muted">18:30:42</small>
+                                        </td>
+                                        <td><span class="badge bg-success">Thành công</span></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" onclick="downloadBackup('backup_20240914_183042')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" onclick="restoreBackup('backup_20240914_183042')">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="viewBackupDetails('backup_20240914_183042')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteBackup('backup_20240914_183042')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0">manual_backup_20240913_140521.sql</h6>
+                                                <small class="text-muted">Sao lưu thủ công trước update</small>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-info">Thủ công</span></td>
+                                        <td>242.8 MB</td>
+                                        <td>
+                                            <div>13/09/2024</div>
+                                            <small class="text-muted">14:05:21</small>
+                                        </td>
+                                        <td><span class="badge bg-success">Thành công</span></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" onclick="downloadBackup('manual_backup_20240913_140521')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" onclick="restoreBackup('manual_backup_20240913_140521')">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="viewBackupDetails('manual_backup_20240913_140521')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteBackup('manual_backup_20240913_140521')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0">backup_20240912_183038.sql</h6>
+                                                <small class="text-muted">Sao lưu tự động hàng ngày</small>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">Toàn bộ</span></td>
+                                        <td>--</td>
+                                        <td>
+                                            <div>12/09/2024</div>
+                                            <small class="text-muted">18:30:38</small>
+                                        </td>
+                                        <td><span class="badge bg-danger">Thất bại</span></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="viewBackupDetails('backup_20240912_183038')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-success" onclick="retryBackup('backup_20240912_183038')">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteBackup('backup_20240912_183038')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Settings Sidebar -->
+            <div class="col-lg-4">
+                <!-- Scheduled Backups -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Lịch sao lưu tự động</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <h6 class="mb-0">Hàng ngày</h6>
+                                    <small class="text-muted">18:30 - Toàn bộ database</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" checked id="dailyBackup">
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <h6 class="mb-0">Hàng tuần</h6>
+                                    <small class="text-muted">Chủ nhật 02:00 - Full backup</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" checked id="weeklyBackup">
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <h6 class="mb-0">Hàng tháng</h6>
+                                    <small class="text-muted">Ngày 1 hàng tháng - Archive</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="monthlyBackup">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm w-100" onclick="editSchedule()">
+                                <i class="fas fa-edit me-1"></i>Chỉnh sửa lịch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup Settings -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Cài đặt sao lưu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nơi lưu trữ</label>
+                            <select class="form-select form-select-sm">
+                                <option>Local Server</option>
+                                <option>AWS S3</option>
+                                <option>Google Drive</option>
+                                <option>FTP Server</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giữ backup trong</label>
+                            <select class="form-select form-select-sm">
+                                <option>7 ngày</option>
+                                <option selected>30 ngày</option>
+                                <option>90 ngày</option>
+                                <option>1 năm</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nén backup</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" checked id="compressBackup">
+                                <label class="form-check-label" for="compressBackup">
+                                    Bật nén (tiết kiệm 60% dung lượng)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mã hóa backup</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="encryptBackup">
+                                <label class="form-check-label" for="encryptBackup">
+                                    Mã hóa AES-256
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-success btn-sm w-100" onclick="saveSettings()">
+                            <i class="fas fa-save me-1"></i>Lưu cài đặt
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Storage Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tình trạng lưu trữ</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Đã sử dụng</span>
+                                <strong>2.3 GB / 10 GB</strong>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: 23%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Backup hôm nay</span>
+                                <strong>1 / 1</strong>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Thời gian backup TB</span>
+                                <strong>3m 45s</strong>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between">
+                                <span>Backup tiếp theo</span>
+                                <strong>Hôm nay 18:30</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Backup Modal -->
+<div class="modal fade" id="createBackupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo sao lưu mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createBackupForm">
+                    <div class="mb-3">
+                        <label for="backupName" class="form-label">Tên backup</label>
+                        <input type="text" class="form-control" id="backupName" placeholder="VD: backup_truoc_update">
+                    </div>
+                    <div class="mb-3">
+                        <label for="backupType" class="form-label">Loại backup</label>
+                        <select class="form-select" id="backupType">
+                            <option value="full">Toàn bộ database</option>
+                            <option value="data">Chỉ dữ liệu</option>
+                            <option value="structure">Chỉ cấu trúc</option>
+                            <option value="custom">Tùy chỉnh</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="customTables" style="display: none;">
+                        <label class="form-label">Chọn bảng</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="table_users" checked>
+                            <label class="form-check-label" for="table_users">Users</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="table_products" checked>
+                            <label class="form-check-label" for="table_products">Products</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="table_orders" checked>
+                            <label class="form-check-label" for="table_orders">Orders</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backupDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="backupDescription" rows="2" placeholder="Mô tả về backup này..."></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="compressNow" checked>
+                        <label class="form-check-label" for="compressNow">
+                            Nén backup để tiết kiệm dung lượng
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="startBackup()">
+                    <i class="fas fa-play me-1"></i>Bắt đầu backup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restore Confirmation Modal -->
+<div class="modal fade" id="restoreModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận khôi phục
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>Cảnh báo:</strong> Khôi phục dữ liệu sẽ ghi đè lên toàn bộ dữ liệu hiện tại. 
+                    Hành động này không thể hoàn tác!
+                </div>
+                <p>Bạn có chắc chắn muốn khôi phục từ backup: <strong id="restoreBackupName"></strong>?</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmRestore">
+                    <label class="form-check-label" for="confirmRestore">
+                        Tôi hiểu rủi ro và muốn tiếp tục
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning" onclick="confirmRestore()" disabled id="confirmRestoreBtn">
+                    <i class="fas fa-undo me-1"></i>Khôi phục
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBackupId = null;
+
+    function createBackup() {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('createBackupModal')).show();
+    }
+
+    function startBackup() {
+        const backupName = document.getElementById('backupName').value;
+        const backupType = document.getElementById('backupType').value;
+        const description = document.getElementById('backupDescription').value;
+        const compress = document.getElementById('compressNow').checked;
+
+        if (!backupName) {
+            alert('Vui lòng nhập tên backup');
+            return;
+        }
+
+        // Close modal and show progress
+        bootstrap.Modal.getInstance(document.getElementById('createBackupModal')).hide();
+        document.getElementById('backupProgressCard').style.display = 'block';
+
+        // Simulate backup progress
+        simulateBackupProgress();
+    }
+
+    function simulateBackupProgress() {
+        let progress = 0;
+        const steps = [
+            'Khởi tạo backup...',
+            'Đang backup bảng Users...',
+            'Đang backup bảng Products...',
+            'Đang backup bảng Orders...',
+            'Đang nén dữ liệu...',
+            'Hoàn thành backup'
+        ];
+        let currentStepIndex = 0;
+
+        const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress > 100) progress = 100;
+
+            document.getElementById('backupProgress').style.width = progress + '%';
+            document.getElementById('backupProgress').textContent = Math.round(progress) + '%';
+            
+            // Update current step
+            const stepIndex = Math.floor((progress / 100) * steps.length);
+            if (stepIndex < steps.length && stepIndex !== currentStepIndex) {
+                currentStepIndex = stepIndex;
+                document.getElementById('currentStep').textContent = steps[stepIndex];
+            }
+
+            // Update processed size
+            const processedSize = Math.round((progress / 100) * 245);
+            document.getElementById('processedSize').textContent = processedSize + ' MB';
+
+            // Update remaining time
+            const remainingMinutes = Math.round((100 - progress) / 20);
+            document.getElementById('remainingTime').textContent = remainingMinutes + ':00';
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    document.getElementById('backupProgressCard').style.display = 'none';
+                    alert('Backup đã hoàn thành thành công!');
+                    location.reload();
+                }, 1000);
+            }
+        }, 500);
+    }
+
+    function cancelBackup() {
+        if (confirm('Bạn có chắc chắn muốn hủy backup đang thực hiện?')) {
+            document.getElementById('backupProgressCard').style.display = 'none';
+        }
+    }
+
+    function downloadBackup(backupId) {
+        window.location.href = `/admin/backups/download/${backupId}`;
+    }
+
+    function restoreBackup(backupId) {
+        currentBackupId = backupId;
+        document.getElementById('restoreBackupName').textContent = backupId;
+        document.getElementById('confirmRestore').checked = false;
+        document.getElementById('confirmRestoreBtn').disabled = true;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('restoreModal')).show();
+    }
+
+    function confirmRestore() {
+        if (!currentBackupId) return;
+
+        // Simulate restore process
+        alert('Đang bắt đầu quá trình khôi phục dữ liệu...');
+        bootstrap.Modal.getInstance(document.getElementById('restoreModal')).hide();
+        
+        // In real application, this would trigger the actual restore process
+        setTimeout(() => {
+            alert('Khôi phục dữ liệu hoàn thành!');
+        }, 3000);
+    }
+
+    function deleteBackup(backupId) {
+        if (confirm('Bạn có chắc chắn muốn xóa backup này? Hành động này không thể hoàn tác.')) {
+            fetch(`/admin/api/backups/${backupId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã xóa backup thành công!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function viewBackupDetails(backupId) {
+        // Implementation for viewing backup details
+        alert('Hiển thị chi tiết backup: ' + backupId);
+    }
+
+    function retryBackup(backupId) {
+        if (confirm('Bạn có muốn thử lại backup này?')) {
+            alert('Đang thử lại backup...');
+        }
+    }
+
+    function refreshBackups() {
+        location.reload();
+    }
+
+    function cleanupOldBackups() {
+        if (confirm('Bạn có muốn xóa tất cả backup cũ hơn 30 ngày?')) {
+            alert('Đang dọn dẹp backup cũ...');
+        }
+    }
+
+    function scheduleBackup() {
+        alert('Chức năng lên lịch backup sẽ được triển khai');
+    }
+
+    function editSchedule() {
+        alert('Chức năng chỉnh sửa lịch backup sẽ được triển khai');
+    }
+
+    function saveSettings() {
+        alert('Đã lưu cài đặt backup!');
+    }
+
+    // Event listeners
+    document.getElementById('backupType').addEventListener('change', function(e) {
+        const customTables = document.getElementById('customTables');
+        if (e.target.value === 'custom') {
+            customTables.style.display = 'block';
+        } else {
+            customTables.style.display = 'none';
+        }
+    });
+
+    document.getElementById('confirmRestore').addEventListener('change', function(e) {
+        document.getElementById('confirmRestoreBtn').disabled = !e.target.checked;
+    });
+
+    // Auto-generate backup name
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const timestamp = now.getFullYear() + 
+                         String(now.getMonth() + 1).padStart(2, '0') + 
+                         String(now.getDate()).padStart(2, '0') + '_' +
+                         String(now.getHours()).padStart(2, '0') + 
+                         String(now.getMinutes()).padStart(2, '0') + 
+                         String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('backupName').value = 'manual_backup_' + timestamp;
+    });
+</script>
+
+<style>
+    .progress {
+        height: 8px;
+    }
+
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .form-check-input:checked {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+    }
+
+    .list-group-item:first-child {
+        border-top: none;
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+</style>

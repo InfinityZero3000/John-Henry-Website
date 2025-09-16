@@ -23,85 +23,110 @@ namespace JohnHenryFashionWeb.Controllers
         // GET: Blog
         public async Task<IActionResult> Index(int page = 1, string? category = null, string? search = null)
         {
-            const int pageSize = 9;
-            
-            var query = _context.BlogPosts
-                .Include(b => b.Category)
-                .Include(b => b.Author)
-                .Where(b => b.Status == "published")
-                .AsQueryable();
-
-            // Filter by category
-            if (!string.IsNullOrEmpty(category))
+            try
             {
-                query = query.Where(b => b.Category != null && b.Category.Slug == category);
-            }
+                const int pageSize = 9;
+                
+                var query = _context.BlogPosts
+                    .Include(b => b.Category)
+                    .Include(b => b.Author)
+                    .Where(b => b.Status == "published")
+                    .AsQueryable();
 
-            // Search functionality
-            if (!string.IsNullOrEmpty(search))
+                // Filter by category
+                if (!string.IsNullOrEmpty(category))
+                {
+                    query = query.Where(b => b.Category != null && b.Category.Slug == category);
+                }
+
+                // Search functionality
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(b => b.Title.Contains(search) || 
+                                           b.Content.Contains(search) ||
+                                           (b.Excerpt != null && b.Excerpt.Contains(search)));
+                }
+
+                var totalPosts = await query.CountAsync();
+                var posts = await query
+                    .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize);
+                ViewBag.Category = category;
+                ViewBag.Search = search;
+
+                // Get categories for sidebar
+                ViewBag.Categories = await _context.BlogCategories
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.SortOrder)
+                    .ToListAsync();
+
+                // Get featured posts
+                ViewBag.FeaturedPosts = await _context.BlogPosts
+                    .Include(b => b.Category)
+                    .Where(b => b.Status == "published" && b.IsFeatured)
+                    .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                    .Take(3)
+                    .ToListAsync();
+
+                return View(posts);
+            }
+            catch (Exception ex)
             {
-                query = query.Where(b => b.Title.Contains(search) || 
-                                       b.Content.Contains(search) ||
-                                       (b.Excerpt != null && b.Excerpt.Contains(search)));
+                // Database connection failed - return empty blog view
+                ViewBag.CurrentPage = 1;
+                ViewBag.TotalPages = 0;
+                ViewBag.Category = category;
+                ViewBag.Search = search;
+                ViewBag.Categories = new List<BlogCategory>();
+                ViewBag.FeaturedPosts = new List<BlogPost>();
+                ViewBag.DatabaseError = "Trang blog hiện tại không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.";
+                
+                return View(new List<BlogPost>());
             }
-
-            var totalPosts = await query.CountAsync();
-            var posts = await query
-                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalPosts / pageSize);
-            ViewBag.Category = category;
-            ViewBag.Search = search;
-
-            // Get categories for sidebar
-            ViewBag.Categories = await _context.BlogCategories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.SortOrder)
-                .ToListAsync();
-
-            // Get featured posts
-            ViewBag.FeaturedPosts = await _context.BlogPosts
-                .Include(b => b.Category)
-                .Where(b => b.Status == "published" && b.IsFeatured)
-                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
-                .Take(3)
-                .ToListAsync();
-
-            return View(posts);
         }
 
         // GET: Blog/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
-            var post = await _context.BlogPosts
-                .Include(b => b.Category)
-                .Include(b => b.Author)
-                .FirstOrDefaultAsync(b => b.Id == id && b.Status == "published");
-
-            if (post == null)
+            try
             {
-                return NotFound();
+                var post = await _context.BlogPosts
+                    .Include(b => b.Category)
+                    .Include(b => b.Author)
+                    .FirstOrDefaultAsync(b => b.Id == id && b.Status == "published");
+
+                if (post == null)
+                {
+                    return NotFound();
+                }
+
+                // Increment view count
+                post.ViewCount++;
+                await _context.SaveChangesAsync();
+
+                // Get related posts
+                ViewBag.RelatedPosts = await _context.BlogPosts
+                    .Include(b => b.Category)
+                    .Where(b => b.Id != post.Id && 
+                               b.Status == "published" && 
+                               (b.CategoryId == post.CategoryId || b.Tags!.Any(t => post.Tags!.Contains(t))))
+                    .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                    .Take(3)
+                    .ToListAsync();
+
+                return View(post);
             }
-
-            // Increment view count
-            post.ViewCount++;
-            await _context.SaveChangesAsync();
-
-            // Get related posts
-            ViewBag.RelatedPosts = await _context.BlogPosts
-                .Include(b => b.Category)
-                .Where(b => b.Id != post.Id && 
-                           b.Status == "published" && 
-                           (b.CategoryId == post.CategoryId || b.Tags!.Any(t => post.Tags!.Contains(t))))
-                .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
-                .Take(3)
-                .ToListAsync();
-
-            return View(post);
+            catch (Exception ex)
+            {
+                // Database connection failed
+                ViewBag.DatabaseError = "Không thể tải bài viết. Vui lòng thử lại sau.";
+                return View("Error");
+            }
         }
 
         // GET: Blog/Category/fashion

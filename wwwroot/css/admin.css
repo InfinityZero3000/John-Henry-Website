@@ -15,7 +15,7 @@
     left: 0;
     height: 100vh;
     width: 280px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FF4747 0%, #CC3636 100%);
     color: white;
     z-index: 1000;
     overflow-y: auto;
@@ -346,7 +346,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: linear-gradient(45deg, #FF4747, #CC3636);
 }
 
 .stats-card:hover {
@@ -558,7 +558,7 @@
 }
 
 .btn-admin-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FF4747 0%, #CC3636 100%);
     color: white;
 }
 
@@ -640,13 +640,13 @@
 }
 
 .admin-form .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #FF4747;
+    box-shadow: 0 0 0 0.2rem rgba(255, 71, 71, 0.25);
 }
 
 /* ===== UTILITIES ===== */
 .text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FF4747 0%, #CC3636 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -734,17 +734,17 @@
 }
 
 .quick-action-card:hover {
-    border-color: #667eea;
+    border-color: #FF4747;
     transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-    color: #667eea;
+    color: #FF4747;
     text-decoration: none;
 }
 
 .quick-action-icon {
     font-size: 48px;
     margin-bottom: 15px;
-    color: #667eea;
+    color: #951329;
 }
 
 .quick-action-title {
@@ -788,7 +788,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #667eea;
+    background: #FF4747;
     border: 2px solid white;
     box-shadow: 0 0 0 2px #e9ecef;
 }

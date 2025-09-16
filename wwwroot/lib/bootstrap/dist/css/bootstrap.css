@@ -227,7 +227,7 @@ h1, .h1 {
 }
 @media (min-width: 1200px) {
   h1, .h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 }
 
@@ -662,7 +662,7 @@ progress {
 }
 @media (min-width: 1200px) {
   .display-6 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 }
 
@@ -3055,11 +3055,11 @@ textarea.form-control-lg {
 
 .btn-primary {
   --bs-btn-color: #fff;
-  --bs-btn-bg: #0d6efd;
+  --bs-btn-bg: #ffffff;
   --bs-btn-border-color: #0d6efd;
   --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: #0b5ed7;
-  --bs-btn-hover-border-color: #0a58ca;
+  --bs-btn-hover-border-color: #ffffff;
   --bs-btn-focus-shadow-rgb: 49, 132, 253;
   --bs-btn-active-color: #fff;
   --bs-btn-active-bg: #0a58ca;
@@ -12006,7 +12006,7 @@ textarea.form-control-lg {
 }
 @media (min-width: 1200px) {
   .fs-1 {
-    font-size: 2.5rem !important;
+    font-size: 2rem !important;
   }
   .fs-2 {
     font-size: 2rem !important;

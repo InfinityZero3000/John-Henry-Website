@@ -44,6 +44,44 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult JohnHenry()
+    {
+        // Generate breadcrumbs for John Henry page
+        var breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+            new BreadcrumbItem { Name = "JOHN HENRY", Url = "" }
+        };
+
+        var breadcrumbJsonLd = _seoService.GenerateBreadcrumbJsonLd(breadcrumbs);
+
+        ViewBag.BreadcrumbJsonLd = breadcrumbJsonLd;
+        ViewBag.Breadcrumbs = breadcrumbs;
+        ViewBag.MetaTitle = "JOHN HENRY - Thời trang nam nữ cao cấp";
+        ViewBag.MetaDescription = "Khám phá bộ sưu tập JOHN HENRY với các sản phẩm thời trang nam nữ chất lượng cao, phong cách hiện đại và sang trọng.";
+
+        return View();
+    }
+
+    public IActionResult Freelancer()
+    {
+        // Generate breadcrumbs for Freelancer page
+        var breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+            new BreadcrumbItem { Name = "FREELANCER For Her", Url = "" }
+        };
+
+        var breadcrumbJsonLd = _seoService.GenerateBreadcrumbJsonLd(breadcrumbs);
+
+        ViewBag.BreadcrumbJsonLd = breadcrumbJsonLd;
+        ViewBag.Breadcrumbs = breadcrumbs;
+        ViewBag.MetaTitle = "FREELANCER For Her - Thời trang nữ hiện đại";
+        ViewBag.MetaDescription = "Khám phá bộ sưu tập FREELANCER For Her với các sản phẩm thời trang nữ chất lượng cao, phong cách hiện đại và sang trọng dành riêng cho phái đẹp.";
+
+        return View();
+    }
+
     public IActionResult SeoTest()
     {
         // Generate breadcrumbs for SEO test page

@@ -1,0 +1,426 @@
+@{
+    ViewData["Title"] = "Quản lý quyền hạn";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Quản lý quyền hạn
+                </h1>
+                <p class="text-muted mb-0">Quản lý vai trò và phân quyền trong hệ thống</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
+                    <i class="fas fa-plus me-1"></i>Tạo vai trò mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-wrapper">
+        <div class="row">
+            <!-- Roles Section -->
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Danh sách vai trò</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-crown text-warning me-2"></i>
+                                        <div>
+                                            <h6 class="mb-0">Admin</h6>
+                                            <small class="text-muted">Quyền quản trị toàn bộ hệ thống</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary">Hệ thống</span>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="viewRole('Admin')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-store text-success me-2"></i>
+                                        <div>
+                                            <h6 class="mb-0">Seller</h6>
+                                            <small class="text-muted">Quyền quản lý đơn hàng</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary">Hệ thống</span>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="viewRole('Seller')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user text-info me-2"></i>
+                                        <div>
+                                            <h6 class="mb-0">Customer</h6>
+                                            <small class="text-muted">Quyền khách hàng cơ bản</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-secondary">Mặc định</span>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="viewRole('Customer')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Permissions Detail -->
+                <div class="card" id="roleDetailCard" style="display: none;">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Chi tiết quyền hạn: <span id="selectedRoleName"></span></h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="permissionsList">
+                            <!-- Permissions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Assignments Section -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Phân quyền người dùng</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Search User -->
+                        <div class="mb-3">
+                            <label class="form-label">Tìm kiếm người dùng</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Nhập email hoặc tên..." id="userSearch">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- User Results -->
+                        <div id="userResults">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-search fa-2x mb-2"></i>
+                                <p>Nhập từ khóa để tìm kiếm người dùng</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Role Changes -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thay đổi gần đây</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Thêm vai trò Seller</h6>
+                                    <p class="mb-1 text-muted">user@example.com</p>
+                                    <small class="text-muted">2 giờ trước</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Thay đổi quyền Admin</h6>
+                                    <p class="mb-1 text-muted">admin@example.com</p>
+                                    <small class="text-muted">1 ngày trước</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Tạo vai trò mới</h6>
+                                    <p class="mb-1 text-muted">Manager</p>
+                                    <small class="text-muted">3 ngày trước</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Role Modal -->
+<div class="modal fade" id="createRoleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo vai trò mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createRoleForm">
+                    <div class="mb-3">
+                        <label for="roleName" class="form-label">Tên vai trò <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="roleName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="roleDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="roleDescription" rows="3"></textarea>
+                    </div>
+                    
+                    <h6>Chọn quyền hạn:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Quản lý đơn hàng</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_order_view">
+                                    <label class="form-check-label" for="perm_order_view">Xem đơn hàng</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_order_edit">
+                                    <label class="form-check-label" for="perm_order_edit">Sửa đơn hàng</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_order_delete">
+                                    <label class="form-check-label" for="perm_order_delete">Xóa đơn hàng</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Quản lý người dùng</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_user_view">
+                                    <label class="form-check-label" for="perm_user_view">Xem người dùng</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_user_edit">
+                                    <label class="form-check-label" for="perm_user_edit">Sửa người dùng</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_user_roles">
+                                    <label class="form-check-label" for="perm_user_roles">Quản lý vai trò</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Hệ thống</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_system_settings">
+                                    <label class="form-check-label" for="perm_system_settings">Cài đặt hệ thống</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_system_reports">
+                                    <label class="form-check-label" for="perm_system_reports">Báo cáo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_system_logs">
+                                    <label class="form-check-label" for="perm_system_logs">Xem logs</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="createRole()">Tạo vai trò</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function viewRole(roleName) {
+        document.getElementById('selectedRoleName').textContent = roleName;
+        document.getElementById('roleDetailCard').style.display = 'block';
+        
+        // Load permissions for the role
+        loadRolePermissions(roleName);
+    }
+
+    function loadRolePermissions(roleName) {
+        const permissionsList = document.getElementById('permissionsList');
+        
+        // Sample permissions data - in real app, fetch from server
+        const permissions = {
+            'Admin': [
+                { name: 'Quản lý toàn bộ hệ thống', granted: true },
+                { name: 'Xem tất cả dữ liệu', granted: true },
+                { name: 'Sửa đổi cài đặt hệ thống', granted: true },
+                { name: 'Quản lý người dùng', granted: true },
+                { name: 'Xem báo cáo', granted: true }
+            ],
+            'Seller': [
+                { name: 'Xem đơn hàng liên quan', granted: true },
+                { name: 'Cập nhật trạng thái đơn hàng', granted: true },
+                { name: 'Xem báo cáo bán hàng', granted: true },
+                { name: 'Quản lý người dùng', granted: false }
+            ],
+            'Customer': [
+                { name: 'Tạo đơn hàng', granted: true },
+                { name: 'Xem lịch sử đơn hàng', granted: true },
+                { name: 'Quản lý hồ sơ cá nhân', granted: true }
+            ]
+        };
+
+        const rolePermissions = permissions[roleName] || [];
+        
+        permissionsList.innerHTML = rolePermissions.map(perm => `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>${perm.name}</span>
+                <span class="badge ${perm.granted ? 'bg-success' : 'bg-secondary'}">
+                    ${perm.granted ? 'Có quyền' : 'Không có quyền'}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    function searchUsers() {
+        const searchTerm = document.getElementById('userSearch').value;
+        if (searchTerm.length < 2) {
+            return;
+        }
+
+        // Sample user data - in real app, fetch from server
+        const users = [
+            { id: '1', email: 'john@example.com', name: 'John Doe', roles: ['Customer'] },
+            { id: '2', email: 'jane@example.com', name: 'Jane Smith', roles: ['Seller'] },
+            { id: '3', email: 'admin@example.com', name: 'Admin User', roles: ['Admin'] }
+        ];
+
+        const filteredUsers = users.filter(u => 
+            u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        displayUsers(filteredUsers);
+    }
+
+    function displayUsers(users) {
+        const userResults = document.getElementById('userResults');
+        
+        if (users.length === 0) {
+            userResults.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-user-times fa-2x mb-2"></i>
+                    <p>Không tìm thấy người dùng nào</p>
+                </div>
+            `;
+            return;
+        }
+
+        userResults.innerHTML = users.map(user => `
+            <div class="card mb-2">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${user.name}</h6>
+                            <p class="mb-1 text-muted">${user.email}</p>
+                            <div>
+                                ${user.roles.map(role => `<span class="badge bg-primary me-1">${role}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editUserRoles('${user.id}')">
+                                <i class="fas fa-edit"></i> Sửa quyền
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function editUserRoles(userId) {
+        // Implementation for editing user roles
+        alert('Chức năng sửa quyền người dùng sẽ được triển khai');
+    }
+
+    function createRole() {
+        const roleName = document.getElementById('roleName').value;
+        const roleDescription = document.getElementById('roleDescription').value;
+        
+        if (!roleName) {
+            alert('Vui lòng nhập tên vai trò');
+            return;
+        }
+
+        // Collect selected permissions
+        const permissions = [];
+        document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+            permissions.push(cb.id);
+        });
+
+        // In real app, send to server
+        alert('Vai trò đã được tạo thành công!');
+        bootstrap.Modal.getInstance(document.getElementById('createRoleModal')).hide();
+    }
+</script>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .timeline-item:not(:last-child)::before {
+        content: '';
+        position: absolute;
+        left: -15px;
+        top: 20px;
+        height: calc(100% - 10px);
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -20px;
+        top: 5px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .timeline-content {
+        margin-left: 10px;
+    }
+
+    .list-group-item {
+        border: 1px solid #dee2e6;
+        margin-bottom: 5px;
+        border-radius: 0.375rem;
+    }
+
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+</style>

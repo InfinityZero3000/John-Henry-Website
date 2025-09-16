@@ -1,0 +1,154 @@
+@model IEnumerable<JohnHenryFashionWeb.Models.ProductReview>
+@{
+    ViewData["Title"] = "Quản lý đánh giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-star me-2"></i>Quản lý đánh giá
+                </h1>
+                <p class="text-muted mb-0">Quản lý đánh giá sản phẩm của khách hàng</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Danh sách đánh giá</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>Khách hàng</th>
+                                            <th>Đánh giá</th>
+                                            <th>Nội dung</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var review in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        @if (!string.IsNullOrEmpty(review.Product?.FeaturedImageUrl))
+                                                        {
+                                                            <img src="@review.Product.FeaturedImageUrl" alt="@review.Product.Name" 
+                                                                 class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        }
+                                                        <div>
+                                                            <div class="fw-semibold">@review.Product?.Name</div>
+                                                            <small class="text-muted">@review.Product?.SKU</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <div class="fw-semibold">@(review.User?.FirstName + " " + review.User?.LastName)</div>
+                                                        <small class="text-muted">@review.User?.Email</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                                        }
+                                                        <span class="ms-1">(@review.Rating)</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="review-content" style="max-width: 300px;">
+                                                        @if (!string.IsNullOrEmpty(review.Comment))
+                                                        {
+                                                            @(review.Comment.Length > 100 ? review.Comment.Substring(0, 100) + "..." : review.Comment)
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Không có bình luận</span>
+                                                        }
+                                                    </div>
+                                                </td>
+                                                <td>@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td>
+                                                    @if (review.IsApproved)
+                                                    {
+                                                        <span class="badge bg-success">Đã duyệt</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning">Chờ duyệt</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        @if (!review.IsApproved)
+                                                        {
+                                                            <form asp-action="ApproveReview" asp-route-id="@review.Id" method="post" class="d-inline">
+                                                                <button type="submit" class="btn btn-sm btn-success" title="Duyệt">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                            </form>
+                                                        }
+                                                        <form asp-action="DeleteReview" asp-route-id="@review.Id" method="post" class="d-inline">
+                                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')" title="Xóa">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Chưa có đánh giá nào</h5>
+                                <p class="text-muted">Các đánh giá của khách hàng sẽ hiển thị tại đây</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .review-content {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+</style>

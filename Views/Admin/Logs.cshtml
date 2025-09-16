@@ -1,0 +1,651 @@
+@{
+    ViewData["Title"] = "Quản lý logs";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-list-alt me-2"></i>Quản lý logs hệ thống
+                </h1>
+                <p class="text-muted mb-0">Theo dõi và phân tích logs hệ thống</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline-secondary" onclick="downloadLogs()">
+                    <i class="fas fa-download me-1"></i>Tải logs
+                </button>
+                <button class="btn btn-outline-danger" onclick="clearOldLogs()">
+                    <i class="fas fa-trash me-1"></i>Xóa logs cũ
+                </button>
+                <button class="btn btn-primary" onclick="refreshLogs()">
+                    <i class="fas fa-sync me-1"></i>Làm mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">12,345</h4>
+                                <p class="card-text">Tổng log entries</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-file-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">23</h4>
+                                <p class="card-text">Lỗi hôm nay</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">156</h4>
+                                <p class="card-text">Cảnh báo hôm nay</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exclamation-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">2.3GB</h4>
+                                <p class="card-text">Dung lượng logs</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-hdd fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Files Overview -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <!-- Filters Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Bộ lọc logs</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Mức độ log</label>
+                                <select class="form-select" id="logLevel">
+                                    <option value="">Tất cả</option>
+                                    <option value="error">Error</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="info">Information</option>
+                                    <option value="debug">Debug</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Nguồn</label>
+                                <select class="form-select" id="logSource">
+                                    <option value="">Tất cả nguồn</option>
+                                    <option value="application">Application</option>
+                                    <option value="database">Database</option>
+                                    <option value="authentication">Authentication</option>
+                                    <option value="payment">Payment</option>
+                                    <option value="email">Email</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Từ ngày</label>
+                                <input type="date" class="form-control" id="fromDate">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Đến ngày</label>
+                                <input type="date" class="form-control" id="toDate">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-primary w-100" onclick="applyFilters()">
+                                    <i class="fas fa-search"></i> Lọc
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" placeholder="Tìm kiếm trong logs..." id="searchLogs">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="itemsPerPage">
+                                    <option value="50">50 entries</option>
+                                    <option value="100" selected>100 entries</option>
+                                    <option value="500">500 entries</option>
+                                    <option value="1000">1000 entries</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="autoRefresh">
+                                    <label class="form-check-label" for="autoRefresh">
+                                        Tự động làm mới (30s)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Log entries</h5>
+                            <div class="text-muted">
+                                <small>Hiển thị 100 của 12,345 entries</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 140px;">Thời gian</th>
+                                        <th style="width: 80px;">Mức độ</th>
+                                        <th style="width: 120px;">Nguồn</th>
+                                        <th>Nội dung</th>
+                                        <th style="width: 60px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsTableBody">
+                                    <!-- Logs will be populated here -->
+                                    <tr>
+                                        <td>15/09/2024<br><small class="text-muted">14:30:25</small></td>
+                                        <td><span class="badge bg-danger">ERROR</span></td>
+                                        <td>Database</td>
+                                        <td>
+                                            <div class="log-message">Connection timeout while executing query: SELECT * FROM Products WHERE...</div>
+                                            <small class="text-muted">User: admin@example.com | IP: 192.168.1.100</small>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewLogDetails('log-1')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/09/2024<br><small class="text-muted">14:29:12</small></td>
+                                        <td><span class="badge bg-warning">WARN</span></td>
+                                        <td>Authentication</td>
+                                        <td>
+                                            <div class="log-message">Multiple failed login attempts detected for user: test@example.com</div>
+                                            <small class="text-muted">IP: 203.171.29.45 | Attempts: 5</small>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewLogDetails('log-2')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/09/2024<br><small class="text-muted">14:28:45</small></td>
+                                        <td><span class="badge bg-info">INFO</span></td>
+                                        <td>Application</td>
+                                        <td>
+                                            <div class="log-message">User successful login: admin@example.com</div>
+                                            <small class="text-muted">Session: abc123def456 | IP: 192.168.1.100</small>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewLogDetails('log-3')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/09/2024<br><small class="text-muted">14:25:33</small></td>
+                                        <td><span class="badge bg-success">INFO</span></td>
+                                        <td>Payment</td>
+                                        <td>
+                                            <div class="log-message">Payment processed successfully for order #12345</div>
+                                            <small class="text-muted">Amount: ₫1,234,567 | Gateway: VNPay</small>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewLogDetails('log-4')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/09/2024<br><small class="text-muted">14:23:18</small></td>
+                                        <td><span class="badge bg-secondary">DEBUG</span></td>
+                                        <td>Application</td>
+                                        <td>
+                                            <div class="log-message">Cache miss for product catalog page, regenerating...</div>
+                                            <small class="text-muted">Cache key: product_catalog_page_1 | TTL: 3600s</small>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewLogDetails('log-5')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <nav>
+                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                                <li class="page-item disabled">
+                                    <span class="page-link">Trước</span>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link">1</span>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(2)">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(3)">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(2)">Sau</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Files Sidebar -->
+            <div class="col-lg-4">
+                <!-- Log Files -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tệp logs</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">john-henry-20250915.txt</h6>
+                                    <small class="text-muted">Hôm nay • 45.2 MB</small>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="viewLogFile('20250915')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="downloadLogFile('20250915')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">john-henry-20250914.txt</h6>
+                                    <small class="text-muted">Hôm qua • 38.7 MB</small>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="viewLogFile('20250914')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="downloadLogFile('20250914')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">john-henry-20250913.txt</h6>
+                                    <small class="text-muted">2 ngày trước • 42.1 MB</small>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="viewLogFile('20250913')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="downloadLogFile('20250913')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">john-henry-20250912.txt</h6>
+                                    <small class="text-muted">3 ngày trước • 39.8 MB</small>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="viewLogFile('20250912')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="downloadLogFile('20250912')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log Statistics -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thống kê hôm nay</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <h4 class="text-danger">23</h4>
+                                    <small class="text-muted">Lỗi</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <h4 class="text-warning">156</h4>
+                                    <small class="text-muted">Cảnh báo</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <h4 class="text-info">2,345</h4>
+                                    <small class="text-muted">Thông tin</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <h4 class="text-secondary">5,678</h4>
+                                    <small class="text-muted">Debug</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tình trạng hệ thống</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>CPU Usage</span>
+                                <strong>45%</strong>
+                            </div>
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Memory Usage</span>
+                                <strong>67%</strong>
+                            </div>
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: 67%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Disk Usage</span>
+                                <strong>23%</strong>
+                            </div>
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar bg-info" style="width: 23%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between">
+                                <span>Database Connections</span>
+                                <strong>12/50</strong>
+                            </div>
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar bg-primary" style="width: 24%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Detail Modal -->
+<div class="modal fade" id="logDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logDetailContent">
+                    <!-- Log details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="copyLogDetails()">
+                    <i class="fas fa-copy me-1"></i>Sao chép
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let autoRefreshInterval;
+
+    function applyFilters() {
+        const level = document.getElementById('logLevel').value;
+        const source = document.getElementById('logSource').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        const search = document.getElementById('searchLogs').value;
+        
+        // Simulate filtering
+        console.log('Applying filters:', { level, source, fromDate, toDate, search });
+        // In real app, make API call to filter logs
+        alert('Đang áp dụng bộ lọc...');
+    }
+
+    function refreshLogs() {
+        // Simulate log refresh
+        alert('Đã làm mới logs');
+        // In real app, reload logs from server
+    }
+
+    function viewLogDetails(logId) {
+        // Sample log detail
+        const logDetail = `
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>ID:</strong></div>
+                <div class="col-sm-9">${logId}</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>Timestamp:</strong></div>
+                <div class="col-sm-9">2024-09-15 14:30:25.123</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>Level:</strong></div>
+                <div class="col-sm-9"><span class="badge bg-danger">ERROR</span></div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>Source:</strong></div>
+                <div class="col-sm-9">Database</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>Message:</strong></div>
+                <div class="col-sm-9">Connection timeout while executing query</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>Exception:</strong></div>
+                <div class="col-sm-9">
+                    <pre class="bg-light p-2 rounded">
+System.Data.SqlClient.SqlException: Timeout expired. The timeout period elapsed prior to completion of the operation or the server is not responding.
+   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action\`1 wrapCloseInAction)
+   at System.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action\`1 wrapCloseInAction)
+                    </pre>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>User:</strong></div>
+                <div class="col-sm-9">admin@example.com</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>IP Address:</strong></div>
+                <div class="col-sm-9">192.168.1.100</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3"><strong>Request URL:</strong></div>
+                <div class="col-sm-9">/admin/products</div>
+            </div>
+        `;
+        
+        document.getElementById('logDetailContent').innerHTML = logDetail;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('logDetailModal')).show();
+    }
+
+    function copyLogDetails() {
+        const content = document.getElementById('logDetailContent').innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            alert('Đã sao chép chi tiết log!');
+        });
+    }
+
+    function viewLogFile(date) {
+        window.open(`/admin/logs/view/${date}`, '_blank');
+    }
+
+    function downloadLogFile(date) {
+        window.location.href = `/admin/logs/download/${date}`;
+    }
+
+    function downloadLogs() {
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        
+        if (!fromDate || !toDate) {
+            alert('Vui lòng chọn khoảng thời gian');
+            return;
+        }
+        
+        window.location.href = `/admin/logs/download?from=${fromDate}&to=${toDate}`;
+    }
+
+    function clearOldLogs() {
+        if (confirm('Bạn có chắc chắn muốn xóa logs cũ? Hành động này không thể hoàn tác.')) {
+            fetch('/admin/api/logs/clear-old', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Đã xóa logs cũ thành công!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function loadPage(page) {
+        // Simulate pagination
+        console.log('Loading page:', page);
+        // In real app, load logs for specific page
+    }
+
+    // Auto refresh functionality
+    document.getElementById('autoRefresh').addEventListener('change', function(e) {
+        if (e.target.checked) {
+            autoRefreshInterval = setInterval(refreshLogs, 30000); // 30 seconds
+        } else {
+            clearInterval(autoRefreshInterval);
+        }
+    });
+
+    // Set default date range (last 7 days)
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        
+        document.getElementById('toDate').value = today.toISOString().split('T')[0];
+        document.getElementById('fromDate').value = weekAgo.toISOString().split('T')[0];
+    });
+
+    // Search functionality
+    document.getElementById('searchLogs').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyFilters();
+        }
+    });
+</script>
+
+<style>
+    .log-message {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        word-break: break-all;
+    }
+
+    .stat-item {
+        padding: 0.5rem 0;
+    }
+
+    .table-responsive {
+        max-height: 600px;
+    }
+
+    .progress {
+        height: 6px;
+    }
+
+    pre {
+        font-size: 0.8rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>

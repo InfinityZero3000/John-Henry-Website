@@ -114,3 +114,5 @@ seller@johnhenry.com
 Seller123!
 
 tiny dùng để làm gì ?
+
+brew services start postgresql@14 -- khởi động postgresql

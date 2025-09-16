@@ -7,8 +7,64 @@ a.navbar-brand {
   word-break: break-all;
 }
 
+/* Default link color for general content */
 a {
-  color: #252a2b;
+  color: #000000;
+}
+
+/* Navigation bar link colors */
+.nav-menu .nav-link {
+  color: #333 !important;
+  text-decoration: none;
+}
+
+.nav-menu .nav-link:hover {
+  color: var(--jh-red, #951329) !important;
+}
+
+.nav-menu .nav-link.active {
+  color: var(--jh-red, #951329) !important;
+}
+
+/* Dropdown menu link colors */
+.dropdown-menu a {
+  color: #333 !important;
+}
+
+.dropdown-menu a:hover {
+  color: var(--jh-red, #951329) !important;
+}
+
+/* Footer link colors - override default link color */
+.footer-section a,
+.footer-section .legal-link,
+.footer-section .contact-item a {
+  color: #cccccc !important;
+  text-decoration: none;
+}
+
+.footer-section a:hover,
+.footer-section .legal-link:hover,
+.footer-section .contact-item a:hover {
+  color: var(--jh-red, #951329) !important;
+}
+
+/* Social media links in footer */
+.footer-section .social-links a {
+  color: #cccccc !important;
+}
+
+.footer-section .social-links a:hover {
+  color: var(--jh-red, #951329) !important;
+}
+
+/* Footer bottom section links */
+.footer-bottom a {
+  color: #cccccc !important;
+}
+
+.footer-bottom a:hover {
+  color: var(--jh-red, #951329) !important;
 }
 
 .btn-primary {
@@ -19,8 +75,8 @@ a {
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
   color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+  background-color: #fbfbfb;
+  border-color: #000000;
 }
 
 .border-top {

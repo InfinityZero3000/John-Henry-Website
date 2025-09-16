@@ -226,7 +226,7 @@ namespace JohnHenryFashionWeb.Services
                         "Đơn hàng mới",
                         $"Đơn hàng mới #{order.OrderNumber} từ {order.User?.FirstName} {order.User?.LastName}",
                         "admin_order",
-                        $"/Admin/Orders/{order.Id}"
+                        $"/admin/orders/{order.Id}"
                     );
                 }
             }

@@ -58,6 +58,12 @@
     
     <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="dns-prefetch" href="//unpkg.com">
     
     <!-- Favicon and app icons -->
@@ -79,8 +85,8 @@
     @await RenderSectionAsync("Styles", required: false)
     <style>
         :root {
-            --jh-red: #CE193A;
-            --jh-dark-red: #95122A;
+            --jh-red: #951329;
+            --jh-dark-red: #7a0f21;
             --jh-white: #FFFFFF;
         }
         
@@ -141,6 +147,16 @@
         .logo-section {
             display: flex;
             align-items: center;
+        }
+        
+        .logo-icon {
+            display: inline-block;
+            transition: transform 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .logo-icon:hover {
+            transform: scale(1.05);
         }
         
         .logo-icon img {
@@ -236,7 +252,7 @@
         }
         
         .wishlist-badge {
-            background: #e91e63;
+            background: #951329;
         }
         
         /* Account Dropdown Styles */
@@ -802,7 +818,7 @@
         .newsletter-form {
             display: flex;
             background: rgba(255,255,255,0.1);
-            border-radius: 25px;
+            border-radius: 10px;
             overflow: hidden;
             backdrop-filter: blur(10px);
         }
@@ -967,9 +983,9 @@
             <div class="header-content">
                 <!-- Logo Section -->
                 <div class="logo-section">
-                    <div class="logo-icon">
+                    <a href="/" class="logo-icon">
                         <img src="~/images/logo.png" alt="John Henry Logo">
-                    </div>
+                    </a>
                 </div>
 
                 <!-- Search Section -->
@@ -997,7 +1013,6 @@
                                 <div class="account-header">
                                     <div class="account-info">
                                         <h6>@(User.Identity?.Name ?? "User")</h6>
-                                        <small>Chào mừng trở lại!</small>
                                     </div>
                                 </div>
                                 <hr class="account-divider">
@@ -1088,7 +1103,7 @@
             <div class="nav-section">
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="/" class="nav-link active">JOHN HENRY</a>
+                        <a href="/Home/JohnHenry" class="nav-link">John Henry</a>
                         <div class="dropdown-menu">
                             <div class="dropdown-content">
                                 <div class="dropdown-categories">
@@ -1126,7 +1141,7 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">FREELANCER</a>
+                        <a href="/Home/Freelancer" class="nav-link">FREELANCER</a>
                         <div class="dropdown-menu">
                             <div class="dropdown-content">
                                 <div class="dropdown-categories">
@@ -1171,8 +1186,8 @@
                         <div class="dropdown-menu">
                             <div class="dropdown-content">
                                 <div class="dropdown-categories">
-                                    <a href="#" class="dropdown-category">JOHN HENRY</a>
-                                    <a href="#" class="dropdown-category">FREELANCER</a>
+                                    <a href="/Home/JohnHenry" class="dropdown-category">JOHN HENRY</a>
+                                    <a href="/Home/Freelancer" class="dropdown-category">FREELANCER</a>
                                 </div>
                                 <div class="dropdown-image">
                                     <img src="~/images/client-suit-boutique-with-shopping-bags.jpg" alt="Store Image">

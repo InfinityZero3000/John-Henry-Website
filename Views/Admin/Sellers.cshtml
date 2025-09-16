@@ -1,0 +1,421 @@
+@model IEnumerable<JohnHenryFashionWeb.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý người bán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-store me-2"></i>Quản lý người bán
+                </h1>
+                <p class="text-muted mb-0">Quản lý tài khoản và quyền hạn của người bán hàng</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inviteSellerModal">
+                    <i class="fas fa-user-plus me-1"></i>Mời người bán mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count()</h4>
+                                <p class="card-text">Tổng số người bán</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count(u => u.EmailConfirmed)</h4>
+                                <p class="card-text">Đã xác thực</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count(u => u.LockoutEnd > DateTime.Now)</h4>
+                                <p class="card-text">Bị khóa</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-lock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">@Model.Count(u => u.LastLoginDate.HasValue && u.LastLoginDate.Value >= DateTime.Now.AddDays(-7))</h4>
+                                <p class="card-text">Hoạt động tuần qua</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchInput">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active">Hoạt động</option>
+                            <option value="locked">Bị khóa</option>
+                            <option value="unverified">Chưa xác thực</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="sortBy">
+                            <option value="name">Sắp xếp theo tên</option>
+                            <option value="email">Sắp xếp theo email</option>
+                            <option value="lastLogin">Lần đăng nhập cuối</option>
+                            <option value="createdDate">Ngày tạo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                            <i class="fas fa-sync me-1"></i>Đặt lại
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sellers Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Danh sách người bán</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Người bán</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th>Trạng thái</th>
+                                <th>Lần đăng nhập cuối</th>
+                                <th>Ngày tham gia</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var seller in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3">
+                                                @if (!string.IsNullOrEmpty(seller.FirstName) && !string.IsNullOrEmpty(seller.LastName))
+                                                {
+                                                    @seller.FirstName.First()@seller.LastName.First()
+                                                }
+                                                else
+                                                {
+                                                    @(seller.Email?.First() ?? 'U')
+                                                }
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@seller.FirstName @seller.LastName</div>
+                                                <small class="text-muted">ID: @seller.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>@seller.Email</div>
+                                        @if (seller.EmailConfirmed)
+                                        {
+                                            <small class="text-success"><i class="fas fa-check-circle"></i> Đã xác thực</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-warning"><i class="fas fa-exclamation-circle"></i> Chưa xác thực</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(seller.PhoneNumber))
+                                        {
+                                            <div>@seller.PhoneNumber</div>
+                                            @if (seller.PhoneNumberConfirmed)
+                                            {
+                                                <small class="text-success"><i class="fas fa-check-circle"></i> Đã xác thực</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa cung cấp</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (seller.LockoutEnd.HasValue && seller.LockoutEnd > DateTime.Now)
+                                        {
+                                            <span class="badge bg-danger">Bị khóa</span>
+                                        }
+                                        else if (!seller.EmailConfirmed)
+                                        {
+                                            <span class="badge bg-warning">Chưa xác thực</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (seller.LastLoginDate.HasValue)
+                                        {
+                                            <div>@seller.LastLoginDate.Value.ToString("dd/MM/yyyy")</div>
+                                            <small class="text-muted">@seller.LastLoginDate.Value.ToString("HH:mm")</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa đăng nhập</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div>@seller.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                        <small class="text-muted">@seller.CreatedAt.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewSeller('@seller.Id')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editSeller('@seller.Id')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            @if (seller.LockoutEnd.HasValue && seller.LockoutEnd > DateTime.Now)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="unlockSeller('@seller.Id')">
+                                                    <i class="fas fa-unlock"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="lockSeller('@seller.Id')">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invite Seller Modal -->
+<div class="modal fade" id="inviteSellerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mời người bán mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="inviteSellerForm">
+                    <div class="mb-3">
+                        <label for="sellerEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="sellerEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sellerFirstName" class="form-label">Họ</label>
+                        <input type="text" class="form-control" id="sellerFirstName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="sellerLastName" class="form-label">Tên</label>
+                        <input type="text" class="form-control" id="sellerLastName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inviteMessage" class="form-label">Lời nhắn (tùy chọn)</label>
+                        <textarea class="form-control" id="inviteMessage" rows="3" placeholder="Lời mời tham gia làm người bán..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="sendInvite()">Gửi lời mời</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function viewSeller(sellerId) {
+        // Implementation for viewing seller details
+        window.location.href = `/admin/sellers/${sellerId}`;
+    }
+
+    function editSeller(sellerId) {
+        // Implementation for editing seller
+        window.location.href = `/admin/sellers/${sellerId}/edit`;
+    }
+
+    function lockSeller(sellerId) {
+        if (confirm('Bạn có chắc chắn muốn khóa tài khoản này?')) {
+            fetch(`/admin/api/sellers/${sellerId}/lock`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function unlockSeller(sellerId) {
+        if (confirm('Bạn có chắc chắn muốn mở khóa tài khoản này?')) {
+            fetch(`/admin/api/sellers/${sellerId}/unlock`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function sendInvite() {
+        const email = document.getElementById('sellerEmail').value;
+        const firstName = document.getElementById('sellerFirstName').value;
+        const lastName = document.getElementById('sellerLastName').value;
+        const message = document.getElementById('inviteMessage').value;
+
+        if (!email) {
+            alert('Vui lòng nhập email');
+            return;
+        }
+
+        fetch('/admin/api/sellers/invite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Lời mời đã được gửi thành công!');
+                document.getElementById('inviteSellerForm').reset();
+                bootstrap.Modal.getInstance(document.getElementById('inviteSellerModal')).hide();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.message);
+            }
+        });
+    }
+
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('sortBy').value = 'name';
+        // Apply filters
+        applyFilters();
+    }
+
+    function applyFilters() {
+        // Implementation for filtering sellers
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const status = document.getElementById('statusFilter').value;
+        const sortBy = document.getElementById('sortBy').value;
+        
+        // Filter logic would go here
+    }
+
+    // Event listeners for filters
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('sortBy').addEventListener('change', applyFilters);
+</script>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .table th {
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+</style>

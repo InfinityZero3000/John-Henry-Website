@@ -185,6 +185,113 @@ namespace JohnHenryFashionWeb.ViewModels
         public int PageSize { get; set; } = 50;
         public int CurrentPage { get; set; } = 1;
         public int TotalLogs { get; set; }
+        
+        // Additional properties needed for the controller
+        public int TotalPages => (int)Math.Ceiling((double)TotalLogs / PageSize);
+        public string SelectedLevel { get; set; } = "All";
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public List<string> LogLevels { get; set; } = new() { "All", "Error", "Warning", "Information", "Debug", "Trace" };
+    }
+
+    #endregion
+
+    #region System Management ViewModels
+
+    public class MaintenanceViewModel
+    {
+        public bool IsMaintenanceMode { get; set; }
+        public string MaintenanceMessage { get; set; } = string.Empty;
+        public DateTime? ScheduledMaintenanceStart { get; set; }
+        public DateTime? ScheduledMaintenanceEnd { get; set; }
+        public List<string> AllowedIpAddresses { get; set; } = new();
+        public bool AllowAdminAccess { get; set; } = true;
+    }
+
+    public class BackupInfo
+    {
+        public Guid Id { get; set; }
+        public string FileName { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public long FileSize { get; set; }
+        public long Size { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string Type { get; set; } = "Full";
+    }
+
+    public class BackupRestoreViewModel
+    {
+        public List<BackupInfo> Backups { get; set; } = new();
+        public List<BackupInfo> BackupHistory { get; set; } = new();
+        public string NewBackupDescription { get; set; } = string.Empty;
+        public bool AutoBackupEnabled { get; set; }
+        public int BackupRetentionDays { get; set; } = 30;
+        public int RetentionDays { get; set; } = 30;
+        public string BackupFrequency { get; set; } = "Daily";
+    }
+
+    public class SystemLog
+    {
+        public Guid Id { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string Level { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Source { get; set; } = string.Empty;
+        public string? UserId { get; set; }
+        public string? IpAddress { get; set; }
+        public string? Details { get; set; }
+    }
+
+    public class ServerInfo
+    {
+        public string ServerName { get; set; } = string.Empty;
+        public string MachineName { get; set; } = string.Empty;
+        public string OperatingSystem { get; set; } = string.Empty;
+        public string Framework { get; set; } = string.Empty;
+        public DateTime StartTime { get; set; }
+        public TimeSpan Uptime { get; set; }
+        public double CpuUsage { get; set; }
+        public long MemoryUsed { get; set; }
+        public long MemoryTotal { get; set; }
+        public long WorkingSet { get; set; }
+        public long TotalPhysicalMemory { get; set; }
+        public long AvailablePhysicalMemory { get; set; }
+        public int ProcessorCount { get; set; }
+        public long DiskUsed { get; set; }
+        public long DiskTotal { get; set; }
+    }
+
+    public class DatabaseInfo
+    {
+        public string DatabaseName { get; set; } = string.Empty;
+        public string Version { get; set; } = string.Empty;
+        public long DatabaseSize { get; set; }
+        public int TableCount { get; set; }
+        public int RecordCount { get; set; }
+        public DateTime LastBackup { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class ApplicationInfo
+    {
+        public string Version { get; set; } = string.Empty;
+        public string Environment { get; set; } = string.Empty;
+        public DateTime BuildDate { get; set; }
+        public TimeSpan Uptime { get; set; }
+        public int ActiveUsers { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalProducts { get; set; }
+        public int TotalOrders { get; set; }
+    }
+
+    public class SystemInfoViewModel
+    {
+        public ServerInfo Server { get; set; } = new();
+        public DatabaseInfo Database { get; set; } = new();
+        public ApplicationInfo Application { get; set; } = new();
+        public List<string> RecentLogs { get; set; } = new();
+        public Dictionary<string, object> ConfigSettings { get; set; } = new();
     }
 
     #endregion
@@ -270,18 +377,6 @@ namespace JohnHenryFashionWeb.ViewModels
         public string Format { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool IsAvailable { get; set; } = true;
-    }
-
-    public class AdvancedAnalyticsViewModel
-    {
-        public SalesAnalytics SalesAnalytics { get; set; } = new();
-        public UserAnalytics UserAnalytics { get; set; } = new();
-        public ProductAnalytics ProductAnalytics { get; set; } = new();
-        public MarketingAnalytics MarketingAnalytics { get; set; } = new();
-        public List<AnalyticsChart> Charts { get; set; } = new();
-        public List<KPI> KPIs { get; set; } = new();
-        public AnalyticsFilter Filter { get; set; } = new();
-        public List<AnalyticsExport> AvailableExports { get; set; } = new();
     }
 
     #endregion

@@ -13,7 +13,7 @@ namespace JohnHenryFashionWeb.Controllers
         #region Settings Management
         
         [HttpGet("settings")]
-        public async Task<IActionResult> Settings()
+        public IActionResult Settings()
         {
             var viewModel = new SystemSettingsViewModel
             {
@@ -78,7 +78,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         [HttpPost("settings")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateSettings(SystemSettingsViewModel model)
+        public IActionResult UpdateSettings(SystemSettingsViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -105,7 +105,7 @@ namespace JohnHenryFashionWeb.Controllers
         #region System Maintenance
 
         [HttpGet("maintenance")]
-        public async Task<IActionResult> MaintenanceMode()
+        public IActionResult MaintenanceMode()
         {
             var viewModel = new MaintenanceViewModel
             {
@@ -120,7 +120,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("maintenance/toggle")]
-        public async Task<IActionResult> ToggleMaintenanceMode(bool enable)
+        public IActionResult ToggleMaintenanceMode(bool enable)
         {
             try
             {
@@ -141,7 +141,7 @@ namespace JohnHenryFashionWeb.Controllers
         #region Backup & Restore
 
         [HttpGet("backup")]
-        public async Task<IActionResult> BackupRestore()
+        public IActionResult BackupRestore()
         {
             var backupHistory = new List<BackupInfo>
             {
@@ -150,7 +150,7 @@ namespace JohnHenryFashionWeb.Controllers
                     Id = Guid.NewGuid(),
                     FileName = "backup_20241214_120000.sql",
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    Size = "15.2 MB",
+                    Size = 15928576, // 15.2 MB in bytes
                     Type = "Full"
                 }
             };
@@ -167,7 +167,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("backup/create")]
-        public async Task<IActionResult> CreateBackup(string backupType = "Full")
+        public IActionResult CreateBackup(string backupType = "Full")
         {
             try
             {
@@ -190,7 +190,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("backup/restore")]
-        public async Task<IActionResult> RestoreBackup(IFormFile backupFile)
+        public IActionResult RestoreBackup(IFormFile backupFile)
         {
             if (backupFile == null || backupFile.Length == 0)
             {
@@ -218,30 +218,30 @@ namespace JohnHenryFashionWeb.Controllers
         #region System Logs
 
         [HttpGet("logs")]
-        public async Task<IActionResult> SystemLogs(int page = 1, string level = "", DateTime? fromDate = null, DateTime? toDate = null)
+        public IActionResult SystemLogs(int page = 1, string level = "", DateTime? fromDate = null, DateTime? toDate = null)
         {
             const int pageSize = 50;
             
             // Mock data - replace with actual log reading
-            var logs = new List<SystemLog>
+            var logs = new List<SystemLogEntry>
             {
-                new SystemLog
+                new SystemLogEntry
                 {
-                    Id = Guid.NewGuid(),
+                    Id = 1,
                     Level = "Error",
                     Message = "Database connection timeout",
                     Timestamp = DateTime.UtcNow.AddMinutes(-10),
                     Source = "AdminController",
-                    UserId = User.Identity?.Name
+                    UserId = User.Identity?.Name ?? string.Empty
                 },
-                new SystemLog
+                new SystemLogEntry
                 {
-                    Id = Guid.NewGuid(),
+                    Id = 2,
                     Level = "Info",
                     Message = "User logged in successfully",
                     Timestamp = DateTime.UtcNow.AddMinutes(-15),
                     Source = "AuthService",
-                    UserId = User.Identity?.Name
+                    UserId = User.Identity?.Name ?? string.Empty
                 }
             };
 
@@ -255,7 +255,6 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 Logs = pagedLogs,
                 CurrentPage = page,
-                TotalPages = (int)Math.Ceiling((double)totalLogs / pageSize),
                 PageSize = pageSize,
                 TotalLogs = totalLogs,
                 SelectedLevel = level,
@@ -268,7 +267,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("logs/clear")]
-        public async Task<IActionResult> ClearLogs(DateTime? beforeDate = null)
+        public IActionResult ClearLogs(DateTime? beforeDate = null)
         {
             try
             {
@@ -296,7 +295,7 @@ namespace JohnHenryFashionWeb.Controllers
         {
             var viewModel = new SystemInfoViewModel
             {
-                ServerInfo = new ServerInfo
+                Server = new ServerInfo
                 {
                     MachineName = Environment.MachineName,
                     OperatingSystem = Environment.OSVersion.ToString(),
@@ -306,20 +305,24 @@ namespace JohnHenryFashionWeb.Controllers
                     TotalPhysicalMemory = GetTotalPhysicalMemory(),
                     AvailablePhysicalMemory = GetAvailablePhysicalMemory()
                 },
-                DatabaseInfo = new DatabaseInfo
+                Database = new DatabaseInfo
                 {
                     DatabaseName = "JohnHenryFashionDB",
-                    DatabaseSize = "125.5 MB",
+                    DatabaseSize = 131609600, // 125.5 MB in bytes
                     TableCount = await GetTableCountAsync(),
                     RecordCount = await GetTotalRecordCountAsync(),
                     LastBackup = DateTime.UtcNow.AddDays(-1)
                 },
-                ApplicationInfo = new ApplicationInfo
+                Application = new ApplicationInfo
                 {
                     Version = "1.0.0",
                     BuildDate = new DateTime(2024, 12, 14),
                     Uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime,
-                    Environment = _webHostEnvironment.EnvironmentName
+                    Environment = "Development",
+                    ActiveUsers = 25,
+                    TotalUsers = await _context.Users.CountAsync(),
+                    TotalProducts = await _context.Products.CountAsync(),
+                    TotalOrders = await _context.Orders.CountAsync()
                 }
             };
 
@@ -333,13 +336,13 @@ namespace JohnHenryFashionWeb.Controllers
         private long GetTotalPhysicalMemory()
         {
             // Implementation to get total physical memory
-            return 8 * 1024 * 1024 * 1024; // 8 GB as example
+            return 8L * 1024L * 1024L * 1024L; // 8 GB as example
         }
 
         private long GetAvailablePhysicalMemory()
         {
             // Implementation to get available physical memory
-            return 4 * 1024 * 1024 * 1024; // 4 GB as example
+            return 4L * 1024L * 1024L * 1024L; // 4 GB as example
         }
 
         private async Task<int> GetTableCountAsync()
@@ -348,7 +351,7 @@ namespace JohnHenryFashionWeb.Controllers
             return await Task.FromResult(25);
         }
 
-        private async Task<long> GetTotalRecordCountAsync()
+        private async Task<int> GetTotalRecordCountAsync()
         {
             // Count total records across all tables
             var productCount = await _context.Products.CountAsync();

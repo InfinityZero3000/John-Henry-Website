@@ -1,14 +1,14 @@
 @model JohnHenryFashionWeb.ViewModels.AdvancedAnalyticsViewModel
 @{
-    ViewData["Title"] = "Báo cáo & Phân tích nâng cao";
-    ViewData["CurrentSection"] = "reports";
-    Layout = "~/Views/Shared/_AdminLayout_New.cshtml";
+    ViewData["Title"] = "Báo cáo nâng cao";
+    ViewData["CurrentSection"] = "advanced-reports";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 @section Styles {
     <style>
         .analytics-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF4747 0%, #CC3636 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;
@@ -88,7 +88,7 @@
         }
 
         .kpi-value {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 8px;
@@ -479,11 +479,11 @@
         <div class="kpi-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
             <i class="fas fa-dollar-sign"></i>
         </div>
-        <div class="kpi-value">2.4M</div>
+        <div class="kpi-value">@Model.KPIData.TotalRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
         <div class="kpi-label">Tổng doanh thu</div>
-        <div class="kpi-change increase">
-            <i class="fas fa-arrow-up"></i>
-            <span>+12.5%</span>
+        <div class="kpi-change @(Model.KPIData.RevenueGrowth >= 0 ? "increase" : "decrease")">
+            <i class="fas fa-arrow-@(Model.KPIData.RevenueGrowth >= 0 ? "up" : "down")"></i>
+            <span>@(Model.KPIData.RevenueGrowth >= 0 ? "+" : "")@Model.KPIData.RevenueGrowth.ToString("F1")%</span>
             <span>so với kỳ trước</span>
         </div>
     </div>
@@ -492,11 +492,11 @@
         <div class="kpi-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
             <i class="fas fa-shopping-cart"></i>
         </div>
-        <div class="kpi-value">847</div>
+        <div class="kpi-value">@Model.KPIData.CompletedOrders.ToString("N0")</div>
         <div class="kpi-label">Đơn hàng hoàn thành</div>
-        <div class="kpi-change increase">
-            <i class="fas fa-arrow-up"></i>
-            <span>+8.3%</span>
+        <div class="kpi-change @(Model.KPIData.OrdersGrowth >= 0 ? "increase" : "decrease")">
+            <i class="fas fa-arrow-@(Model.KPIData.OrdersGrowth >= 0 ? "up" : "down")"></i>
+            <span>@(Model.KPIData.OrdersGrowth >= 0 ? "+" : "")@Model.KPIData.OrdersGrowth.ToString("F1")%</span>
             <span>so với kỳ trước</span>
         </div>
     </div>
@@ -505,11 +505,11 @@
         <div class="kpi-icon" style="background: linear-gradient(45deg, #8b5cf6, #7c3aed);">
             <i class="fas fa-users"></i>
         </div>
-        <div class="kpi-value">1,234</div>
+        <div class="kpi-value">@Model.KPIData.NewCustomers.ToString("N0")</div>
         <div class="kpi-label">Khách hàng mới</div>
-        <div class="kpi-change increase">
-            <i class="fas fa-arrow-up"></i>
-            <span>+15.7%</span>
+        <div class="kpi-change @(Model.KPIData.CustomersGrowth >= 0 ? "increase" : "decrease")">
+            <i class="fas fa-arrow-@(Model.KPIData.CustomersGrowth >= 0 ? "up" : "down")"></i>
+            <span>@(Model.KPIData.CustomersGrowth >= 0 ? "+" : "")@Model.KPIData.CustomersGrowth.ToString("F1")%</span>
             <span>so với kỳ trước</span>
         </div>
     </div>
@@ -518,11 +518,11 @@
         <div class="kpi-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">
             <i class="fas fa-chart-line"></i>
         </div>
-        <div class="kpi-value">3.8%</div>
+        <div class="kpi-value">@Model.KPIData.ConversionRate.ToString("F1")%</div>
         <div class="kpi-label">Tỷ lệ chuyển đổi</div>
-        <div class="kpi-change increase">
-            <i class="fas fa-arrow-up"></i>
-            <span>+0.5%</span>
+        <div class="kpi-change @(Model.KPIData.ConversionGrowth >= 0 ? "increase" : "decrease")">
+            <i class="fas fa-arrow-@(Model.KPIData.ConversionGrowth >= 0 ? "up" : "down")"></i>
+            <span>@(Model.KPIData.ConversionGrowth >= 0 ? "+" : "")@Model.KPIData.ConversionGrowth.ToString("F1")%</span>
             <span>so với kỳ trước</span>
         </div>
     </div>
@@ -531,7 +531,7 @@
 <!-- Export Panel -->
 <div class="export-panel">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">📤 Xuất báo cáo</h6>
+        <h6 class="mb-0">Xuất báo cáo</h6>
         <button class="btn btn-success btn-sm" onclick="scheduleReport()">
             <i class="fas fa-clock me-1"></i>Lập lịch tự động
         </button>
@@ -629,28 +629,28 @@
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="metric-card">
-                        <div class="metric-value">2.4M</div>
+                        <div class="metric-value">@Model.SalesAnalytics.TotalRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
                         <div class="metric-label">Doanh thu</div>
-                        <div class="metric-trend trend-up">+12.5%</div>
+                        <div class="metric-trend @(Model.SalesAnalytics.GrowthRate >= 0 ? "trend-up" : "trend-down")">@(Model.SalesAnalytics.GrowthRate >= 0 ? "+" : "")@Model.SalesAnalytics.GrowthRate.ToString("F1")%</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card">
-                        <div class="metric-value">847</div>
+                        <div class="metric-value">@Model.SalesAnalytics.TotalOrders.ToString("N0")</div>
                         <div class="metric-label">Đơn hàng</div>
                         <div class="metric-trend trend-up">+8.3%</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card">
-                        <div class="metric-value">2.8M</div>
+                        <div class="metric-value">@Model.SalesAnalytics.AverageOrderValue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
                         <div class="metric-label">Giá trị trung bình</div>
                         <div class="metric-trend trend-up">+4.2%</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card">
-                        <div class="metric-value">15.7%</div>
+                        <div class="metric-value">@Model.SalesAnalytics.MonthlyGrowthRate.ToString("F1")%</div>
                         <div class="metric-label">Tăng trưởng</div>
                         <div class="metric-trend trend-up">+2.3%</div>
                     </div>
@@ -889,15 +889,17 @@
             new Chart(revenueCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6'],
+                    labels: [@Html.Raw(string.Join(",", Model.RevenueChartData.Select(d => "'" + d.Label + "'")))],
                     datasets: [{
                         label: 'Doanh thu',
-                        data: [1200000, 1900000, 3000000, 5000000, 2000000, 3000000],
+                        data: [@Html.Raw(string.Join(",", Model.RevenueChartData.Select(d => d.Value.ToString())))],
                         borderColor: 'rgb(99, 102, 241)',
                         backgroundColor: 'rgba(99, 102, 241, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4
+                    }]
+                },
                     }]
                 },
                 options: {
@@ -928,9 +930,9 @@
             new Chart(topProductsCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Áo sơ mi', 'Quần jeans', 'Áo khoác', 'Váy', 'Phụ kiện'],
+                    labels: [@Html.Raw(string.Join(",", Model.TopProductsData.Select(d => "'" + d.Label + "'")))],
                     datasets: [{
-                        data: [30, 25, 20, 15, 10],
+                        data: [@Html.Raw(string.Join(",", Model.TopProductsData.Select(d => d.Value.ToString())))],
                         backgroundColor: [
                             '#10b981',
                             '#3b82f6',
@@ -957,10 +959,10 @@
             new Chart(categorySalesCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Nam', 'Nữ', 'Trẻ em', 'Phụ kiện', 'Giày dép'],
+                    labels: [@Html.Raw(string.Join(",", Model.CategorySalesData.Select(d => "'" + d.Label + "'")))],
                     datasets: [{
                         label: 'Doanh thu',
-                        data: [800000, 1200000, 600000, 400000, 500000],
+                        data: [@Html.Raw(string.Join(",", Model.CategorySalesData.Select(d => d.Value.ToString())))],
                         backgroundColor: 'rgba(99, 102, 241, 0.8)',
                         borderColor: 'rgb(99, 102, 241)',
                         borderWidth: 1
@@ -978,9 +980,9 @@
             new Chart(paymentCtx, {
                 type: 'pie',
                 data: {
-                    labels: ['Thẻ tín dụng', 'Chuyển khoản', 'COD', 'Ví điện tử'],
+                    labels: [@Html.Raw(string.Join(",", Model.PaymentMethodData.Select(d => "'" + d.Label + "'")))],
                     datasets: [{
-                        data: [45, 30, 15, 10],
+                        data: [@Html.Raw(string.Join(",", Model.PaymentMethodData.Select(d => d.Value.ToString())))],
                         backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6']
                     }]
                 },

@@ -19,6 +19,18 @@
 <!-- Blog Content Section -->
 <section class="blog-content-section py-5">
     <div class="container">
+        @if (ViewBag.DatabaseError != null)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        @ViewBag.DatabaseError
+                    </div>
+                </div>
+            </div>
+        }
+        
         <!-- Search Form -->
         <div class="row mb-4">
             <div class="col-lg-6 mx-auto">

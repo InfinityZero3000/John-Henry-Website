@@ -2,6 +2,207 @@
    John Henry Fashion - Product Card Styles
    ======================================== */
 
+/* New Product Card - Clean design like in reference image */
+.product-card-new {
+    background: #ffffff;
+    border: none;
+    box-shadow: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card-new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product-image-container {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+}
+
+.product-card-new:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+}
+
+.product-card-new:hover .product-actions {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover {
+    background: #333;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.product-info {
+    padding: 16px 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-name {
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: 'Open Sans', sans-serif !important;
+}
+
+.product-price-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.product-price-actions .product-actions {
+    position: static;
+    opacity: 1;
+    transform: none;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.product-price-actions .action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+}
+
+.product-price {
+    font-size: 16px;
+    font-weight: 500;
+    color: #b4282b#b4282b;
+    margin: 0;
+}
+
+/* Responsive Design for Product Cards */
+@media (max-width: 1200px) {
+    .product-image-container {
+        height: 280px;
+    }
+    
+    .product-name {
+        font-size: 13px;
+    }
+    
+    .product-price {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 992px) {
+    .product-image-container {
+        height: 260px;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .product-info {
+        padding: 12px 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-image-container {
+        height: 240px;
+    }
+    
+    .product-name {
+        font-size: 12px;
+    }
+    
+    .product-price {
+        font-size: 14px;
+    }
+    
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+    
+    .product-actions {
+        top: 10px;
+        right: 10px;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-image-container {
+        height: 200px;
+    }
+    
+    .product-info {
+        padding: 8px 0;
+    }
+    
+    .product-name {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+    
+    .product-price {
+        font-size: 13px;
+    }
+}
+
 /* Unified Product Card - Based on target layout */
 .product-card-unified {
     background: #fff;
@@ -127,15 +328,15 @@
 }
 
 .btn-action:hover, .btn-action-modern:hover {
-    background: #e74c3c;
+    background: #b4282b;
     color: white;
     transform: scale(1.1);
 }
 
 .product-card-unified .btn-action:hover {
-    background: #e74c3c;
+    background: #b4282b;
     color: white;
-    border-color: #e74c3c;
+    border-color: #b4282b;
 }
 
 .product-details, .product-info {
@@ -184,7 +385,7 @@
 .product-price, .current-price {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #e74c3c !important;
+    color: #b4282b !important;
     margin: 0;
     text-align: left;
 }
@@ -193,7 +394,7 @@
 .product-card-unified .product-price {
     font-size: 1rem;
     font-weight: 700;
-    color: #e74c3c !important;
+    color: #b4282b !important;
     margin: 0;
     text-align: left;
     display: inline-block;
@@ -201,25 +402,44 @@
 
 /* Price and actions container - same line layout */
 .product-card-unified .product-details {
-    z-index: 9;
-    width: 100%;
+    padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+/* Create flex container for price and actions on same row */
+.product-card-unified .product-price-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+/* Auto-layout for existing structure - make price and actions same line */
+.product-card-unified .product-details {
+    padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
     position: relative;
 }
 
-.product-card-unified .product-details::after {
-    content: "";
-    clear: both;
-    display: table;
+/* When price-actions container doesn't exist, create same-line layout */
+.product-card-unified .product-details .product-price {
+    display: inline-block;
+    margin: 0;
 }
 
-/* Unified layout action buttons - positioned on same line as price */
-.product-card-unified .product-actions {
+.product-card-unified .product-details .product-actions {
     position: absolute;
-    right: 6px;
-    bottom: 6px;
+    right: 15px;
+    bottom: 15px;
     display: flex;
     flex-direction: row;
-    gap: 4px;
+    gap: 6px;
     opacity: 1;
     margin: 0;
     justify-content: flex-end;

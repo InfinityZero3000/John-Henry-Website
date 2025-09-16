@@ -45,7 +45,6 @@ namespace JohnHenryFashionWeb.Controllers
         {
             var dashboardSummary = await _reportingService.GetDashboardSummaryAsync();
             var salesChartData = await _reportingService.GetSalesChartDataAsync("daily", 30);
-            var topProductsData = await _reportingService.GetTopProductsChartDataAsync(10);
             var revenueTimeSeries = await _reportingService.GetRevenueTimeSeriesAsync(
                 DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, "daily");
 
@@ -53,7 +52,6 @@ namespace JohnHenryFashionWeb.Controllers
             var recentOrders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(10)
                 .ToListAsync();
@@ -62,12 +60,6 @@ namespace JohnHenryFashionWeb.Controllers
                 .Where(u => u.CreatedAt >= DateTime.UtcNow.AddDays(-7))
                 .OrderByDescending(u => u.CreatedAt)
                 .Take(5)
-                .ToListAsync();
-
-            var lowStockProducts = await _context.Products
-                .Where(p => p.StockQuantity <= 10 && p.IsActive)
-                .OrderBy(p => p.StockQuantity)
-                .Take(10)
                 .ToListAsync();
 
             var pendingOrders = await _context.Orders
@@ -105,17 +97,6 @@ namespace JohnHenryFashionWeb.Controllers
             };
 
             var systemAlerts = new List<ViewModels.SystemAlert>();
-            
-            // Check for low stock alerts
-            if (lowStockProducts.Any())
-            {
-                systemAlerts.Add(new ViewModels.SystemAlert { 
-                    Type = "warning", 
-                    Message = $"{lowStockProducts.Count} sản phẩm sắp hết hàng", 
-                    Action = "/Admin/Inventory",
-                    Icon = "fas fa-exclamation-triangle"
-                });
-            }
 
             // Check for pending orders
             if (pendingOrders > 0)
@@ -131,7 +112,6 @@ namespace JohnHenryFashionWeb.Controllers
             // Quick actions data
             var quickActions = new[]
             {
-                new ViewModels.QuickAction { Title = "Thêm sản phẩm", Icon = "fas fa-plus", Url = "/Admin/CreateProduct", Color = "primary" },
                 new ViewModels.QuickAction { Title = "Xem đơn hàng", Icon = "fas fa-shopping-cart", Url = "/Admin/Orders", Color = "success" },
                 new ViewModels.QuickAction { Title = "Quản lý người dùng", Icon = "fas fa-users", Url = "/Admin/Users", Color = "info" },
                 new ViewModels.QuickAction { Title = "Báo cáo", Icon = "fas fa-chart-bar", Url = "/Admin/Reports", Color = "warning" },
@@ -144,7 +124,6 @@ namespace JohnHenryFashionWeb.Controllers
                 Summary = dashboardSummary,
                 DashboardSummary = dashboardSummary,
                 SalesChartData = salesChartData,
-                TopProductsData = topProductsData,
                 RevenueTimeSeriesData = revenueTimeSeries,
                 CategoryPerformance = await _reportingService.GetCategoryPerformanceAsync(
                     DateTime.UtcNow.AddDays(-30), DateTime.UtcNow),
@@ -158,7 +137,6 @@ namespace JohnHenryFashionWeb.Controllers
                 // Enhanced dashboard data
                 RecentOrders = recentOrders,
                 RecentUsers = recentUsers,
-                LowStockProducts = lowStockProducts,
                 TodayStats = todayStats,
                 WeeklyComparison = weeklyComparison,
                 SystemAlerts = systemAlerts,
@@ -169,14 +147,14 @@ namespace JohnHenryFashionWeb.Controllers
                     StartDate = DateTime.UtcNow.AddDays(-30),
                     EndDate = DateTime.UtcNow
                 },
-                AvailableDateRanges = new List<DateRange>
+                AvailableDateRanges = new List<Models.DateRange>
                 {
-                    DateRange.Today,
-                    DateRange.Yesterday,
-                    DateRange.Last7Days,
-                    DateRange.Last30Days,
-                    DateRange.ThisMonth,
-                    DateRange.LastMonth
+                    Models.DateRange.Today,
+                    Models.DateRange.Yesterday,
+                    Models.DateRange.Last7Days,
+                    Models.DateRange.Last30Days,
+                    Models.DateRange.ThisMonth,
+                    Models.DateRange.LastMonth
                 },
                 SelectedTab = "overview",
                 LastUpdated = DateTime.UtcNow
@@ -196,23 +174,44 @@ namespace JohnHenryFashionWeb.Controllers
             var marketingAnalytics = await _analyticsService.GetMarketingAnalyticsAsync(filter.StartDate, filter.EndDate);
             var conversionAnalytics = await _analyticsService.GetConversionAnalyticsAsync(filter.StartDate, filter.EndDate);
 
-            var viewModel = new AnalyticsViewModel
+            var viewModel = new ViewModels.AnalyticsViewModel
             {
-                UserAnalytics = userAnalytics,
-                SalesAnalytics = salesAnalytics,
-                ProductAnalytics = productAnalyticsList.FirstOrDefault() ?? new ProductAnalyticsData(),
-                MarketingAnalytics = marketingAnalytics,
-                ConversionAnalytics = conversionAnalytics,
-                Filter = filter,
-                DateRange = GetDateRangeFromString(dateRange),
-                AvailableFormats = GetAvailableExportFormats(),
-                ViewConfig = new AnalyticsViewConfiguration
-                {
-                    VisibleCharts = new List<string> { "sales", "users", "products", "conversions" },
-                    ShowComparison = true,
-                    ShowRealTime = true,
-                    DefaultTimeRange = dateRange ?? "last30days",
-                    Theme = "light"
+                UserAnalytics = new ViewModels.UserAnalyticsData 
+                { 
+                    TotalUsers = userAnalytics.TotalSessions,
+                    ActiveUsers = userAnalytics.UniqueSessions,
+                    NewUsers = userAnalytics.RegisteredUserSessions,
+                    GrowthRate = 0 // Calculate growth rate if needed
+                },
+                SalesAnalytics = new ViewModels.SalesAnalyticsData 
+                { 
+                    TotalRevenue = salesAnalytics.TotalRevenue,
+                    TotalOrders = salesAnalytics.TotalOrders,
+                    AverageOrderValue = salesAnalytics.AverageOrderValue,
+                    GrowthRate = 0 // Calculate growth rate if needed
+                },
+                ProductAnalytics = new ViewModels.ProductAnalyticsData 
+                { 
+                    TotalProducts = 0, // Would need a different service method for aggregate data
+                    NewProducts = 0,
+                    OutOfStock = 0,
+                    AvailabilityRate = 0,
+                    GrowthRate = 0
+                },
+                MarketingAnalytics = new ViewModels.MarketingAnalyticsData 
+                { 
+                    TotalVisits = 0, // Would need different service method for aggregate marketing data
+                    ConversionRate = 0,
+                    AdvertisingCost = 0,
+                    ROAS = 0,
+                    GrowthRate = 0
+                },
+                ConversionAnalytics = new ViewModels.ConversionAnalyticsData 
+                { 
+                    ConversionRate = 0, // Would need to calculate from available data
+                    TotalConversions = conversionAnalytics.TotalConversions,
+                    Revenue = conversionAnalytics.TotalValue,
+                    AverageOrderValue = conversionAnalytics.TotalConversions > 0 ? conversionAnalytics.TotalValue / conversionAnalytics.TotalConversions : 0
                 }
             };
 
@@ -221,18 +220,18 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpGet("reports")]
-        public async Task<IActionResult> Reports()
+        public IActionResult Reports()
         {
             var viewModel = new ReportsViewModel
             {
                 TotalRevenue = 1000000,
                 TotalOrders = 150,
                 TotalCustomers = 50,
-                TotalProducts = await _context.Products.CountAsync(),
+                TotalProducts = 0, // Removed product management
                 RevenueGrowth = 15.5m,
                 NewCustomers = 10,
-                LowStockProducts = await _context.Products.CountAsync(p => p.StockQuantity <= 10),
-                InventoryValue = 500000
+                LowStockProducts = 0, // Removed product management
+                InventoryValue = 0 // Removed product management
             };
 
             return View(viewModel);
@@ -331,10 +330,6 @@ namespace JohnHenryFashionWeb.Controllers
             var viewModel = new RealTimeDashboardViewModel
             {
                 RealTimeData = realTimeData,
-                LiveVisitors = realTimeData.LiveVisitors,
-                RecentConversions = realTimeData.RecentConversions,
-                TopActivePages = realTimeData.TopActivePages,
-                LiveMetrics = liveMetrics,
                 RecentEvents = new List<LiveEvent>(), // Would populate from recent events
                 Performance = new LivePerformanceData
                 {
@@ -347,17 +342,6 @@ namespace JohnHenryFashionWeb.Controllers
                         new() { Name = "Memory Usage", Value = 78, Unit = "%", Status = "normal" },
                         new() { Name = "Database Response", Value = 45, Unit = "ms", Status = "normal" }
                     }
-                },
-                UpdateInterval = 10000,
-                AutoUpdate = true,
-                EnabledMetrics = new List<string> { "users", "pageviews", "orders", "revenue" },
-                ActiveAlerts = new List<RealTimeAlert>(),
-                AlertSettings = new AlertSettings
-                {
-                    EnableAlerts = true,
-                    PlaySounds = true,
-                    ShowPopups = true,
-                    Thresholds = new Dictionary<string, AlertThreshold>()
                 }
             };
 
@@ -386,7 +370,6 @@ namespace JohnHenryFashionWeb.Controllers
                 List<ChartData> data = type.ToLower() switch
                 {
                     "sales" => await _reportingService.GetSalesChartDataAsync(period, days),
-                    "products" => await _reportingService.GetTopProductsChartDataAsync(days),
                     _ => new List<ChartData>()
                 };
 
@@ -470,9 +453,9 @@ namespace JohnHenryFashionWeb.Controllers
             };
         }
 
-        private List<ExportFormat> GetAvailableExportFormats()
+        private List<ViewModels.ExportFormat> GetAvailableExportFormats()
         {
-            return new List<ExportFormat>
+            return new List<ViewModels.ExportFormat>
             {
                 new() { Id = "excel", Name = "Excel", Extension = ".xlsx", MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
                 new() { Id = "pdf", Name = "PDF", Extension = ".pdf", MimeType = "application/pdf" },
@@ -481,9 +464,9 @@ namespace JohnHenryFashionWeb.Controllers
             };
         }
 
-        private List<ReportType> GetAvailableReportTypes()
+        private List<ViewModels.ReportType> GetAvailableReportTypes()
         {
-            return new List<ReportType>
+            return new List<ViewModels.ReportType>
             {
                 new() { Id = "sales", Name = "Sales Report", Description = "Comprehensive sales analysis with order details, revenue breakdown, and product performance" },
                 new() { Id = "products", Name = "Product Report", Description = "Product performance, inventory analysis, and category insights" },
@@ -520,7 +503,6 @@ namespace JohnHenryFashionWeb.Controllers
         #region Dashboard Data Methods
         private async Task<Models.DashboardSummary> GetDashboardStats()
         {
-            var totalProducts = await _context.Products.CountAsync();
             var totalOrders = await _context.Orders.CountAsync();
             var totalCustomers = await _userManager.GetUsersInRoleAsync(UserRoles.Customer);
             var totalSellers = await _userManager.GetUsersInRoleAsync(UserRoles.Seller);
@@ -539,9 +521,6 @@ namespace JohnHenryFashionWeb.Controllers
 
             var pendingOrders = await _context.Orders
                 .CountAsync(o => o.Status == "pending");
-
-            var lowStockProducts = await _context.Products
-                .CountAsync(p => p.StockQuantity <= 10);
 
             return new Models.DashboardSummary
             {
@@ -633,302 +612,6 @@ namespace JohnHenryFashionWeb.Controllers
         }
         #endregion
 
-        #region Product Management
-        [HttpGet("products")]
-        public async Task<IActionResult> Products(int page = 1, int pageSize = 10, string search = "", Guid? categoryId = null, string status = "")
-        {
-            var query = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(p => p.Name.Contains(search) || p.SKU.Contains(search));
-            }
-
-            if (categoryId.HasValue)
-            {
-                query = query.Where(p => p.CategoryId == categoryId.Value);
-            }
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                query = query.Where(p => p.Status == status);
-            }
-
-            var totalCount = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new ProductListItemViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    SKU = p.SKU,
-                    Price = p.Price,
-                    SalePrice = p.SalePrice,
-                    StockQuantity = p.StockQuantity,
-                    Status = p.Status,
-                    CategoryName = p.Category.Name,
-                    BrandName = p.Brand != null ? p.Brand.Name : "",
-                    FeaturedImageUrl = p.FeaturedImageUrl,
-                    CreatedAt = p.CreatedAt,
-                    IsFeatured = p.IsFeatured,
-                    IsActive = p.IsActive,
-                    Description = p.Description,
-                    Category = p.Category
-                })
-                .ToListAsync();
-
-            var categories = await _context.Categories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-
-            var viewModel = new ProductListViewModel
-            {
-                Products = products,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PageSize = pageSize,
-                SearchTerm = search,
-                CategoryId = categoryId,
-                Status = status,
-                Categories = categories
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpGet("products/create")]
-        public async Task<IActionResult> CreateProduct()
-        {
-            var viewModel = new ProductCreateEditViewModel
-            {
-                Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync(),
-                Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync()
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("products/create")]
-        public async Task<IActionResult> CreateProduct(ProductCreateEditViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var product = new Product
-                {
-                    Id = Guid.NewGuid(),
-                    Name = model.Name,
-                    SKU = model.SKU,
-                    Price = model.Price,
-                    SalePrice = model.SalePrice,
-                    CategoryId = model.CategoryId,
-                    BrandId = model.BrandId,
-                    ShortDescription = model.ShortDescription,
-                    Description = model.Description,
-                    StockQuantity = model.StockQuantity,
-                    ManageStock = model.ManageStock,
-                    InStock = model.InStock,
-                    IsFeatured = model.IsFeatured,
-                    IsActive = model.IsActive,
-                    Size = model.Size,
-                    Color = model.Color,
-                    Material = model.Material,
-                    Weight = model.Weight,
-                    Dimensions = model.Dimensions,
-                    Status = model.Status,
-                    Slug = GenerateSlug(model.Name),
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                // Handle featured image upload
-                if (model.FeaturedImage != null)
-                {
-                    product.FeaturedImageUrl = await SaveUploadedFile(model.FeaturedImage, "products");
-                }
-
-                // Handle gallery images upload
-                if (model.GalleryImages != null && model.GalleryImages.Count > 0)
-                {
-                    var galleryUrls = new List<string>();
-                    foreach (var image in model.GalleryImages)
-                    {
-                        var imageUrl = await SaveUploadedFile(image, "products");
-                        galleryUrls.Add(imageUrl);
-                    }
-                    product.GalleryImages = galleryUrls.ToArray();
-                }
-
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Sản phẩm đã được tạo thành công!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            // Reload dropdown data if validation fails
-            model.Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
-            model.Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync();
-
-            return View(model);
-        }
-
-        [HttpGet("products/edit/{id}")]
-        public async Task<IActionResult> EditProduct(Guid id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            var viewModel = new ProductCreateEditViewModel
-            {
-                Id = product.Id,
-                Name = product.Name,
-                SKU = product.SKU,
-                Price = product.Price,
-                SalePrice = product.SalePrice,
-                CategoryId = product.CategoryId,
-                BrandId = product.BrandId,
-                ShortDescription = product.ShortDescription,
-                Description = product.Description,
-                StockQuantity = product.StockQuantity,
-                ManageStock = product.ManageStock,
-                InStock = product.InStock,
-                IsFeatured = product.IsFeatured,
-                IsActive = product.IsActive,
-                Size = product.Size,
-                Color = product.Color,
-                Material = product.Material,
-                Weight = product.Weight,
-                Dimensions = product.Dimensions,
-                Status = product.Status,
-                FeaturedImageUrl = product.FeaturedImageUrl,
-                ExistingGalleryImages = product.GalleryImages,
-                Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync(),
-                Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync()
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("products/edit/{id}")]
-        public async Task<IActionResult> EditProduct(Guid id, ProductCreateEditViewModel model)
-        {
-            if (id != model.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                var product = await _context.Products.FindAsync(id);
-                if (product == null)
-                {
-                    return NotFound();
-                }
-
-                product.Name = model.Name;
-                product.SKU = model.SKU;
-                product.Price = model.Price;
-                product.SalePrice = model.SalePrice;
-                product.CategoryId = model.CategoryId;
-                product.BrandId = model.BrandId;
-                product.ShortDescription = model.ShortDescription;
-                product.Description = model.Description;
-                product.StockQuantity = model.StockQuantity;
-                product.ManageStock = model.ManageStock;
-                product.InStock = model.InStock;
-                product.IsFeatured = model.IsFeatured;
-                product.IsActive = model.IsActive;
-                product.Size = model.Size;
-                product.Color = model.Color;
-                product.Material = model.Material;
-                product.Weight = model.Weight;
-                product.Dimensions = model.Dimensions;
-                product.Status = model.Status;
-                product.Slug = GenerateSlug(model.Name);
-                product.UpdatedAt = DateTime.UtcNow;
-
-                // Handle featured image upload
-                if (model.FeaturedImage != null)
-                {
-                    product.FeaturedImageUrl = await SaveUploadedFile(model.FeaturedImage, "products");
-                }
-
-                // Handle gallery images upload
-                if (model.GalleryImages != null && model.GalleryImages.Count > 0)
-                {
-                    var galleryUrls = new List<string>();
-                    foreach (var image in model.GalleryImages)
-                    {
-                        var imageUrl = await SaveUploadedFile(image, "products");
-                        galleryUrls.Add(imageUrl);
-                    }
-                    product.GalleryImages = galleryUrls.ToArray();
-                }
-
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Sản phẩm đã được cập nhật thành công!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            // Reload dropdown data if validation fails
-            model.Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
-            model.Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync();
-
-            return View(model);
-        }
-
-        [HttpGet("products/delete/{id}")]
-        public async Task<IActionResult> DeleteProduct(Guid id)
-        {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .FirstOrDefaultAsync(p => p.Id == id);
-            
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        [HttpPost("products/delete/{id}")]
-        public async Task<IActionResult> DeleteProductConfirmed(Guid id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Check if product is referenced in orders
-            var hasOrders = await _context.OrderItems.AnyAsync(oi => oi.ProductId == id);
-            if (hasOrders)
-            {
-                TempData["Warning"] = "Không thể xóa sản phẩm này vì đã có đơn hàng liên quan. Bạn có thể ngừng kích hoạt sản phẩm thay thế.";
-                return RedirectToAction(nameof(EditProduct), new { id });
-            }
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Sản phẩm đã được xóa thành công!";
-            return RedirectToAction(nameof(Products));
-        }
-        #endregion
 
         #region Category Management
         [HttpGet("categories")]
@@ -1199,141 +882,6 @@ namespace JohnHenryFashionWeb.Controllers
         }
         #endregion
 
-        #region Product Management (continued)
-        [HttpGet("products/import-from-images")]
-        public async Task<IActionResult> ImportProductsFromImages()
-        {
-            var productsCreated = 0;
-            var imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
-            
-            if (Directory.Exists(imagesPath))
-            {
-                var categoryFolders = Directory.GetDirectories(imagesPath)
-                    .Where(d => !Path.GetFileName(d).StartsWith(".") && 
-                               !Path.GetFileName(d).Equals("store", StringComparison.OrdinalIgnoreCase) &&
-                               !Path.GetFileName(d).Equals("Banner", StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                foreach (var folder in categoryFolders)
-                {
-                    var folderName = Path.GetFileName(folder);
-                    
-                    // Find or create category
-                    var category = await _context.Categories
-                        .FirstOrDefaultAsync(c => c.Name == folderName);
-                    
-                    if (category == null)
-                    {
-                        category = new Category
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = folderName,
-                            Slug = GenerateSlug(folderName),
-                            Description = $"Danh mục {folderName}",
-                            IsActive = true,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        };
-                        _context.Categories.Add(category);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Get all image files in the folder
-                    var imageFiles = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
-                        .Where(file => file.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                      file.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                                      file.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-
-                    foreach (var imageFile in imageFiles)
-                    {
-                        var fileName = Path.GetFileNameWithoutExtension(imageFile);
-                        var productName = FormatProductName(fileName);
-                        var sku = GenerateProductSKU(fileName);
-
-                        // Check if product already exists
-                        var existingProduct = await _context.Products
-                            .FirstOrDefaultAsync(p => p.SKU == sku);
-
-                        if (existingProduct == null)
-                        {
-                            var relativePath = Path.GetRelativePath(_webHostEnvironment.WebRootPath, imageFile)
-                                .Replace("\\", "/");
-
-                            // Extract price and details from filename if possible
-                            var (price, size, color) = ExtractProductDetails(fileName);
-
-                            var product = new Product
-                            {
-                                Id = Guid.NewGuid(),
-                                Name = productName,
-                                SKU = sku,
-                                Slug = GenerateSlug(productName),
-                                Price = price,
-                                CategoryId = category.Id,
-                                Description = $"Sản phẩm {productName} thuộc danh mục {folderName}",
-                                ShortDescription = $"Sản phẩm thời trang {productName}",
-                                StockQuantity = 100, // Default stock
-                                ManageStock = true,
-                                InStock = true,
-                                IsActive = true,
-                                IsFeatured = false,
-                                Status = "active",
-                                FeaturedImageUrl = "/" + relativePath,
-                                Size = size,
-                                Color = color,
-                                CreatedAt = DateTime.UtcNow,
-                                UpdatedAt = DateTime.UtcNow
-                            };
-
-                            _context.Products.Add(product);
-                            productsCreated++;
-                        }
-                    }
-                }
-
-                if (productsCreated > 0)
-                {
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = $"Đã tạo {productsCreated} sản phẩm từ thư mục hình ảnh!";
-                }
-                else
-                {
-                    TempData["Info"] = "Tất cả sản phẩm đã tồn tại!";
-                }
-            }
-            else
-            {
-                TempData["Error"] = "Không tìm thấy thư mục hình ảnh!";
-            }
-
-            return RedirectToAction(nameof(Products));
-        }
-
-        [HttpPost("products/{id}/update-stock")]
-        public async Task<IActionResult> UpdateProductStock(Guid id, [FromBody] UpdateStockRequest request)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return Json(new { success = false, message = "Không tìm thấy sản phẩm" });
-            }
-
-            product.StockQuantity = request.Stock;
-            product.InStock = request.Stock > 0;
-            product.Status = request.Stock > 0 ? "active" : "out_of_stock";
-            product.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Cập nhật tồn kho thành công" });
-        }
-
-        public class UpdateStockRequest
-        {
-            public int Stock { get; set; }
-        }
-        #endregion
 
         #region Order Management
         [HttpGet("orders")]
@@ -1632,85 +1180,6 @@ namespace JohnHenryFashionWeb.Controllers
         }
         #endregion
 
-        #region Inventory Management
-        [HttpGet("inventory")]
-        public async Task<IActionResult> Inventory(string search = "", bool lowStock = false)
-        {
-            var query = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(p => p.Name.Contains(search) || p.SKU.Contains(search));
-            }
-
-            if (lowStock)
-            {
-                query = query.Where(p => p.StockQuantity <= 10);
-            }
-
-            var products = await query
-                .OrderBy(p => p.StockQuantity)
-                .ThenBy(p => p.Name)
-                .Select(p => new InventoryItemViewModel
-                {
-                    Id = p.Id,
-                    ProductId = p.Id,
-                    ProductName = p.Name,
-                    SKU = p.SKU,
-                    CurrentStock = p.StockQuantity,
-                    CategoryName = p.Category.Name,
-                    Price = p.Price,
-                    LastUpdated = p.UpdatedAt
-                })
-                .ToListAsync();
-
-            var viewModel = new InventoryListViewModel
-            {
-                Items = products,
-                SearchTerm = search,
-                Filter = lowStock ? "low_stock" : "all"
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("inventory/update-stock")]
-        public async Task<IActionResult> UpdateStock([FromForm] Guid productId, [FromForm] int newStock, [FromForm] string reason = "")
-        {
-            var product = await _context.Products.FindAsync(productId);
-            if (product == null)
-            {
-                return Json(new { success = false, message = "Không tìm thấy sản phẩm!" });
-            }
-
-            var oldStock = product.StockQuantity;
-            product.StockQuantity = newStock;
-            product.UpdatedAt = DateTime.UtcNow;
-
-            // TODO: Add stock movement history logging
-            // var stockMovement = new StockMovement
-            // {
-            //     ProductId = productId,
-            //     OldQuantity = oldStock,
-            //     NewQuantity = newStock,
-            //     Reason = reason,
-            //     CreatedAt = DateTime.UtcNow,
-            //     CreatedBy = User.Identity.Name
-            // };
-            // _context.StockMovements.Add(stockMovement);
-
-            await _context.SaveChangesAsync();
-
-            return Json(new { 
-                success = true, 
-                message = $"Đã cập nhật tồn kho từ {oldStock} thành {newStock}!",
-                newStock = newStock
-            });
-        }
-        #endregion
 
         #region Brand Management
 
@@ -1882,6 +1351,395 @@ namespace JohnHenryFashionWeb.Controllers
             return RedirectToAction(nameof(Brands));
         }
 
+        #endregion
+
+        #region Reviews Management
+        [HttpGet("reviews")]
+        public async Task<IActionResult> Reviews()
+        {
+            ViewData["CurrentSection"] = "reviews";
+            ViewData["Title"] = "Quản lý đánh giá";
+            
+            var reviews = await _context.ProductReviews
+                .Include(r => r.Product)
+                .Include(r => r.User)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+                
+            return View(reviews);
+        }
+
+        [HttpPost("reviews/{id}/approve")]
+        public async Task<IActionResult> ApproveReview(Guid id)
+        {
+            var review = await _context.ProductReviews.FindAsync(id);
+            if (review != null)
+            {
+                review.IsApproved = true;
+                review.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Reviews");
+        }
+
+        [HttpPost("reviews/{id}/delete")]
+        public async Task<IActionResult> DeleteReview(Guid id)
+        {
+            var review = await _context.ProductReviews.FindAsync(id);
+            if (review != null)
+            {
+                _context.ProductReviews.Remove(review);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Reviews");
+        }
+        #endregion
+
+        #region Coupons Management
+        [HttpGet("coupons")]
+        public async Task<IActionResult> Coupons()
+        {
+            ViewData["CurrentSection"] = "coupons";
+            ViewData["Title"] = "Quản lý mã giảm giá";
+            
+            var coupons = await _context.Coupons
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+                
+            return View(coupons);
+        }
+
+        [HttpGet("coupons/create")]
+        public IActionResult CreateCoupon()
+        {
+            ViewData["CurrentSection"] = "coupons";
+            ViewData["Title"] = "Tạo mã giảm giá";
+            return View();
+        }
+
+        [HttpPost("coupons/create")]
+        public async Task<IActionResult> CreateCoupon(Coupon coupon)
+        {
+            if (ModelState.IsValid)
+            {
+                coupon.Id = Guid.NewGuid();
+                coupon.CreatedAt = DateTime.UtcNow;
+                coupon.IsActive = true;
+                
+                _context.Coupons.Add(coupon);
+                await _context.SaveChangesAsync();
+                
+                return RedirectToAction("Coupons");
+            }
+            return View(coupon);
+        }
+
+        [HttpPost("coupons/{id}/toggle")]
+        public async Task<IActionResult> ToggleCoupon(Guid id)
+        {
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon != null)
+            {
+                coupon.IsActive = !coupon.IsActive;
+                coupon.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Coupons");
+        }
+        #endregion
+
+        #region User Management Extended
+        [HttpGet("sellers")]
+        public async Task<IActionResult> Sellers()
+        {
+            ViewData["CurrentSection"] = "sellers";
+            ViewData["Title"] = "Quản lý người bán";
+            
+            var sellers = await _userManager.GetUsersInRoleAsync("Seller");
+            return View(sellers);
+        }
+
+        [HttpGet("permissions")]
+        public async Task<IActionResult> Permissions()
+        {
+            ViewData["CurrentSection"] = "permissions";
+            ViewData["Title"] = "Phân quyền hệ thống";
+            
+            var roles = await _roleManager.Roles.ToListAsync();
+            return View(roles);
+        }
+        #endregion
+
+        #region Content Management
+        [HttpGet("pages")]
+        public IActionResult Pages()
+        {
+            ViewData["CurrentSection"] = "pages";
+            ViewData["Title"] = "Quản lý trang tĩnh";
+            
+            // Placeholder for pages management
+            return View();
+        }
+
+        [HttpGet("banners")]
+        public IActionResult Banners()
+        {
+            ViewData["CurrentSection"] = "banners";
+            ViewData["Title"] = "Quản lý banner quảng cáo";
+            
+            // Placeholder for banners management
+            return View();
+        }
+        #endregion
+
+        #region Advanced Reports
+        [HttpGet("advanced-reports")]
+        public async Task<IActionResult> AdvancedReports()
+        {
+            ViewData["CurrentSection"] = "reports";
+            ViewData["Title"] = "Báo cáo nâng cao";
+            
+            var viewModel = await GenerateAdvancedAnalyticsData();
+            
+            return View(viewModel);
+        }
+
+        private async Task<ViewModels.AdvancedAnalyticsViewModel> GenerateAdvancedAnalyticsData()
+        {
+            var endDate = DateTime.UtcNow;
+            var startDate = endDate.AddDays(-30);
+            var previousStartDate = startDate.AddDays(-30);
+            var previousEndDate = startDate;
+
+            // KPI Data
+            var currentRevenue = await _context.Orders
+                .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate && o.Status == "completed")
+                .SumAsync(o => o.TotalAmount);
+
+            var previousRevenue = await _context.Orders
+                .Where(o => o.CreatedAt >= previousStartDate && o.CreatedAt <= previousEndDate && o.Status == "completed")
+                .SumAsync(o => o.TotalAmount);
+
+            var currentOrders = await _context.Orders
+                .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate && o.Status == "completed")
+                .CountAsync();
+
+            var previousOrders = await _context.Orders
+                .Where(o => o.CreatedAt >= previousStartDate && o.CreatedAt <= previousEndDate && o.Status == "completed")
+                .CountAsync();
+
+            var currentCustomers = await _context.Users
+                .Where(u => u.CreatedAt >= startDate && u.CreatedAt <= endDate)
+                .CountAsync();
+
+            var previousCustomers = await _context.Users
+                .Where(u => u.CreatedAt >= previousStartDate && u.CreatedAt <= previousEndDate)
+                .CountAsync();
+
+            var totalVisits = currentOrders * 25; // Mock calculation for demo
+            var totalConversions = currentOrders;
+            var conversionRate = totalVisits > 0 ? (decimal)totalConversions / totalVisits * 100 : 0;
+            
+            var previousTotalVisits = previousOrders * 25;
+            var previousConversions = previousOrders;
+            var previousConversionRate = previousTotalVisits > 0 ? (decimal)previousConversions / previousTotalVisits * 100 : 0;
+
+            var kpiData = new ViewModels.KPIData
+            {
+                TotalRevenue = currentRevenue,
+                RevenueGrowth = previousRevenue > 0 ? (currentRevenue - previousRevenue) / previousRevenue * 100 : 0,
+                CompletedOrders = currentOrders,
+                OrdersGrowth = previousOrders > 0 ? (decimal)(currentOrders - previousOrders) / previousOrders * 100 : 0,
+                NewCustomers = currentCustomers,
+                CustomersGrowth = previousCustomers > 0 ? (decimal)(currentCustomers - previousCustomers) / previousCustomers * 100 : 0,
+                ConversionRate = conversionRate,
+                ConversionGrowth = previousConversionRate > 0 ? (conversionRate - previousConversionRate) / previousConversionRate * 100 : 0
+            };
+
+            // Sales Analytics Data
+            var monthlyRevenue = await _context.Orders
+                .Where(o => o.CreatedAt >= startDate && o.Status == "completed")
+                .GroupBy(o => new { Year = o.CreatedAt.Year, Month = o.CreatedAt.Month })
+                .Select(g => new MonthlyData
+                {
+                    Month = $"Tháng {g.Key.Month}",
+                    Revenue = g.Sum(o => o.TotalAmount),
+                    Orders = g.Count(),
+                    Date = new DateTime(g.Key.Year, g.Key.Month, 1)
+                })
+                .OrderBy(m => m.Date)
+                .ToListAsync();
+
+            var salesAnalytics = new ViewModels.SalesAnalyticsData
+            {
+                TotalRevenue = currentRevenue,
+                TotalOrders = currentOrders,
+                AverageOrderValue = currentOrders > 0 ? currentRevenue / currentOrders : 0,
+                GrowthRate = previousRevenue > 0 ? (currentRevenue - previousRevenue) / previousRevenue * 100 : 0,
+                MonthlyGrowthRate = 12.5m, // Mock data
+                MonthlyData = monthlyRevenue
+            };
+
+            // Customer Analytics Data
+            var customerAnalytics = new ViewModels.CustomerAnalyticsData
+            {
+                TotalCustomers = await _context.Users.CountAsync(),
+                NewCustomers = currentCustomers,
+                ReturnRate = 68.5m, // Mock data - would calculate from actual data
+                CustomerLifetimeValue = 4200000m, // Mock data
+                GrowthRate = previousCustomers > 0 ? (decimal)(currentCustomers - previousCustomers) / previousCustomers * 100 : 0,
+                GrowthData = new List<ViewModels.CustomerGrowthData>() // Would populate with real data
+            };
+
+            // Product Analytics Data
+            var totalProducts = await _context.Products.CountAsync();
+            var newProducts = await _context.Products
+                .Where(p => p.CreatedAt >= startDate)
+                .CountAsync();
+            var outOfStock = await _context.Products
+                .Where(p => p.StockQuantity == 0)
+                .CountAsync();
+
+            var productAnalytics = new ViewModels.ProductAnalyticsData
+            {
+                TotalProducts = totalProducts,
+                NewProducts = newProducts,
+                OutOfStock = outOfStock,
+                AvailabilityRate = totalProducts > 0 ? (decimal)(totalProducts - outOfStock) / totalProducts * 100 : 0,
+                GrowthRate = 5.2m, // Mock data
+                CategoryData = new List<ViewModels.ProductCategoryData>() // Would populate with real data
+            };
+
+            // Marketing Analytics Data
+            var marketingAnalytics = new ViewModels.MarketingAnalyticsData
+            {
+                TotalVisits = totalVisits,
+                ConversionRate = conversionRate,
+                AdvertisingCost = 45200000m, // Mock data
+                ROAS = 8.7m, // Mock data
+                GrowthRate = 18.5m, // Mock data
+                TrafficSources = new List<ViewModels.TrafficSourceData>() // Would populate with real data
+            };
+
+            // Chart Data - Revenue Chart
+            var revenueChartData = monthlyRevenue.Select(m => new Models.ChartData
+            {
+                Label = m.Month,
+                Value = m.Revenue
+            }).ToList();
+
+            // Top Products Data
+            var topProducts = await _context.OrderItems
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Order.CreatedAt >= startDate && oi.Order.Status == "completed")
+                .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
+                .Select(g => new Models.ChartData
+                {
+                    Label = g.Key.Name,
+                    Value = g.Sum(oi => oi.TotalPrice)
+                })
+                .OrderByDescending(p => p.Value)
+                .Take(5)
+                .ToListAsync();
+
+            // Category Sales Data
+            var categorySales = await _context.OrderItems
+                .Include(oi => oi.Product)
+                .ThenInclude(p => p.Category)
+                .Where(oi => oi.Order.CreatedAt >= startDate && oi.Order.Status == "completed")
+                .GroupBy(oi => oi.Product.Category.Name)
+                .Select(g => new Models.ChartData
+                {
+                    Label = g.Key,
+                    Value = g.Sum(oi => oi.TotalPrice)
+                })
+                .ToListAsync();
+
+            // Payment Method Data
+            var paymentMethods = await _context.Orders
+                .Where(o => o.CreatedAt >= startDate && o.Status == "completed")
+                .GroupBy(o => o.PaymentMethod)
+                .Select(g => new Models.ChartData
+                {
+                    Label = GetPaymentMethodDisplayName(g.Key),
+                    Value = g.Sum(o => o.TotalAmount)
+                })
+                .ToListAsync();
+
+            // Customer Segments
+            var customerSegments = new List<ViewModels.CustomerSegment>
+            {
+                new ViewModels.CustomerSegment { Name = "VIP", Count = 245, Percentage = 85, Revenue = 1200000, AverageOrderValue = 4900000, GrowthRate = 12 },
+                new ViewModels.CustomerSegment { Name = "Thường xuyên", Count = 1567, Percentage = 65, Revenue = 800000, AverageOrderValue = 2100000, GrowthRate = 8 },
+                new ViewModels.CustomerSegment { Name = "Mới", Count = 2890, Percentage = 35, Revenue = 400000, AverageOrderValue = 890000, GrowthRate = 22 }
+            };
+
+            return new ViewModels.AdvancedAnalyticsViewModel
+            {
+                KPIData = kpiData,
+                SalesAnalytics = salesAnalytics,
+                CustomerAnalytics = customerAnalytics,
+                ProductAnalytics = productAnalytics,
+                MarketingAnalytics = marketingAnalytics,
+                RevenueChartData = revenueChartData,
+                TopProductsData = topProducts,
+                CategorySalesData = categorySales,
+                PaymentMethodData = paymentMethods,
+                CustomerSegments = customerSegments,
+                StartDate = startDate,
+                EndDate = endDate,
+                DateRange = "30 ngày qua",
+                ComparisonData = new ViewModels.ComparisonPeriodData
+                {
+                    PreviousRevenue = previousRevenue,
+                    PreviousOrders = previousOrders,
+                    PreviousCustomers = previousCustomers,
+                    PreviousConversionRate = previousConversionRate
+                }
+            };
+        }
+
+        private string GetPaymentMethodDisplayName(string paymentMethod)
+        {
+            return paymentMethod?.ToLower() switch
+            {
+                "credit_card" => "Thẻ tín dụng",
+                "bank_transfer" => "Chuyển khoản",
+                "cod" => "COD",
+                "momo" => "Ví điện tử",
+                "vnpay" => "Ví điện tử",
+                _ => "Khác"
+            };
+        }
+
+        [HttpGet("system-logs")]
+        public IActionResult Logs()
+        {
+            ViewData["CurrentSection"] = "logs";
+            ViewData["Title"] = "Nhật ký hệ thống";
+            
+            return View();
+        }
+        #endregion
+
+        #region System Management
+        [HttpGet("backups")]
+        public IActionResult Backups()
+        {
+            ViewData["CurrentSection"] = "backups";
+            ViewData["Title"] = "Sao lưu dữ liệu";
+            
+            return View();
+        }
+
+        [HttpGet("security")]
+        public IActionResult Security()
+        {
+            ViewData["CurrentSection"] = "security";
+            ViewData["Title"] = "Bảo mật hệ thống";
+            
+            return View();
+        }
         #endregion
     }
 }

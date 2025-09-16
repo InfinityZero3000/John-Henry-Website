@@ -975,7 +975,7 @@ namespace JohnHenryFashionWeb.Services
                 UserId = o.UserId,
                 UserName = o.User?.FullName,
                 Value = o.TotalAmount,
-                ActionUrl = $"/Admin/OrderDetails/{o.Id}"
+                ActionUrl = $"/admin/orders/{o.Id}"
             }));
 
             return activities.OrderByDescending(a => a.Timestamp).ToList();
@@ -1035,7 +1035,7 @@ namespace JohnHenryFashionWeb.Services
                     Title = "Low Stock Alert",
                     Message = $"{lowStockProducts} products are running low on stock",
                     CreatedAt = DateTime.UtcNow,
-                    ActionUrl = "/Admin/Inventory",
+                    ActionUrl = "/admin/inventory",
                     ActionText = "View Inventory"
                 });
             }
@@ -1053,7 +1053,7 @@ namespace JohnHenryFashionWeb.Services
                     Title = "Pending Orders",
                     Message = $"{pendingOrders} orders are pending processing",
                     CreatedAt = DateTime.UtcNow,
-                    ActionUrl = "/Admin/Orders",
+                    ActionUrl = "/admin/orders",
                     ActionText = "View Orders"
                 });
             }

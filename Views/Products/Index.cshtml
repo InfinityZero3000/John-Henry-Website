@@ -233,52 +233,124 @@
                     @foreach (var product in Model.Results.Products)
                     {
                         <div class="col-xl-4 col-lg-6 col-md-6">
-                            <div class="product-card-unified h-100">
+                            <div class="product-card-unified h-100 shadow-sm">
                                 <!-- Product Image -->
-                                <div class="product-image-wrapper position-relative">
+                                <div class="product-image-container position-relative">
                                     @if (!string.IsNullOrEmpty(product.ImageUrl))
                                     {
-                                        <img src="@product.ImageUrl" class="product-img w-100" alt="@product.Name" />
+                                        <img src="@product.ImageUrl" class="card-img-top product-image" alt="@product.Name" />
                                     }
                                     else
                                     {
-                                        <div class="product-img w-100 d-flex align-items-center justify-content-center bg-light">
+                                        <div class="placeholder-image d-flex align-items-center justify-content-center">
                                             <i class="fas fa-image fa-3x text-muted"></i>
                                         </div>
                                     }
 
+                                    <!-- Product Badges -->
+                                    @if (product.IsFeatured)
+                                    {
+                                        <span class="badge bg-warning position-absolute top-0 start-0 m-2">Nổi bật</span>
+                                    }
+                                    @if (product.HasDiscount)
+                                    {
+                                        <span class="badge bg-danger position-absolute top-0 end-0 m-2">-@product.DiscountPercentage%</span>
+                                    }
+                                    @if (!product.InStock)
+                                    {
+                                        <span class="badge bg-secondary position-absolute bottom-0 start-0 m-2">Hết hàng</span>
+                                    }
+
                                     <!-- Quick Actions -->
-                                    <div class="product-actions">
-                                        <button class="btn-action" onclick="addToWishlist('@product.Id')" title="Thêm vào yêu thích">
-                                            <i class="fas fa-heart"></i>
-                                        </button>
-                                        <a href="@Url.Action("Details", new { id = product.Id })" class="btn-action" title="Xem chi tiết">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        @if (product.InStock)
-                                        {
-                                            <button class="btn-action" onclick="addToCart('@product.Id')" title="Thêm vào giỏ">
-                                                <i class="fas fa-cart-plus"></i>
+                                    <div class="product-actions position-absolute top-50 start-50 translate-middle">
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-light" onclick="addToWishlist('@product.Id')" title="Thêm vào yêu thích">
+                                                <i class="fas fa-heart"></i>
                                             </button>
-                                        }
+                                            <a href="@Url.Action("Details", new { id = product.Id })" class="btn btn-sm btn-primary" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (product.InStock)
+                                            {
+                                                <button class="btn btn-sm btn-success" onclick="addToCart('@product.Id')" title="Thêm vào giỏ">
+                                                    <i class="fas fa-cart-plus"></i>
+                                                </button>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Product Info -->
-                                <div class="product-details">
-                                    <h6 class="product-title">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="mb-2">
+                                        <small class="text-muted">@product.CategoryName</small>
+                                        @if (!string.IsNullOrEmpty(product.BrandName))
+                                        {
+                                            <small class="text-muted"> • @product.BrandName</small>
+                                        }
+                                    </div>
+
+                                    <h6 class="card-title mb-2">
                                         <a href="@Url.Action("Details", new { id = product.Id })" class="text-decoration-none text-dark">
                                             @product.Name
                                         </a>
                                     </h6>
 
+                                    @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                    {
+                                        <p class="card-text text-muted small mb-2">@product.ShortDescription</p>
+                                    }
+
+                                    <!-- Product Attributes -->
+                                    @if (!string.IsNullOrEmpty(product.Size) || !string.IsNullOrEmpty(product.Color))
+                                    {
+                                        <div class="mb-2">
+                                            @if (!string.IsNullOrEmpty(product.Size))
+                                            {
+                                                <span class="badge bg-light text-dark me-1">Size: @product.Size</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(product.Color))
+                                            {
+                                                <span class="badge bg-light text-dark">@product.Color</span>
+                                            }
+                                        </div>
+                                    }
+
+                                    <!-- Rating -->
+                                    @if (product.ReviewCount > 0)
+                                    {
+                                        <div class="mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="stars me-2">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        @if (i <= product.AverageRating)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-star text-warning"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                                <small class="text-muted">(@product.ReviewCount)</small>
+                                            </div>
+                                        </div>
+                                    }
+
                                     <!-- Price -->
                                     <div class="mt-auto">
-                                        <span class="product-price">@product.PriceFormatted</span>
-                                        @if (!product.InStock)
-                                        {
-                                            <small class="text-muted d-block">Hết hàng</small>
-                                        }
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <span class="h6 text-primary mb-0">@product.PriceFormatted</span>
+                                                @if (product.HasDiscount)
+                                                {
+                                                    <small class="text-muted text-decoration-line-through ms-2">@product.OriginalPriceFormatted</small>
+                                                }
+                                            </div>
+                                            <small class="text-muted">Còn: @product.StockQuantity</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

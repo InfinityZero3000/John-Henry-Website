@@ -1,0 +1,631 @@
+@{
+    ViewData["Title"] = "Quản lý banner";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-image me-2"></i>Quản lý banner
+                </h1>
+                <p class="text-muted mb-0">Quản lý banner trang chủ và nội dung quảng cáo</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBannerModal">
+                    <i class="fas fa-plus me-1"></i>Tạo banner mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">8</h4>
+                                <p class="card-text">Tổng banner</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-images fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">5</h4>
+                                <p class="card-text">Đang hiển thị</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-eye fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">2</h4>
+                                <p class="card-text">Đã lên lịch</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">1,234</h4>
+                                <p class="card-text">Lượt click hôm nay</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-mouse-pointer fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner Positions Section -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <!-- Main Homepage Banners -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Banner trang chủ chính</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="banner-grid" id="mainBanners">
+                            <div class="banner-slot active" data-position="main-1">
+                                <div class="banner-preview">
+                                    <img src="https://via.placeholder.com/400x200/007bff/ffffff?text=Banner+1" alt="Banner 1" class="img-fluid">
+                                    <div class="banner-overlay">
+                                        <div class="banner-actions">
+                                            <button class="btn btn-sm btn-light" onclick="editBanner('main-1')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light" onclick="removeBanner('main-1')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="banner-info">
+                                    <h6 class="mb-1">Khuyến mãi mùa hè</h6>
+                                    <small class="text-muted">Clicks: 456 | CTR: 3.2%</small>
+                                </div>
+                            </div>
+
+                            <div class="banner-slot active" data-position="main-2">
+                                <div class="banner-preview">
+                                    <img src="https://via.placeholder.com/400x200/28a745/ffffff?text=Banner+2" alt="Banner 2" class="img-fluid">
+                                    <div class="banner-overlay">
+                                        <div class="banner-actions">
+                                            <button class="btn btn-sm btn-light" onclick="editBanner('main-2')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light" onclick="removeBanner('main-2')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="banner-info">
+                                    <h6 class="mb-1">Bộ sưu tập mới</h6>
+                                    <small class="text-muted">Clicks: 278 | CTR: 2.8%</small>
+                                </div>
+                            </div>
+
+                            <div class="banner-slot empty" data-position="main-3">
+                                <div class="banner-placeholder" onclick="addBanner('main-3')">
+                                    <i class="fas fa-plus fa-2x"></i>
+                                    <p class="mt-2">Thêm banner</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Banners -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Banner phụ</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="banner-slot active small" data-position="secondary-1">
+                                    <div class="banner-preview">
+                                        <img src="https://via.placeholder.com/300x150/dc3545/ffffff?text=Sale+Banner" alt="Sale Banner" class="img-fluid">
+                                        <div class="banner-overlay">
+                                            <div class="banner-actions">
+                                                <button class="btn btn-sm btn-light" onclick="editBanner('secondary-1')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-light" onclick="removeBanner('secondary-1')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="banner-info">
+                                        <h6 class="mb-1">Flash Sale</h6>
+                                        <small class="text-muted">Clicks: 189</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="banner-slot empty small" data-position="secondary-2">
+                                    <div class="banner-placeholder" onclick="addBanner('secondary-2')">
+                                        <i class="fas fa-plus fa-lg"></i>
+                                        <p class="mt-2">Thêm banner</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Management Sidebar -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Danh sách banner</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/50x30/007bff/ffffff?text=1" alt="Banner 1" class="me-2 rounded">
+                                        <div>
+                                            <h6 class="mb-0">Khuyến mãi mùa hè</h6>
+                                            <small class="text-muted">Trang chủ chính</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success">Hoạt động</span>
+                                        <div class="btn-group btn-group-sm ms-1">
+                                            <button class="btn btn-outline-secondary" onclick="toggleBanner('banner-1')">
+                                                <i class="fas fa-eye-slash"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-1')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/50x30/28a745/ffffff?text=2" alt="Banner 2" class="me-2 rounded">
+                                        <div>
+                                            <h6 class="mb-0">Bộ sưu tập mới</h6>
+                                            <small class="text-muted">Trang chủ chính</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success">Hoạt động</span>
+                                        <div class="btn-group btn-group-sm ms-1">
+                                            <button class="btn btn-outline-secondary" onclick="toggleBanner('banner-2')">
+                                                <i class="fas fa-eye-slash"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-2')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/50x30/dc3545/ffffff?text=3" alt="Banner 3" class="me-2 rounded">
+                                        <div>
+                                            <h6 class="mb-0">Flash Sale</h6>
+                                            <small class="text-muted">Banner phụ</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success">Hoạt động</span>
+                                        <div class="btn-group btn-group-sm ms-1">
+                                            <button class="btn btn-outline-secondary" onclick="toggleBanner('banner-3')">
+                                                <i class="fas fa-eye-slash"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-3')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/50x30/6c757d/ffffff?text=4" alt="Banner 4" class="me-2 rounded">
+                                        <div>
+                                            <h6 class="mb-0">Giáng sinh 2024</h6>
+                                            <small class="text-muted">Lên lịch: 15/12/2024</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-warning">Chờ lịch</span>
+                                        <div class="btn-group btn-group-sm ms-1">
+                                            <button class="btn btn-outline-secondary" onclick="scheduleNow('banner-4')">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-4')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Stats -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thống kê hiệu suất</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Lượt hiển thị hôm nay</span>
+                                <strong>12,345</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Lượt click hôm nay</span>
+                                <strong>1,234</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Tỷ lệ click (CTR)</span>
+                                <strong>10.0%</strong>
+                            </div>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 10%"></div>
+                        </div>
+                        <small class="text-muted">Banner có hiệu suất tốt (>5% CTR)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Banner Modal -->
+<div class="modal fade" id="createBannerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo banner mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createBannerForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="bannerTitle" class="form-label">Tiêu đề banner <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="bannerTitle" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="bannerPosition" class="form-label">Vị trí hiển thị <span class="text-danger">*</span></label>
+                                <select class="form-select" id="bannerPosition" required>
+                                    <option value="">Chọn vị trí</option>
+                                    <option value="main">Trang chủ chính</option>
+                                    <option value="secondary">Banner phụ</option>
+                                    <option value="sidebar">Sidebar</option>
+                                    <option value="footer">Footer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bannerImage" class="form-label">Hình ảnh banner <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="bannerImage" accept="image/*" required>
+                        <div class="form-text">Khuyến nghị: 1200x400px cho banner chính, 600x300px cho banner phụ</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bannerUrl" class="form-label">URL liên kết</label>
+                        <input type="url" class="form-control" id="bannerUrl" placeholder="https://example.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bannerAlt" class="form-label">Alt text</label>
+                        <input type="text" class="form-control" id="bannerAlt" placeholder="Mô tả hình ảnh">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="form-control" id="startDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">Ngày kết thúc</label>
+                                <input type="datetime-local" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">Độ ưu tiên</label>
+                                <select class="form-select" id="priority">
+                                    <option value="1">Thấp</option>
+                                    <option value="2" selected>Trung bình</option>
+                                    <option value="3">Cao</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                    <label class="form-check-label" for="isActive">
+                                        Kích hoạt ngay
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="mb-3" id="imagePreview" style="display: none;">
+                        <label class="form-label">Xem trước</label>
+                        <div class="border rounded p-2">
+                            <img id="previewImg" class="img-fluid" style="max-height: 200px;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="createBanner()">Tạo banner</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addBanner(position) {
+        document.getElementById('bannerPosition').value = position;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('createBannerModal')).show();
+    }
+
+    function editBanner(bannerId) {
+        // Implementation for editing banner
+        window.location.href = `/admin/banners/${bannerId}/edit`;
+    }
+
+    function removeBanner(position) {
+        if (confirm('Bạn có chắc chắn muốn gỡ banner này?')) {
+            fetch(`/admin/api/banners/position/${position}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function toggleBanner(bannerId) {
+        fetch(`/admin/api/banners/${bannerId}/toggle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.message);
+            }
+        });
+    }
+
+    function scheduleNow(bannerId) {
+        if (confirm('Bạn có muốn kích hoạt banner này ngay bây giờ?')) {
+            fetch(`/admin/api/banners/${bannerId}/activate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            });
+        }
+    }
+
+    function createBanner() {
+        const formData = new FormData(document.getElementById('createBannerForm'));
+        
+        fetch('/admin/api/banners', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Banner đã được tạo thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('createBannerModal')).hide();
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.message);
+            }
+        });
+    }
+
+    // Image preview functionality
+    document.getElementById('bannerImage').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Set default start date to now
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('startDate').value = now.toISOString().slice(0, 16);
+    });
+</script>
+
+<style>
+    .banner-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .banner-slot {
+        border: 2px dashed #dee2e6;
+        border-radius: 0.375rem;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .banner-slot.active {
+        border-style: solid;
+        border-color: #28a745;
+    }
+
+    .banner-slot.small {
+        max-width: 300px;
+    }
+
+    .banner-preview {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .banner-preview img {
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .banner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .banner-slot:hover .banner-overlay {
+        opacity: 1;
+    }
+
+    .banner-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .banner-placeholder:hover {
+        color: #007bff;
+        background-color: #f8f9fa;
+    }
+
+    .banner-info {
+        padding: 0.75rem;
+        background: white;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .banner-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .list-group-item img {
+        width: 50px;
+        height: 30px;
+        object-fit: cover;
+    }
+
+    .progress {
+        height: 8px;
+    }
+</style>

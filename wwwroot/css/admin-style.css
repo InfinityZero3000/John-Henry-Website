@@ -1,14 +1,14 @@
 /* ===== ADMIN LAYOUT STYLES ===== */
 
 :root {
-    --admin-primary: #667eea;
-    --admin-secondary: #764ba2;
-    --admin-success: #28a745;
-    --admin-warning: #ffc107;
+    --admin-primary: #FF4747;
+    --admin-secondary: #CC3636;
+    --admin-success: #059669;
+    --admin-warning: #f59e0b;
     --admin-danger: #dc3545;
-    --admin-info: #17a2b8;
-    --admin-light: #f8f9fa;
-    --admin-dark: #343a40;
+    --admin-info: #0ea5e9;
+    --admin-light: #ffffff;
+    --admin-dark: #1e293b;
     --sidebar-width: 280px;
     --header-height: 70px;
     --border-radius: 12px;
@@ -22,7 +22,7 @@
 
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: #ffffff;
     margin: 0;
     padding: 0;
     line-height: 1.6;
@@ -441,7 +441,7 @@ body {
 }
 
 .stats-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
     opacity: 0.8;
     position: relative;
 }
