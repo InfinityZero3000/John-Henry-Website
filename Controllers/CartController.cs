@@ -101,6 +101,7 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error updating cart quantity: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while updating quantity" });
             }
         }
@@ -145,6 +146,7 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error removing cart item: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while removing item" });
             }
         }
@@ -177,6 +179,7 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error clearing cart: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while clearing cart" });
             }
         }

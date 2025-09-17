@@ -7,851 +7,682 @@
 
 @section Styles {
     <style>
-        .user-management {
-            background: #f8f9fa;
+        .user-management-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
         }
-        
-        .user-card {
-            background: white;
+
+        .page-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control, .form-select {
             border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
         }
-        
-        .user-card:hover {
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary-modern {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-outline-modern {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline-modern:hover {
+            background: #667eea;
+            color: white;
             transform: translateY(-2px);
         }
-        
+
+        .users-table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .table-modern {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        .table-modern thead th {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-modern thead th:first-child {
+            border-top-left-radius: 12px;
+        }
+
+        .table-modern thead th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .table-modern tbody td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
         .user-avatar {
-            width: 60px;
-            height: 60px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            object-fit: cover;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
-            font-size: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
         }
-        
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-details h6 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .user-details p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
         .role-badge {
-            padding: 0.3rem 0.6rem;
-            border-radius: 15px;
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
+
         .role-admin {
-            background: #dc3545;
+            background: linear-gradient(45deg, #ef4444, #dc2626);
             color: white;
         }
-        
-        .role-seller {
-            background: #fd7e14;
-            color: white;
-        }
-        
+
         .role-customer {
-            background: #20c997;
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
             color: white;
         }
-        
-        .user-stats {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .role-seller {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
             color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
         }
-        
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
         .status-active {
-            color: #28a745;
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
         }
-        
+
         .status-inactive {
-            color: #dc3545;
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
         }
-        
-        .status-pending {
-            color: #ffc107;
-        }
-        
-        .filter-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-        }
-        
-        .user-detail-modal .modal-dialog {
-            max-width: 800px;
-        }
-        
-        .activity-timeline {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .timeline-item {
-            border-left: 3px solid #dee2e6;
-            padding-left: 1rem;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-        
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -6px;
-            top: 0.5rem;
-            width: 10px;
-            height: 10px;
-            background: #6c757d;
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
+            background: currentColor;
         }
-        
-        .timeline-item.recent::before {
-            background: #28a745;
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .btn-edit {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .pagination-modern {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-link-modern {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .page-link-modern:hover, .page-link-modern.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            text-decoration: none;
+        }
+
+        .search-highlight {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @@media (max-width: 768px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .table-modern {
+                font-size: 0.875rem;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 }
 
-<div class="user-management">
-    <div class="content-wrapper">
+<div class="user-management-modern">
+    <div class="container-fluid">
+        <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">
-                <i class="fas fa-users me-2"></i>
-                Quản lý người dùng
-            </h1>
-            <div class="page-actions">
-                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                    <i class="fas fa-plus me-2"></i>Thêm người dùng
-                </button>
-                <button class="btn btn-primary" onclick="exportUsers()">
-                    <i class="fas fa-download me-2"></i>Xuất danh sách
-                </button>
-            </div>
-        </div>
-
-        <!-- User Statistics -->
-        <div class="user-stats">
-            <div class="row">
-                <div class="col-md-3 text-center">
-                    <h3 class="mb-1">@Model.TotalUsers</h3>
-                    <small>Tổng người dùng</small>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-2">
+                        <i class="fas fa-users me-2"></i>
+                        Quản Lý Người Dùng
+                    </h1>
+                    <p class="mb-0 opacity-90">Quản lý thông tin và quyền của người dùng trong hệ thống</p>
                 </div>
-                <div class="col-md-3 text-center">
-                    <h3 class="mb-1">@Model.ActiveUsers</h3>
-                    <small>Đang hoạt động</small>
-                </div>
-                <div class="col-md-3 text-center">
-                    <h3 class="mb-1">@Model.NewUsersThisMonth</h3>
-                    <small>Mới tháng này</small>
-                </div>
-                <div class="col-md-3 text-center">
-                    <h3 class="mb-1">@Model.SellersCount</h3>
-                    <small>Người bán</small>
+                <div>
+                    <a href="/admin/users/create" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-plus me-2"></i>
+                        Thêm người dùng
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="filter-card">
-            <div class="card-body">
-                <form method="get" id="userFilterForm">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Tìm kiếm</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" name="search" placeholder="Tên, email, số điện thoại..." 
-                                       value="@Model.SearchTerm">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Vai trò</label>
-                            <select name="role" class="form-select">
-                                <option value="">Tất cả</option>
-                                <option value="Admin" selected="@(Model.RoleFilter == "Admin")">Quản trị viên</option>
-                                <option value="Seller" selected="@(Model.RoleFilter == "Seller")">Người bán</option>
-                                <option value="Customer" selected="@(Model.RoleFilter == "Customer")">Khách hàng</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Trạng thái</label>
-                            <select name="status" class="form-select">
-                                <option value="">Tất cả</option>
-                                <option value="Active" selected="@(Model.StatusFilter == "Active")">Hoạt động</option>
-                                <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Không hoạt động</option>
-                                <option value="Pending" selected="@(Model.StatusFilter == "Pending")">Chờ xác nhận</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Ngày tham gia</label>
-                            <select name="dateRange" class="form-select">
-                                <option value="">Tất cả</option>
-                                <option value="today" selected="@(Model.DateRange == "today")">Hôm nay</option>
-                                <option value="week" selected="@(Model.DateRange == "week")">Tuần này</option>
-                                <option value="month" selected="@(Model.DateRange == "month")">Tháng này</option>
-                                <option value="year" selected="@(Model.DateRange == "year")">Năm này</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Sắp xếp</label>
-                            <select name="sortBy" class="form-select">
-                                <option value="newest" selected="@(Model.SortBy == "newest")">Mới nhất</option>
-                                <option value="oldest" selected="@(Model.SortBy == "oldest")">Cũ nhất</option>
-                                <option value="name" selected="@(Model.SortBy == "name")">Theo tên</option>
-                                <option value="activity" selected="@(Model.SortBy == "activity")">Hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="col-md-1">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-filter"></i>
-                            </button>
-                        </div>
+        <!-- Statistics Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-number">@(Model.Statistics?.GetValueOrDefault("Total", 0) ?? Model.TotalUsers)</div>
+                <div class="stat-label">Tổng người dùng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@(Model.Statistics?.GetValueOrDefault("Active", 0) ?? Model.ActiveUsers)</div>
+                <div class="stat-label">Đang hoạt động</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@(Model.Statistics?.GetValueOrDefault("NewThisMonth", 0) ?? Model.NewUsersThisMonth)</div>
+                <div class="stat-label">Mới tháng này</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@(Model.Statistics?.GetValueOrDefault("Customers", 0) ?? 0)</div>
+                <div class="stat-label">Khách hàng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@(Model.Statistics?.GetValueOrDefault("Sellers", 0) ?? Model.SellersCount)</div>
+                <div class="stat-label">Người bán</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@(Model.Statistics?.GetValueOrDefault("Admins", 0) ?? 0)</div>
+                <div class="stat-label">Quản trị viên</div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <form method="get" id="filterForm">
+                <div class="filter-grid">
+                    <div>
+                        <label class="form-label fw-semibold">Tìm kiếm</label>
+                        <input type="text" name="searchTerm" value="@(Model.Filter?.SearchTerm ?? Model.SearchTerm)" 
+                               class="form-control" placeholder="Tên, email, số điện thoại...">
                     </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Bulk Actions -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="bulk-actions" id="bulkActions" style="display: none;">
-                <span class="text-muted">
-                    <span id="selectedCount">0</span> người dùng được chọn
-                </span>
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-success" onclick="bulkUpdateStatus('Active')">
-                        <i class="fas fa-check"></i> Kích hoạt
-                    </button>
-                    <button class="btn btn-sm btn-outline-warning" onclick="bulkUpdateStatus('Inactive')">
-                        <i class="fas fa-pause"></i> Vô hiệu hóa
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="bulkDeleteUsers()">
-                        <i class="fas fa-trash"></i> Xóa
-                    </button>
-                </div>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-muted">@Model.Users.Count() người dùng</span>
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleView('grid')" id="gridViewBtn">
-                        <i class="fas fa-th"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary active" onclick="toggleView('list')" id="listViewBtn">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Users Grid/List -->
-        <div id="usersContainer">
-            <!-- Grid View -->
-            <div class="row" id="gridView" style="display: none;">
-                @foreach (var user in Model.Users)
-                {
-                    <div class="col-md-4 col-lg-3 mb-4">
-                        <div class="user-card">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-2 user-checkbox" 
-                                           value="@user.Id" data-user-id="@user.Id">
-                                    @if (!string.IsNullOrEmpty(user.Avatar))
-                                    {
-                                        <img src="@user.Avatar" alt="@user.FullName" class="user-avatar mx-auto">
-                                    }
-                                    else
-                                    {
-                                        <div class="user-avatar mx-auto">
-                                            @user.FullName?.Substring(0, 1).ToUpper()
-                                        </div>
-                                    }
-                                </div>
-                                
-                                <h6 class="card-title mb-1">@user.FullName</h6>
-                                <p class="text-muted small mb-2">@user.Email</p>
-                                
-                                <div class="mb-2">
-                                    <span class="role-badge role-@user.Role.ToLower()">
-                                        @switch (user.Role.ToLower())
-                                        {
-                                            case "admin":
-                                                <text>Quản trị viên</text>
-                                                break;
-                                            case "seller":
-                                                <text>Người bán</text>
-                                                break;
-                                            case "customer":
-                                                <text>Khách hàng</text>
-                                                break;
-                                            default:
-                                                @user.Role
-                                                break;
-                                        }
-                                    </span>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <i class="fas fa-circle status-@user.Status.ToLower() me-1"></i>
-                                    <small class="text-muted">
-                                        @switch (user.Status.ToLower())
-                                        {
-                                            case "active":
-                                                <text>Hoạt động</text>
-                                                break;
-                                            case "inactive":
-                                                <text>Không hoạt động</text>
-                                                break;
-                                            case "pending":
-                                                <text>Chờ xác nhận</text>
-                                                break;
-                                            default:
-                                                @user.Status
-                                                break;
-                                        }
-                                    </small>
-                                </div>
-                                
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary btn-sm" onclick="viewUserDetails('@user.Id')">
-                                        <i class="fas fa-eye me-1"></i>Chi tiết
-                                    </button>
-                                    <div class="btn-group">
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="editUser('@user.Id')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteUser('@user.Id')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <!-- List View -->
-            <div id="listView">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-list me-2"></i>
-                            Danh sách người dùng
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="selectAll">
-                            <label class="form-check-label" for="selectAll">
-                                Chọn tất cả
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="50"></th>
-                                    <th>Người dùng</th>
-                                    <th>Vai trò</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày tham gia</th>
-                                    <th>Lần cuối hoạt động</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in Model.Users)
+                    <div>
+                        <label class="form-label fw-semibold">Vai trò</label>
+                        <select name="role" class="form-select">
+                            <option value="">Tất cả vai trò</option>
+                            @if (Model.AvailableRoles?.Any() == true)
+                            {
+                                @foreach (var role in Model.AvailableRoles)
                                 {
-                                    <tr data-user-id="@user.Id">
-                                        <td>
-                                            <input type="checkbox" class="form-check-input user-checkbox" 
-                                                   value="@user.Id" data-user-id="@user.Id">
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
+                                    <option value="@role" selected="@(role == (Model.Filter?.Role ?? Model.RoleFilter))">@role</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Trạng thái</label>
+                        <select name="isActive" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="true" selected="@(Model.Filter?.IsActive == true)">Hoạt động</option>
+                            <option value="false" selected="@(Model.Filter?.IsActive == false)">Đã khóa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Từ ngày</label>
+                        <input type="date" name="createdFrom" value="@(Model.Filter?.CreatedFrom?.ToString("yyyy-MM-dd"))" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Đến ngày</label>
+                        <input type="date" name="createdTo" value="@(Model.Filter?.CreatedTo?.ToString("yyyy-MM-dd"))" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Sắp xếp</label>
+                        <select name="sortBy" class="form-select">
+                            <option value="CreatedAt" selected="@((Model.Filter?.SortBy ?? "CreatedAt") == "CreatedAt")">Ngày tạo</option>
+                            <option value="FirstName" selected="@((Model.Filter?.SortBy ?? "") == "FirstName")">Tên</option>
+                            <option value="Email" selected="@((Model.Filter?.SortBy ?? "") == "Email")">Email</option>
+                            <option value="LastLoginDate" selected="@((Model.Filter?.SortBy ?? "") == "LastLoginDate")">Lần đăng nhập cuối</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-search me-2"></i>
+                        Tìm kiếm
+                    </button>
+                    <a href="/admin/users" class="btn btn-outline-modern btn-modern">
+                        <i class="fas fa-redo me-2"></i>
+                        Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="users-table-container">
+            @if (Model.Users?.Any() == true)
+            {
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Người dùng</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Đơn hàng</th>
+                                <th>Tổng chi tiêu</th>
+                                <th>Lần cuối đăng nhập</th>
+                                <th>Ngày tạo</th>
+                                <th class="text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">
                                                 @if (!string.IsNullOrEmpty(user.Avatar))
                                                 {
-                                                    <img src="@user.Avatar" alt="@user.FullName" class="user-avatar me-3" style="width: 40px; height: 40px;">
+                                                    <img src="@user.Avatar" alt="@user.FullName" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                                                 }
                                                 else
                                                 {
-                                                    <div class="user-avatar me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-                                                        @user.FullName?.Substring(0, 1).ToUpper()
-                                                    </div>
+                                                    @(user.FirstName?.Substring(0, 1) ?? "U")
                                                 }
-                                                <div>
-                                                    <div class="fw-bold">@user.FullName</div>
-                                                    <small class="text-muted">@user.Email</small>
-                                                    @if (!string.IsNullOrEmpty(user.PhoneNumber))
-                                                    {
-                                                        <br><small class="text-muted">@user.PhoneNumber</small>
-                                                    }
-                                                </div>
                                             </div>
-                                        </td>
-                                        <td>
-                                            <span class="role-badge role-@user.Role.ToLower()">
-                                                @switch (user.Role.ToLower())
+                                            <div class="user-details">
+                                                <h6>@user.FullName</h6>
+                                                <p>@user.Email</p>
+                                                @if (!string.IsNullOrEmpty(user.PhoneNumber))
                                                 {
-                                                    case "admin":
-                                                        <text>Quản trị viên</text>
-                                                        break;
-                                                    case "seller":
-                                                        <text>Người bán</text>
-                                                        break;
-                                                    case "customer":
-                                                        <text>Khách hàng</text>
-                                                        break;
-                                                    default:
-                                                        @user.Role
-                                                        break;
+                                                    <p><i class="fas fa-phone text-muted me-1"></i>@user.PhoneNumber</p>
                                                 }
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <i class="fas fa-circle status-@user.Status.ToLower() me-1"></i>
-                                            @switch (user.Status.ToLower())
-                                            {
-                                                case "active":
-                                                    <text>Hoạt động</text>
-                                                    break;
-                                                case "inactive":
-                                                    <text>Không hoạt động</text>
-                                                    break;
-                                                case "pending":
-                                                    <text>Chờ xác nhận</text>
-                                                    break;
-                                                default:
-                                                    @user.Status
-                                                    break;
-                                            }
-                                        </td>
-                                        <td>
-                                            <div>@user.CreatedAt.ToString("dd/MM/yyyy")</div>
-                                            <small class="text-muted">@user.CreatedAt.ToString("HH:mm")</small>
-                                        </td>
-                                        <td>
-                                            @if (user.LastLogin.HasValue)
-                                            {
-                                                <div>@user.LastLogin.Value.ToString("dd/MM/yyyy")</div>
-                                                <small class="text-muted">@user.LastLogin.Value.ToString("HH:mm")</small>
-                                            }
-                                            else
-                                            {
-                                                <small class="text-muted">Chưa đăng nhập</small>
-                                            }
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <button class="btn btn-sm btn-outline-primary" 
-                                                        onclick="viewUserDetails('@user.Id')" title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary" 
-                                                        onclick="editUser('@user.Id')" title="Chỉnh sửa">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                                                            data-bs-toggle="dropdown" title="Thêm hành động">
-                                                        <i class="fas fa-ellipsis-v"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu">
-                                                        <li><a class="dropdown-item" href="#" onclick="resetPassword('@user.Id')">
-                                                            <i class="fas fa-key me-2"></i>Đặt lại mật khẩu
-                                                        </a></li>
-                                                        <li><a class="dropdown-item" href="#" onclick="sendMessage('@user.Id')">
-                                                            <i class="fas fa-envelope me-2"></i>Gửi tin nhắn
-                                                        </a></li>
-                                                        <li><hr class="dropdown-divider"></li>
-                                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteUser('@user.Id')">
-                                                            <i class="fas fa-trash me-2"></i>Xóa người dùng
-                                                        </a></li>
-                                                    </ul>
-                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    @if (Model.TotalPages > 1)
-                    {
-                        <div class="card-footer">
-                            <nav aria-label="Users pagination">
-                                <ul class="pagination justify-content-center mb-0">
-                                    @if (Model.CurrentPage > 1)
-                                    {
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=@(Model.CurrentPage - 1)@(Context.Request.QueryString.HasValue ? "&" + Context.Request.QueryString.Value.TrimStart('?') : "")">
-                                                <i class="fas fa-chevron-left"></i>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (user.Roles?.Any() == true)
+                                        {
+                                            @foreach (var role in user.Roles.Take(2))
+                                            {
+                                                <span class="role-badge role-@role.ToLower() me-1">@role</span>
+                                            }
+                                            @if (user.Roles.Count > 2)
+                                            {
+                                                <span class="text-muted">+@(user.Roles.Count - 2)</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="role-badge role-customer">Customer</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="status-badge @(user.IsActive ? "status-active" : "status-inactive")">
+                                            <span class="status-indicator"></span>
+                                            @user.StatusText
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>@user.OrderCount</strong>
+                                    </td>
+                                    <td>
+                                        <strong>@user.TotalSpent.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                    </td>
+                                    <td>
+                                        @if (user.LastLoginDate.HasValue)
+                                        {
+                                            <span>@user.LastLoginDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa đăng nhập</span>
+                                        }
+                                    </td>
+                                    <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/admin/users/@user.Id" class="btn-icon btn-view" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
                                             </a>
-                                        </li>
-                                    }
-                                    
-                                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
-                                    {
-                                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                            <a class="page-link" href="?page=@i@(Context.Request.QueryString.HasValue ? "&" + Context.Request.QueryString.Value.TrimStart('?') : "")">@i</a>
-                                        </li>
-                                    }
-                                    
-                                    @if (Model.CurrentPage < Model.TotalPages)
-                                    {
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=@(Model.CurrentPage + 1)@(Context.Request.QueryString.HasValue ? "&" + Context.Request.QueryString.Value.TrimStart('?') : "")">
-                                                <i class="fas fa-chevron-right"></i>
+                                            <a href="/admin/users/@user.Id/edit" class="btn-icon btn-edit" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
                                             </a>
-                                        </li>
-                                    }
-                                </ul>
-                            </nav>
-                        </div>
-                    }
+                                            <button type="button" class="btn-icon btn-toggle" 
+                                                    onclick="toggleUserStatus('@user.Id')" 
+                                                    title="@(user.IsActive ? "Khóa tài khoản" : "Kích hoạt tài khoản")">
+                                                <i class="fas fa-@(user.IsActive ? "lock" : "unlock")"></i>
+                                            </button>
+                                            <button type="button" class="btn-icon btn-delete" 
+                                                    onclick="deleteUser('@user.Id')" 
+                                                    title="Xóa người dùng">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- User Details Modal -->
-<div class="modal fade user-detail-modal" id="userDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chi tiết người dùng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="userDetailsContent">
-                <!-- Content loaded via AJAX -->
-            </div>
-        </div>
-    </div>
-</div>
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="pagination-modern">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <a href="?page=@(Model.CurrentPage - 1)&searchTerm=@(Model.Filter?.SearchTerm ?? Model.SearchTerm)&role=@(Model.Filter?.Role ?? Model.RoleFilter)&isActive=@(Model.Filter?.IsActive)" 
+                               class="page-link-modern">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        }
 
-<!-- Add User Modal -->
-<div class="modal fade" id="addUserModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thêm người dùng mới</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="addUserForm">
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" name="fullName" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" required>
-                            </div>
-                        </div>
+                        @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                        {
+                            <a href="?page=@i&searchTerm=@(Model.Filter?.SearchTerm ?? Model.SearchTerm)&role=@(Model.Filter?.Role ?? Model.RoleFilter)&isActive=@(Model.Filter?.IsActive)" 
+                               class="page-link-modern @(i == Model.CurrentPage ? "active" : "")">
+                                @i
+                            </a>
+                        }
+
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <a href="?page=@(Model.CurrentPage + 1)&searchTerm=@(Model.Filter?.SearchTerm ?? Model.SearchTerm)&role=@(Model.Filter?.Role ?? Model.RoleFilter)&isActive=@(Model.Filter?.IsActive)" 
+                               class="page-link-modern">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        }
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="tel" class="form-control" name="phoneNumber">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Vai trò</label>
-                                <select class="form-select" name="role" required>
-                                    <option value="Customer">Khách hàng</option>
-                                    <option value="Seller">Người bán</option>
-                                    <option value="Admin">Quản trị viên</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mật khẩu tạm thời</label>
-                        <input type="password" class="form-control" name="password" required>
-                        <small class="form-text text-muted">Người dùng sẽ được yêu cầu đổi mật khẩu khi đăng nhập lần đầu</small>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="sendWelcomeEmail" checked>
-                        <label class="form-check-label">
-                            Gửi email chào mừng
-                        </label>
-                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h4>Không tìm thấy người dùng</h4>
+                    <p>Thay đổi bộ lọc hoặc thêm người dùng mới để bắt đầu.</p>
+                    <a href="/admin/users/create" class="btn btn-primary-modern btn-modern mt-3">
+                        <i class="fas fa-plus me-2"></i>
+                        Thêm người dùng đầu tiên
+                    </a>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Tạo người dùng</button>
-                </div>
-            </form>
+            }
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Toggle view functionality
-            const gridView = document.getElementById('gridView');
-            const listView = document.getElementById('listView');
-            const gridViewBtn = document.getElementById('gridViewBtn');
-            const listViewBtn = document.getElementById('listViewBtn');
-
-            // Initialize view (default to list)
-            toggleView('list');
-
-            // Checkbox functionality
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const userCheckboxes = document.querySelectorAll('.user-checkbox');
-            const bulkActions = document.getElementById('bulkActions');
-            const selectedCount = document.getElementById('selectedCount');
-
-            if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('change', function() {
-                    userCheckboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
-                    });
-                    updateBulkActions();
-                });
+        function toggleUserStatus(userId) {
+            if (!confirm('Bạn có chắc chắn muốn thay đổi trạng thái của người dùng này?')) {
+                return;
             }
 
-            userCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    updateBulkActions();
-                    
-                    const checkedCount = document.querySelectorAll('.user-checkbox:checked').length;
-                    if (selectAllCheckbox) {
-                        selectAllCheckbox.checked = checkedCount === userCheckboxes.length;
-                        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < userCheckboxes.length;
-                    }
-                });
-            });
-
-            function updateBulkActions() {
-                const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
-                selectedCount.textContent = checkedBoxes.length;
-                
-                if (checkedBoxes.length > 0) {
-                    bulkActions.style.display = 'flex';
-                } else {
-                    bulkActions.style.display = 'none';
+            fetch(`/admin/users/${userId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 }
-            }
-
-            // Add user form
-            document.getElementById('addUserForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addUser();
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thực hiện thao tác!');
             });
-        });
-
-        function toggleView(viewType) {
-            const gridView = document.getElementById('gridView');
-            const listView = document.getElementById('listView');
-            const gridViewBtn = document.getElementById('gridViewBtn');
-            const listViewBtn = document.getElementById('listViewBtn');
-
-            if (viewType === 'grid') {
-                gridView.style.display = 'block';
-                listView.style.display = 'none';
-                gridViewBtn.classList.add('active');
-                listViewBtn.classList.remove('active');
-            } else {
-                gridView.style.display = 'none';
-                listView.style.display = 'block';
-                gridViewBtn.classList.remove('active');
-                listViewBtn.classList.add('active');
-            }
-        }
-
-        function viewUserDetails(userId) {
-            const modalContent = document.getElementById('userDetailsContent');
-            modalContent.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
-            
-            const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
-            modal.show();
-            
-            fetch(`/Admin/GetUserDetails/${userId}`)
-                .then(response => response.text())
-                .then(html => {
-                    modalContent.innerHTML = html;
-                })
-                .catch(error => {
-                    modalContent.innerHTML = '<div class="alert alert-danger">Lỗi khi tải chi tiết người dùng</div>';
-                });
-        }
-
-        function editUser(userId) {
-            window.location.href = `/Admin/EditUser/${userId}`;
         }
 
         function deleteUser(userId) {
-            if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+            if (!confirm('Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác!')) {
                 return;
             }
 
-            fetch(`/Admin/DeleteUser/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('Lỗi khi xóa người dùng');
-            });
-        }
-
-        function addUser() {
-            const form = document.getElementById('addUserForm');
-            const formData = new FormData(form);
-
-            fetch('/Admin/AddUser', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
-                    location.reload();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('Lỗi khi tạo người dùng');
-            });
-        }
-
-        function bulkUpdateStatus(status) {
-            const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
-            const userIds = Array.from(checkedBoxes).map(cb => cb.value);
-            
-            if (userIds.length === 0) {
-                alert('Vui lòng chọn ít nhất một người dùng');
-                return;
-            }
-
-            if (!confirm(`Bạn có chắc chắn muốn cập nhật trạng thái cho ${userIds.length} người dùng?`)) {
-                return;
-            }
-
-            fetch('/Admin/BulkUpdateUserStatus', {
+            fetch(`/admin/users/${userId}/delete`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: JSON.stringify({
-                    userIds: userIds,
-                    status: status
-                })
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    alert(data.message || 'Có lỗi xảy ra!');
                 }
             })
             .catch(error => {
-                alert('Lỗi khi cập nhật trạng thái người dùng');
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thực hiện thao tác!');
             });
         }
 
-        function bulkDeleteUsers() {
-            const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
-            const userIds = Array.from(checkedBoxes).map(cb => cb.value);
+        // Auto-submit form on filter change
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filterForm');
+            const selects = form.querySelectorAll('select');
             
-            if (userIds.length === 0) {
-                alert('Vui lòng chọn ít nhất một người dùng');
-                return;
-            }
-
-            if (!confirm(`Bạn có chắc chắn muốn xóa ${userIds.length} người dùng? Hành động này không thể hoàn tác.`)) {
-                return;
-            }
-
-            fetch('/Admin/BulkDeleteUsers', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: JSON.stringify({
-                    userIds: userIds
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('Lỗi khi xóa người dùng');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    form.submit();
+                });
             });
-        }
-
-        function resetPassword(userId) {
-            if (!confirm('Bạn có chắc chắn muốn đặt lại mật khẩu cho người dùng này?')) {
-                return;
-            }
-
-            fetch(`/Admin/ResetUserPassword/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Đã gửi email đặt lại mật khẩu cho người dùng');
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('Lỗi khi đặt lại mật khẩu');
-            });
-        }
-
-        function sendMessage(userId) {
-            // Implement send message functionality
-            alert('Chức năng gửi tin nhắn sẽ được phát triển');
-        }
-
-        function exportUsers() {
-            const params = new URLSearchParams(window.location.search);
-            window.open(`/Admin/ExportUsers?${params.toString()}`, '_blank');
-        }
+        });
     </script>
 }

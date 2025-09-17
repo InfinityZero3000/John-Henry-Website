@@ -77,7 +77,8 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
-                // Database connection failed - return empty blog view
+                // Log error and return empty blog view
+                Console.WriteLine($"Error loading blog posts: {ex.Message}");
                 ViewBag.CurrentPage = 1;
                 ViewBag.TotalPages = 0;
                 ViewBag.Category = category;
@@ -123,7 +124,8 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
-                // Database connection failed
+                // Log error and return error view
+                Console.WriteLine($"Error loading blog post: {ex.Message}");
                 ViewBag.DatabaseError = "Không thể tải bài viết. Vui lòng thử lại sau.";
                 return View("Error");
             }

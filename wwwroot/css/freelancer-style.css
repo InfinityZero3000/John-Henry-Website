@@ -1,0 +1,210 @@
+/* Freelancer Style CSS */
+
+/* Base styles for freelancer section */
+.freelancer-section {
+    background: #f8f9fa;
+    padding: 80px 0;
+}
+
+.freelancer-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.freelancer-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.freelancer-subtitle {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Product grid styles */
+.freelancer-products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.freelancer-product-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.freelancer-product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.freelancer-product-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+}
+
+.freelancer-product-info {
+    padding: 20px;
+}
+
+.freelancer-product-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.freelancer-product-description {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.freelancer-product-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e74c3c;
+    margin-bottom: 15px;
+}
+
+.freelancer-product-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.freelancer-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.freelancer-btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.freelancer-btn-primary:hover {
+    background: #2980b9;
+    color: white;
+}
+
+.freelancer-btn-secondary {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.freelancer-btn-secondary:hover {
+    background: #3498db;
+    color: white;
+}
+
+.freelancer-wishlist-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.freelancer-wishlist-btn:hover {
+    color: #c0392b;
+}
+
+.freelancer-wishlist-btn.active {
+    color: #e74c3c;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .freelancer-title {
+        font-size: 2.2rem;
+    }
+    
+    .freelancer-products {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .freelancer-section {
+        padding: 40px 0;
+    }
+    
+    .freelancer-product-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .freelancer-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .freelancer-title {
+        font-size: 1.8rem;
+    }
+    
+    .freelancer-subtitle {
+        font-size: 1rem;
+    }
+    
+    .freelancer-product-info {
+        padding: 15px;
+    }
+}
+
+/* Animation styles */
+.freelancer-fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading states */
+.freelancer-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.freelancer-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #ecf0f1;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

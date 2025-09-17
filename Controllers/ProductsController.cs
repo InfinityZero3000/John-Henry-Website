@@ -356,7 +356,6 @@ namespace JohnHenryFashionWeb.Controllers
 
         // GET: Products/IsInWishlist
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> IsInWishlist(Guid productId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

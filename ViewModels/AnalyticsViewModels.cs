@@ -2,8 +2,8 @@ using JohnHenryFashionWeb.Models;
 
 namespace JohnHenryFashionWeb.ViewModels
 {
-    // Advanced Analytics ViewModel for Advanced Reports page
-    public class AdvancedAnalyticsViewModel
+    // Reports ViewModel for Reports page
+    public class ReportsViewModel
     {
         // KPI Data
         public KPIData KPIData { get; set; } = new();
@@ -263,14 +263,6 @@ namespace JohnHenryFashionWeb.ViewModels
     }
 
     // Additional missing classes for AdminController
-    public class AnalyticsViewModel
-    {
-        public UserAnalyticsData UserAnalytics { get; set; } = new();
-        public ViewModels.SalesAnalyticsData SalesAnalytics { get; set; } = new();
-        public ViewModels.ProductAnalyticsData ProductAnalytics { get; set; } = new();
-        public ViewModels.MarketingAnalyticsData MarketingAnalytics { get; set; } = new();
-        public ConversionAnalyticsData ConversionAnalytics { get; set; } = new();
-    }
 
     public class AnalyticsViewConfiguration
     {

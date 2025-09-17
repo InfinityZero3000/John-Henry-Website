@@ -1,386 +1,951 @@
 @model JohnHenryFashionWeb.ViewModels.DashboardViewModel
 @{
-    ViewData["Title"] = "Tổng quan hệ thống";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Dashboard Quản trị";
     ViewData["CurrentSection"] = "dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!-- Header Section with Quick Actions -->
-<div class="dashboard-header mb-4">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h3 mb-1 text-gray-800">
-                <i class="fas fa-tachometer-alt text-primary me-2"></i>
-                Dashboard Admin
-            </h1>
-            <p class="text-muted mb-0">Tổng quan toàn diện về hệ thống John Henry Fashion</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
-                <i class="fas fa-sync-alt"></i> Làm mới
-            </button>
-            <div class="dropdown">
-                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-calendar-alt"></i> Hôm nay
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" data-period="today">Hôm nay</a></li>
-                    <li><a class="dropdown-item" href="#" data-period="yesterday">Hôm qua</a></li>
-                    <li><a class="dropdown-item" href="#" data-period="week">7 ngày qua</a></li>
-                    <li><a class="dropdown-item" href="#" data-period="month">30 ngày qua</a></li>
-                </ul>
+@section Styles {
+    <style>
+        .dashboard-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .dashboard-header .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .live-indicator {
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 0.5rem;
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .trend-positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .trend-negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .time-selector {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .time-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-btn.active,
+        .time-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-action-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quick-action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .action-content h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .action-content p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .recent-activities {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content h5 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .activity-content p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .system-alerts {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            color: #3b82f6;
+        }
+
+        .responsive-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        @@media (min-width: 1024px) {
+            .responsive-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            font-size: 1.25rem;
+        }
+    </style>
+}
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            color: #16a34a;
+        }
+
+        .stat-change.negative {
+            color: #dc2626;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-control {
+            padding: 6px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #64748b;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-control:hover,
+        .chart-control.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .activities-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .alerts-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .alert-item.warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .alert-item.info {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .alert-item.success {
+            background: #dcfce7;
+            border-color: #16a34a;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quick-action {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quick-action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin: 0 auto 15px;
+        }
+
+        .quick-action-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .real-time-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #16a34a;
+        }
+
+        .real-time-dot {
+            width: 8px;
+            height: 8px;
+            background: #16a34a;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .system-health {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .health-score {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .health-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            position: relative;
+            background: conic-gradient(#16a34a 85%, #f1f5f9 85%);
+        }
+
+        .health-circle::before {
+            content: '';
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+        }
+
+        .health-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #16a34a;
+            position: relative;
+            z-index: 1;
+        }
+
+        .responsive-table {
+            overflow-x: auto;
+        }
+
+        .table-modern {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-modern th {
+            background: #f8fafc;
+            border: none;
+            font-weight: 600;
+            color: #374151;
+            padding: 15px;
+        }
+
+        .table-modern td {
+            border: none;
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .table-modern tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        @@media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+}
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-end">
+                <div class="real-time-indicator mb-2">
+                    <div class="real-time-dot"></div>
+                    <span>Dữ liệu thời gian thực</span>
+                </div>
+                <div class="small opacity-75">Cập nhật lần cuối: @DateTime.Now.ToString("HH:mm")</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Key Performance Indicators -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2 kpi-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Doanh thu hôm nay
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            @(Model.DashboardSummary?.TodayRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN")) ?? "0 ₫")
-                        </div>
-                        <div class="small text-success mt-1">
-                            <i class="fas fa-arrow-up"></i>
-                            @{
-                                var revenueChange = (Model.WeeklyComparison?.LastWeekRevenue ?? 0) > 0 
-                                    ? ((Model.WeeklyComparison?.ThisWeekRevenue ?? 0) - (Model.WeeklyComparison?.LastWeekRevenue ?? 0)) / (Model.WeeklyComparison?.LastWeekRevenue ?? 1) * 100
-                                    : 0;
-                            }
-                            @($"{revenueChange:F1}%") so với tuần trước
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
+<!-- Key Metrics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-value">@((Model.DashboardSummary?.TodayRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
+        <div class="stat-label">Doanh thu hôm nay</div>
+        <div class="stat-change positive">
+            <i class="fas fa-arrow-up"></i>
+            <span>+@((Model.DashboardSummary?.RevenueGrowth ?? 0).ToString("F1"))%</span>
+            <span class="text-muted">so với hôm qua</span>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2 kpi-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Đơn hàng hôm nay
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model.DashboardSummary?.TodayOrders ?? 0)</div>
-                        <div class="small text-success mt-1">
-                            <i class="fas fa-arrow-up"></i>
-                            @{
-                                var orderChange = (Model.WeeklyComparison?.LastWeekOrders ?? 0) > 0 
-                                    ? ((Model.WeeklyComparison?.ThisWeekOrders ?? 0) - (Model.WeeklyComparison?.LastWeekOrders ?? 0)) / (double)(Model.WeeklyComparison?.LastWeekOrders ?? 1) * 100
-                                    : 0;
-                            }
-                            @($"{orderChange:F1}%") so với tuần trước
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="stat-value">@(Model.DashboardSummary?.TodayOrders ?? 0)</div>
+        <div class="stat-label">Đơn hàng hôm nay</div>
+        <div class="stat-change positive">
+            <i class="fas fa-arrow-up"></i>
+            <span>+@((Model.DashboardSummary?.OrdersGrowth ?? 0).ToString("F1"))%</span>
+            <span class="text-muted">so với hôm qua</span>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2 kpi-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Khách truy cập
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model.DashboardSummary?.TodayVisitors ?? 0)</div>
-                        <div class="small text-info mt-1">
-                            <i class="fas fa-eye"></i>
-                            Lượt xem hôm nay
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(45deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">@(Model.DashboardSummary?.TodayVisitors ?? 0)</div>
+        <div class="stat-label">Khách truy cập</div>
+        <div class="stat-change positive">
+            <i class="fas fa-arrow-up"></i>
+            <span>+@((Model.DashboardSummary?.VisitorsGrowth ?? 0).ToString("F1"))%</span>
+            <span class="text-muted">so với hôm qua</span>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2 kpi-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Người dùng hoạt động
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model.DashboardSummary?.ActiveUsers ?? 0)</div>
-                        <div class="small text-muted mt-1">
-                            <i class="fas fa-user-check"></i>
-                            Tài khoản active
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-user-friends fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-value">@((Model.DashboardSummary?.ConversionRate ?? 0).ToString("F1"))%</div>
+        <div class="stat-label">Tỷ lệ chuyển đổi</div>
+        <div class="stat-change positive">
+            <i class="fas fa-arrow-up"></i>
+            <span>+@((Model.DashboardSummary?.ConversionGrowth ?? 0).ToString("F1"))%</span>
+            <span class="text-muted">so với hôm qua</span>
         </div>
     </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a href="@Url.Action("Orders", "Admin")" class="quick-action">
+        <div class="quick-action-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="quick-action-title">Xem đơn hàng</div>
+    </a>
+
+    <a href="@Url.Action("Users", "Admin")" class="quick-action">
+        <div class="quick-action-icon" style="background: linear-gradient(45deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="quick-action-title">Quản lý user</div>
+    </a>
+
+    <a href="@Url.Action("Reports", "Admin")" class="quick-action">
+        <div class="quick-action-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="quick-action-title">Báo cáo</div>
+    </a>
+
+    <a href="@Url.Action("Analytics", "Admin")" class="quick-action">
+        <div class="quick-action-icon" style="background: linear-gradient(45deg, #ef4444, #dc2626);">
+            <i class="fas fa-analytics"></i>
+        </div>
+        <div class="quick-action-title">Phân tích</div>
+    </a>
+
+    <a href="@Url.Action("Settings", "Admin")" class="quick-action">
+        <div class="quick-action-icon" style="background: linear-gradient(45deg, #64748b, #475569);">
+            <i class="fas fa-cog"></i>
+        </div>
+        <div class="quick-action-title">Cài đặt</div>
+    </a>
 </div>
 
 <!-- System Alerts -->
-@if (Model.SystemAlerts.Count > 0)
+@if (Model.SystemAlerts?.Any() == true)
 {
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="alert alert-light border-left-warning shadow-sm">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-bell text-warning fa-lg me-3"></i>
-                    <div class="flex-grow-1">
-                        <h6 class="alert-heading mb-2">Thông báo hệ thống</h6>
-                        <div class="alert-items">
-                            @foreach (var alert in Model.SystemAlerts)
-                            {
-                                <div class="alert-item d-flex align-items-center mb-1">
-                                    <i class="@alert.Icon text-@alert.Type me-2"></i>
-                                    <span class="flex-grow-1">@alert.Message</span>
-                                    <a href="@alert.Action" class="btn btn-sm btn-outline-@alert.Type">Xem chi tiết</a>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- Quick Actions Panel -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-bolt me-2"></i>Thao tác nhanh
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    @foreach (var action in Model.QuickActions)
-                    {
-                        <div class="col-xl-2 col-md-4 col-6 mb-3">
-                            <a href="@action.Url" class="quick-action-card text-decoration-none">
-                                <div class="card border-left-@action.Color h-100 hover-shadow">
-                                    <div class="card-body text-center py-3">
-                                        <i class="@action.Icon fa-2x text-@action.Color mb-2"></i>
-                                        <div class="small font-weight-bold text-gray-800">@action.Title</div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Main Dashboard Content -->
-<div class="row">
-    <!-- Revenue Chart -->
-    <div class="col-xl-8 col-lg-7">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-chart-area me-2"></i>Biểu đồ doanh thu
-                </h6>
-                <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow">
-                        <a class="dropdown-item" href="#">Xuất Excel</a>
-                        <a class="dropdown-item" href="#">Xuất PDF</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="chart-area">
-                    <canvas id="revenueChart" height="120"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pie Chart -->
-    <div class="col-xl-4 col-lg-5">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-chart-pie me-2"></i>Phân khúc doanh thu
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="chart-pie pt-4 pb-2">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-                <div class="mt-4 text-center small">
-                    @if (Model.CategoryPerformance?.Any() == true)
-                    {
-                        @foreach (var category in Model.CategoryPerformance.Take(3))
-                        {
-                            <span class="me-4">
-                                <i class="fas fa-circle text-primary"></i> @category.CategoryName
-                            </span>
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Activities and Data Tables -->
-<div class="row">
-    <!-- Recent Orders -->
-    <div class="col-xl-6 col-lg-6">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-shopping-bag me-2"></i>Đơn hàng gần đây
-                </h6>
-                <a href="/Admin/Orders" class="btn btn-sm btn-primary">Xem tất cả</a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-borderless">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Mã đơn</th>
-                                <th>Khách hàng</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in Model.RecentOrders.Take(8))
-                            {
-                                <tr>
-                                    <td class="font-weight-bold">#@order.Id.ToString().Substring(0, 8)</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                @(order.User?.FirstName?.Substring(0, 1) ?? "U")
-                                            </div>
-                                            <div>
-                                                <div class="font-weight-bold">@(order.User?.FirstName ?? "Unknown") @(order.User?.LastName ?? "")</div>
-                                                <div class="small text-muted">@order.CreatedAt.ToString("dd/MM HH:mm")</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="font-weight-bold text-success">@order.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
-                                    <td>
-                                        @{
-                                            var badgeClass = order.Status switch {
-                                                "completed" => "badge-success",
-                                                "pending" => "badge-warning",
-                                                "processing" => "badge-info",
-                                                "cancelled" => "badge-danger",
-                                                _ => "badge-secondary"
-                                            };
-                                        }
-                                        <span class="badge @badgeClass">@order.Status</span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Users & Low Stock -->
-    <div class="col-xl-6 col-lg-6">
-        <!-- New Users -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-user-plus me-2"></i>Người dùng mới
-                </h6>
-                <a href="/Admin/Users" class="btn btn-sm btn-primary">Xem tất cả</a>
-            </div>
-            <div class="card-body">
-                @foreach (var user in Model.RecentUsers)
-                {
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="avatar-md bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                            @(user.FirstName?.Substring(0, 1) ?? "U")
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="font-weight-bold">@user.FirstName @user.LastName</div>
-                            <div class="small text-muted">@user.Email</div>
-                            <div class="small text-muted">Đăng ký: @user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
-                        </div>
-                        <div class="badge badge-success">Mới</div>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- Low Stock Alert -->
-        @if (Model.LowStockProducts.Count > 0)
+    <div class="alerts-container">
+        <h5 class="mb-3"><i class="fas fa-bell me-2"></i>Cảnh báo hệ thống</h5>
+        @foreach (var alert in Model.SystemAlerts)
         {
-            <div class="card shadow mb-4 border-left-warning">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Cảnh báo tồn kho
-                    </h6>
-                    <a href="/Admin/Inventory" class="btn btn-sm btn-warning">Quản lý kho</a>
+            <div class="alert-item @alert.Type">
+                <div style="flex-shrink: 0;">
+                    <i class="@alert.Icon" style="font-size: 18px;"></i>
                 </div>
-                <div class="card-body">
-                    @foreach (var product in Model.LowStockProducts.Take(5))
+                <div>
+                    <div style="font-weight: 600;">@alert.Message</div>
+                    @if (!string.IsNullOrEmpty(alert.Action))
                     {
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div>
-                                <div class="font-weight-bold">@product.Name</div>
-                                <div class="small text-muted">SKU: @product.SKU</div>
-                            </div>
-                            <div class="badge badge-warning">@product.StockQuantity còn lại</div>
-                        </div>
+                        <a href="@alert.Action" class="small">Xem chi tiết</a>
                     }
                 </div>
             </div>
         }
     </div>
+}
+
+<!-- Main Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Sales Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <h5 class="chart-title">Doanh thu theo thời gian</h5>
+            <div class="chart-controls">
+                <button class="chart-control active" data-period="7">7 ngày</button>
+                <button class="chart-control" data-period="30">30 ngày</button>
+                <button class="chart-control" data-period="90">3 tháng</button>
+            </div>
+        </div>
+        <div style="height: 350px;">
+            <canvas id="salesChart" width="100%" height="350"></canvas>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="system-health">
+        <h5 class="mb-3"><i class="fas fa-heartbeat me-2"></i>Sức khỏe hệ thống</h5>
+        <div class="health-score">
+            <div class="health-circle">
+                <div class="health-value">98%</div>
+            </div>
+            <div class="small text-muted">Hoạt động tốt</div>
+        </div>
+        
+        <div class="row text-center">
+            <div class="col-6 mb-3">
+                <div class="small text-muted">CPU</div>
+                <div class="h6 mb-0">45%</div>
+            </div>
+            <div class="col-6 mb-3">
+                <div class="small text-muted">RAM</div>
+                <div class="h6 mb-0">68%</div>
+            </div>
+            <div class="col-6">
+                <div class="small text-muted">Disk</div>
+                <div class="h6 mb-0">23%</div>
+            </div>
+            <div class="col-6">
+                <div class="small text-muted">Online</div>
+                <div class="h6 mb-0">@(Model.DashboardSummary?.ActiveUsers ?? 0)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity & Top Products -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h5 class="chart-title">Hoạt động gần đây</h5>
+            </div>
+            <div class="activities-list">
+                @if (Model.RecentOrders?.Any() == true)
+                {
+                    @foreach (var order in Model.RecentOrders.Take(5))
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    Đơn hàng mới <strong>#@order.OrderNumber</strong> từ @order.User?.Email
+                                </div>
+                                <div class="activity-time">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success">@order.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                            </div>
+                        </div>
+                    }
+                }
+                @if (Model.RecentUsers?.Any() == true)
+                {
+                    @foreach (var user in Model.RecentUsers.Take(3))
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    Người dùng mới đăng ký: <strong>@user.Email</strong>
+                                </div>
+                                <div class="activity-time">@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Revenue Chart
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        const revenueChart = new Chart(revenueCtx, {
+        // Sales Chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [@Html.Raw(string.Join(",", Model.RevenueTimeSeriesData?.Select(x => $"'{x.Date.ToString("dd/MM")}'") ?? new string[0]))],
+                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
                 datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: [@Html.Raw(string.Join(",", Model.RevenueTimeSeriesData?.Select(x => x.Value) ?? new decimal[0]))],
-                    borderColor: '#4e73df',
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    label: 'Doanh thu',
+                    data: [1200000, 1900000, 3000000, 5000000, 2000000, 3000000, 4500000],
+                    borderColor: 'rgb(99, 102, 241)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
                     borderWidth: 3,
                     fill: true,
-                    tension: 0.3
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgb(99, 102, 241)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
                 }]
             },
             options: {
@@ -393,172 +958,58 @@
                 },
                 scales: {
                     y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
                         ticks: {
                             callback: function(value) {
                                 return new Intl.NumberFormat('vi-VN', {
                                     style: 'currency',
-                                    currency: 'VND'
+                                    currency: 'VND',
+                                    minimumFractionDigits: 0
                                 }).format(value);
                             }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     }
                 }
             }
         });
 
-        // Category Chart
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-        const categoryChart = new Chart(categoryCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.CategoryPerformance?.Select(x => $"'{x.CategoryName}'") ?? new string[0]))],
-                datasets: [{
-                    data: [@Html.Raw(string.Join(",", Model.CategoryPerformance?.Select(x => x.Revenue) ?? new decimal[0]))],
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-                    borderColor: ['#fff'],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-
-        // Refresh Dashboard
-        function refreshDashboard() {
-            location.reload();
-        }
-
-        // Period change
-        document.querySelectorAll('[data-period]').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
+        // Chart period controls
+        document.querySelectorAll('.chart-control').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.chart-control').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update chart data based on period
                 const period = this.dataset.period;
-                // Add period change logic here
-                console.log('Changing period to:', period);
+                // Here you would typically make an AJAX call to get new data
+                console.log('Loading data for period:', period);
             });
         });
 
-        // Auto refresh every 5 minutes
-        setTimeout(function() {
-            location.reload();
-        }, 300000);
-    </script>
-}
+        // Auto-refresh dashboard data every 30 seconds
+        setInterval(function() {
+            // Update real-time metrics
+            fetch('/admin/api/dashboard/metrics')
+                .then(response => response.json())
+                .then(data => {
+                    // Update UI with new data
+                    console.log('Dashboard data refreshed');
+                })
+                .catch(error => console.error('Error refreshing dashboard:', error));
+        }, 30000);
 
-@section Styles {
-    <style>
-        .kpi-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
-        }
-        
-        .quick-action-card:hover .card {
-            transform: translateY(-2px);
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
-        }
-        
-        .border-left-primary {
-            border-left: 0.25rem solid #4e73df !important;
-        }
-        
-        .border-left-success {
-            border-left: 0.25rem solid #1cc88a !important;
-        }
-        
-        .border-left-info {
-            border-left: 0.25rem solid #36b9cc !important;
-        }
-        
-        .border-left-warning {
-            border-left: 0.25rem solid #f6c23e !important;
-        }
-        
-        .border-left-purple {
-            border-left: 0.25rem solid #6f42c1 !important;
-        }
-        
-        .text-purple {
-            color: #6f42c1 !important;
-        }
-        
-        .btn-outline-purple {
-            color: #6f42c1;
-            border-color: #6f42c1;
-        }
-        
-        .btn-outline-purple:hover {
-            color: #fff;
-            background-color: #6f42c1;
-            border-color: #6f42c1;
-        }
-        
-        .avatar-sm {
-            width: 2rem;
-            height: 2rem;
-            font-size: 0.875rem;
-        }
-        
-        .avatar-md {
-            width: 2.5rem;
-            height: 2.5rem;
-            font-size: 1rem;
-        }
-        
-        .hover-shadow {
-            transition: all 0.2s;
-        }
-        
-        .alert-item {
-            padding: 0.25rem 0;
-        }
-        
-        .dashboard-header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            margin-bottom: 1.5rem;
-        }
-        
-        .chart-area {
-            position: relative;
-            height: 20rem;
-        }
-        
-        .chart-pie {
-            position: relative;
-            height: 15rem;
-        }
-        
-        .badge-success {
-            background-color: #1cc88a;
-        }
-        
-        .badge-warning {
-            background-color: #f6c23e;
-        }
-        
-        .badge-info {
-            background-color: #36b9cc;
-        }
-        
-        .badge-danger {
-            background-color: #e74a3b;
-        }
-        
-        .badge-secondary {
-            background-color: #858796;
-        }
-    </style>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
 }

@@ -181,9 +181,9 @@ namespace JohnHenryFashionWeb.Controllers
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(o => o.OrderNumber.Contains(search) || 
-                                        o.User.FirstName.Contains(search) || 
-                                        o.User.LastName.Contains(search) ||
-                                        o.User.Email.Contains(search));
+                                        (o.User != null && o.User.FirstName != null && o.User.FirstName.Contains(search)) || 
+                                        (o.User != null && o.User.LastName != null && o.User.LastName.Contains(search)) ||
+                                        (o.User != null && o.User.Email != null && o.User.Email.Contains(search)));
             }
 
             if (!string.IsNullOrEmpty(status))
@@ -212,8 +212,8 @@ namespace JohnHenryFashionWeb.Controllers
                 {
                     Id = o.Id,
                     OrderNumber = o.OrderNumber,
-                    CustomerName = $"{o.User.FirstName} {o.User.LastName}".Trim(),
-                    CustomerEmail = o.User.Email,
+                    CustomerName = o.User != null ? (o.User.FirstName ?? "") + " " + (o.User.LastName ?? "") : "Unknown",
+                    CustomerEmail = o.User != null ? o.User.Email ?? "Unknown" : "Unknown",
                     Total = o.TotalAmount,
                     Status = o.Status,
                     PaymentStatus = o.PaymentStatus,
@@ -255,9 +255,9 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 Id = order.Id,
                 OrderNumber = order.OrderNumber,
-                CustomerName = $"{order.User.FirstName} {order.User.LastName}".Trim(),
-                CustomerEmail = order.User.Email,
-                CustomerPhone = order.User.PhoneNumber ?? "",
+                CustomerName = order.User != null ? $"{order.User.FirstName ?? ""} {order.User.LastName ?? ""}".Trim() : "Unknown",
+                CustomerEmail = order.User?.Email ?? "Unknown",
+                CustomerPhone = order.User?.PhoneNumber ?? "",
                 ShippingAddress = order.ShippingAddress,
                 BillingAddress = order.BillingAddress,
                 Subtotal = order.TotalAmount - order.ShippingFee,
@@ -634,14 +634,14 @@ namespace JohnHenryFashionWeb.Controllers
             
             var viewModel = new SellerProfileViewModel
             {
-                CompanyName = currentUser.CompanyName,
-                BusinessLicense = currentUser.BusinessLicense,
-                TaxCode = currentUser.TaxCode,
-                Address = currentUser.Address,
-                Phone = currentUser.Phone,
-                Email = currentUser.Email,
-                FirstName = currentUser.FirstName,
-                LastName = currentUser.LastName,
+                CompanyName = currentUser.CompanyName ?? "",
+                BusinessLicense = currentUser.BusinessLicense ?? "",
+                TaxCode = currentUser.TaxCode ?? "",
+                Address = currentUser.Address ?? "",
+                Phone = currentUser.Phone ?? "",
+                Email = currentUser.Email ?? "",
+                FirstName = currentUser.FirstName ?? "",
+                LastName = currentUser.LastName ?? "",
                 IsApproved = currentUser.IsApproved,
                 ApprovedAt = currentUser.ApprovedAt,
                 Notes = currentUser.Notes,
@@ -659,24 +659,26 @@ namespace JohnHenryFashionWeb.Controllers
             if (ModelState.IsValid)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                
-                currentUser.CompanyName = model.CompanyName;
-                currentUser.BusinessLicense = model.BusinessLicense;
-                currentUser.TaxCode = model.TaxCode;
-                currentUser.Address = model.Address;
-                currentUser.Phone = model.Phone;
-                currentUser.FirstName = model.FirstName;
-                currentUser.LastName = model.LastName;
+                if (currentUser != null)
+                {
+                    currentUser.CompanyName = model.CompanyName;
+                    currentUser.BusinessLicense = model.BusinessLicense;
+                    currentUser.TaxCode = model.TaxCode;
+                    currentUser.Address = model.Address;
+                    currentUser.Phone = model.Phone;
+                    currentUser.FirstName = model.FirstName;
+                    currentUser.LastName = model.LastName;
 
-                var result = await _userManager.UpdateAsync(currentUser);
+                    var result = await _userManager.UpdateAsync(currentUser);
                 
-                if (result.Succeeded)
-                {
-                    TempData["Success"] = "Hồ sơ đã được cập nhật thành công!";
-                }
-                else
-                {
-                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật hồ sơ!";
+                    if (result.Succeeded)
+                    {
+                        TempData["Success"] = "Hồ sơ đã được cập nhật thành công!";
+                    }
+                    else
+                    {
+                        TempData["Error"] = "Có lỗi xảy ra khi cập nhật hồ sơ!";
+                    }
                 }
             }
 
@@ -716,7 +718,8 @@ namespace JohnHenryFashionWeb.Controllers
             
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(c => c.Code.Contains(search) || c.Description.Contains(search));
+                query = query.Where(c => (c.Code != null && c.Code.Contains(search)) || 
+                                        (c.Description != null && c.Description.Contains(search)));
             }
             
             if (!string.IsNullOrEmpty(status))

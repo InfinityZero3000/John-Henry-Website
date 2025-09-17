@@ -505,12 +505,6 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="@Url.Action("Analytics", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "analytics" ? "active" : "")">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Thống kê nâng cao</span>
-                    </a>
-                </div>
-                <div class="nav-item">
                     <a href="@Url.Action("RealTimeAnalytics", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "realtime" ? "active" : "")">
                         <i class="fas fa-broadcast-tower"></i>
                         <span>Theo dõi thời gian thực</span>
@@ -606,14 +600,8 @@
                 <div class="nav-section-title">Báo cáo & Phân tích</div>
                 <div class="nav-item">
                     <a href="@Url.Action("Reports", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "reports" ? "active" : "")">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Báo cáo cơ bản</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("AdvancedReports", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "reports" ? "active" : "")">
                         <i class="fas fa-chart-line"></i>
-                        <span>Báo cáo nâng cao</span>
+                        <span>Báo cáo</span>
                         <span class="nav-badge">Mới</span>
                     </a>
                 </div>

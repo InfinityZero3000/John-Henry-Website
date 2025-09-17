@@ -14,6 +14,61 @@
             --jh-gold: #FFD700;
         }
 
+        /* Collection styling to match homepage */
+        .collections-section {
+            background-color: #f8f9fa;
+        }
+
+        .collection-section {
+            margin-bottom: 3rem;
+        }
+
+        .collection-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .collection-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            color: #333;
+        }
+
+        .collection-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            color: #666;
+        }
+
+        .section-divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--jh-red), var(--jh-dark-red));
+            margin: 0 auto;
+        }
+
+        .collection-hero-banner {
+            position: relative;
+            margin-bottom: 3rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .collection-hero-banner img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .collection-hero-banner:hover img {
+            transform: scale(1.02);
+        }
+
         .freelancer-page {
             font-family: 'Poppins', sans-serif;
         }
@@ -335,6 +390,26 @@
 }
 
 <div class="freelancer-page">
+    <!-- Collections Section with Banner -->
+    <section class="collections-section py-5 bg-white">
+        <div class="container">
+            <!-- Freelancer Collection -->
+            <div class="collection-section mb-5">
+                <div class="col-12">
+                    <div class="collection-header text-center mb-5">
+                        <h2 class="collection-title mb-2">Freelancer</h2>
+                        <p class="collection-subtitle text-muted">Vẻ đẹp không cần gắng gượng. Thời trang tối giản, sang trọng cho cô gái yêu sự tinh tế và tự do</p>
+                        <div class="section-divider mx-auto"></div>
+                    </div>
+                </div>
+
+                <div class="collection-hero-banner position-relative mb-5">
+                    <img src="~/images/Banner/banner-women-main.jpg" alt="Freelancer Collection" class="w-100 hero-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
     <div class="container-fluid">
 
         <div class="container">

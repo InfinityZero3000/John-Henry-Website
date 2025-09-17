@@ -54,6 +54,9 @@ namespace JohnHenryFashionWeb.Data
         public DbSet<AnalyticsData> AnalyticsData { get; set; }
         public DbSet<SalesReport> SalesReports { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
+        
+        // Audit and Security
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -440,6 +443,13 @@ namespace JohnHenryFashionWeb.Data
                     .WithMany(u => u.PaymentAttempts)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // Configure Order relationship using existing OrderId property
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .HasPrincipalKey(o => o.OrderNumber)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // PaymentMethod configuration
@@ -534,6 +544,13 @@ namespace JohnHenryFashionWeb.Data
                     .WithMany(u => u.RefundRequests)
                     .HasForeignKey(e => e.RequestedBy)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // Configure Order relationship using existing OrderId property
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .HasPrincipalKey(o => o.OrderNumber)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ShippingMethod configuration
@@ -596,6 +613,61 @@ namespace JohnHenryFashionWeb.Data
                 entity.HasIndex(e => e.IsActive);
                 entity.HasIndex(e => e.StartDate);
                 entity.HasIndex(e => e.EndDate);
+            });
+
+            // AuditLog configuration
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Details).HasMaxLength(2000);
+                entity.Property(e => e.IpAddress).HasMaxLength(45); // IPv6 support
+                entity.Property(e => e.UserAgent).HasMaxLength(500);
+                entity.Property(e => e.Timestamp).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.TargetUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.TargetUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.TargetUserId);
+                entity.HasIndex(e => e.Action);
+                entity.HasIndex(e => e.Timestamp);
+            });
+
+            // PageView configuration
+            modelBuilder.Entity<PageView>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Page).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.Referrer).HasMaxLength(500);
+                entity.Property(e => e.UserAgent).HasMaxLength(1000);
+                entity.Property(e => e.IpAddress).HasMaxLength(45);
+                entity.Property(e => e.Source).HasMaxLength(100);
+                entity.Property(e => e.Medium).HasMaxLength(100);
+                entity.Property(e => e.Campaign).HasMaxLength(100);
+                entity.Property(e => e.ExitPage).HasMaxLength(500);
+
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.SessionId);
+                entity.HasIndex(e => e.ViewedAt);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.Session)
+                    .WithMany(s => s.PageViews)
+                    .HasForeignKey(e => e.SessionId)
+                    .HasPrincipalKey(s => s.SessionId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

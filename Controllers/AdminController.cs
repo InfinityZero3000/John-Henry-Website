@@ -22,6 +22,7 @@ namespace JohnHenryFashionWeb.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IAnalyticsService _analyticsService;
         private readonly IReportingService _reportingService;
+        private readonly IUserManagementService _userManagementService;
 
         public AdminController(
             ApplicationDbContext context, 
@@ -29,7 +30,8 @@ namespace JohnHenryFashionWeb.Controllers
             RoleManager<IdentityRole> roleManager,
             IWebHostEnvironment webHostEnvironment,
             IAnalyticsService analyticsService,
-            IReportingService reportingService)
+            IReportingService reportingService,
+            IUserManagementService userManagementService)
         {
             _context = context;
             _userManager = userManager;
@@ -37,6 +39,7 @@ namespace JohnHenryFashionWeb.Controllers
             _webHostEnvironment = webHostEnvironment;
             _analyticsService = analyticsService;
             _reportingService = reportingService;
+            _userManagementService = userManagementService;
         }
 
         [HttpGet("")]
@@ -161,80 +164,6 @@ namespace JohnHenryFashionWeb.Controllers
             };
 
             return View("Dashboard_New", viewModel);
-        }
-
-        [HttpGet("analytics")]
-        public async Task<IActionResult> Analytics(string? tab = "overview", string? dateRange = "last30days")
-        {
-            var filter = GetAnalyticsFilterFromQuery(dateRange);
-            
-            var userAnalytics = await _analyticsService.GetUserAnalyticsAsync(filter.StartDate, filter.EndDate);
-            var salesAnalytics = await _analyticsService.GetSalesAnalyticsAsync(filter.StartDate, filter.EndDate);
-            var productAnalyticsList = await _analyticsService.GetProductAnalyticsAsync(filter.StartDate, filter.EndDate);
-            var marketingAnalytics = await _analyticsService.GetMarketingAnalyticsAsync(filter.StartDate, filter.EndDate);
-            var conversionAnalytics = await _analyticsService.GetConversionAnalyticsAsync(filter.StartDate, filter.EndDate);
-
-            var viewModel = new ViewModels.AnalyticsViewModel
-            {
-                UserAnalytics = new ViewModels.UserAnalyticsData 
-                { 
-                    TotalUsers = userAnalytics.TotalSessions,
-                    ActiveUsers = userAnalytics.UniqueSessions,
-                    NewUsers = userAnalytics.RegisteredUserSessions,
-                    GrowthRate = 0 // Calculate growth rate if needed
-                },
-                SalesAnalytics = new ViewModels.SalesAnalyticsData 
-                { 
-                    TotalRevenue = salesAnalytics.TotalRevenue,
-                    TotalOrders = salesAnalytics.TotalOrders,
-                    AverageOrderValue = salesAnalytics.AverageOrderValue,
-                    GrowthRate = 0 // Calculate growth rate if needed
-                },
-                ProductAnalytics = new ViewModels.ProductAnalyticsData 
-                { 
-                    TotalProducts = 0, // Would need a different service method for aggregate data
-                    NewProducts = 0,
-                    OutOfStock = 0,
-                    AvailabilityRate = 0,
-                    GrowthRate = 0
-                },
-                MarketingAnalytics = new ViewModels.MarketingAnalyticsData 
-                { 
-                    TotalVisits = 0, // Would need different service method for aggregate marketing data
-                    ConversionRate = 0,
-                    AdvertisingCost = 0,
-                    ROAS = 0,
-                    GrowthRate = 0
-                },
-                ConversionAnalytics = new ViewModels.ConversionAnalyticsData 
-                { 
-                    ConversionRate = 0, // Would need to calculate from available data
-                    TotalConversions = conversionAnalytics.TotalConversions,
-                    Revenue = conversionAnalytics.TotalValue,
-                    AverageOrderValue = conversionAnalytics.TotalConversions > 0 ? conversionAnalytics.TotalValue / conversionAnalytics.TotalConversions : 0
-                }
-            };
-
-            ViewBag.SelectedTab = tab;
-            return View(viewModel);
-        }
-
-        [HttpGet("reports")]
-        public IActionResult Reports()
-        {
-            var viewModel = new ReportsViewModel
-            {
-                TotalRevenue = 1000000,
-                TotalOrders = 150,
-                TotalCustomers = 50,
-                TotalProducts = 0, // Removed product management
-                RevenueGrowth = 15.5m,
-                NewCustomers = 10,
-                LowStockProducts = 0, // Removed product management
-                InventoryValue = 0 // Removed product management
-            };
-
-            return View(viewModel);
         }
 
         [HttpPost("reports/generate")]
@@ -1086,97 +1015,182 @@ namespace JohnHenryFashionWeb.Controllers
 
         #region User Management
         [HttpGet("users")]
-        public async Task<IActionResult> Users(int page = 1, int pageSize = 20, string search = "", string role = "", string status = "")
+        public async Task<IActionResult> Users(string searchTerm = "", string role = "", 
+            bool? isActive = null, int page = 1, int pageSize = 20, string sortBy = "CreatedAt", string sortDirection = "desc")
         {
-            var query = _userManager.Users.AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
+            var filter = new UserFilterViewModel
             {
-                query = query.Where(u => (u.FirstName != null && u.FirstName.Contains(search)) || 
-                                       (u.LastName != null && u.LastName.Contains(search)) || 
-                                       (u.Email != null && u.Email.Contains(search)));
-            }
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                var isActive = status == "active";
-                query = query.Where(u => u.IsActive == isActive);
-            }
-
-            var totalCount = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-            var users = await query
-                .OrderByDescending(u => u.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var userViewModels = new List<UserListItemViewModel>();
-            
-            foreach (var user in users)
-            {
-                var userRoles = await _userManager.GetRolesAsync(user);
-                userViewModels.Add(new UserListItemViewModel
-                {
-                    Id = user.Id,
-                    FirstName = user.FirstName ?? "",
-                    LastName = user.LastName ?? "",
-                    Email = user.Email ?? "",
-                    IsActive = user.IsActive,
-                    CreatedAt = user.CreatedAt,
-                    LastLogin = user.LastLoginDate,
-                    Roles = userRoles.ToList()
-                });
-            }
-
-            // Get statistics
-            var totalUsers = await _userManager.Users.CountAsync();
-            var activeUsers = await _userManager.Users.CountAsync(u => u.IsActive);
-            var thisMonth = DateTime.UtcNow.AddDays(-30);
-            var newUsersThisMonth = await _userManager.Users.CountAsync(u => u.CreatedAt >= thisMonth);
-            var sellersCount = (await _userManager.GetUsersInRoleAsync("Seller")).Count;
-
-            var viewModel = new UserManagementViewModel
-            {
-                Users = userViewModels,
-                CurrentPage = page,
-                TotalPages = totalPages,
+                SearchTerm = searchTerm,
+                Role = role,
+                IsActive = isActive,
+                Page = page,
                 PageSize = pageSize,
-                SearchTerm = search,
-                RoleFilter = role,
-                StatusFilter = status,
-                TotalUsers = totalUsers,
-                ActiveUsers = activeUsers,
-                NewUsersThisMonth = newUsersThisMonth,
-                SellersCount = sellersCount
+                SortBy = sortBy,
+                SortDirection = sortDirection
             };
 
-            return View(viewModel);
+            var result = await _userManagementService.GetUsersAsync(filter);
+            
+            // Get statistics for dashboard cards
+            result.Statistics = await _userManagementService.GetUserStatisticsAsync();
+
+            return View(result);
         }
 
-        [HttpPost("users/toggle-status/{id}")]
-        public async Task<IActionResult> ToggleUserStatus(string id)
+        [HttpGet("users/{id}")]
+        public async Task<IActionResult> UserDetail(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
+            var userDetail = await _userManagementService.GetUserDetailAsync(id);
+            if (userDetail == null)
             {
                 return NotFound();
             }
 
-            user.IsActive = !user.IsActive;
-            var result = await _userManager.UpdateAsync(user);
+            return View(userDetail);
+        }
 
+        [HttpGet("users/{id}/edit")]
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var userEdit = await _userManagementService.GetUserForEditAsync(id);
+            if (userEdit == null)
+            {
+                return NotFound();
+            }
+
+            return View(userEdit);
+        }
+
+        [HttpPost("users/{id}/edit")]
+        public async Task<IActionResult> EditUser(string id, UserEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.AvailableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+                return View(model);
+            }
+
+            var success = await _userManagementService.UpdateUserAsync(id, model);
+            if (success)
+            {
+                TempData["Success"] = "Cập nhật thông tin người dùng thành công!";
+                return RedirectToAction(nameof(UserDetail), new { id });
+            }
+
+            TempData["Error"] = "Có lỗi xảy ra khi cập nhật thông tin người dùng!";
+            return View(model);
+        }
+
+        [HttpPost("users/{id}/toggle-status")]
+        public async Task<IActionResult> ToggleUserStatus(string id)
+        {
+            var success = await _userManagementService.ToggleUserStatusAsync(id);
+            if (success)
+            {
+                return Json(new { success = true, message = "Cập nhật trạng thái thành công!" });
+            }
+
+            return Json(new { success = false, message = "Có lỗi xảy ra!" });
+        }
+
+        [HttpPost("users/{id}/reset-password")]
+        public async Task<IActionResult> ResetUserPassword(string id)
+        {
+            var success = await _userManagementService.ResetUserPasswordAsync(id);
+            if (success)
+            {
+                return Json(new { success = true, message = "Đặt lại mật khẩu thành công! Mật khẩu mới: TempPassword@123" });
+            }
+
+            return Json(new { success = false, message = "Có lỗi xảy ra khi đặt lại mật khẩu!" });
+        }
+
+        [HttpPost("users/{id}/delete")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var success = await _userManagementService.DeleteUserAsync(id);
+            if (success)
+            {
+                return Json(new { success = true, message = "Xóa người dùng thành công!" });
+            }
+
+            return Json(new { success = false, message = "Có lỗi xảy ra khi xóa người dùng!" });
+        }
+
+        [HttpGet("users/create")]
+        public async Task<IActionResult> CreateUser()
+        {
+            var model = new UserCreateViewModel
+            {
+                AvailableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync()
+            };
+            return View(model);
+        }
+
+        [HttpPost("users/create")]
+        public async Task<IActionResult> CreateUser(UserCreateViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.AvailableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+                return View(model);
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                PhoneNumber = model.PhoneNumber,
+                IsActive = model.IsActive,
+                DateOfBirth = model.DateOfBirth,
+                Gender = model.Gender,
+                Address = model.Address,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                TempData["Success"] = $"Trạng thái người dùng đã được {(user.IsActive ? "kích hoạt" : "vô hiệu hóa")}!";
-            }
-            else
-            {
-                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái người dùng!";
+                if (model.SelectedRoles?.Any() == true)
+                {
+                    await _userManager.AddToRolesAsync(user, model.SelectedRoles);
+                }
+
+                TempData["Success"] = "Tạo người dùng mới thành công!";
+                return RedirectToAction(nameof(Users));
             }
 
-            return RedirectToAction(nameof(Users));
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            model.AvailableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+            return View(model);
+        }
+
+        // API endpoints for user management
+        [HttpGet("api/users/statistics")]
+        public async Task<IActionResult> GetUserStatistics()
+        {
+            var stats = await _userManagementService.GetUserStatisticsAsync();
+            return Json(stats);
+        }
+
+        [HttpGet("api/users/recent")]
+        public async Task<IActionResult> GetRecentUsers(int count = 10)
+        {
+            var users = await _userManagementService.GetRecentUsersAsync(count);
+            return Json(users.Select(u => new
+            {
+                u.Id,
+                FullName = $"{u.FirstName} {u.LastName}".Trim(),
+                u.Email,
+                u.CreatedAt,
+                u.IsActive
+            }));
         }
         #endregion
 
@@ -1493,18 +1507,18 @@ namespace JohnHenryFashionWeb.Controllers
         #endregion
 
         #region Advanced Reports
-        [HttpGet("advanced-reports")]
-        public async Task<IActionResult> AdvancedReports()
+        [HttpGet("reports")]
+        public async Task<IActionResult> Reports()
         {
             ViewData["CurrentSection"] = "reports";
-            ViewData["Title"] = "Báo cáo nâng cao";
+            ViewData["Title"] = "Báo cáo";
             
             var viewModel = await GenerateAdvancedAnalyticsData();
             
-            return View(viewModel);
+            return View("Reports", viewModel);
         }
 
-        private async Task<ViewModels.AdvancedAnalyticsViewModel> GenerateAdvancedAnalyticsData()
+        private async Task<ViewModels.ReportsViewModel> GenerateAdvancedAnalyticsData()
         {
             var endDate = DateTime.UtcNow;
             var startDate = endDate.AddDays(-30);
@@ -1656,15 +1670,23 @@ namespace JohnHenryFashionWeb.Controllers
                 .ToListAsync();
 
             // Payment Method Data
-            var paymentMethods = await _context.Orders
+            var paymentMethodsRaw = await _context.Orders
                 .Where(o => o.CreatedAt >= startDate && o.Status == "completed")
                 .GroupBy(o => o.PaymentMethod)
-                .Select(g => new Models.ChartData
+                .Select(g => new
                 {
-                    Label = GetPaymentMethodDisplayName(g.Key),
-                    Value = g.Sum(o => o.TotalAmount)
+                    PaymentMethod = g.Key,
+                    TotalAmount = g.Sum(o => o.TotalAmount)
                 })
                 .ToListAsync();
+
+            var paymentMethods = paymentMethodsRaw
+                .Select(p => new Models.ChartData
+                {
+                    Label = GetPaymentMethodDisplayName(p.PaymentMethod),
+                    Value = p.TotalAmount
+                })
+                .ToList();
 
             // Customer Segments
             var customerSegments = new List<ViewModels.CustomerSegment>
@@ -1674,7 +1696,7 @@ namespace JohnHenryFashionWeb.Controllers
                 new ViewModels.CustomerSegment { Name = "Mới", Count = 2890, Percentage = 35, Revenue = 400000, AverageOrderValue = 890000, GrowthRate = 22 }
             };
 
-            return new ViewModels.AdvancedAnalyticsViewModel
+            return new ViewModels.ReportsViewModel
             {
                 KPIData = kpiData,
                 SalesAnalytics = salesAnalytics,

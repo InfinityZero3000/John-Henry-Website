@@ -716,4 +716,21 @@ namespace JohnHenryFashionWeb.Models
         // Navigation properties
         public ApplicationUser? CreatedByUser { get; set; }
     }
+
+    public class AuditLog
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string? UserId { get; set; }
+        public string? TargetUserId { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public string? Details { get; set; }
+        public string? IpAddress { get; set; }
+        public string? UserAgent { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string? AdditionalData { get; set; } // JSON for extra context
+
+        // Navigation properties
+        public ApplicationUser? User { get; set; }
+        public ApplicationUser? TargetUser { get; set; }
+    }
 }

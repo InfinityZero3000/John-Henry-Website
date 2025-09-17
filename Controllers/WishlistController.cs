@@ -93,6 +93,8 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                // Log the error for debugging
+                Console.WriteLine($"Error adding to wishlist: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while adding to wishlist" });
             }
         }
@@ -132,6 +134,8 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                // Log the error for debugging
+                Console.WriteLine($"Error removing from wishlist: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while removing from wishlist" });
             }
         }
@@ -163,6 +167,8 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                // Log the error for debugging
+                Console.WriteLine($"Error clearing wishlist: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while clearing wishlist" });
             }
         }
@@ -234,6 +240,8 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
+                // Log the error for debugging
+                Console.WriteLine($"Error adding to cart from wishlist: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while adding to cart" });
             }
         }

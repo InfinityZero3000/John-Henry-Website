@@ -319,6 +319,14 @@ namespace JohnHenryFashionWeb.ViewModels
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLogin { get; set; }
         public string? CompanyName { get; set; }
+        
+        // Enhanced properties for User Management
+        public DateTime? LastLoginDate { get; set; }
+        public int OrderCount { get; set; }
+        public decimal TotalSpent { get; set; }
+        public string PrimaryRole => Roles.FirstOrDefault() ?? "Customer";
+        public string StatusText => IsActive ? "Hoạt động" : "Đã khóa";
+        public string StatusClass => IsActive ? "success" : "danger";
     }
 
     // Inventory Management ViewModels
@@ -481,46 +489,12 @@ namespace JohnHenryFashionWeb.ViewModels
         public int ActiveUsers { get; set; }
         public int NewUsersThisMonth { get; set; }
         public int SellersCount { get; set; }
-    }
-
-    public class ReportsViewModel
-    {
-        public decimal TotalRevenue { get; set; }
-        public int TotalOrders { get; set; }
-        public int TotalCustomers { get; set; }
-        public int TotalProducts { get; set; }
-        public decimal RevenueGrowth { get; set; }
-        public int NewCustomers { get; set; }
-        public int LowStockProducts { get; set; }
-        public decimal InventoryValue { get; set; }
         
-        // Chart Data
-        public List<string> RevenueChartLabels { get; set; } = new();
-        public List<decimal> RevenueChartData { get; set; } = new();
-        
-        public List<string> CategoryLabels { get; set; } = new();
-        public List<decimal> CategoryData { get; set; } = new();
-        
-        public List<string> OrderStatusLabels { get; set; } = new();
-        public List<int> OrderStatusData { get; set; } = new();
-        
-        public List<string> CustomerChartLabels { get; set; } = new();
-        public List<int> NewCustomersData { get; set; } = new();
-        public List<int> ReturningCustomersData { get; set; } = new();
-        
-        // Top Products
-        public List<TopProductReportItem> TopProducts { get; set; } = new();
-    }
-
-    public class TopProductReportItem
-    {
-        public string ProductName { get; set; } = string.Empty;
-        public string CategoryName { get; set; } = string.Empty;
-        public string SKU { get; set; } = string.Empty;
-        public string? ImageUrl { get; set; }
-        public int QuantitySold { get; set; }
-        public decimal Revenue { get; set; }
-        public decimal GrowthRate { get; set; }
+        // Enhanced properties for new functionality
+        public UserFilterViewModel Filter { get; set; } = new();
+        public int TotalCount { get; set; }
+        public List<string> AvailableRoles { get; set; } = new();
+        public Dictionary<string, int> Statistics { get; set; } = new();
     }
 
     public class InventoryViewModel
@@ -728,5 +702,116 @@ namespace JohnHenryFashionWeb.ViewModels
         public bool LowStock { get; set; } = true;
         public bool ProductReviews { get; set; } = true;
         public bool SystemUpdates { get; set; } = true;
+    }
+
+    // Enhanced User Management ViewModels
+    public class UserFilterViewModel
+    {
+        public string SearchTerm { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public bool? IsActive { get; set; }
+        public DateTime? CreatedFrom { get; set; }
+        public DateTime? CreatedTo { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+        public string SortBy { get; set; } = "CreatedAt";
+        public string SortDirection { get; set; } = "desc";
+    }
+
+    public class UserEditViewModel
+    {
+        public string Id { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Họ là bắt buộc")]
+        [StringLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Tên là bắt buộc")]
+        [StringLength(50)]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; } = string.Empty;
+
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        public string? PhoneNumber { get; set; }
+
+        public bool IsActive { get; set; } = true;
+
+        [DataType(DataType.Date)]
+        public DateTime? DateOfBirth { get; set; }
+
+        public string? Gender { get; set; }
+
+        [StringLength(500)]
+        public string? Address { get; set; }
+
+        public List<string> SelectedRoles { get; set; } = new();
+        public List<string> AvailableRoles { get; set; } = new();
+        public IFormFile? AvatarFile { get; set; }
+        public string? CurrentAvatarUrl { get; set; }
+    }
+
+    public class UserDetailViewModel
+    {
+        public ApplicationUser User { get; set; } = new();
+        public List<string> Roles { get; set; } = new();
+        public List<Order> RecentOrders { get; set; } = new();
+        public int OrderCount { get; set; }
+        public decimal TotalSpent { get; set; }
+        public DateTime JoinDate { get; set; }
+        public DateTime? LastActivity { get; set; }
+        public Dictionary<string, object> AdditionalInfo { get; set; } = new();
+    }
+
+    public class UserCreateViewModel
+    {
+        [Required(ErrorMessage = "Họ là bắt buộc")]
+        [StringLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Tên là bắt buộc")]
+        [StringLength(50)]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        public string? PhoneNumber { get; set; }
+
+        public bool IsActive { get; set; } = true;
+
+        [DataType(DataType.Date)]
+        public DateTime? DateOfBirth { get; set; }
+
+        public string? Gender { get; set; }
+
+        [StringLength(500)]
+        public string? Address { get; set; }
+
+        public List<string> SelectedRoles { get; set; } = new();
+        public List<string> AvailableRoles { get; set; } = new();
+        public IFormFile? AvatarFile { get; set; }
+    }
+
+    public class UserStatsViewModel
+    {
+        public int TotalUsers { get; set; }
+        public int ActiveUsers { get; set; }
+        public int InactiveUsers { get; set; }
+        public int NewUsersThisMonth { get; set; }
+        public double GrowthRate { get; set; }
     }
 }
