@@ -8,7 +8,7 @@
     
     <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Chart.js for Analytics -->
@@ -56,7 +56,7 @@
             left: 0 !important;
             height: 100vh !important;
             width: 280px !important; 
-            background: var(--primary-gradient) !important;
+            background: linear-gradient(180deg, #332b2c 0%, #a01527 100%) !important;
             z-index: 1000 !important;
             transition: var(--transition);
             overflow-y: auto;
@@ -98,6 +98,12 @@
             height: 40px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
             display: flex;
             align-items: center;
             justify-content: center;
@@ -486,7 +492,7 @@
         <div class="sidebar-header">
             <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-brand">
                 <div class="brand-logo">
-                    <i class="fas fa-crown"></i>
+                    <i data-lucide="heart"></i>
                 </div>
                 <div>
                     <div class="brand-text">John Henry</div>
@@ -497,146 +503,106 @@
 
         <nav class="sidebar-nav">
             <div class="nav-section">
-                <div class="nav-section-title">Dashboard</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Dashboard", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "dashboard" ? "active" : "")">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Tổng quan</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("RealTimeAnalytics", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "realtime" ? "active" : "")">
-                        <i class="fas fa-broadcast-tower"></i>
-                        <span>Theo dõi thời gian thực</span>
-                        <span class="nav-badge">LIVE</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Danh mục & Thương hiệu</div>
+                <div class="nav-section-title">DANH MỤC & THƯƠNG HIỆU</div>
                 <div class="nav-item">
                     <a href="@Url.Action("Categories", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "categories" ? "active" : "")">
-                        <i class="fas fa-tags"></i>
+                        <i data-lucide="list"></i>
                         <span>Danh mục</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Brands", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "brands" ? "active" : "")">
-                        <i class="fas fa-award"></i>
+                        <i data-lucide="award"></i>
                         <span>Thương hiệu</span>
                     </a>
                 </div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Quản lý đơn hàng</div>
+                <div class="nav-section-title">QUẢN LÝ ĐƠN HÀNG</div>
                 <div class="nav-item">
                     <a href="@Url.Action("Orders", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "orders" ? "active" : "")">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i data-lucide="shopping-cart"></i>
                         <span>Đơn hàng</span>
-                        @* <span class="nav-badge">12</span> *@
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Reviews", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "reviews" ? "active" : "")">
-                        <i class="fas fa-star"></i>
+                        <i data-lucide="star"></i>
                         <span>Đánh giá</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Coupons", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "coupons" ? "active" : "")">
-                        <i class="fas fa-ticket-alt"></i>
+                        <i data-lucide="ticket"></i>
                         <span>Mã giảm giá</span>
                     </a>
                 </div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Quản lý người dùng</div>
+                <div class="nav-section-title">QUẢN LÝ NGƯỜI DÙNG</div>
                 <div class="nav-item">
                     <a href="@Url.Action("Users", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "users" ? "active" : "")">
-                        <i class="fas fa-users"></i>
+                        <i data-lucide="users"></i>
                         <span>Người dùng</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Sellers", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "sellers" ? "active" : "")">
-                        <i class="fas fa-store"></i>
+                        <i data-lucide="store"></i>
                         <span>Người bán</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Permissions", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "permissions" ? "active" : "")">
-                        <i class="fas fa-shield-alt"></i>
+                        <i data-lucide="shield"></i>
                         <span>Phân quyền</span>
                     </a>
                 </div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Nội dung & Marketing</div>
+                <div class="nav-section-title">NỘI DUNG & MARKETING</div>
                 <div class="nav-item">
                     <a href="@Url.Action("Blog", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "blog" ? "active" : "")">
-                        <i class="fas fa-blog"></i>
+                        <i data-lucide="edit"></i>
                         <span>Blog</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Pages", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "pages" ? "active" : "")">
-                        <i class="fas fa-file-alt"></i>
+                        <i data-lucide="file-text"></i>
                         <span>Trang tĩnh</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Banners", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "banners" ? "active" : "")">
-                        <i class="fas fa-image"></i>
+                        <i data-lucide="image"></i>
                         <span>Banner quảng cáo</span>
                     </a>
                 </div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Báo cáo & Phân tích</div>
+                <div class="nav-section-title">BÁO CÁO & PHÂN TÍCH</div>
                 <div class="nav-item">
                     <a href="@Url.Action("Reports", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "reports" ? "active" : "")">
-                        <i class="fas fa-chart-line"></i>
+                        <i data-lucide="trending-up"></i>
                         <span>Báo cáo</span>
                         <span class="nav-badge">Mới</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Performance", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "performance" ? "active" : "")">
-                        <i class="fas fa-tachometer-alt"></i>
+                        <i data-lucide="activity"></i>
                         <span>Hiệu suất</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="@Url.Action("Logs", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "logs" ? "active" : "")">
-                        <i class="fas fa-clipboard-list"></i>
+                        <i data-lucide="clipboard-list"></i>
                         <span>Nhật ký hệ thống</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Cài đặt</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Settings", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "settings" ? "active" : "")">
-                        <i class="fas fa-cog"></i>
-                        <span>Cài đặt hệ thống</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Backups", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "backups" ? "active" : "")">
-                        <i class="fas fa-database"></i>
-                        <span>Sao lưu</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Security", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "security" ? "active" : "")">
-                        <i class="fas fa-lock"></i>
-                        <span>Bảo mật</span>
                     </a>
                 </div>
             </div>
@@ -649,23 +615,23 @@
         <header class="admin-header">
             <div class="header-left">
                 <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
+                    <i data-lucide="menu"></i>
                 </button>
                 
                 <div class="header-search">
-                    <i class="fas fa-search"></i>
+                    <i data-lucide="search"></i>
                     <input type="text" placeholder="Tìm kiếm đơn hàng, khách hàng...">
                 </div>
             </div>
 
             <div class="header-right">
                 <button class="header-notification" title="Thông báo">
-                    <i class="fas fa-bell"></i>
+                    <i data-lucide="bell"></i>
                     <span class="notification-badge"></span>
                 </button>
 
                 <button class="header-notification" title="Tin nhắn">
-                    <i class="fas fa-envelope"></i>
+                    <i data-lucide="mail"></i>
                 </button>
 
                 <div class="dropdown">
@@ -677,13 +643,13 @@
                             <div class="user-name">@(User.Identity?.Name ?? "Admin")</div>
                             <div class="user-role">Quản trị viên</div>
                         </div>
-                        <i class="fas fa-chevron-down"></i>
+                        <i data-lucide="chevron-down"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                        <li><a class="dropdown-item" href="#"><i data-lucide="user" class="me-2"></i>Hồ sơ</a></li>
+                        <li><a class="dropdown-item" href="#"><i data-lucide="settings" class="me-2"></i>Cài đặt</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i data-lucide="log-out" class="me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
             </div>
@@ -745,6 +711,9 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+        
+        // Initialize Lucide icons
+        lucide.createIcons();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

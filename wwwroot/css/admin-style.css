@@ -1,8 +1,8 @@
 /* ===== ADMIN LAYOUT STYLES ===== */
 
 :root {
-    --admin-primary: #FF4747;
-    --admin-secondary: #CC3636;
+    --admin-primary: #46acec;
+    --admin-secondary: #000000;
     --admin-success: #059669;
     --admin-warning: #f59e0b;
     --admin-danger: #dc3545;
@@ -57,13 +57,14 @@ body {
     left: 0;
     height: 100vh;
     width: var(--sidebar-width);
-    background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     z-index: 1000;
     overflow-y: auto;
     overflow-x: hidden;
     transition: var(--transition);
     box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    backdrop-filter: blur(15px);
 }
 
 .admin-sidebar::-webkit-scrollbar {
@@ -85,7 +86,8 @@ body {
     align-items: center;
     padding: 25px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
 }
 
 .logo h4 {
@@ -160,14 +162,16 @@ body {
 
 .nav-link:hover {
     color: white !important;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.15);
     transform: translateX(2px);
+    backdrop-filter: blur(10px);
 }
 
 .nav-link.active {
     background: rgba(255,255,255,0.2) !important;
     color: white !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    backdrop-filter: blur(15px);
 }
 
 .nav-link.active::before {
