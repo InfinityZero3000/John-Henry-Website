@@ -18,8 +18,11 @@ namespace JohnHenryFashionWeb.ViewModels
         public int MyOrdersCount { get; set; }
         public decimal MyRevenue { get; set; }
         public decimal MonthlyRevenue { get; set; }
-        public List<RecentOrder> MyRecentOrders { get; set; } = new();
+        public List<Models.RecentOrder> MyRecentOrders { get; set; } = new();
         public List<TopSellingProduct> MyTopProducts { get; set; } = new();
+        public int PendingReviewsCount { get; set; }
+        public int ActiveCouponsCount { get; set; }
+        public int LowInventoryProductsCount { get; set; }
     }
 
     // Product Management ViewModels
@@ -33,6 +36,7 @@ namespace JohnHenryFashionWeb.ViewModels
         public Guid? CategoryId { get; set; }
         public string Status { get; set; } = string.Empty;
         public List<Category> Categories { get; set; } = new();
+        public int TotalProducts { get; set; }
     }
 
     public class ProductListItemViewModel
@@ -813,5 +817,309 @@ namespace JohnHenryFashionWeb.ViewModels
         public int InactiveUsers { get; set; }
         public int NewUsersThisMonth { get; set; }
         public double GrowthRate { get; set; }
+    }
+
+    public class SellerReviewsViewModel
+    {
+        public List<ProductReview> Reviews { get; set; } = new();
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 10;
+        public int TotalCount { get; set; }
+        
+        // Filters
+        public string Search { get; set; } = string.Empty;
+        public int? Rating { get; set; }
+        public string Status { get; set; } = string.Empty;
+        
+        // Statistics
+        public ReviewStatistics Statistics { get; set; } = new();
+    }
+
+    public class ReviewStatistics
+    {
+        public int TotalReviews { get; set; }
+        public int PendingReviews { get; set; }
+        public int ApprovedReviews { get; set; }
+        public int RejectedReviews { get; set; }
+        public double AverageRating { get; set; }
+        public Dictionary<int, int> RatingDistribution { get; set; } = new();
+    }
+
+    public class CouponManagementViewModel
+    {
+        public List<CouponItem> Coupons { get; set; } = new();
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 10;
+        public int TotalCount { get; set; }
+        public string Search { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public CouponStatistics Statistics { get; set; } = new();
+    }
+
+    public class CouponStatistics
+    {
+        public int TotalCoupons { get; set; }
+        public int ActiveCoupons { get; set; }
+        public int ExpiredCoupons { get; set; }
+        public int UsedCoupons { get; set; }
+        public decimal TotalDiscountGiven { get; set; }
+    }
+
+    public class CouponItem
+    {
+        public Guid Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public decimal Value { get; set; }
+        public decimal? MinOrderAmount { get; set; }
+        public int? UsageLimit { get; set; }
+        public int UsageCount { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public bool IsActive { get; set; }
+        public string Status => GetStatus();
+
+        private string GetStatus()
+        {
+            if (!IsActive) return "inactive";
+            if (EndDate.HasValue && EndDate.Value < DateTime.Now) return "expired";
+            if (UsageLimit.HasValue && UsageCount >= UsageLimit.Value) return "used_up";
+            return "active";
+        }
+    }
+
+    public class CouponCreateEditViewModel
+    {
+        public Guid? Id { get; set; }
+        
+        [Required(ErrorMessage = "Mã coupon là bắt buộc")]
+        [StringLength(20, ErrorMessage = "Mã coupon không được vượt quá 20 ký tự")]
+        public string Code { get; set; } = string.Empty;
+
+        [StringLength(100, ErrorMessage = "Mô tả không được vượt quá 100 ký tự")]
+        public string Description { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Loại giảm giá là bắt buộc")]
+        public string DiscountType { get; set; } = "percentage";
+
+        [Required(ErrorMessage = "Giá trị giảm giá là bắt buộc")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Giá trị giảm giá phải lớn hơn 0")]
+        public decimal DiscountValue { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "Giá trị đơn hàng tối thiểu phải lớn hơn hoặc bằng 0")]
+        public decimal? MinOrderAmount { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Giới hạn sử dụng phải lớn hơn 0")]
+        public int? UsageLimit { get; set; }
+
+        [Required(ErrorMessage = "Ngày hết hạn là bắt buộc")]
+        public DateTime ExpiryDate { get; set; } = DateTime.Now.AddDays(30);
+
+        public bool IsActive { get; set; } = true;
+    }
+
+    public class SellerNotificationsViewModel
+    {
+        public List<Notification> Notifications { get; set; } = new();
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 10;
+        public int TotalCount { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public bool? IsRead { get; set; }
+        public int UnreadCount { get; set; }
+    }
+
+    // Store Management ViewModels
+    public class StoreManagementViewModel
+    {
+        public Store? Store { get; set; }
+        public List<StoreInventoryItem> Inventory { get; set; } = new();
+        public List<StoreSettingItem> Settings { get; set; } = new();
+        public StoreStatistics Statistics { get; set; } = new();
+        public List<SellerStore> StoreStaff { get; set; } = new();
+    }
+
+    public class StoreInventoryItem
+    {
+        public Guid Id { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ProductImageUrl { get; set; } = string.Empty;
+        public string ProductSku { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public int MinimumStock { get; set; }
+        public int MaximumStock { get; set; }
+        public string? Location { get; set; }
+        public DateTime LastUpdated { get; set; }
+    }
+
+    public class StoreSettingItem
+    {
+        public Guid Id { get; set; }
+        public string SettingKey { get; set; } = string.Empty;
+        public string SettingValue { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public string UpdatedByName { get; set; } = string.Empty;
+    }
+
+    public class StoreStatistics
+    {
+        public int TotalProducts { get; set; }
+        public int LowStockProducts { get; set; }
+        public int OutOfStockProducts { get; set; }
+        public decimal TotalInventoryValue { get; set; }
+        public int StaffCount { get; set; }
+        public decimal MonthlyRevenue { get; set; }
+        public int MonthlyOrders { get; set; }
+    }
+
+    public class StoreSettingsViewModel
+    {
+        public Guid StoreId { get; set; }
+        public string StoreName { get; set; } = string.Empty;
+        public string StoreAddress { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? Website { get; set; }
+        public string? WorkingHours { get; set; }
+        public string? Description { get; set; }
+        public string? SocialMedia { get; set; }
+        public bool IsActive { get; set; } = true;
+        public Dictionary<string, string> AdditionalSettings { get; set; } = new();
+    }
+
+    // Additional Seller ViewModels
+    public class SellerCommissionsViewModel
+    {
+        public List<MonthlyCommissionData> MonthlyData { get; set; } = new();
+        public decimal TotalCommission { get; set; }
+        public decimal CurrentMonthCommission { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        
+        // Additional properties required by controller
+        public decimal TotalSales { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal CommissionRate { get; set; }
+        public List<RecentOrder> RecentOrders { get; set; } = new();
+    }
+
+    public class MonthlyCommissionData
+    {
+        public int Month { get; set; }
+        public int Year { get; set; }
+        public decimal Commission { get; set; }
+        public int OrderCount { get; set; }
+        
+        // Additional property for sales data
+        public decimal Sales { get; set; }
+    }
+
+    public class RecentOrder
+    {
+        public Guid OrderId { get; set; }
+        public string OrderNumber { get; set; } = string.Empty;
+        public DateTime OrderDate { get; set; }
+        public decimal Total { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class SellerCustomersViewModel
+    {
+        public List<CustomerInfo> Customers { get; set; } = new();
+        public int TotalCustomers { get; set; }
+        public int NewCustomersThisMonth { get; set; }
+        public int ReturningCustomers { get; set; }
+        
+        // Additional properties for pagination and search
+        public List<CustomerInfo> TopCustomers { get; set; } = new();
+        public List<CustomerInfo> NewCustomers { get; set; } = new();
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 10;
+        public string Search { get; set; } = string.Empty;
+        public int TotalCount { get; set; }
+    }
+
+    public class CustomerInfo
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public int OrderCount { get; set; }
+        public decimal TotalSpent { get; set; }
+        public DateTime LastOrderDate { get; set; }
+        
+        // Additional properties required by controller
+        public string UserId { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public DateTime FirstOrderDate { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class SellerReportsViewModel
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public List<DailySalesData> DailySales { get; set; } = new();
+        
+        // Additional properties required by controller
+        public decimal MonthlyRevenue { get; set; }
+        public int MonthlyOrders { get; set; }
+        public int TotalProducts { get; set; }
+        public int ActiveProducts { get; set; }
+        public int TotalCustomers { get; set; }
+        public int NewCustomers { get; set; }
+        public decimal ConversionRate { get; set; }
+        public List<string> SalesChartLabels { get; set; } = new();
+        public List<decimal> SalesChartData { get; set; } = new();
+        public List<string> OrdersChartLabels { get; set; } = new();
+        public List<int> OrdersChartData { get; set; } = new();
+    }
+
+    public class DailySalesData
+    {
+        public DateTime Date { get; set; }
+        public decimal Revenue { get; set; }
+        public int Orders { get; set; }
+    }
+
+    public class SellerProductPerformanceViewModel
+    {
+        public List<ProductPerformanceItem> Products { get; set; } = new();
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        
+        // Additional properties required by controller
+        public List<ProductPerformanceItem> TopProducts { get; set; } = new();
+        public List<ProductPerformanceItem> LowPerformingProducts { get; set; } = new();
+    }
+
+    public class ProductPerformanceItem
+    {
+        public Guid ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ProductImageUrl { get; set; } = string.Empty;
+        public int ViewCount { get; set; }
+        public int SalesCount { get; set; }
+        public decimal Revenue { get; set; }
+        public decimal ConversionRate { get; set; }
+        
+        // Additional properties required by controller
+        public string ImageUrl { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int TotalSold { get; set; }
+        public int ReviewCount { get; set; }
+        public double AverageRating { get; set; }
     }
 }

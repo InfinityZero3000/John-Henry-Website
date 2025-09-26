@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JohnHenryFashionWeb.Models
 {
@@ -203,16 +204,25 @@ namespace JohnHenryFashionWeb.Models
         public Guid Id { get; set; }
         public Guid ProductId { get; set; }
         public string UserId { get; set; } = string.Empty;
+        [NotMapped]
+        public string? ApplicationUserId { get; set; } // EF shadow property - not mapped
         public int Rating { get; set; } // 1-5
         public string? Title { get; set; }
         public string? Comment { get; set; }
         public bool IsApproved { get; set; } = false;
+        // public string? SellerResponse { get; set; }
+        // public DateTime? SellerResponseDate { get; set; }
+        // public string? SellerResponseBy { get; set; } // Seller ID who responded
+        // public bool IsHelpful { get; set; } = false;
+        // public int HelpfulCount { get; set; } = 0;
+        // public bool IsVerifiedPurchase { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public Product Product { get; set; } = null!;
         public ApplicationUser User { get; set; } = null!;
+        // public ApplicationUser? SellerResponseUser { get; set; }
     }
 
     public class Coupon
@@ -224,13 +234,43 @@ namespace JohnHenryFashionWeb.Models
         public string Type { get; set; } = "percentage"; // percentage, fixed_amount
         public decimal Value { get; set; }
         public decimal? MinOrderAmount { get; set; }
+        [NotMapped]
+        public decimal? MaxDiscountAmount { get; set; }
         public int? UsageLimit { get; set; }
         public int UsageCount { get; set; } = 0;
+        [NotMapped]
+        public int? UsageLimitPerUser { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; } = true;
+        // public string CreatedBy { get; set; } = string.Empty; // Seller ID
+        [NotMapped]
+        public string? TargetAudience { get; set; } = "all"; // all, new_customers, returning_customers
+        [NotMapped]
+        public string? ProductCategories { get; set; } // JSON array of category IDs
+        [NotMapped]
+        public string? ProductIds { get; set; } // JSON array of specific product IDs
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        // public ApplicationUser Creator { get; set; } = null!;
+        public ICollection<CouponUsage> CouponUsages { get; set; } = new List<CouponUsage>();
+    }
+
+    public class CouponUsage
+    {
+        public Guid Id { get; set; }
+        public Guid CouponId { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public Guid OrderId { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public DateTime UsedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        public Coupon Coupon { get; set; } = null!;
+        public ApplicationUser User { get; set; } = null!;
+        public Order Order { get; set; } = null!;
     }
 
     public class Wishlist
