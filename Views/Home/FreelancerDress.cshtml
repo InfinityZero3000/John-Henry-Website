@@ -1,0 +1,667 @@
+@{
+    ViewData["Title"] = "VÁY FREELANCER";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/freelancer-style.css" />
+    <link rel="stylesheet" href="~/css/dropdown.css" />
+    <style>
+        :root {
+            --jh-red: #951329;
+            --jh-dark-red: #95122A;
+            --jh-white: #FFFFFF;
+            --jh-gold: #FFD700;
+        }
+
+        /* Collection styling to match homepage */
+        .collections-section {
+            background-color: #f8f9fa;
+        }
+
+        .collection-section {
+            margin-bottom: 3rem;
+        }
+
+        .collection-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .collection-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            color: #333;
+        }
+
+        .collection-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            color: #666;
+        }
+
+        .collection-hero-banner {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .collection-hero-banner img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .freelancer-page {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .breadcrumb-nav {
+            background-color: #f8f9fa;
+            padding: 15px 0;
+        }
+
+        .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .breadcrumb-nav .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d;
+            padding: 0 8px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        .sidebar {
+            max-width: 300px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            height: fit-content;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+        }
+
+        .filter-section h5 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filter-section h5 i {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-option {
+            padding: 5px 0;
+        }
+
+        .filter-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--jh-red);
+        }
+
+        .filter-option label {
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .filter-option.has-subcategory {
+            cursor: pointer;
+        }
+
+        .filter-option .expand-icon {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .filter-option .expand-icon.expanded {
+            transform: rotate(45deg);
+        }
+
+        .subcategories {
+            display: none;
+            margin-left: 0;
+            margin-top: 8px;
+            padding-left: 0;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+
+        .subcategories.show {
+            display: block;
+            max-height: 300px;
+            opacity: 1;
+        }
+
+        .subcategory-item {
+            padding: 8px 0;
+            padding-left: 20px;
+            font-size: 14px;
+            margin-left: 10px;
+            position: relative;
+        }
+
+        .subcategory-item label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .subcategory-item input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--jh-red);
+        }
+
+        .color-options-new .color-row {
+            padding: 5px 0;
+        }
+
+        .color-square {
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .price-range-new .form-range {
+            accent-color: var(--jh-red);
+        }
+
+        .price-inputs .input-group-text {
+            font-size: 11px;
+            padding: 0.25rem 0.4rem;
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        .price-inputs .form-control {
+            font-size: 12px;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .size-section .size-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .size-btn {
+            min-width: 35px;
+            height: 28px;
+            padding: 0.15rem 0.4rem;
+            font-size: 11px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .size-btn:hover {
+            background-color: var(--jh-red);
+            border-color: var(--jh-red);
+            color: white;
+        }
+
+        .size-btn.active {
+            background-color: var(--jh-red) !important;
+            border-color: var(--jh-red) !important;
+            color: white !important;
+        }
+
+        .products-section {
+            flex: 1;
+        }
+
+        .products-header {
+            background-color: white;
+            padding: 20px 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .products-count {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Hide shirt and trouser filters for dress page */
+        .filter-option.ao-freelancer,
+        .filter-option.quan-freelancer {
+            display: none !important;
+        }
+
+        /* Hide trouser size section */
+        .size-category.trouser-sizes {
+            display: none !important;
+        }
+
+        @@media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .sidebar {
+                max-width: auto;
+            }
+        }
+    </style>
+}
+
+<div class="freelancer-page">
+    <section class="collections-section py-2 bg-white">
+        <div class="container">
+            <!-- Freelancer Dress Collection -->
+            <div class="collection-section mb-3">
+                <div class="col-12">
+                </div>
+
+                <div class="collection-hero-banner position-relative mb-5">
+                    <img src="~/images/Banner/banner-dress-woman.jpg" alt="Váy Freelancer Collection" class="w-100 hero-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container-fluid">
+        <div class="container">
+            <div class="main-content">
+                <!-- Sidebar Filters -->
+                <div class="sidebar">
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Danh mục 
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="filter-options">
+                            <div class="filter-option d-flex justify-content-between align-items-center">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="category" value="dam" class="me-2">
+                                    Đầm
+                                </label>
+                            </div>
+                            <div class="filter-option d-flex justify-content-between align-items-center">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="category" value="chanvay" class="me-2">
+                                    Chân váy
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Màu sắc 
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="color-options-new">
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="white" class="me-2">
+                                    White
+                                </label>
+                                <div class="color-square" style="background-color: #fff; border: 1px solid #ddd; width: 16px; height: 16px;"></div>
+                            </div>
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="black" class="me-2">
+                                    Black
+                                </label>
+                                <div class="color-square" style="background-color: #000; width: 16px; height: 16px;"></div>
+                            </div>
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="navy" class="me-2">
+                                    Navy
+                                </label>
+                                <div class="color-square" style="background-color: #4a90e2; width: 16px; height: 16px;"></div>
+                            </div>
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="blue" class="me-2">
+                                    Blue
+                                </label>
+                                <div class="color-square" style="background-color: #5bc0eb; width: 16px; height: 16px;"></div>
+                            </div>
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="green" class="me-2">
+                                    Green
+                                </label>
+                                <div class="color-square" style="background-color: #9bc53d; width: 16px; height: 16px;"></div>
+                            </div>
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="pink" class="me-2">
+                                    Pink
+                                </label>
+                                <div class="color-square" style="background-color: #ff69b4; width: 16px; height: 16px;"></div>
+                            </div>
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="red" class="me-2">
+                                    Red
+                                </label>
+                                <div class="color-square" style="background-color: #e55353; width: 16px; height: 16px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Giá 
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="price-range-new">
+                            <div class="price-slider mb-3">
+                                <input type="range" class="form-range" id="priceRange" min="0" max="3000000" step="100000" value="1500000">
+                            </div>
+                            <div class="price-inputs">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-fill">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Minimum</span>
+                                            <input type="number" class="form-control" value="0" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Maximum</span>
+                                            <input type="number" class="form-control" value="3000000" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Size 
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="size-section">
+                            <div class="size-category mb-3">
+                                <h6 class="text-muted mb-2" style="font-size: 13px;">Đầm & Váy</h6>
+                                <div class="size-buttons">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">XS</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">S</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">M</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">L</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">XL</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-dark btn-sm clear-filters px-4">Xóa</button>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="products-section">
+                    <div class="products-header">
+                        <div class="sort-options">
+                            <label for="sort-select">Sắp xếp theo</label>
+                            <select id="sort-select" class="sort-select">
+                                <option value="default">Mặc định</option>
+                                <option value="name">Tên A-Z</option>
+                                <option value="price-low">Giá thấp đến cao</option>
+                                <option value="price-high">Giá cao đến thấp</option>
+                                <option value="newest">Mới nhất</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="products-grid">
+                        <div class="row g-4">
+                            <!-- Sample dress products - in reality these would be filtered from the backend -->
+                            <!-- Product 1 -->
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                <div class="product-card-new">
+                                    <div class="product-image-container">
+                                        <img src="~/images/Đầm nữ/Đầm Midi Freelancer FWDR25SS01C.jpg" alt="Đầm Midi Freelancer" class="product-image">
+                                    </div>
+                                    <div class="product-info">
+                                        <h6 class="product-name">Đầm Midi Freelancer FWDR25SS01C</h6>
+                                        <div class="product-price-actions">
+                                            <div class="product-price">1.200.000₫</div>
+                                            <div class="product-actions">
+                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-dress-001">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-dress-001', this)">
+                                                    <i class="fas fa-shopping-bag"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product 2 -->
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                <div class="product-card-new">
+                                    <div class="product-image-container">
+                                        <img src="~/images/Chân váy/Chân Váy Midi Freelancer FWSK25SS01C.jpg" alt="Chân Váy Midi Freelancer" class="product-image">
+                                    </div>
+                                    <div class="product-info">
+                                        <h6 class="product-name">Chân Váy Midi Freelancer FWSK25SS01C</h6>
+                                        <div class="product-price-actions">
+                                            <div class="product-price">800.000₫</div>
+                                            <div class="product-actions">
+                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-skirt-001">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-skirt-001', this)">
+                                                    <i class="fas fa-shopping-bag"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Color filter functionality
+            const colorRadios = document.querySelectorAll('input[name="color"]');
+            colorRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    console.log('Color selected:', this.value);
+                });
+            });
+
+            // Category filter functionality  
+            const categoryRadios = document.querySelectorAll('input[name="category"]');
+            categoryRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    console.log('Category selected:', this.value);
+                });
+            });
+
+            // Size button functionality
+            const sizeBtns = document.querySelectorAll('.size-btn');
+            sizeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Toggle active state
+                    this.classList.toggle('active');
+                    if (this.classList.contains('active')) {
+                        this.classList.remove('btn-outline-secondary');
+                        this.classList.add('btn-primary');
+                    } else {
+                        this.classList.remove('btn-primary');
+                        this.classList.add('btn-outline-secondary');
+                    }
+                    console.log('Size selected:', this.textContent);
+                });
+            });
+
+            // Clear filters functionality
+            const clearFiltersBtn = document.querySelector('.clear-filters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    // Clear radio buttons
+                    const radios = document.querySelectorAll('input[type="radio"]');
+                    radios.forEach(radio => {
+                        radio.checked = false;
+                    });
+
+                    // Clear size selections
+                    sizeBtns.forEach(btn => {
+                        btn.classList.remove('active', 'btn-primary');
+                        btn.classList.add('btn-outline-secondary');
+                    });
+
+                    // Clear price inputs
+                    const priceInputs = document.querySelectorAll('input[type="number"]');
+                    priceInputs.forEach(input => {
+                        if (input.getAttribute('value') === '0') {
+                            input.value = '0';
+                        } else {
+                            input.value = '3000000';
+                        }
+                    });
+
+                    // Reset price range slider
+                    const priceRange = document.getElementById('priceRange');
+                    if (priceRange) {
+                        priceRange.value = '1500000';
+                    }
+
+                    console.log('Filters cleared');
+                });
+            }
+
+            // Price range slider functionality
+            const priceRange = document.getElementById('priceRange');
+            const minPriceInput = document.querySelector('input[value="0"]');
+            const maxPriceInput = document.querySelector('input[value="3000000"]');
+
+            if (priceRange && minPriceInput && maxPriceInput) {
+                priceRange.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    maxPriceInput.value = value;
+                });
+
+                minPriceInput.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    if (value < parseInt(priceRange.max)) {
+                        priceRange.min = value;
+                    }
+                });
+
+                maxPriceInput.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    if (value > 0) {
+                        priceRange.value = value;
+                    }
+                });
+            }
+
+            // Wishlist functionality
+            const wishlistBtns = document.querySelectorAll('.wishlist-btn');
+            wishlistBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.getAttribute('data-wishlist-product-id');
+                    if (productId) {
+                        toggleWishlist(productId, this);
+                    }
+                });
+            });
+
+            // Sort functionality
+            const sortSelect = document.getElementById('sort-select');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    console.log('Sort by:', this.value);
+                });
+            }
+        });
+
+        // Add to cart function
+        function addToCart(productId, button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                alert('Đã thêm sản phẩm vào giỏ hàng!');
+            }, 1000);
+        }
+
+        // Wishlist function
+        function toggleWishlist(productId, button) {
+            const icon = button.querySelector('i');
+            
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                button.style.color = '#dc3545';
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                button.style.color = '';
+            }
+        }
+    </script>
+}

@@ -103,7 +103,7 @@
                 </div>
             </div>
             
-            <div class="collection-hero-banner position-relative mb-5">
+            <div class="collection-hero-banner position-relative mb-4">
                 <img src="~/images/Banner/banner-man-bestseller.jpg" alt="John Henry Collection" class="w-100 hero-image">
             </div>
             
@@ -113,10 +113,14 @@
                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                         <div class="product-card-new">
                             <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Hoodie Nam Tay Dài TS25FH22C-LS.jpg" alt="Áo Hoodie Nam Tay Dài" class="product-image">
+                                <a href="@Url.Action("Products", "Home")">
+                                    <img src="~/images/Áo nam/Áo Hoodie Nam Tay Dài TS25FH22C-LS.jpg" alt="Áo Hoodie Nam Tay Dài" class="product-image">
+                                </a>
                             </div>
                             <div class="product-info">
-                                <h6 class="product-name">Áo Hoodie Nam Tay Dài TS25FH22C-LS</h6>
+                                <a href="@Url.Action("Products", "Home")" style="text-decoration: none; color: inherit;">
+                                    <h6 class="product-name">Áo Hoodie Nam Tay Dài TS25FH22C-LS</h6>
+                                </a>
                                 <div class="product-price-actions">
                                     <div class="product-price">800.000₫</div>
                                     <div class="product-actions">
@@ -274,32 +278,10 @@
                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                         <div class="product-card-new">
                             <div class="product-image-container">
-                                <img src="~/images/Quần nam/Quần Khaki Nam Form Vừa KP25FH18C-NMSC.jpg" alt="Quần Khaki Nam Form Vừa" class="product-image">
+                                <img src="~/images/Quần nam/Quần Khaki Nam Form Vừa KP25FH20C-NMWFRG.jpg" alt="Quần Khaki Nam Form Vừa" class="product-image">
                             </div>
                             <div class="product-info">
-                                <h6 class="product-name">Quần Khaki Nam Form Vừa KP25FH18C-NMSC</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">780.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-khaki-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-khaki-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product 9 -->
-                                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Quần nam/Quần Khaki Nam Form Vừa KP25FH18C-NMSC.jpg" alt="Quần Khaki Nam Form Vừa" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Quần Khaki Nam Form Vừa KP25FH18C-NMSC</h6>
+                                <h6 class="product-name">Quần Khaki Nam Form Vừa KP25FH20C-NMWFRG</h6>
                                 <div class="product-price-actions">
                                     <div class="product-price">780.000₫</div>
                                     <div class="product-actions">
@@ -318,9 +300,8 @@
                 
                 <!-- View All Button -->
                 <div class="text-center mt-5">
-                    <a href="/Products" class="btn btn-outline-primary btn-lg px-5">
-                        <i class="fas fa-th-large me-2"></i>
-                        Xem Tất Cả Sản Phẩm Nam
+                    <a href="@Url.Action("Products", "Home")" class="btn btn-outline-primary view-all-btn px-5">
+                        XEM THÊM
                     </a>
                 </div>
             </div>
@@ -336,7 +317,7 @@
                 </div>
             </div>
 
-                <div class="collection-banner position-relative mb-5">
+                <div class="collection-banner position-relative mb-4">
                     <img src="~/images/Banner/banner-women-main.jpg" alt="Freelancer Collection" class="w-100 hero-image">
                 </div>
                 
@@ -529,9 +510,8 @@
                 
                 <!-- View All Button -->
                 <div class="text-center mt-5">
-                    <a href="/Products" class="btn btn-outline-primary btn-lg px-5">
-                        <i class="fas fa-th-large me-2"></i>
-                        Xem Tất Cả Sản Phẩm Nữ
+                    <a href="@Url.Action("Products", "Home")" class="btn btn-outline-primary view-all-btn px-5">
+                        XEM THÊM
                     </a>
                 </div>
             </div>
@@ -547,7 +527,7 @@
                 </div>
             </div>
             
-            <div class="collection-hero-banner position-relative mb-5">
+            <div class="collection-hero-banner position-relative mb-4">
                 <img src="~/images/Banner/banner-women-bestseller.jpg" alt="Best Seller Collection" class="w-100 hero-image">
             </div>
             
@@ -737,14 +717,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- View All Button -->
-                <div class="text-center mt-5">
-                    <a href="/Products" class="btn btn-outline-primary btn-lg px-5">
-                        <i class="fas fa-star me-2"></i>
-                        Xem Tất Cả Sản Phẩm Best Seller
-                    </a>
-                </div>
             </div>
         </div>
         
@@ -857,153 +829,6 @@
     </div>
 </section>
 
-<!-- Best Sellers Section -->
-<section class="best-sellers-section py-5">
-    <div class="container">
-        <!-- Section Header -->
-        <div class="row mb-5">
-            <div class="col-12 text-center">
-                <div class="best-sellers-header">
-                    <h2 class="best-sellers-title">BEST</h2>
-                    <h3 class="best-sellers-subtitle">SELLERS</h3>
-                    <div class="title-divider"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Products Row -->
-        <div class="row g-4">
-            <!-- Product 1: Áo Khoác Nam -->
-            <div class="col-lg-3 col-md-6">
-                <div class="best-seller-card">
-                    <div class="product-image-container">
-                        <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
-                        <span class="product-badge">NEW</span>
-                        <div class="product-actions">
-                            <button class="action-btn"><i class="fas fa-heart"></i></button>
-                            <button class="action-btn"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn"><i class="fas fa-shopping-bag"></i></button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h5 class="product-name">Áo Khoác Nam Cá Tính</h5>
-                        <p class="product-code">JK25FH04C-PA</p>
-                        <div class="product-price">
-                            <span class="current-price">1.200.000₫</span>
-                            <span class="old-price">1.500.000₫</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span class="rating-count">(24)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 2: Áo Len Nam -->
-            <div class="col-lg-3 col-md-6">
-                <div class="best-seller-card">
-                    <div class="product-image-container">
-                        <img src="~/images/Áo nam/Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB.jpg" alt="Áo Len Nam" class="product-image">
-                        <span class="product-badge sale-badge">SALE</span>
-                        <div class="product-actions">
-                            <button class="action-btn"><i class="fas fa-heart"></i></button>
-                            <button class="action-btn"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn"><i class="fas fa-shopping-bag"></i></button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h5 class="product-name">Áo Len Nam Tay Dài</h5>
-                        <p class="product-code">SW25FH04M-LB</p>
-                        <div class="product-price">
-                            <span class="current-price">890.000₫</span>
-                            <span class="old-price">1.100.000₫</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <span class="rating-count">(18)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 3: Áo Blouse Nữ -->
-            <div class="col-lg-3 col-md-6">
-                <div class="best-seller-card">
-                    <div class="product-image-container">
-                        <img src="~/images/Áo nữ/Áo Blouse Nữ Thời Trang FWBL25SS01C.jpg" alt="Áo Blouse Nữ" class="product-image">
-                        <span class="product-badge">HOT</span>
-                        <div class="product-actions">
-                            <button class="action-btn"><i class="fas fa-heart"></i></button>
-                            <button class="action-btn"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn"><i class="fas fa-shopping-bag"></i></button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h5 class="product-name">Áo Blouse Nữ Thời Trang</h5>
-                        <p class="product-code">FWBL25SS01C</p>
-                        <div class="product-price">
-                            <span class="current-price">750.000₫</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span class="rating-count">(32)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 4: Áo Polo Nữ -->
-            <div class="col-lg-3 col-md-6">
-                <div class="best-seller-card">
-                    <div class="product-image-container">
-                        <img src="~/images/Áo nữ/Áo Polo Nữ Cổ Lưới FWKS25SS11G.jpg" alt="Áo Polo Nữ" class="product-image">
-                        <div class="product-actions">
-                            <button class="action-btn"><i class="fas fa-heart"></i></button>
-                            <button class="action-btn"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn"><i class="fas fa-shopping-bag"></i></button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h5 class="product-name">Áo Polo Nữ Cổ Lưới</h5>
-                        <p class="product-code">FWKS25SS11G</p>
-                        <div class="product-price">
-                            <span class="current-price">680.000₫</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <span class="rating-count">(15)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- View All Button -->
-        <div class="row mt-5">
-            <div class="col-12 text-center">
-                <a href="/Products" class="btn btn-outline-primary view-all-btn">XEM TẤT CẢ SẢN PHẨM</a>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Product Categories Section -->
 <section class="product-categories-section py-5 bg-light">
     <div class="container">
@@ -1029,7 +854,7 @@
                                 <div class="category-stats">
                                     <span class="product-count">50+ Sản phẩm</span>
                                 </div>
-                                <a href="/Products" class="btn category-btn btn-primary">KHÁM PHÁ NGAY</a>
+                                <a href="/JohnHenry" class="btn category-btn btn-primary">KHÁM PHÁ NGAY</a>
                             </div>
                         </div>
                     </div>
@@ -1048,7 +873,7 @@
                                 <div class="category-stats">
                                     <span class="product-count">60+ Sản phẩm</span>
                                 </div>
-                                <a href="/Products" class="btn category-btn btn-outline-light">KHÁM PHÁ NGAY</a>
+                                <a href="/Freelancer" class="btn category-btn btn-outline-light">KHÁM PHÁ NGAY</a>
                             </div>
                         </div>
                     </div>
@@ -1085,7 +910,7 @@
                         <span class="blog-category">Xu hướng</span>
                         <h5 class="blog-title">Xu hướng thời trang Thu Đông 2024</h5>
                         <p class="blog-excerpt">Khám phá những xu hướng thời trang mới nhất cho mùa Thu Đông năm nay với những màu sắc và phong cách độc đáo...</p>
-                        <a href="#" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -1131,7 +956,7 @@
 
         <!-- View All Button -->
         <div class="text-center mt-5">
-            <a href="/Blog" class="btn btn-primary view-all-btn">XEM TẤT CẢ TIN TỨC</a>
+            <a href="/Blog" class="btn btn-outline-primary view-all-btn px-5">XEM TIN TỨC</a>
         </div>
     </div>
 </section>
@@ -1152,32 +977,38 @@
 
 <style>
     :root {
-        --jh-red: #CE193A;
+        --jh-red: #951329;
         --jh-dark-red: #95122A;
         --jh-white: #FFFFFF;
         --jh-gold: #FFD700;
-        --primary-color: #CE193A;
+        --primary-color: #951329;
     }
     
     .hero-carousel {
-        height: 60vh; /* Giảm từ 100vh xuống 60vh */
+        width: 100%; /* Sử dụng 100% thay vì 100vw */
+        height: 100vh; /* Full viewport height */
         overflow: hidden;
         position: relative;
+        margin: 0; /* Loại bỏ margin âm */
     }
     
     .carousel-inner {
+        width: 100%;
         height: 100%;
     }
     
     .carousel-item {
-        height: 60vh; /* Giảm từ 100vh xuống 60vh */
+        width: 100%;
+        height: 100vh; /* Full viewport height */
     }
     
     .hero-slide {
         position: relative;
+        width: 100%;
         height: 100%;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
     
     .hero-background {
@@ -1187,12 +1018,31 @@
         width: 100%;
         height: 100%;
         z-index: 1;
+        overflow: hidden;
     }
     
     .hero-bg-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        width: auto!important;
+        height: 85%;
+        object-fit: contain; 
+        object-position: center;
+        background-color: #f8f9fa;
+        transition: transform 0.3s ease;
+    }
+    
+    /* Tùy chọn: nếu muốn ảnh fill toàn bộ space trên màn hình lớn */
+    @@media (min-width: 1200px) {
+        .hero-bg-img {
+            object-fit: cover; /* Fill toàn bộ space trên desktop */
+        }
+    }
+    
+    @@media (max-width: 1199px) {
+        .hero-bg-img {
+            object-fit: contain;
+            max-width: 100%;
+            max-height: 100%;
+        }
     }
     
     /* Carousel Controls */
@@ -1304,14 +1154,43 @@
         color: var(--jh-dark-red);
     }
     
-    /* Responsive Design */
-    @@media (max-width: 768px) {
+    /* Responsive Design cho Banner */
+    @@media (max-width: 1200px) {
         .hero-carousel {
-            height: 50vh;
+            height: 80vh;
         }
         
         .carousel-item {
-            height: 50vh;
+            height: 80vh;
+        }
+    }
+    
+    @@media (max-width: 992px) {
+        .hero-carousel {
+            height: 70vh;
+        }
+        
+        .carousel-item {
+            height: 70vh;
+        }
+        
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 8%;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .hero-carousel {
+            height: 60vh;
+        }
+        
+        .carousel-item {
+            height: 60vh;
+        }
+        
+        .hero-bg-img {
+            object-fit: contain;
         }
         
         .carousel-control-prev,
@@ -1348,16 +1227,26 @@
     
     @@media (max-width: 576px) {
         .hero-carousel {
-            height: 40vh;
+            height: 50vh;
         }
         
         .carousel-item {
-            height: 40vh;
+            height: 50vh;
+        }
+        
+        .hero-bg-img {
+            object-fit: contain; 
+            object-position: center;
         }
         
         .carousel-indicators [data-bs-target] {
             width: 10px;
             height: 10px;
+        }
+        
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 12%;
         }
         
         .small-banners-section {
@@ -1383,6 +1272,21 @@
         
         .row.g-3 {
             gap: 15px;
+        }
+    }
+    
+    @@media (max-width: 400px) {
+        .hero-carousel {
+            height: 45vh;
+        }
+        
+        .carousel-item {
+            height: 45vh;
+        }
+        
+        .hero-bg-img {
+            object-fit: contain;
+            object-position: center;
         }
     }
     }
@@ -1601,7 +1505,6 @@
     
     /* Featured Products Section */
     .featured-products {
-        background-color: #f8f9fa;
     }
     
     .section-title {
@@ -1808,9 +1711,9 @@
     
     .view-all-btn {
         padding: 15px 40px;
-        font-weight: 700;
+        font-weight: 100;
         font-size: 1.1rem;
-        border-radius: 50px;
+        border-radius: 15px;
         text-transform: uppercase;
         letter-spacing: 1px;
         transition: all 0.3s ease;

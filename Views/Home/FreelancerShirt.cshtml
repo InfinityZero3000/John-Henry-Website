@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "FREELANCER";
+    ViewData["Title"] = "ÁO NỮ FREELANCER";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -238,98 +238,6 @@
             color: white !important;
         }
 
-        .color-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .color-option {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #ddd;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .color-option:hover {
-            transform: scale(1.1);
-            border-color: var(--jh-red);
-        }
-
-        .color-option.selected {
-            border-color: var(--jh-red);
-            border-width: 3px;
-        }
-
-        .color-option.selected::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--jh-red);
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .price-range {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .price-input {
-            width: 100px;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .size-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .size-option {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            background: white;
-        }
-
-        .size-option:hover {
-            border-color: var(--jh-red);
-            color: var(--jh-red);
-        }
-
-        .size-option.selected {
-            background-color: var(--jh-red);
-            color: white;
-            border-color: var(--jh-red);
-        }
-
-        .clear-filters {
-            background: none;
-            border: 1px solid #ddd;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 13px;
-            color: #666;
-        }
-
         .products-section {
             flex: 1;
         }
@@ -370,29 +278,28 @@
             }
 
             .sidebar {
-                max -width: auto;
+                max-width: auto;
             }
         }
-    </link>
+    </style>
 }
 
 <div class="freelancer-page">
     <section class="collections-section py-2 bg-white">
         <div class="container">
-            <!-- Freelancer Collection -->
+            <!-- Freelancer Shirt Collection -->
             <div class="collection-section mb-3">
                 <div class="col-12">
                 </div>
 
                 <div class="collection-hero-banner position-relative mb-5">
-                    <img src="~/images/Banner/banner-women-0.jpg" alt="Freelancer Collection" class="w-100 hero-image">
+                    <img src="~/images/Banner/banner-shirt-woman.jpg" alt="Áo Nữ Freelancer Collection" class="w-100 hero-image">
                 </div>
             </div>
         </div>
     </section>
 
     <div class="container-fluid">
-
         <div class="container">
             <div class="main-content">
                 <!-- Sidebar Filters -->
@@ -403,18 +310,6 @@
                             <i class="fas fa-chevron-down"></i>
                         </h5>
                         <div class="filter-options">
-                            <div class="filter-option d-flex justify-content-between align-items-center">
-                                <label class="d-flex align-items-center mb-0">
-                                    <input type="radio" name="category" value="dam" class="me-2">
-                                    Đầm
-                                </label>
-                            </div>
-                            <div class="filter-option d-flex justify-content-between align-items-center">
-                                <label class="d-flex align-items-center mb-0">
-                                    <input type="radio" name="category" value="chanvay" class="me-2">
-                                    Chân váy
-                                </label>
-                            </div>
                             <div class="filter-option has-subcategory">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label class="d-flex align-items-center mb-0">
@@ -455,41 +350,6 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="filter-option has-subcategory">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <label class="d-flex align-items-center mb-0">
-                                        <input type="radio" name="category" value="quan-freelancer" class="me-2">
-                                        Quần Freelancer
-                                    </label>
-                                    <i class="fas fa-plus text-muted expand-icon" data-target="quan-subcategories"></i>
-                                </div>
-                                <div class="subcategories" id="quan-subcategories">
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="quan-jeans-nu" class="me-2">
-                                            Quần Jeans Nữ
-                                        </label>
-                                    </div>
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="quan-tay-nu" class="me-2">
-                                            Quần Tây Nữ
-                                        </label>
-                                    </div>
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="quan-short-nu" class="me-2">
-                                            Quần Short Nữ
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="filter-option d-flex justify-content-between align-items-center">
-                                <label class="d-flex align-items-center mb-0">
-                                    <input type="radio" name="category" value="phu-kien-nu" class="me-2">
-                                    Phụ kiện nữ
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -587,24 +447,13 @@
                         </h5>
                         <div class="size-section">
                             <div class="size-category mb-3">
-                                <h6 class="text-muted mb-2" style="font-size: 13px;">Đầm & Áo</h6>
+                                <h6 class="text-muted mb-2" style="font-size: 13px;">Áo Nữ</h6>
                                 <div class="size-buttons">
                                     <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">XS</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">S</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">M</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">L</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">XL</button>
-                                </div>
-                            </div>
-                            <div class="size-category">
-                                <h6 class="text-muted mb-2" style="font-size: 13px;">Quần & Chân váy</h6>
-                                <div class="size-buttons">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">26</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">27</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">28</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">29</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">30</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn me-1 mb-1">31</button>
                                 </div>
                             </div>
                         </div>
@@ -632,51 +481,53 @@
 
                     <div class="products-grid">
                         <div class="row g-4">
+                            <!-- Sample shirt products -->
                             <!-- Product 1 -->
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                 <div class="product-card-new">
                                     <div class="product-image-container">
                                         <img src="~/images/Áo nữ/Áo Blouse Cổ Trụ Freelancer FWBL25SS07C.jpg" alt="Áo Blouse Cổ Trụ Freelancer FWBL25SS07C" class="product-image">
-                                </div>
-                                        <div class="product-info">
-                                            <h6 class="product-name">Áo Blouse Cổ Trụ Freelancer FWBL25SS07C</h6>
-                                            <div class="product-price-actions">
-                                                <div class="product-price">700.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-001">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-001', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
+                                    </div>
+                                    <div class="product-info">
+                                        <h6 class="product-name">Áo Blouse Cổ Trụ Freelancer FWBL25SS07C</h6>
+                                        <div class="product-price-actions">
+                                            <div class="product-price">700.000₫</div>
+                                            <div class="product-actions">
+                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-001">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-001', this)">
+                                                    <i class="fas fa-shopping-bag"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
                             <!-- Product 2 -->
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                 <div class="product-card-new">
                                     <div class="product-image-container">
                                         <img src="~/images/Áo nữ/Áo Blouse Freelancer FWBL25SS03C.jpg" alt="Áo Blouse Freelancer FWBL25SS03C" class="product-image">
-                                        </div>
-                                        <div class="product-info">
-                                            <h6 class="product-name">Áo Blouse Freelancer FWBL25SS03C</h6>
-                                            <div class="product-price-actions">
-                                                <div class="product-price">600.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-001">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-001', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
+                                    </div>
+                                    <div class="product-info">
+                                        <h6 class="product-name">Áo Blouse Freelancer FWBL25SS03C</h6>
+                                        <div class="product-price-actions">
+                                            <div class="product-price">600.000₫</div>
+                                            <div class="product-actions">
+                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-002">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-002', this)">
+                                                    <i class="fas fa-shopping-bag"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
                             <!-- Product 3 -->
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                 <div class="product-card-new">
@@ -687,126 +538,34 @@
                                         <h6 class="product-name">Áo Polo Cổ V – FWKS25SS02G</h6>
                                         <div class="product-price-actions">
                                             <div class="product-price">700.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-001">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-001', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
+                                            <div class="product-actions">
+                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-polo-001">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-polo-001', this)">
+                                                    <i class="fas fa-shopping-bag"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
                             <!-- Product 4 -->
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                 <div class="product-card-new">
                                     <div class="product-image-container">
                                         <img src="~/images/Áo nữ/Áo Sơ Mi Freelancer – FWWS25SS06G.jpg" alt="Áo Sơ Mi Freelancer – FWWS25SS06G" class="product-image">
-                                </div>
-                                        <div class="product-info">
-                                            <h6 class="product-name">Áo Sơ Mi Freelancer – FWWS25SS06G</h6>
-                                            <div class="product-price-actions">
-                                                <div class="product-price">700.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-shirt-001">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-shirt-001', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
-                                </div>
-
-                            <!-- Product 5 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Đầm nữ/Đầm Nữ Thời Trang FWDR25SS08G.jpg" alt="Đầm Nữ Thời Trang FWDR25SS08G" class="product-image">
-                                </div>
-                                        <div class="product-info">
-                                            <h6 class="product-name">Đầm Nữ Thời Trang FWDR25SS08G</h6>
-                                            <div class="product-price-actions">
-                                                <div class="product-price">850.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-dress-001">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-dress-001', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            <!-- Product 6 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Chân váy nữ/Chân Váy Freelancer – FWSK25SS02G.jpg" alt="Chân Váy Freelancer FWSK25SS02G" class="product-image">
-                                </div>
-                                        <div class="product-info">
-                                            <h6 class="product-name">Chân Váy Freelancer FWSK25SS02G</h6>
-                                            <div class="product-price-actions">
-                                                <div class="product-price">650.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-skirt-001">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-skirt-001', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            <!-- Product 7 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Đầm nữ/Đầm Cổ Vest Thanh Lịch FWDR24SS21C.jpg" alt="Đầm Cổ Vest Thanh Lịch FWDR24SS21C" class="product-image">
-                                </div>
-                                        <div class="product-info">
-                                            <h6 class="product-name">Đầm Cổ Vest Thanh Lịch FWDR24SS21C</h6>
-                                            <div class="product-price-actions">
-                                                <div class="product-price">950.000₫</div>
-                                                <div class="product-actions">
-                                                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-dress-vest-002">
-                                                        <i class="far fa-heart"></i>
-                                                    </button>
-                                                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-dress-vest-002', this)">
-                                                        <i class="fas fa-shopping-bag"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            <!-- Product 8 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Chân váy nữ/Chân Váy Jeans Cá Tính FWSK24SS05G-J.jpg" alt="Chân Váy Jeans Cá Tính FWSK24SS05G-J" class="product-image">
-                                </div>
                                     <div class="product-info">
-                                        <h6 class="product-name">Chân Váy Jeans Cá Tính FWSK24SS05G-J</h6>
+                                        <h6 class="product-name">Áo Sơ Mi Freelancer – FWWS25SS06G</h6>
                                         <div class="product-price-actions">
-                                            <div class="product-price">750.000₫</div>
+                                            <div class="product-price">700.000₫</div>
                                             <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-jeans-skirt-001">
+                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-shirt-001">
                                                     <i class="far fa-heart"></i>
                                                 </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-jeans-skirt-001', this)">
+                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-shirt-001', this)">
                                                     <i class="fas fa-shopping-bag"></i>
                                                 </button>
                                             </div>
@@ -920,7 +679,7 @@
                 });
             }
 
-            // Wishlist functionality from homepage
+            // Wishlist functionality
             const wishlistBtns = document.querySelectorAll('.wishlist-btn');
             wishlistBtns.forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -937,40 +696,19 @@
             if (sortSelect) {
                 sortSelect.addEventListener('change', function() {
                     console.log('Sort by:', this.value);
-                    // Add sorting functionality here
                 });
             }
-
-            // Filter section toggle functionality
-            const filterTitles = document.querySelectorAll('.filter-section h5');
-            filterTitles.forEach(title => {
-                title.addEventListener('click', function() {
-                    const icon = this.querySelector('i');
-                    const content = this.nextElementSibling;
-                    
-                    if (content.style.display === 'none') {
-                        content.style.display = 'block';
-                        icon.classList.remove('fa-chevron-right');
-                        icon.classList.add('fa-chevron-down');
-                    } else {
-                        content.style.display = 'none';
-                        icon.classList.remove('fa-chevron-down');
-                        icon.classList.add('fa-chevron-right');
-                    }
-                });
-            });
 
             // Subcategory dropdown functionality
             const expandIcons = document.querySelectorAll('.expand-icon');
             expandIcons.forEach(icon => {
                 icon.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Prevent triggering parent label click
+                    e.stopPropagation();
                     const targetId = this.getAttribute('data-target');
                     const subcategoriesDiv = document.getElementById(targetId);
                     
                     if (subcategoriesDiv) {
                         if (subcategoriesDiv.classList.contains('show')) {
-                            // Close dropdown with smooth animation
                             subcategoriesDiv.style.maxHeight = '0';
                             subcategoriesDiv.style.opacity = '0';
                             this.classList.remove('expanded');
@@ -980,7 +718,6 @@
                                 subcategoriesDiv.style.display = 'none';
                             }, 300);
                         } else {
-                            // Close all other dropdowns first
                             document.querySelectorAll('.subcategories.show').forEach(div => {
                                 div.style.maxHeight = '0';
                                 div.style.opacity = '0';
@@ -993,12 +730,10 @@
                                 otherIcon.classList.remove('expanded');
                             });
                             
-                            // Open this dropdown with smooth animation
                             subcategoriesDiv.style.display = 'block';
                             subcategoriesDiv.classList.add('show');
                             this.classList.add('expanded');
                             
-                            // Trigger reflow for smooth animation
                             subcategoriesDiv.offsetHeight;
                             subcategoriesDiv.style.maxHeight = '300px';
                             subcategoriesDiv.style.opacity = '1';
@@ -1012,7 +747,6 @@
             subcategoryInputs.forEach(input => {
                 input.addEventListener('change', function() {
                     if (this.checked) {
-                        // Also check the parent category
                         const parentCategory = this.closest('.filter-option').querySelector('input[type="radio"]');
                         if (parentCategory) {
                             parentCategory.checked = true;
@@ -1023,28 +757,23 @@
             });
         });
 
-        // Add to cart function from homepage - NOW USING GLOBAL FUNCTION
+        // Add to cart function - NOW USING GLOBAL FUNCTION
         // (Commented out local function, using global addToCart from _Layout.cshtml)
         /*
         function addToCart(productId, button) {
-            // Add loading state
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
 
-            // Simulate API call
             setTimeout(() => {
-                // Reset button
                 button.innerHTML = originalText;
                 button.disabled = false;
-                
-                // Show success message (you can customize this)
                 alert('Đã thêm sản phẩm vào giỏ hàng!');
             }, 1000);
         }
         */
 
-        // Wishlist function from homepage
+        // Wishlist function
         function toggleWishlist(productId, button) {
             const icon = button.querySelector('i');
             

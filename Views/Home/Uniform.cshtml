@@ -1,0 +1,290 @@
+@{
+    ViewData["Title"] = "UNIFORM";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/john-henry-style.css" />
+    <link rel="stylesheet" href="~/css/dropdown.css" />
+    <style>
+        .uniform-page {
+            min-height: 100vh;
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Banner sections */
+        .banner-section {
+            margin-bottom: 0;
+            width: 100vw;
+            margin-left: calc(50% - 50vw);
+        }
+
+        .banner-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Banner-2 group (horizontal layout) */
+        .banner-2-group {
+            margin: 4rem 0;
+            width: 100vw;
+            margin-left: calc(50% - 50vw);
+        }
+
+        .banner-2-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            padding: 0;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .banner-2-item {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .banner-2-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Product grid */
+        .products-section {
+            margin-top: 4rem;
+            padding: 3rem 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            color: var(--jh-red);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--jh-red), var(--jh-gold));
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Responsive design */
+        @@media (max-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.2rem;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .banner-2-container {
+                flex-direction: column;
+            }
+
+            .banner-2-item {
+                flex: none;
+            }
+
+            .banner-2-item img {
+                height: 150px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .product-image {
+                height: 200px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .banner-2-container {
+                flex-direction: column;
+            }
+
+            .banner-2-item img {
+                height: 120px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .product-image {
+                height: 180px;
+            }
+        }
+    </style>
+}
+
+<div class="uniform-page">
+
+    <!-- Banner 1 -->
+    <div class="banner-section">
+        <img src="~/images/Uniform/banner-uniform-1.jpg" alt="Banner Uniform 1" class="banner-img">
+    </div>
+
+    <!-- Banner 3 -->
+    <div class="banner-section">
+        <img src="~/images/Uniform/banner-uniform-3.jpg" alt="Banner Uniform 3" class="banner-img">
+    </div>
+
+    <!-- Banner 4 -->
+    <div class="banner-section">
+        <img src="~/images/Uniform/banner-uniform-4.jpg" alt="Banner Uniform 4" class="banner-img">
+    </div>
+
+    <!-- Banner 2 Group (Horizontal Layout) -->
+    <div class="banner-2-group">
+        <h2 class="section-title">Tại sao chọn đồng phục của chúng tôi?</h2>
+        <div class="banner-2-container">
+            <div class="banner-2-item">
+                <img src="~/images/Uniform/banner-2-why-choose-uniform/banner-1.jpg" alt="Lý do chọn uniform 1">
+            </div>
+            <div class="banner-2-item">
+                <img src="~/images/Uniform/banner-2-why-choose-uniform/banner-2.jpg" alt="Lý do chọn uniform 2">
+            </div>
+            <div class="banner-2-item">
+                <img src="~/images/Uniform/banner-2-why-choose-uniform/banner-3.jpg" alt="Lý do chọn uniform 3">
+            </div>
+            <div class="banner-2-item">
+                <img src="~/images/Uniform/banner-2-why-choose-uniform/banner-4.jpg" alt="Lý do chọn uniform 4">
+            </div>
+            <div class="banner-2-item">
+                <img src="~/images/Uniform/banner-2-why-choose-uniform/banner-5.jpg" alt="Lý do chọn uniform 5">
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="products-section">
+        <div class="container">
+            <h2 class="section-title">Các loại đồng phục chuyên nghiệp</h2>
+            <div class="products-grid">
+                <div class="">
+                    <img src="~/images/Uniform/beauty-salon-uniform.jpg" alt="Đồng phục salon làm đẹp" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/Business Uniform.jpg" alt="Đồng phục doanh nghiệp" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/blazer-uniform.jpg" alt="Blazer đồng phục" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/jacket-uniform.jpg" alt="Áo khoác đồng phục" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/safety-uniform.jpg" alt="Đồng phục bảo hộ lao động" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/events-uniform.jpg" alt="Đồng phục sự kiện" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/showroom-uniform.jpg" alt="Đồng phục showroom" class="product-image">
+                </div>
+
+                <div class="">
+                    <img src="~/images/Uniform/group-uniform.jpg" alt="Đồng phục nhóm" class="product-image">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add smooth scrolling and animation effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate product items on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Apply animation to product items
+            document.querySelectorAll('.').forEach(item => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(item);
+            });
+
+            // Add click tracking for analytics
+            document.querySelectorAll('.').forEach(item => {
+                item.addEventListener('click', function() {
+                    const productAlt = this.querySelector('.product-image').alt;
+                    console.log('Product clicked:', productAlt);
+                    // Add analytics tracking here if needed
+                });
+            });
+        });
+    </script>
+}

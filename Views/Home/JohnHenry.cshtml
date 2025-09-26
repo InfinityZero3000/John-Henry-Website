@@ -1,13 +1,47 @@
-@{
+f@{
     ViewData["Title"] = "JOHN HENRY";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/freelancer-dropdown.css" />
+    <link rel="stylesheet" href="~/css/john-henry-style.css" />
+    <link rel="stylesheet" href="~/css/dropdown.css" />
     <style>
+
+        :root {
+            --jh-red: #951329;
+            --jh-dark-red: #95122A;
+            --jh-white: #FFFFFF;
+            --jh-gold: #FFD700;
+        }
+
+        /* Collection styling to match homepage */
+        .collections-section {
+        }
+
+        .collection-section {
+            margin-bottom: 3rem;
+        }
+
+        .collection-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .collection-hero-banner {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .collection-hero-banner img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
         .john-henry-page {
-            background-color: #f8f9fa;
             min-height: 100vh;
         }
 
@@ -118,9 +152,21 @@
         }
 
         .subcategories.show {
-            display: block;
-            max-height: 300px;
-            opacity: 1;
+            display: block !important;
+            max-height: 300px !important;
+            opacity: 1 !important;
+            animation: slideDownSmooth 0.3s ease-out;
+        }
+
+        @@keyframes slideDownSmooth {
+            from {
+                max-height: 0;
+                opacity: 0;
+            }
+            to {
+                max-height: 300px;
+                opacity: 1;
+            }
         }
 
         .subcategory-item {
@@ -147,7 +193,6 @@
             flex-shrink: 0;
         }
 
-        /* Clean CSS for John Henry dropdown categories */
         .john-henry-page .filter-option {
             margin-bottom: 10px;
             padding: 0;
@@ -187,17 +232,14 @@
             color: #007bff;
         }
         
+        /* Remove conflicting John Henry subcategories styles */
         .john-henry-page .subcategories {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            opacity: 0;
             padding-left: 20px;
+            margin-top: 8px;
         }
         
         .john-henry-page .subcategories.show {
-            max-height: 200px;
-            opacity: 1;
+            /* Inherit from main .subcategories.show rule above */
         }
         
         .john-henry-page .subcategory-item {
@@ -513,6 +555,19 @@
 }
 
 <div class="john-henry-page">
+    <section class="collections-section py-2 bg-white">
+        <div class="container">
+            <!-- John Henry Collection -->
+            <div class="collection-section mb-3">
+                <div class="col-12">
+                </div>
+                <div class="collection-hero-banner position-relative mb-5">
+                    <img src="~/images/Banner/banner-man-0.jpg" alt="Freelancer Collection" class="w-100 hero-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
     <div class="container-fluid">
 
         <div class="container">
@@ -1166,7 +1221,9 @@
             });
         });
 
-        // Add to cart function from homepage
+        // Add to cart function from homepage - NOW USING GLOBAL FUNCTION
+        // (Commented out local function, using global addToCart from _Layout.cshtml)
+        /*
         function addToCart(productId, button) {
             // Add loading state
             const originalText = button.innerHTML;
@@ -1183,6 +1240,7 @@
                 alert('Đã thêm sản phẩm vào giỏ hàng!');
             }, 1000);
         }
+        */
 
         // Wishlist function from homepage
         function toggleWishlist(productId, button) {
