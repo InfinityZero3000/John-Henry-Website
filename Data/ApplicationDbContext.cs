@@ -11,16 +11,21 @@ namespace JohnHenryFashionWeb.Data
         {
         }
 
-                // DbSets cho các bảng chính
+        // DbSets cho các bảng chính
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
+        public DbSet<Store> Stores { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<CouponUsage> CouponUsages { get; set; }
+        public DbSet<SellerStore> SellerStores { get; set; }
+        public DbSet<StoreSettings> StoreSettings { get; set; }
+        public DbSet<StoreInventory> StoreInventories { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Payment> Payments { get; set; }
@@ -668,6 +673,31 @@ namespace JohnHenryFashionWeb.Data
                     .HasForeignKey(e => e.SessionId)
                     .HasPrincipalKey(s => s.SessionId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Cấu hình cho bảng ProductReviews
+            modelBuilder.Entity<ProductReview>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasOne(e => e.Product)
+                    .WithMany(p => p.ProductReviews)
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.ProductReviews)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.Property(e => e.Rating)
+                    .IsRequired();
+                    
+                entity.Property(e => e.Comment)
+                    .HasMaxLength(1000);
+                    
+                // entity.Property(e => e.SellerResponse)
+                //     .HasMaxLength(1000);
             });
         }
     }

@@ -3,6 +3,7 @@ using System;
 using JohnHenryFashionWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JohnHenryFashionWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250918095028_AddStoreEntity")]
+    partial class AddStoreEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -866,13 +869,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatorId")
-                        .HasColumnType("text");
-
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -882,9 +878,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal?>("MaxDiscountAmount")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal?>("MinOrderAmount")
                         .HasColumnType("numeric");
 
@@ -892,17 +885,8 @@ namespace JohnHenryFashionWeb.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ProductCategories")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProductIds")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TargetAudience")
-                        .HasColumnType("text");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -917,50 +901,12 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Property<int?>("UsageLimit")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("UsageLimitPerUser")
-                        .HasColumnType("integer");
-
                     b.Property<decimal>("Value")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorId");
-
                     b.ToTable("Coupons");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CouponUsage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CouponId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UsedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CouponId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CouponUsages");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.InventoryItem", b =>
@@ -1665,22 +1611,12 @@ namespace JohnHenryFashionWeb.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Comment")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("HelpfulCount")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsHelpful")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsVerifiedPurchase")
                         .HasColumnType("boolean");
 
                     b.Property<Guid>("ProductId")
@@ -1688,19 +1624,6 @@ namespace JohnHenryFashionWeb.Migrations
 
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
-
-                    b.Property<string>("SellerResponse")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("SellerResponseBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("SellerResponseDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SellerResponseUserId")
-                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
@@ -1715,8 +1638,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("SellerResponseUserId");
 
                     b.HasIndex("UserId");
 
@@ -2029,38 +1950,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.ToTable("SecurityLogs");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.SellerStore", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SellerId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("StoreId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SellerId");
-
-                    b.HasIndex("StoreId");
-
-                    b.ToTable("SellerStores");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ShippingMethod", b =>
                 {
                     b.Property<int>("Id")
@@ -2272,10 +2161,6 @@ namespace JohnHenryFashionWeb.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("SocialMedia")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<string>("StoreType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -2284,10 +2169,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Website")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<string>("WorkingHours")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -2295,90 +2176,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Stores");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.StoreInventory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("text");
-
-                    b.Property<int>("MaximumStock")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MinimumStock")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("StoreId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UpdatedByUserId")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("StoreId");
-
-                    b.HasIndex("UpdatedByUserId");
-
-                    b.ToTable("StoreInventories");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.StoreSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SettingKey")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SettingValue")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("StoreId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UpdatedByUserId")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoreId");
-
-                    b.HasIndex("UpdatedByUserId");
-
-                    b.ToTable("StoreSettings");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.TwoFactorToken", b =>
@@ -2776,42 +2573,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.Coupon", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId");
-
-                    b.Navigation("Creator");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.CouponUsage", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.Coupon", "Coupon")
-                        .WithMany("CouponUsages")
-                        .HasForeignKey("CouponId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Coupon");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.InventoryItem", b =>
                 {
                     b.HasOne("JohnHenryFashionWeb.Models.Product", "Product")
@@ -2980,19 +2741,13 @@ namespace JohnHenryFashionWeb.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "SellerResponseUser")
-                        .WithMany("ProductReviews")
-                        .HasForeignKey("SellerResponseUserId");
-
                     b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("ProductReviews")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
-
-                    b.Navigation("SellerResponseUser");
 
                     b.Navigation("User");
                 });
@@ -3046,25 +2801,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.SellerStore", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "Seller")
-                        .WithMany()
-                        .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.Store", "Store")
-                        .WithMany("SellerStores")
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Seller");
-
-                    b.Navigation("Store");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ShoppingCartItem", b =>
                 {
                     b.HasOne("JohnHenryFashionWeb.Models.Product", "Product")
@@ -3105,48 +2841,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.StoreInventory", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Store");
-
-                    b.Navigation("UpdatedByUser");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.StoreSettings", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "UpdatedByUser")
-                        .WithMany()
-                        .HasForeignKey("UpdatedByUserId");
-
-                    b.Navigation("Store");
-
-                    b.Navigation("UpdatedByUser");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.TwoFactorToken", b =>
@@ -3292,11 +2986,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.Coupon", b =>
-                {
-                    b.Navigation("CouponUsages");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.InventoryItem", b =>
                 {
                     b.Navigation("StockMovements");
@@ -3320,11 +3009,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("ShoppingCartItems");
 
                     b.Navigation("Wishlists");
-                });
-
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.Store", b =>
-                {
-                    b.Navigation("SellerStores");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.UserSession", b =>
