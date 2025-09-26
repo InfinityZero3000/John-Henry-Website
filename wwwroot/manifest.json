@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#CE193A",
+  "theme_color": "#951329",
   "orientation": "portrait-primary",
   "categories": ["shopping", "fashion", "lifestyle"],
   "lang": "vi",
