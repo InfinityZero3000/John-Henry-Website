@@ -175,7 +175,7 @@ function initializeWishlistStates() {
     wishlistButtons.forEach(button => {
         const productId = button.getAttribute('data-wishlist-product-id');
         
-        fetch(`/Products/IsInWishlist?productId=${productId}`, {
+        fetch(`/Wishlist/IsInWishlist?productId=${productId}`, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'

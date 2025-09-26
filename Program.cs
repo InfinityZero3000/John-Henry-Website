@@ -102,6 +102,8 @@ configuration["Security:LockoutDurationMinutes"] = Environment.GetEnvironmentVar
 configuration["Security:SessionTimeoutMinutes"] = Environment.GetEnvironmentVariable("SESSION_TIMEOUT_MINUTES");
 configuration["Security:RequireTwoFactorForAdmin"] = Environment.GetEnvironmentVariable("REQUIRE_2FA_FOR_ADMIN");
 configuration["Security:RequireEmailConfirmation"] = Environment.GetEnvironmentVariable("REQUIRE_EMAIL_CONFIRMATION");
+configuration["Security:RequireEmailConfirmationForGoogle"] = Environment.GetEnvironmentVariable("REQUIRE_EMAIL_CONFIRMATION_FOR_GOOGLE");
+configuration["Security:GoogleAutoConfirmEmail"] = Environment.GetEnvironmentVariable("GOOGLE_AUTO_CONFIRM_EMAIL");
 
 // Application Insights
 configuration["ApplicationInsights:ConnectionString"] = Environment.GetEnvironmentVariable("APPLICATION_INSIGHTS_CONNECTION_STRING");
@@ -141,8 +143,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.User.RequireUniqueEmail = true;
 
     // Sign-in settings - Enhanced security
-    options.SignIn.RequireConfirmedEmail = true;
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedEmail = bool.Parse(Environment.GetEnvironmentVariable("REQUIRE_EMAIL_CONFIRMATION") ?? "false");
+    options.SignIn.RequireConfirmedAccount = bool.Parse(Environment.GetEnvironmentVariable("REQUIRE_EMAIL_CONFIRMATION") ?? "false");
     options.SignIn.RequireConfirmedPhoneNumber = false;
 
     // Token settings
@@ -181,11 +183,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// Add JWT Authentication
+// Add Authentication with Identity as default and JWT for API
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -205,6 +208,11 @@ builder.Services.AddAuthentication(options =>
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     googleOptions.SaveTokens = true;
+    googleOptions.Scope.Add("email");
+    googleOptions.Scope.Add("profile");
+    
+    // Explicitly set the callback path for current environment
+    googleOptions.CallbackPath = "/signin-google";
 });
 
 // Add Authorization policies

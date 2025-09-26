@@ -90,6 +90,52 @@
             --jh-white: #FFFFFF;
         }
         
+        /* Global text color override */
+        body, 
+        p, 
+        span, 
+        div, 
+        h1, h2, h3, h4, h5, h6,
+        .text-muted,
+        .text-secondary,
+        .small,
+        .store-phone,
+        .store-name,
+        .store-address,
+        a,
+        a:link,
+        a:visited,
+        a:hover,
+        a:active,
+        .text-decoration-none,
+        i,
+        .fas,
+        .far,
+        .fab,
+        .fal,
+        .fat,
+        .fa-solid,
+        .fa-regular,
+        .fa-brands,
+        .fa-light,
+        .fa-thin,
+        .text-success,
+        .text-primary,
+        .text-info,
+        .text-warning,
+        .text-danger {
+            @* color: #000 !important; *@
+        }
+        
+        /* Exception for white text elements */
+        .btn-primary,
+        .bg-dark *,
+        .footer-section *,
+        .text-light,
+        .text-white {
+            color: white !important;
+        }
+        
         html, body {
             height: 100%;
             margin: 0;
@@ -480,7 +526,7 @@
             font-weight: 900 !important;
             margin-left: 15px !important;
             font-size: 14px !important;
-            color: #CE193A !important;
+            color: #951329 !important;
             display: inline-block !important;
             vertical-align: middle !important;
         }
@@ -992,7 +1038,7 @@
                 <div class="search-section">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Áo thun nam" class="form-control">
+                        <input type="text" placeholder="Áo thun nam, đầm, váy,..." class="form-control">
                     </div>
                 </div>
 
@@ -1002,76 +1048,36 @@
                         <i data-lucide="map-pin"></i>
                     </a>
                     
-                    <!-- Account Dropdown -->
-                    <div class="account-dropdown">
-                        @if (User?.Identity?.IsAuthenticated == true)
+                    <!-- Account Icon -->
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="@Url.Action("Profile", "UserDashboard")" class="header-icon" title="Hồ sơ cá nhân">
+                            <i data-lucide="user"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("ProfileOrLogin", "UserDashboard")" class="header-icon" title="Hồ sơ cá nhân">
+                            <i data-lucide="user"></i>
+                        </a>
+                    }
+                    
+                    <!-- Dashboard Icon for Admin and Seller -->
+                    @if (User?.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Seller")))
+                    {
+                        @if (User.IsInRole("Admin"))
                         {
-                            <a href="#" class="header-icon account-toggle" title="Tài khoản của @(User.Identity?.Name ?? "User")">
-                                <i data-lucide="user"></i>
-                            </a>
-                            <div class="account-menu">
-                                <div class="account-header">
-                                    <div class="account-info">
-                                        <h6>@(User.Identity?.Name ?? "User")</h6>
-                                    </div>
-                                </div>
-                                <hr class="account-divider">
-                                <div class="account-links">
-                                    <a href="@Url.Action("Profile", "Account")" class="account-link">
-                                        <i class="fas fa-user-circle"></i>
-                                        Hồ sơ cá nhân
-                                    </a>
-                                    <a href="@Url.Action("ChangePassword", "Account")" class="account-link">
-                                        <i class="fas fa-lock"></i>
-                                        Đổi mật khẩu
-                                    </a>
-                                    <a href="/Account/Orders" class="account-link">
-                                        <i class="fas fa-shopping-bag"></i>
-                                        Đơn hàng của tôi
-                                    </a>
-                                    <a href="/Wishlist" class="account-link">
-                                        <i class="fas fa-heart"></i>
-                                        Sản phẩm yêu thích
-                                    </a>
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <a href="@Url.Action("Dashboard", "Admin")" class="account-link">
-                                            <i class="fas fa-cogs"></i>
-                                            Quản trị hệ thống
-                                        </a>
-                                        <a href="@Url.Action("Manage", "Coupon")" class="account-link">
-                                            <i class="fas fa-ticket-alt"></i>
-                                            Quản lý mã giảm giá
-                                        </a>
-                                    }
-                                    @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
-                                    {
-                                        <a href="@Url.Action("Dashboard", "Seller")" class="account-link">
-                                            <i class="fas fa-store"></i>
-                                            Kênh bán hàng
-                                        </a>
-                                    }
-                                    <a href="#" class="account-link">
-                                        <i class="fas fa-cog"></i>
-                                        Cài đặt
-                                    </a>
-                                </div>
-                                <hr class="account-divider">
-                                <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
-                                    <button type="submit" class="account-link logout-btn">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        Đăng xuất
-                                    </button>
-                                </form>
-                            </div>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("Login", "Account")" class="header-icon" title="Đăng nhập">
-                                <i data-lucide="user"></i>
+                            <a href="@Url.Action("Dashboard", "Admin")" class="header-icon" title="Bảng điều khiển Admin">
+                                <i data-lucide="layout-dashboard"></i>
                             </a>
                         }
-                    </div>
+                        else if (User.IsInRole("Seller"))
+                        {
+                            <a href="@Url.Action("Dashboard", "Seller")" class="header-icon" title="Bảng điều khiển Seller">
+                                <i data-lucide="store"></i>
+                            </a>
+                        }
+                    }
                     
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
@@ -1086,7 +1092,7 @@
                             <i data-lucide="heart"></i>
                         </a>
                     }
-                    <a href="/Cart" class="header-icon" title="Giỏ hàng">
+                    <a href="#" class="header-icon" title="Giỏ hàng" id="cart-icon">
                         <i data-lucide="shopping-bag"></i>
                         <span class="cart-badge cart-count">0</span>
                     </a>
@@ -1108,23 +1114,23 @@
                             <div class="dropdown-content">
                                 <div class="dropdown-categories">
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category with-arrow">ÁO NAM</a>
+                                        <a href="/Home/JohnHenryShirt" class="dropdown-category with-arrow">ÁO NAM</a>
                                         <div class="submenu">
-                                            <a href="#" class="submenu-item">ÁO POLO</a>
-                                            <a href="#" class="submenu-item">ÁO SƠ MI</a>
-                                            <a href="#" class="submenu-item">ÁO THUN</a>
-                                            <a href="#" class="submenu-item">ÁO LEN</a>
-                                            <a href="#" class="submenu-item">ÁO KHOÁC</a>
-                                            <a href="#" class="submenu-item">ÁO VEST - BLAZER</a>
+                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO POLO</a>
+                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO SƠ MI</a>
+                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO THUN</a>
+                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO LEN</a>
+                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO KHOÁC</a>
+                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO VEST - BLAZER</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category with-arrow">QUẦN NAM</a>
+                                        <a href="/Home/JohnHenryTrousers" class="dropdown-category with-arrow">QUẦN NAM</a>
                                         <div class="submenu">
-                                            <a href="#" class="submenu-item">QUẦN KHAKI</a>
-                                            <a href="#" class="submenu-item">QUẦN JEANS</a>
-                                            <a href="#" class="submenu-item">QUẦN TÂY</a>
-                                            <a href="#" class="submenu-item">QUẦN SHORT</a>
+                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN KHAKI</a>
+                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN JEANS</a>
+                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN TÂY</a>
+                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN SHORT</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
@@ -1146,57 +1152,46 @@
                             <div class="dropdown-content">
                                 <div class="dropdown-categories">
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category">ĐẦM</a>
+                                        <a href="/Home/FreelancerDress" class="dropdown-category">ĐẦM</a>
                                     </div>
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category">CHÂN VÁY</a>
+                                        <a href="/Home/FreelancerSkirt" class="dropdown-category">CHÂN VÁY</a>
                                     </div>
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category with-arrow">ÁO NỮ</a>
+                                        <a href="/Home/FreelancerShirt" class="dropdown-category with-arrow">ÁO NỮ</a>
                                         <div class="submenu">
-                                            <a href="#" class="submenu-item">ÁO BLOUSE</a>
-                                            <a href="#" class="submenu-item">ÁO T-SHIRT</a>
-                                            <a href="#" class="submenu-item">ÁO SƠ MI</a>
-                                            <a href="#" class="submenu-item">ÁO POLO</a>
-                                            <a href="#" class="submenu-item">ÁO BLAZER</a>
-                                            <a href="#" class="submenu-item">ÁO LEN</a>
+                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO BLOUSE</a>
+                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO T-SHIRT</a>
+                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO SƠ MI</a>
+                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO POLO</a>
+                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO BLAZER</a>
+                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO LEN</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category with-arrow">QUẦN NỮ</a>
+                                        <a href="/Home/FreelancerTrousers" class="dropdown-category with-arrow">QUẦN NỮ</a>
                                         <div class="submenu">
-                                            <a href="#" class="submenu-item">QUẦN JEAN</a>
-                                            <a href="#" class="submenu-item">QUẦN TÂY</a>
-                                            <a href="#" class="submenu-item">QUẦN SHORT</a>
-                                            <a href="#" class="submenu-item">QUẦN LEGGING</a>
+                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN JEAN</a>
+                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN TÂY</a>
+                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN SHORT</a>
+                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN LEGGING</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
-                                        <a href="#" class="dropdown-category">PHỤ KIỆN NỮ</a>
+                                        <a href="/Home/Freelancer" class="dropdown-category">PHỤ KIỆN NỮ</a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>  
                     </li>
                     <li class="nav-item">
                         <a href="/Blog" class="nav-link">BLOG</a>
                     </li>
                     <li class="nav-item">
-                        <a href="/Products" class="nav-link">CỬA HÀNG</a>
-                        <div class="dropdown-menu">
-                            <div class="dropdown-content">
-                                <div class="dropdown-categories">
-                                    <a href="/Home/JohnHenry" class="dropdown-category">JOHN HENRY</a>
-                                    <a href="/Home/Freelancer" class="dropdown-category">FREELANCER</a>
-                                </div>
-                                <div class="dropdown-image">
-                                    <img src="~/images/client-suit-boutique-with-shopping-bags.jpg" alt="Store Image">
-                                </div>
-                            </div>
-                        </div>
+                        <a href="/Store" class="nav-link">CỬA HÀNG</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">UNIFORMPRO</a>
+                        <a href="/Home/Uniform" class="nav-link">UNIFORMPRO</a>
                     </li>
                 </ul>
             </div>
@@ -1268,10 +1263,10 @@
                         <h5 class="footer-title">Liên Kết</h5>
                         <ul class="footer-links">
                             <li><a href="/" class="footer-link">Trang Chủ</a></li>
-                            <li><a href="/Products" class="footer-link">Sản Phẩm</a></li>
-                            <li><a href="#" class="footer-link">Nam</a></li>
-                            <li><a href="#" class="footer-link">Nữ</a></li>
-                            <li><a href="#" class="footer-link">Phụ Kiện</a></li>
+                            <li><a href="/Store" class="footer-link">Hệ Thống Cửa Hàng</a></li>
+                            <li><a href="/Home/JohnHenry" class="footer-link">John Henry</a></li>
+                            <li><a href="/Home/Freelancer" class="footer-link">Freelancer</a></li>
+                            <li><a href="/Blog" class="footer-link">Blog</a></li>
                             <li><a href="/Contact" class="footer-link">Liên Hệ</a></li>
                         </ul>
                     </div>
@@ -1350,7 +1345,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <p class="copyright mb-0">
-                            &copy; 2025 JOHN HENRY Fashion. Infinity Zero 3000.
+                            &copy; 2025 JOHN HENRY - Infinity Zero 3000.
                         </p>
                     </div>
                     <div class="col-md-6 text-md-end">
@@ -1425,7 +1420,7 @@
             if (document.querySelector('.user-authenticated')) {
                 try {
                     // Load cart count
-                    const cartResponse = await fetch('/Cart/GetCount');
+                    const cartResponse = await fetch('/Cart/GetCartCount');
                     if (cartResponse.ok) {
                         const cartCount = await cartResponse.json();
                         updateCartCount(cartCount);
@@ -1469,13 +1464,230 @@
             });
         }
         
+        // Cart Sidebar Functions
+        function openCartSidebar() {
+            fetch('/Cart/GetSidebarData')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('cart-sidebar-container').innerHTML = html;
+                    document.getElementById('cart-sidebar').classList.add('open');
+                    document.getElementById('cart-sidebar-overlay').classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Re-initialize lucide icons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                    
+                    // Bind cart sidebar events
+                    bindCartSidebarEvents();
+                })
+                .catch(error => {
+                    console.error('Error loading cart sidebar:', error);
+                });
+        }
+        
+        function closeCartSidebar() {
+            document.getElementById('cart-sidebar').classList.remove('open');
+            document.getElementById('cart-sidebar-overlay').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        function bindCartSidebarEvents() {
+            // Close sidebar events
+            const closeBtn = document.getElementById('close-cart-sidebar');
+            const overlay = document.getElementById('cart-sidebar-overlay');
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeCartSidebar);
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', closeCartSidebar);
+            }
+            
+            // Quantity controls
+            document.querySelectorAll('.quantity-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const cartItemId = this.dataset.cartItemId;
+                    const quantityElement = this.parentElement.querySelector('.quantity');
+                    let currentQuantity = parseInt(quantityElement.textContent);
+                    
+                    if (action === 'increase') {
+                        updateCartQuantity(cartItemId, currentQuantity + 1);
+                    } else if (action === 'decrease' && currentQuantity > 1) {
+                        updateCartQuantity(cartItemId, currentQuantity - 1);
+                    }
+                });
+            });
+            
+            // Remove item buttons
+            document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const cartItemId = this.dataset.cartItemId;
+                    removeCartItem(cartItemId);
+                });
+            });
+        }
+        
+        function updateCartQuantity(cartItemId, quantity) {
+            fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `cartItemId=${cartItemId}&quantity=${quantity}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh cart sidebar
+                    openCartSidebar();
+                    // Update header cart count
+                    updateCartCount(data.cartCount);
+                } else {
+                    alert(data.message || 'Error updating quantity');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating quantity:', error);
+            });
+        }
+        
+        function removeCartItem(cartItemId) {
+            if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+                fetch('/Cart/RemoveItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `cartItemId=${cartItemId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh cart sidebar
+                        openCartSidebar();
+                        // Update header cart count
+                        updateCartCount(data.cartCount);
+                    } else {
+                        alert(data.message || 'Error removing item');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing item:', error);
+                });
+            }
+        }
+        
+        // Real Add to Cart function
+        async function addToCart(productId, button, quantity = 1, size = null, color = null) {
+            // Check if user is authenticated
+            const isAuthenticated = document.querySelector('.user-authenticated');
+            if (!isAuthenticated) {
+                // Redirect to login if not authenticated
+                window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+            
+            // Add loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('productId', productId);
+                formData.append('quantity', quantity.toString());
+                if (size) formData.append('size', size);
+                if (color) formData.append('color', color);
+
+                const response = await fetch('/Products/AddToCart', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update cart count
+                    updateCartCount(result.cartCount || 0);
+                    
+                    // Show success message
+                    showNotification('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                    
+                    // Optionally open cart sidebar after adding to cart
+                    // openCartSidebar();
+                } else {
+                    showNotification(result.message || 'Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification('Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
+            } finally {
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        // Simple notification function
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 4px;
+                z-index: 10000;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
         // Make functions globally available
         window.updateCartCount = updateCartCount;
         window.updateWishlistCount = updateWishlistCount;
+        window.openCartSidebar = openCartSidebar;
+        window.closeCartSidebar = closeCartSidebar;
+        window.addToCart = addToCart;
         
         document.addEventListener("DOMContentLoaded", function() {
             // Load initial counts
             loadCounts();
+            
+            // Cart icon click event
+            const cartIcon = document.getElementById('cart-icon');
+            if (cartIcon) {
+                cartIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openCartSidebar();
+                });
+            }
+            
             // Initialize AOS
             AOS.init({
                 duration: 1000,
@@ -1567,7 +1779,7 @@
         }
         
         .nav-link:hover {
-            color: #CE193A !important;
+            color: #951329 !important;
         }
     </style>
     <script>
@@ -1593,5 +1805,10 @@
         };
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar-container">
+        @await Html.PartialAsync("_CartSidebar", new List<JohnHenryFashionWeb.Models.ShoppingCartItem>())
+    </div>
 </body>
 </html>
