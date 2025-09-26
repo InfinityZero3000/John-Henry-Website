@@ -8,7 +8,7 @@
 @section Styles {
     <style>
         .dashboard-modern {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             min-height: 100vh;
             padding: 2rem 0;
         }
@@ -82,7 +82,7 @@
             left: 0;
             width: 4px;
             height: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--jh-red), var(--jh-dark-red));
             transform: scaleY(0);
             transition: transform 0.3s ease;
         }
@@ -112,8 +112,8 @@
             justify-content: center;
             font-size: 1.5rem;
             color: white;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(45deg, var(--jh-red), var(--jh-dark-red));
+            box-shadow: 0 4px 15px rgba(206, 25, 58, 0.3);
         }
 
         .stat-value {
@@ -197,9 +197,9 @@
 
         .time-btn.active,
         .time-btn:hover {
-            background: #667eea;
+            background: var(--jh-red);
             color: white;
-            border-color: #667eea;
+            border-color: var(--jh-red);
         }
 
         .quick-actions {
@@ -280,7 +280,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--jh-red), var(--jh-dark-red));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -366,8 +366,8 @@
         .section-title i {
             font-size: 1.25rem;
         }
-    </style>
-}
+
+        .stat-icon {
             align-items: center;
             justify-content: center;
             font-size: 24px;

@@ -10,13 +10,13 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h1 class="h3 mb-0">
-                    <i class="fas fa-ticket-alt me-2"></i>Quản lý mã giảm giá
+                    <i data-lucide="ticket" class="me-2"></i>Quản lý mã giảm giá
                 </h1>
                 <p class="text-muted mb-0">Quản lý các mã giảm giá và khuyến mãi</p>
             </div>
             <div class="header-actions">
                 <a href="@Url.Action("CreateCoupon", "Admin")" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Tạo mã mới
+                    <i data-lucide="plus" class="me-1"></i>Tạo mã mới
                 </a>
             </div>
         </div>
@@ -112,7 +112,7 @@
                                                         </form>
                                                         <button type="button" class="btn btn-sm btn-info" 
                                                                 onclick="copyToClipboard('@coupon.Code')" title="Copy mã">
-                                                            <i class="fas fa-copy"></i>
+                                                            <i data-lucide="copy"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -125,11 +125,11 @@
                         else
                         {
                             <div class="text-center py-5">
-                                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                                <i data-lucide="ticket" class="w-12 h-12 text-muted mb-3"></i>
                                 <h5 class="text-muted">Chưa có mã giảm giá nào</h5>
                                 <p class="text-muted">Tạo mã giảm giá đầu tiên để khuyến khích khách hàng mua sắm</p>
                                 <a href="@Url.Action("CreateCoupon", "Admin")" class="btn btn-primary">
-                                    <i class="fas fa-plus me-1"></i>Tạo mã giảm giá
+                                    <i data-lucide="plus" class="me-1"></i>Tạo mã giảm giá
                                 </a>
                             </div>
                         }

@@ -6,99 +6,201 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2><i class="fas fa-tachometer-alt"></i> Performance Dashboard</h2>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-primary" id="refreshBtn">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                    <button type="button" class="btn btn-outline-danger" id="clearCacheBtn">
-                        <i class="fas fa-trash"></i> Clear Cache
-                    </button>
-                </div>
+<style>
+    .performance-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .performance-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        height: 140px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .metric-card.primary {
+        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
+        color: white;
+    }
+
+    .metric-card.success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .metric-card.warning {
+        background: linear-gradient(135deg, #ffc107, #ffb347);
+        color: white;
+    }
+
+    .metric-card.info {
+        background: linear-gradient(135deg, #17a2b8, #00d4ff);
+        color: white;
+    }
+
+    .health-indicator {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+
+    .health-healthy { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+    .health-warning { background: linear-gradient(135deg, #ffc107, #ffb347); color: white; }
+    .health-critical { background: linear-gradient(135deg, #dc3545, #ff6b6b); color: white; }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
+        color: white;
+    }
+
+    .btn-danger-modern {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        color: white;
+    }
+</style>
+
+<div class="performance-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-0" style="color: #1a1a2e; font-size: 2.5rem; font-weight: 700;">
+                    <i class="fas fa-tachometer-alt text-danger me-3"></i>Performance Dashboard
+                </h1>
+                <p class="text-muted mt-2 mb-0" style="font-size: 1.1rem;">Theo dõi hiệu suất và tình trạng hệ thống</p>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn-modern btn-primary-modern" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button type="button" class="btn-modern btn-danger-modern" id="clearCacheBtn">
+                    <i class="fas fa-trash"></i> Clear Cache
+                </button>
             </div>
         </div>
     </div>
 
     <!-- System Health Status -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-heartbeat"></i> System Health Status</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="health-indicator health-@Model.SystemHealth.OverallStatus.ToString().ToLower()">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <h5>Overall</h5>
-                                <span class="badge badge-@GetHealthBadgeClass(Model.SystemHealth.OverallStatus)">
-                                    @Model.SystemHealth.OverallStatus
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="health-indicator health-@Model.SystemHealth.MemoryStatus.ToString().ToLower()">
-                                    <i class="fas fa-memory"></i>
-                                </div>
-                                <h6>Memory</h6>
-                                <span class="badge badge-@GetHealthBadgeClass(Model.SystemHealth.MemoryStatus)">
-                                    @Model.SystemHealth.MemoryStatus
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="health-indicator health-@Model.SystemHealth.CpuStatus.ToString().ToLower()">
-                                    <i class="fas fa-microchip"></i>
-                                </div>
-                                <h6>CPU</h6>
-                                <span class="badge badge-@GetHealthBadgeClass(Model.SystemHealth.CpuStatus)">
-                                    @Model.SystemHealth.CpuStatus
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="health-indicator health-@Model.SystemHealth.DatabaseStatus.ToString().ToLower()">
-                                    <i class="fas fa-database"></i>
-                                </div>
-                                <h6>Database</h6>
-                                <span class="badge badge-@GetHealthBadgeClass(Model.SystemHealth.DatabaseStatus)">
-                                    @Model.SystemHealth.DatabaseStatus
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="health-indicator health-@Model.SystemHealth.CacheStatus.ToString().ToLower()">
-                                    <i class="fas fa-layer-group"></i>
-                                </div>
-                                <h6>Cache</h6>
-                                <span class="badge badge-@GetHealthBadgeClass(Model.SystemHealth.CacheStatus)">
-                                    @Model.SystemHealth.CacheStatus
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="health-indicator health-@Model.SystemHealth.ResponseTimeStatus.ToString().ToLower()">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <h6>Response</h6>
-                                <span class="badge badge-@GetHealthBadgeClass(Model.SystemHealth.ResponseTimeStatus)">
-                                    @Model.SystemHealth.ResponseTimeStatus
-                                </span>
-                            </div>
-                        </div>
+    <div class="performance-card">
+        <h5 style="color: #1a1a2e; font-weight: 700; margin-bottom: 2rem;">
+            <i class="fas fa-heartbeat text-danger me-2"></i>System Health Status
+        </h5>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="text-center">
+                    <div class="health-indicator health-@Model.SystemHealth.OverallStatus.ToString().ToLower()">
+                        <i class="fas fa-circle"></i>
                     </div>
+                    <h6 class="fw-bold">Overall</h6>
+                    <span class="badge-modern" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem;">
+                        @Model.SystemHealth.OverallStatus
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-center">
+                    <div class="health-indicator health-@Model.SystemHealth.MemoryStatus.ToString().ToLower()">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <h6 class="fw-bold">Memory</h6>
+                    <span class="badge-modern" style="background: linear-gradient(135deg, #17a2b8, #00d4ff); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem;">
+                        @Model.SystemHealth.MemoryStatus
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-center">
+                    <div class="health-indicator health-@Model.SystemHealth.CpuStatus.ToString().ToLower()">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h6 class="fw-bold">CPU</h6>
+                    <span class="badge-modern" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem;">
+                        @Model.SystemHealth.CpuStatus
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-center">
+                    <div class="health-indicator health-@Model.SystemHealth.DatabaseStatus.ToString().ToLower()">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h6 class="fw-bold">Database</h6>
+                    <span class="badge-modern" style="background: linear-gradient(135deg, #ffc107, #ffb347); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem;">
+                        @Model.SystemHealth.DatabaseStatus
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-center">
+                    <div class="health-indicator health-@Model.SystemHealth.CacheStatus.ToString().ToLower()">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h6 class="fw-bold">Cache</h6>
+                    <span class="badge-modern" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem;">
+                        @Model.SystemHealth.CacheStatus
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-center">
+                    <div class="health-indicator health-@Model.SystemHealth.ResponseTimeStatus.ToString().ToLower()">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h6 class="fw-bold">Response</h6>
+                    <span class="badge-modern" style="background: linear-gradient(135deg, #17a2b8, #00d4ff); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem;">
+                        @Model.SystemHealth.ResponseTimeStatus
+                    </span>
                 </div>
             </div>
         </div>
@@ -107,61 +209,53 @@
     <!-- Performance Metrics -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>@Model.CurrentMetrics.MemoryUsageMB MB</h4>
-                            <p class="mb-0">Memory Usage</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-memory fa-2x"></i>
-                        </div>
+            <div class="metric-card primary">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                    <div>
+                        <h3 class="mb-2">@Model.CurrentMetrics.MemoryUsageMB MB</h3>
+                        <p class="mb-0 opacity-75">Memory Usage</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-memory fa-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>@Model.CurrentMetrics.CpuUsagePercent.ToString("F1")%</h4>
-                            <p class="mb-0">CPU Usage</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-microchip fa-2x"></i>
-                        </div>
+            <div class="metric-card success">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                    <div>
+                        <h3 class="mb-2">@Model.CurrentMetrics.CpuUsagePercent.ToString("F1")%</h3>
+                        <p class="mb-0 opacity-75">CPU Usage</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-microchip fa-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>@Model.CurrentMetrics.RequestsPerSecond.ToString("F1")</h4>
-                            <p class="mb-0">Requests/sec</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-chart-line fa-2x"></i>
-                        </div>
+            <div class="metric-card warning">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                    <div>
+                        <h3 class="mb-2">@Model.CurrentMetrics.RequestsPerSecond.ToString("F1")</h3>
+                        <p class="mb-0 opacity-75">Requests/sec</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>@Model.CurrentMetrics.AverageResponseTime.TotalMilliseconds.ToString("F0")ms</h4>
-                            <p class="mb-0">Avg Response</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clock fa-2x"></i>
-                        </div>
+            <div class="metric-card info">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                    <div>
+                        <h3 class="mb-2">@Model.CurrentMetrics.AverageResponseTime.TotalMilliseconds.ToString("F0")ms</h3>
+                        <p class="mb-0 opacity-75">Avg Response</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
@@ -171,23 +265,19 @@
     <!-- Charts Row -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-area"></i> Memory Usage (24h)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="memoryChart" height="200"></canvas>
-                </div>
+            <div class="performance-card">
+                <h5 style="color: #1a1a2e; font-weight: 700; margin-bottom: 1.5rem;">
+                    <i class="fas fa-chart-area text-danger me-2"></i>Memory Usage (24h)
+                </h5>
+                <canvas id="memoryChart" height="200"></canvas>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-line"></i> Response Time (24h)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="responseChart" height="200"></canvas>
-                </div>
+            <div class="performance-card">
+                <h5 style="color: #1a1a2e; font-weight: 700; margin-bottom: 1.5rem;">
+                    <i class="fas fa-chart-line text-danger me-2"></i>Response Time (24h)
+                </h5>
+                <canvas id="responseChart" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -195,9 +285,10 @@
     <!-- Cache Management -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-layer-group"></i> Cache Management</h5>
+            <div class="performance-card">
+                <h5 style="color: #1a1a2e; font-weight: 700; margin-bottom: 1.5rem;">
+                    <i class="fas fa-layer-group text-danger me-2"></i>Cache Management
+                </h5>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">

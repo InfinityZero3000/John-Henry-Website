@@ -4,85 +4,182 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800">Quản lý Blog</h1>
-            <p class="text-muted">Tạo và quản lý các bài viết blog</p>
-        </div>
-        <div>
-            <a href="@Url.Action("CreateBlogPost", "Admin")" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tạo bài viết mới
-            </a>
+<style>
+    .blog-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .blog-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
+        color: white;
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .form-control-modern {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control-modern:focus {
+        border-color: var(--jh-red);
+        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
+    }
+
+    .table-modern {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-modern thead th {
+        background: var(--jh-red);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+
+    .table-modern tbody td {
+        padding: 1rem;
+        border-color: rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    .table-modern tbody tr:hover {
+        background: rgba(206, 25, 58, 0.05);
+    }
+
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+</style>
+
+<div class="blog-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-0" style="color: #1a1a2e; font-size: 2.5rem; font-weight: 700;">
+                    <i class="fas fa-blog text-danger me-3"></i>Quản lý Blog
+                </h1>
+                <p class="text-muted mt-2 mb-0" style="font-size: 1.1rem;">Tạo và quản lý các bài viết blog</p>
+            </div>
+            <div>
+                <a href="@Url.Action("CreateBlogPost", "Admin")" class="btn-modern btn-primary-modern">
+                    <i class="fas fa-plus"></i> Tạo bài viết mới
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Tìm kiếm</label>
-                    <input type="text" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tiêu đề, nội dung...">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Trạng thái</label>
-                    <select name="status" class="form-select">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="draft" selected="@(Model.StatusFilter == "draft" ? "selected" : null)">Bản nháp</option>
-                        <option value="published" selected="@(Model.StatusFilter == "published" ? "selected" : null)">Đã xuất bản</option>
-                        <option value="archived" selected="@(Model.StatusFilter == "archived" ? "selected" : null)">Lưu trữ</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Danh mục</label>
-                    <select name="category" class="form-select">
-                        <option value="">Tất cả danh mục</option>
-                        @foreach (var category in Model.Categories)
-                        {
-                            <option value="@category.Id" selected="@(Model.CategoryFilter == category.Id.ToString() ? "selected" : null)">
-                                @category.Name
-                            </option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-outline-primary me-2">
-                        <i class="fas fa-search"></i> Lọc
-                    </button>
-                    <a href="@Url.Action("Blog", "Admin")" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i> Xóa
-                    </a>
-                </div>
-            </form>
-        </div>
+    <div class="blog-card">
+        <h5 style="color: #1a1a2e; font-weight: 700; margin-bottom: 1.5rem;">
+            <i class="fas fa-filter text-danger me-2"></i>Bộ lọc tìm kiếm
+        </h5>
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Tìm kiếm</label>
+                <input type="text" name="search" value="@Model.SearchTerm" class="form-control-modern" placeholder="Tìm theo tiêu đề, nội dung...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Trạng thái</label>
+                <select name="status" class="form-control-modern">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="draft" selected="@(Model.StatusFilter == "draft" ? "selected" : null)">Bản nháp</option>
+                    <option value="published" selected="@(Model.StatusFilter == "published" ? "selected" : null)">Đã xuất bản</option>
+                    <option value="archived" selected="@(Model.StatusFilter == "archived" ? "selected" : null)">Lưu trữ</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Danh mục</label>
+                <select name="category" class="form-control-modern">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id" selected="@(Model.CategoryFilter == category.Id.ToString() ? "selected" : null)">
+                            @category.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn-modern btn-primary-modern me-2">
+                    <i class="fas fa-search"></i> Lọc
+                </button>
+                <a href="@Url.Action("Blog", "Admin")" class="btn-modern" style="background: #6c757d; color: white;">
+                    <i class="fas fa-times"></i> Xóa
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- Results -->
-    <div class="card shadow">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">
-                Danh sách bài viết (@Model.TotalPosts bài viết)
-            </h6>
+    <div class="blog-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 style="color: #1a1a2e; font-weight: 700; margin: 0;">
+                <i class="fas fa-list text-danger me-2"></i>Danh sách bài viết (@Model.TotalPosts bài viết)
+            </h5>
         </div>
-        <div class="card-body">
-            @if (Model.Posts.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Ảnh</th>
-                                <th>Tiêu đề</th>
-                                <th>Danh mục</th>
-                                <th>Trạng thái</th>
-                                <th>Tác giả</th>
-                                <th>Ngày tạo</th>
-                                <th>Lượt xem</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
+        @if (Model.Posts.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-modern table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Danh mục</th>
+                            <th>Trạng thái</th>
+                            <th>Tác giả</th>
+                            <th>Ngày tạo</th>
+                            <th>Lượt xem</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
                         <tbody>
                             @foreach (var post in Model.Posts)
                             {
@@ -115,7 +212,7 @@
                                     <td>
                                         @if (post.Category != null)
                                         {
-                                            <span class="badge bg-info">@post.Category.Name</span>
+                                            <span class="badge-modern" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white;">@post.Category.Name</span>
                                         }
                                         else
                                         {
@@ -126,16 +223,16 @@
                                         @switch (post.Status)
                                         {
                                             case "published":
-                                                <span class="badge bg-success">Đã xuất bản</span>
+                                                <span class="badge-modern" style="background: linear-gradient(135deg, #28a745, #1e7e34); color: white;">Đã xuất bản</span>
                                                 break;
                                             case "draft":
-                                                <span class="badge bg-secondary">Bản nháp</span>
+                                                <span class="badge-modern" style="background: linear-gradient(135deg, #6c757d, #545b62); color: white;">Bản nháp</span>
                                                 break;
                                             case "archived":
-                                                <span class="badge bg-dark">Lưu trữ</span>
+                                                <span class="badge-modern" style="background: linear-gradient(135deg, #343a40, #23272b); color: white;">Lưu trữ</span>
                                                 break;
                                             default:
-                                                <span class="badge bg-light text-dark">@post.Status</span>
+                                                <span class="badge-modern" style="background: #f8f9fa; color: #212529;">@post.Status</span>
                                                 break;
                                         }
                                     </td>
@@ -150,17 +247,17 @@
                                         <small class="text-muted">@post.CreatedAt.ToString("HH:mm")</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark">@post.ViewCount</span>
+                                        <span class="badge-modern" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); color: #495057; border: 1px solid #dee2e6;">@post.ViewCount</span>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="@Url.Action("Details", "Blog", new { id = post.Id })" class="btn btn-sm btn-outline-info" title="Xem bài viết" target="_blank">
+                                            <a href="@Url.Action("Details", "Blog", new { id = post.Id })" class="btn btn-sm" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; border-radius: 8px; margin-right: 0.25rem;" title="Xem bài viết" target="_blank">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="@Url.Action("EditBlogPost", "Admin", new { id = post.Id })" class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                            <a href="@Url.Action("EditBlogPost", "Admin", new { id = post.Id })" class="btn btn-sm" style="background: linear-gradient(135deg, var(--jh-red), #a01527); color: white; border-radius: 8px; margin-right: 0.25rem;" title="Chỉnh sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" 
+                                            <button type="button" class="btn btn-sm" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border-radius: 8px;" title="Xóa" 
                                                     onclick="deletePost('@post.Id', '@post.Title')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -219,10 +316,10 @@
             else
             {
                 <div class="text-center py-5">
-                    <i class="fas fa-blog fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Không có bài viết nào</h5>
-                    <p class="text-muted">Hãy tạo bài viết đầu tiên của bạn!</p>
-                    <a href="@Url.Action("CreateBlogPost", "Admin")" class="btn btn-primary">
+                    <i class="fas fa-blog fa-5x mb-4" style="color: rgba(206, 25, 58, 0.3);"></i>
+                    <h5 class="text-muted mb-3">Không có bài viết nào</h5>
+                    <p class="text-muted mb-4">Hãy tạo bài viết đầu tiên của bạn!</p>
+                    <a href="@Url.Action("CreateBlogPost", "Admin")" class="btn-modern btn-primary-modern">
                         <i class="fas fa-plus"></i> Tạo bài viết mới
                     </a>
                 </div>

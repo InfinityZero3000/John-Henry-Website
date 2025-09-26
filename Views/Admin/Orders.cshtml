@@ -2,545 +2,729 @@
 
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
-    ViewData["ActivePage"] = "Orders";
+    ViewData["CurrentSection"] = "orders";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 @section Styles {
     <style>
-        .order-management {
-            background: #f8f9fa;
+        .orders-modern {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 2rem;
         }
-        
-        .filter-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .page-header-modern {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .page-title-modern {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .stats-grid-modern {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card-modern {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(45deg, #ce193a, #a01527);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card-modern:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card-modern:hover::before {
+            transform: scaleY(1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.5rem;
         }
-        
-        .orders-table {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .stat-icon-modern {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(45deg, #ce193a, #a01527);
+            box-shadow: 0 4px 15px rgba(206, 25, 58, 0.3);
         }
-        
-        .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+
+        .stat-value-modern {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label-modern {
+            color: #6b7280;
+            font-size: 0.9rem;
             font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+
+        .filters-card-modern {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .status-processing {
-            background: #cce5ff;
-            color: #004085;
-            border: 1px solid #99d6ff;
+
+        .filter-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
-        .status-shipped {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #a8d4b0;
+
+        .form-control-modern {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
-        
-        .status-delivered {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #7dd3fc;
+
+        .form-control-modern:focus {
+            background: white;
+            border-color: #ce193a;
+            box-shadow: 0 0 0 3px rgba(206, 25, 58, 0.1);
         }
-        
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f1b0b7;
+
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
-        
-        .product-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
+
+        .btn-primary-modern {
+            background: linear-gradient(45deg, #ce193a, #a01527);
+            color: white;
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(206, 25, 58, 0.3);
+        }
+
+        .orders-table-modern {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-header-modern {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-title-modern {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-modern {
+            margin-bottom: 0;
+        }
+
+        .table-modern th {
+            background: transparent;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-modern td {
+            border: none;
+            padding: 1.5rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .table-modern tbody tr:hover {
+            background: rgba(206, 25, 58, 0.05);
+        }
+
+        .status-badge-modern {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-processing { background: #dbeafe; color: #2563eb; }
+        .status-shipped { background: #dcfce7; color: #16a34a; }
+        .status-delivered { background: #e0e7ff; color: #4f46e5; }
+        .status-cancelled { background: #fee2e2; color: #dc2626; }
+
+        .order-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
             border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
         }
-        
-        .bulk-actions {
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-view {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .action-edit {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .action-delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .bulk-actions-modern {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
             display: none;
             align-items: center;
             gap: 1rem;
         }
-        
-        .bulk-actions.show {
+
+        .bulk-actions-modern.show {
             display: flex;
+        }
+
+        .pagination-modern {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .pagination-modern .page-link {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin: 0 0.25rem;
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-modern .page-link:hover,
+        .pagination-modern .page-link.active {
+            background: linear-gradient(45deg, #ce193a, #a01527);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(206, 25, 58, 0.3);
+        }
+
+        @@media (max-width: 768px) {
+            .stats-grid-modern {
+                grid-template-columns: 1fr;
+            }
+            
+            .orders-modern {
+                padding: 1rem;
+            }
         }
     </style>
 }
 
-<div class="content-wrapper">
-    <div class="page-header">
-        <h1 class="page-title">
-            <i class="fas fa-shopping-cart me-2"></i>
-            Quản lý đơn hàng
-        </h1>
-        <div class="page-actions">
-            <button class="btn btn-primary" onclick="exportOrders()">
-                <i class="fas fa-download me-2"></i>Xuất báo cáo
+<div class="orders-modern">
+    <!-- Page Header -->
+    <div class="page-header-modern">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="page-title-modern">
+                    <i class="fas fa-shopping-cart"></i>
+                    Quản lý đơn hàng
+                </h1>
+                <p class="page-subtitle">Theo dõi và quản lý tất cả đơn hàng trong hệ thống</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn-modern btn-primary-modern" onclick="exportOrders()">
+                    <i class="fas fa-download me-2"></i>Xuất báo cáo
+                </button>
+                <button class="btn-modern btn-primary-modern" onclick="refreshOrders()">
+                    <i class="fas fa-sync-alt me-2"></i>Làm mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid-modern">
+        <div class="stat-card-modern">
+            <div class="stat-header">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="stat-value-modern">@(Model?.PendingOrdersCount ?? 0)</div>
+            <div class="stat-label-modern">Chờ xử lý</div>
+        </div>
+
+        <div class="stat-card-modern">
+            <div class="stat-header">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-cogs"></i>
+                </div>
+            </div>
+            <div class="stat-value-modern">@(Model?.ProcessingOrdersCount ?? 0)</div>
+            <div class="stat-label-modern">Đang xử lý</div>
+        </div>
+
+        <div class="stat-card-modern">
+            <div class="stat-header">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+            </div>
+            <div class="stat-value-modern">@(Model?.ShippedOrdersCount ?? 0)</div>
+            <div class="stat-label-modern">Đã giao hàng</div>
+        </div>
+
+        <div class="stat-card-modern">
+            <div class="stat-header">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+            <div class="stat-value-modern">@((Model?.TotalRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
+            <div class="stat-label-modern">Tổng doanh thu</div>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="filters-card-modern">
+        <h5 class="filter-section-title">
+            <i class="fas fa-filter"></i>
+            Bộ lọc nâng cao
+        </h5>
+        <form method="get" id="orderFilterForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-medium">Tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control-modern border-start-0" 
+                               name="search" placeholder="Mã đơn hàng, khách hàng..." 
+                               value="@(Model?.SearchTerm ?? "")">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-medium">Trạng thái</label>
+                    <select name="status" class="form-control-modern">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Pending" selected="@(Model?.StatusFilter == "Pending")">Chờ xử lý</option>
+                        <option value="Processing" selected="@(Model?.StatusFilter == "Processing")">Đang xử lý</option>
+                        <option value="Shipped" selected="@(Model?.StatusFilter == "Shipped")">Đã giao</option>
+                        <option value="Delivered" selected="@(Model?.StatusFilter == "Delivered")">Hoàn thành</option>
+                        <option value="Cancelled" selected="@(Model?.StatusFilter == "Cancelled")">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-medium">Từ ngày</label>
+                    <input type="date" class="form-control-modern" name="fromDate" 
+                           value="@(Model?.FromDate?.ToString("yyyy-MM-dd") ?? "")">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-medium">Đến ngày</label>
+                    <input type="date" class="form-control-modern" name="toDate" 
+                           value="@(Model?.ToDate?.ToString("yyyy-MM-dd") ?? "")">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-medium">Sắp xếp theo</label>
+                    <select name="sortBy" class="form-control-modern">
+                        <option value="newest" selected="@(Model?.SortBy == "newest")">Mới nhất</option>
+                        <option value="oldest" selected="@(Model?.SortBy == "oldest")">Cũ nhất</option>
+                        <option value="amount_high" selected="@(Model?.SortBy == "amount_high")">Giá trị cao</option>
+                        <option value="amount_low" selected="@(Model?.SortBy == "amount_low")">Giá trị thấp</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn-modern btn-primary-modern w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions-modern" id="bulkActions">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-check-circle text-primary"></i>
+            <span class="fw-medium">
+                <span id="selectedCount">0</span> đơn hàng được chọn
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn-modern" style="background: #dcfce7; color: #16a34a;" 
+                    onclick="updateSelectedOrders('Processing')">
+                <i class="fas fa-play me-1"></i> Xử lý
+            </button>
+            <button class="btn-modern" style="background: #dbeafe; color: #2563eb;" 
+                    onclick="updateSelectedOrders('Shipped')">
+                <i class="fas fa-shipping-fast me-1"></i> Giao hàng
+            </button>
+            <button class="btn-modern" style="background: #e0e7ff; color: #4f46e5;" 
+                    onclick="updateSelectedOrders('Delivered')">
+                <i class="fas fa-check me-1"></i> Hoàn thành
+            </button>
+            <button class="btn-modern" style="background: #fee2e2; color: #dc2626;" 
+                    onclick="updateSelectedOrders('Cancelled')">
+                <i class="fas fa-times me-1"></i> Hủy đơn
             </button>
         </div>
     </div>
 
-    <!-- Order Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stat-card bg-warning text-white">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>@Model.PendingOrdersCount</h3>
-                    <p>Chờ xử lý</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card bg-info text-white">
-                <div class="stat-icon">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>@Model.ProcessingOrdersCount</h3>
-                    <p>Đang xử lý</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card bg-success text-white">
-                <div class="stat-icon">
-                    <i class="fas fa-shipping-fast"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>@Model.ShippedOrdersCount</h3>
-                    <p>Đã giao hàng</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card bg-primary text-white">
-                <div class="stat-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>@Model.TotalRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</h3>
-                    <p>Tổng doanh thu</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Enhanced Filters -->
-    <div class="filter-card">
-        <div class="card-body">
-            <form method="get" id="orderFilterForm">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Tìm kiếm</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" name="search" placeholder="Mã đơn hàng, khách hàng..." 
-                                   value="@Model.SearchTerm">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Trạng thái</label>
-                        <select name="status" class="form-select">
-                            <option value="">Tất cả</option>
-                            <option value="Pending" selected="@(Model.StatusFilter == "Pending")">Chờ xử lý</option>
-                            <option value="Processing" selected="@(Model.StatusFilter == "Processing")">Đang xử lý</option>
-                            <option value="Shipped" selected="@(Model.StatusFilter == "Shipped")">Đã giao</option>
-                            <option value="Delivered" selected="@(Model.StatusFilter == "Delivered")">Hoàn thành</option>
-                            <option value="Cancelled" selected="@(Model.StatusFilter == "Cancelled")">Đã hủy</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Từ ngày</label>
-                        <input type="date" class="form-control" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Đến ngày</label>
-                        <input type="date" class="form-control" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Sắp xếp</label>
-                        <select name="sortBy" class="form-select">
-                            <option value="newest" selected="@(Model.SortBy == "newest")">Mới nhất</option>
-                            <option value="oldest" selected="@(Model.SortBy == "oldest")">Cũ nhất</option>
-                            <option value="amount_high" selected="@(Model.SortBy == "amount_high")">Giá trị cao</option>
-                            <option value="amount_low" selected="@(Model.SortBy == "amount_low")">Giá trị thấp</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-filter"></i>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Bulk Actions -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="bulk-actions" id="bulkActions">
-            <span class="text-muted">
-                <span id="selectedCount">0</span> đơn hàng được chọn
-            </span>
-            <div class="btn-group">
-                <button class="btn btn-sm btn-outline-success" onclick="updateSelectedOrders('Processing')">
-                    <i class="fas fa-play"></i> Xử lý
-                </button>
-                <button class="btn btn-sm btn-outline-info" onclick="updateSelectedOrders('Shipped')">
-                    <i class="fas fa-shipping-fast"></i> Giao hàng
-                </button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateSelectedOrders('Delivered')">
-                    <i class="fas fa-check"></i> Hoàn thành
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="updateSelectedOrders('Cancelled')">
-                    <i class="fas fa-times"></i> Hủy đơn
-                </button>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="text-muted">@Model.Orders.Count() đơn hàng</span>
-        </div>
-    </div>
-                <div class="stat-content">
-                    <h3>@Model.CompletedOrders</h3>
-                    <p>Hoàn thành</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card bg-danger text-white">
-                <div class="stat-icon">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>@Model.CancelledOrders</h3>
-                    <p>Đã hủy</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-2">
-                    <label class="form-label">Trạng thái</label>
-                    <select name="status" class="form-select">
-                        <option value="">Tất cả</option>
-                        <option value="Pending" selected="@(ViewBag.Status == "Pending")">Chờ xử lý</option>
-                        <option value="Confirmed" selected="@(ViewBag.Status == "Confirmed")">Đã xác nhận</option>
-                        <option value="Shipping" selected="@(ViewBag.Status == "Shipping")">Đang giao</option>
-                        <option value="Completed" selected="@(ViewBag.Status == "Completed")">Hoàn thành</option>
-                        <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Đã hủy</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Từ ngày</label>
-                    <input type="date" name="fromDate" class="form-control" value="@ViewBag.FromDate" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Đến ngày</label>
-                    <input type="date" name="toDate" class="form-control" value="@ViewBag.ToDate" />
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Tìm kiếm</label>
-                    <input type="text" name="search" class="form-control" placeholder="Mã đơn, tên KH, SĐT..." value="@ViewBag.Search" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Hiển thị</label>
-                    <select name="pageSize" class="form-select">
-                        <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
-                        <option value="25" selected="@(ViewBag.PageSize == 25)">25</option>
-                        <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
-                        <option value="100" selected="@(ViewBag.PageSize == 100)">100</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Orders Table -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Danh sách đơn hàng (@Model.TotalOrders đơn hàng)</h5>
+    <div class="orders-table-modern">
+        <div class="table-header-modern">
+            <h5 class="table-title-modern">
+                <i class="fas fa-list"></i>
+                Danh sách đơn hàng (@(Model?.Orders?.Count() ?? 0) đơn hàng)
+            </h5>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="100">Mã đơn</th>
-                            <th width="150">Khách hàng</th>
-                            <th width="120">Ngày đặt</th>
-                            <th width="100">Tổng tiền</th>
-                            <th width="100">Trạng thái</th>
-                            <th width="120">Thanh toán</th>
-                            <th width="150">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var order in Model.Orders)
+        
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th width="50">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                            </div>
+                        </th>
+                        <th width="100">Mã đơn</th>
+                        <th width="150">Khách hàng</th>
+                        <th width="120">Ngày đặt</th>
+                        <th width="100">Tổng tiền</th>
+                        <th width="120">Trạng thái</th>
+                        <th width="100">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model?.Orders != null && Model.Orders.Any())
+                    {
+                        foreach (var order in Model.Orders)
                         {
                             <tr>
                                 <td>
-                                    <strong>#@order.OrderNumber</strong>
+                                    <div class="form-check">
+                                        <input class="form-check-input order-checkbox" type="checkbox" 
+                                               value="@order.Id">
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-primary">#@order.Id</span>
                                 </td>
                                 <td>
                                     <div>
-                                        <strong>@order.CustomerName</strong>
-                                        <br>
+                                        <div class="fw-medium">@order.CustomerName</div>
                                         <small class="text-muted">@order.CustomerPhone</small>
                                     </div>
                                 </td>
                                 <td>
                                     <div>
-                                        @order.OrderDate.ToString("dd/MM/yyyy")
-                                        <br>
+                                        <div>@order.OrderDate.ToString("dd/MM/yyyy")</div>
                                         <small class="text-muted">@order.OrderDate.ToString("HH:mm")</small>
                                     </div>
                                 </td>
                                 <td>
-                                    <strong class="text-primary">@order.TotalAmount.ToString("N0") ₫</strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-@GetStatusBadgeClass(order.Status)">
-                                        @GetStatusText(order.Status)
+                                    <span class="fw-bold text-success">
+                                        @order.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-@(order.PaymentStatus == "Paid" ? "success" : "warning")">
-                                        @(order.PaymentStatus == "Paid" ? "Đã thanh toán" : "Chưa thanh toán")
+                                    <span class="status-badge-modern status-@order.Status.ToLower()">
+                                        @order.Status
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewOrderDetails(@order.Id)">
+                                    <div class="order-actions">
+                                        <button class="action-btn action-view" title="Xem chi tiết" 
+                                                onclick="viewOrder('@order.Id')">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="printInvoice(@order.Id)">
-                                            <i class="fas fa-print"></i>
+                                        <button class="action-btn action-edit" title="Chỉnh sửa" 
+                                                onclick="editOrder('@order.Id')">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                        @if (order.Status == "Pending")
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="updateOrderStatus(@order.Id, 'Confirmed')">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        }
-                                        @if (order.Status == "Confirmed")
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateOrderStatus(@order.Id, 'Shipping')">
-                                                <i class="fas fa-truck"></i>
-                                            </button>
-                                        }
-                                        @if (order.Status == "Shipping")
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="updateOrderStatus(@order.Id, 'Completed')">
-                                                <i class="fas fa-check-circle"></i>
-                                            </button>
-                                        }
-                                        @if (order.Status == "Pending" || order.Status == "Confirmed")
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="updateOrderStatus(@order.Id, 'Cancelled')">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        }
+                                        <button class="action-btn action-delete" title="Xóa" 
+                                                onclick="deleteOrder('@order.Id')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                    <p class="fs-5">Không tìm thấy đơn hàng nào</p>
+                                    <p>Thử thay đổi bộ lọc để xem kết quả khác</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-        
-        @if (Model.TotalPages > 1)
+
+        <!-- Pagination -->
+        @if (Model?.Orders != null && Model.Orders.Any())
         {
-            <div class="card-footer">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center mb-0">
-                        @if (Model.CurrentPage > 1)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="?page=@(Model.CurrentPage - 1)&status=@ViewBag.Status&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate&search=@ViewBag.Search&pageSize=@ViewBag.PageSize">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                        }
-                        
-                        @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
-                        {
-                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                <a class="page-link" href="?page=@i&status=@ViewBag.Status&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate&search=@ViewBag.Search&pageSize=@ViewBag.PageSize">@i</a>
-                            </li>
-                        }
-                        
-                        @if (Model.CurrentPage < Model.TotalPages)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="?page=@(Model.CurrentPage + 1)&status=@ViewBag.Status&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate&search=@ViewBag.Search&pageSize=@ViewBag.PageSize">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </nav>
+            <div class="pagination-modern">
+                <a href="#" class="page-link">«</a>
+                <a href="#" class="page-link active">1</a>
+                <a href="#" class="page-link">2</a>
+                <a href="#" class="page-link">3</a>
+                <a href="#" class="page-link">»</a>
             </div>
         }
     </div>
 </div>
-
-<!-- Order Details Modal -->
-<div class="modal fade" id="orderDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chi tiết đơn hàng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="orderDetailsContent">
-                <!-- Order details will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="printCurrentOrder()">
-                    <i class="fas fa-print me-2"></i>In hóa đơn
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
-        let currentOrderId = 0;
+        // Select All Functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+            const bulkActions = document.getElementById('bulkActions');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            
+            updateBulkActions();
+        });
 
-        function viewOrderDetails(orderId) {
-            currentOrderId = orderId;
+        // Individual Checkbox Functionality
+        document.querySelectorAll('.order-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateBulkActions);
+        });
+
+        function updateBulkActions() {
+            const checkedBoxes = document.querySelectorAll('.order-checkbox:checked');
+            const bulkActions = document.getElementById('bulkActions');
+            const selectedCount = document.getElementById('selectedCount');
+            
+            if (checkedBoxes.length > 0) {
+                bulkActions.classList.add('show');
+                selectedCount.textContent = checkedBoxes.length;
+            } else {
+                bulkActions.classList.remove('show');
+            }
+        }
+
+        // Order Actions
+        function viewOrder(orderId) {
             // Load order details via AJAX
-            fetch(`/admin/order-details/${orderId}`)
+            fetch(`/admin/orders/${orderId}`)
                 .then(response => response.text())
-                .then(html => {
-                    document.getElementById('orderDetailsContent').innerHTML = html;
-                    new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+                .then(data => {
+                    alert('Chi tiết đơn hàng: ' + orderId);
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Không thể tải thông tin đơn hàng');
+                    console.error('Error loading order details:', error);
+                    alert('Không thể tải chi tiết đơn hàng. Vui lòng thử lại.');
                 });
         }
 
-        function updateOrderStatus(orderId, newStatus) {
-            const statusText = {
-                'Confirmed': 'xác nhận',
-                'Shipping': 'chuyển sang đang giao',
-                'Completed': 'hoàn thành',
-                'Cancelled': 'hủy'
-            };
+        function editOrder(orderId) {
+            window.location.href = `/admin/orders/edit/${orderId}`;
+        }
 
-            if (confirm(`Bạn có chắc muốn ${statusText[newStatus]} đơn hàng này?`)) {
-                // Update status via AJAX
-                fetch('/admin/update-order-status', {
-                    method: 'POST',
+        function deleteOrder(orderId) {
+            if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
+                fetch(`/admin/orders/${orderId}`, {
+                    method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify({
-                        orderId: orderId,
-                        status: newStatus
-                    })
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(response => {
+                    if (response.ok) {
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + data.message);
+                        alert('Có lỗi xảy ra khi xóa đơn hàng.');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Không thể cập nhật trạng thái đơn hàng');
+                    console.error('Error deleting order:', error);
+                    alert('Có lỗi xảy ra khi xóa đơn hàng.');
                 });
             }
         }
 
-        function printInvoice(orderId) {
-            window.open(`/admin/print-invoice/${orderId}`, '_blank');
-        }
+        function updateSelectedOrders(status) {
+            const checkedBoxes = document.querySelectorAll('.order-checkbox:checked');
+            const orderIds = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            if (orderIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một đơn hàng.');
+                return;
+            }
 
-        function printCurrentOrder() {
-            if (currentOrderId > 0) {
-                printInvoice(currentOrderId);
+            if (confirm(`Bạn có chắc chắn muốn cập nhật ${orderIds.length} đơn hàng thành trạng thái "${status}"?`)) {
+                fetch('/admin/orders/bulk-update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify({
+                        orderIds: orderIds,
+                        status: status
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật đơn hàng.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating orders:', error);
+                    alert('Có lỗi xảy ra khi cập nhật đơn hàng.');
+                });
             }
         }
 
         function exportOrders() {
-            const params = new URLSearchParams(window.location.search);
-            window.location.href = '/admin/export-orders?' + params.toString();
+            const form = new FormData(document.getElementById('orderFilterForm'));
+            const params = new URLSearchParams(form);
+            window.open(`/admin/orders/export?${params.toString()}`, '_blank');
         }
 
-        // Auto refresh every 30 seconds for pending orders
-        @if (ViewBag.Status == "Pending" || string.IsNullOrEmpty(ViewBag.Status))
-        {
-            @:setInterval(() => {
-                @:if (document.querySelector('.modal.show') === null) {
-                    @:location.reload();
-                @:}
-            @:}, 30000);
+        function refreshOrders() {
+            location.reload();
         }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            fetch('/admin/api/orders/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update statistics without full page reload
+                    const statValues = document.querySelectorAll('.stat-value-modern');
+                    if (statValues.length >= 4) {
+                        statValues[0].textContent = data.pending || 0;
+                        statValues[1].textContent = data.processing || 0;
+                        statValues[2].textContent = data.shipped || 0;
+                        statValues[3].textContent = data.revenue || '0₫';
+                    }
+                })
+                .catch(error => console.error('Error updating stats:', error));
+        }, 30000);
     </script>
-}
-
-@functions {
-    string GetStatusBadgeClass(string status)
-    {
-        return status switch
-        {
-            "Pending" => "warning",
-            "Confirmed" => "info",
-            "Shipping" => "primary",
-            "Completed" => "success",
-            "Cancelled" => "danger",
-            _ => "secondary"
-        };
-    }
-
-    string GetStatusText(string status)
-    {
-        return status switch
-        {
-            "Pending" => "Chờ xử lý",
-            "Confirmed" => "Đã xác nhận",
-            "Shipping" => "Đang giao",
-            "Completed" => "Hoàn thành",
-            "Cancelled" => "Đã hủy",
-            _ => "Không xác định"
-        };
-    }
 }
