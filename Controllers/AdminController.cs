@@ -163,7 +163,7 @@ namespace JohnHenryFashionWeb.Controllers
                 LastUpdated = DateTime.UtcNow
             };
 
-            return View("Dashboard_New", viewModel);
+            return View("Dashboard", viewModel);
         }
 
         [HttpPost("reports/generate")]
@@ -472,13 +472,13 @@ namespace JohnHenryFashionWeb.Controllers
             };
         }
 
-        private async Task<List<RecentOrder>> GetRecentOrders(int count)
+        private async Task<List<Models.RecentOrder>> GetRecentOrders(int count)
         {
             return await _context.Orders
                 .Include(o => o.User)
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(count)
-                .Select(o => new RecentOrder
+                .Select(o => new Models.RecentOrder
                 {
                     Id = o.Id,
                     OrderNumber = o.OrderNumber,

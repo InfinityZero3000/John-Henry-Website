@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using JohnHenryFashionWeb.Data;
 using JohnHenryFashionWeb.Models;
 using JohnHenryFashionWeb.ViewModels;
+using System.IO;
 
 namespace JohnHenryFashionWeb.Controllers
 {
@@ -65,7 +66,7 @@ namespace JohnHenryFashionWeb.Controllers
                 .Include(o => o.User)
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(5)
-                .Select(o => new RecentOrder
+                .Select(o => new Models.RecentOrder
                 {
                     Id = o.Id,
                     OrderNumber = o.OrderNumber,
@@ -104,14 +105,21 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpGet("products")]
-        public async Task<IActionResult> Products(int page = 1, int pageSize = 10, string search = "", Guid? categoryId = null, string status = "")
+        public async Task<IActionResult> Products(int page = 1, int pageSize = 12, string search = "", Guid? categoryId = null, string status = "")
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             // For now, show all products. In real implementation, filter by seller
             var query = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .AsQueryable();
 
+            // Add filters
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(p => p.Name.Contains(search) || p.SKU.Contains(search));
@@ -165,7 +173,8 @@ namespace JohnHenryFashionWeb.Controllers
                 SearchTerm = search,
                 CategoryId = categoryId,
                 Status = status,
-                Categories = categories
+                Categories = categories,
+                TotalProducts = totalCount
             };
 
             return View(viewModel);
@@ -686,26 +695,106 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpGet("settings")]
-        public IActionResult Settings()
+        public async Task<IActionResult> Settings()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get statistics for the sidebar
+            var totalProducts = await _context.Products.CountAsync();
+            var totalOrders = await _context.Orders.CountAsync();
+
             var viewModel = new SellerSettingsViewModel
             {
-                // Load current settings
+                // Default settings
+                IsStoreActive = true,
+                BusinessHoursStart = new TimeSpan(9, 0, 0), // 9:00 AM
+                BusinessHoursEnd = new TimeSpan(18, 0, 0),   // 6:00 PM
+                ReportFrequency = "Weekly",
+                LowStockThreshold = 10,
+                TotalProducts = totalProducts,
+                TotalOrders = totalOrders,
+                EmailNotifications = new EmailNotificationSettings
+                {
+                    NewOrders = true,
+                    LowStock = true,
+                    ProductReviews = true,
+                    SystemUpdates = true
+                }
             };
 
             return View(viewModel);
         }
 
         [HttpPost("settings")]
-        public IActionResult Settings(SellerSettingsViewModel model)
+        public async Task<IActionResult> Settings(SellerSettingsViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Save settings
+                // In a real application, you would save these settings to the database
+                // For now, we'll just show a success message
                 TempData["Success"] = "Cài đặt đã được lưu thành công!";
+                return RedirectToAction(nameof(Settings));
             }
 
+            // If model is invalid, reload statistics
+            var totalProducts = await _context.Products.CountAsync();
+            var totalOrders = await _context.Orders.CountAsync();
+            
+            model.TotalProducts = totalProducts;
+            model.TotalOrders = totalOrders;
+
             return View(model);
+        }
+
+        // MARK: - Helper Methods
+        private string GenerateSlug(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            var slug = text.ToLowerInvariant()
+                          .Replace("đ", "d")
+                          .Replace("ă", "a")
+                          .Replace("â", "a")
+                          .Replace("ê", "e")
+                          .Replace("ô", "o")
+                          .Replace("ơ", "o")
+                          .Replace("ư", "u")
+                          .Replace(" ", "-")
+                          .Replace("--", "-");
+
+            // Remove special characters except hyphens
+            var cleanSlug = new System.Text.StringBuilder();
+            foreach (char c in slug)
+            {
+                if (char.IsLetterOrDigit(c) || c == '-')
+                    cleanSlug.Append(c);
+            }
+
+            return cleanSlug.ToString().Trim('-');
+        }
+
+        private async Task<string?> SaveUploadedFile(IFormFile file, string subFolder = "uploads")
+        {
+            if (file == null || file.Length == 0)
+                return null;
+
+            var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, subFolder);
+            Directory.CreateDirectory(uploadsPath);
+
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return $"/{subFolder}/{fileName}";
         }
 
         // MARK: - Quản lý Coupons/Discounts
@@ -729,14 +818,27 @@ namespace JohnHenryFashionWeb.Controllers
             
             var totalCount = await query.CountAsync();
             var coupons = await query
-                .OrderByDescending(c => c.CreatedAt)
+                .OrderByDescending(c => c.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
             
-            var model = new SellerCouponsViewModel
+            var model = new CouponManagementViewModel
             {
-                Coupons = coupons,
+                Coupons = coupons.Select(c => new CouponItem
+                {
+                    Id = c.Id,
+                    Code = c.Code,
+                    Name = c.Name,
+                    Type = c.Type,
+                    Value = c.Value,
+                    MinOrderAmount = c.MinOrderAmount,
+                    UsageLimit = c.UsageLimit,
+                    UsageCount = c.UsageCount,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    IsActive = c.IsActive
+                }).ToList(),
                 CurrentPage = page,
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
                 PageSize = pageSize,
@@ -881,7 +983,18 @@ namespace JohnHenryFashionWeb.Controllers
             
             if (!string.IsNullOrEmpty(status))
             {
-                query = query.Where(r => r.IsApproved == (status == "approved"));
+                if (status == "approved")
+                {
+                    query = query.Where(r => r.IsApproved == true);
+                }
+                else if (status == "pending")
+                {
+                    query = query.Where(r => r.IsApproved == false);
+                }
+                else if (status == "rejected")
+                {
+                    query = query.Where(r => r.IsApproved == false);
+                }
             }
             
             var totalCount = await query.CountAsync();
@@ -890,6 +1003,19 @@ namespace JohnHenryFashionWeb.Controllers
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+            // Calculate statistics
+            var allReviewsQuery = _context.ProductReviews.AsQueryable();
+            var totalReviews = await allReviewsQuery.CountAsync();
+            var approvedReviews = await allReviewsQuery.CountAsync(r => r.IsApproved == true);
+            var pendingReviews = await allReviewsQuery.CountAsync(r => r.IsApproved == false);
+            var rejectedReviews = 0; // Since IsApproved is bool, we don't have rejected state
+            var averageRating = totalReviews > 0 ? await allReviewsQuery.AverageAsync(r => r.Rating) : 0;
+
+            // Rating distribution
+            var ratingDistribution = await allReviewsQuery
+                .GroupBy(r => r.Rating)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
             
             var model = new SellerReviewsViewModel
             {
@@ -900,7 +1026,16 @@ namespace JohnHenryFashionWeb.Controllers
                 Search = search,
                 Rating = rating,
                 Status = status,
-                TotalCount = totalCount
+                TotalCount = totalCount,
+                Statistics = new ReviewStatistics
+                {
+                    TotalReviews = totalReviews,
+                    ApprovedReviews = approvedReviews,
+                    PendingReviews = pendingReviews,
+                    RejectedReviews = rejectedReviews,
+                    AverageRating = averageRating,
+                    RatingDistribution = ratingDistribution
+                }
             };
             
             return View(model);
@@ -912,14 +1047,13 @@ namespace JohnHenryFashionWeb.Controllers
             var review = await _context.ProductReviews.FindAsync(id);
             if (review == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Không tìm thấy đánh giá!" });
             }
             
             review.IsApproved = true;
             await _context.SaveChangesAsync();
             
-            TempData["SuccessMessage"] = "Phê duyệt đánh giá thành công!";
-            return RedirectToAction("Reviews");
+            return Json(new { success = true, message = "Phê duyệt đánh giá thành công!" });
         }
 
         [HttpPost("reviews/reject/{id}")]
@@ -928,14 +1062,13 @@ namespace JohnHenryFashionWeb.Controllers
             var review = await _context.ProductReviews.FindAsync(id);
             if (review == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Không tìm thấy đánh giá!" });
             }
             
             review.IsApproved = false;
             await _context.SaveChangesAsync();
             
-            TempData["SuccessMessage"] = "Từ chối đánh giá thành công!";
-            return RedirectToAction("Reviews");
+            return Json(new { success = true, message = "Đã từ chối đánh giá!" });
         }
 
         // MARK: - Quản lý Notifications
@@ -1048,12 +1181,13 @@ namespace JohnHenryFashionWeb.Controllers
                 .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
                 .Select(g => new MonthlyCommissionData
                 {
-                    Month = $"{g.Key.Month:D2}/{g.Key.Year}",
+                    Month = g.Key.Month,
+                    Year = g.Key.Year,
                     Sales = g.Sum(o => o.TotalAmount),
                     Commission = g.Sum(o => o.TotalAmount) * commissionRate,
                     OrderCount = g.Count()
                 })
-                .OrderBy(x => x.Month)
+                .OrderBy(x => x.Year).ThenBy(x => x.Month)
                 .ToList();
             
             var model = new SellerCommissionsViewModel
@@ -1065,7 +1199,14 @@ namespace JohnHenryFashionWeb.Controllers
                 TotalOrders = totalOrders,
                 CommissionRate = commissionRate,
                 MonthlyData = monthlyData,
-                RecentOrders = orders.Take(10).ToList()
+                RecentOrders = orders.Take(10).Select(o => new ViewModels.RecentOrder
+                {
+                    OrderId = o.Id,
+                    OrderNumber = o.OrderNumber,
+                    OrderDate = o.CreatedAt,
+                    Total = o.TotalAmount,
+                    Status = o.Status
+                }).ToList()
             };
             
             return View(model);
@@ -1092,7 +1233,7 @@ namespace JohnHenryFashionWeb.Controllers
                     LastOrderDate = g.Max(o => o.CreatedAt),
                     TotalOrders = g.Count(),
                     TotalSpent = g.Sum(o => o.TotalAmount),
-                    AverageOrderValue = (double)g.Average(o => o.TotalAmount),
+                    AverageOrderValue = (decimal)g.Average(o => o.TotalAmount),
                     Status = g.Any(o => o.CreatedAt > DateTime.Now.AddDays(-30)) ? "Active" : "Inactive"
                 })
                 .AsQueryable();
@@ -1265,8 +1406,8 @@ namespace JohnHenryFashionWeb.Controllers
                 ActiveProducts = activeProducts,
                 TotalCustomers = totalCustomers,
                 NewCustomers = newCustomers,
-                AverageOrderValue = averageOrderValue,
-                ConversionRate = conversionRate,
+                AverageOrderValue = (decimal)averageOrderValue,
+                ConversionRate = (decimal)conversionRate,
                 SalesChartLabels = salesChartLabels,
                 SalesChartData = salesChartData,
                 OrdersChartLabels = ordersChartLabels,
@@ -1331,45 +1472,363 @@ namespace JohnHenryFashionWeb.Controllers
             return View(model);
         }
 
-        #region Helper Methods
-        private string GenerateSlug(string text)
+        // POST: Seller/UpdateProductStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProductStatus(Guid productId, string status)
         {
-            return text.ToLower()
-                      .Replace("á", "a").Replace("à", "a").Replace("ả", "a").Replace("ã", "a").Replace("ạ", "a")
-                      .Replace("ă", "a").Replace("ắ", "a").Replace("ằ", "a").Replace("ẳ", "a").Replace("ẵ", "a").Replace("ặ", "a")
-                      .Replace("â", "a").Replace("ấ", "a").Replace("ầ", "a").Replace("ẩ", "a").Replace("ẫ", "a").Replace("ậ", "a")
-                      .Replace("é", "e").Replace("è", "e").Replace("ẻ", "e").Replace("ẽ", "e").Replace("ẹ", "e")
-                      .Replace("ê", "e").Replace("ế", "e").Replace("ề", "e").Replace("ể", "e").Replace("ễ", "e").Replace("ệ", "e")
-                      .Replace("í", "i").Replace("ì", "i").Replace("ỉ", "i").Replace("ĩ", "i").Replace("ị", "i")
-                      .Replace("ó", "o").Replace("ò", "o").Replace("ỏ", "o").Replace("õ", "o").Replace("ọ", "o")
-                      .Replace("ô", "o").Replace("ố", "o").Replace("ồ", "o").Replace("ổ", "o").Replace("ỗ", "o").Replace("ộ", "o")
-                      .Replace("ơ", "o").Replace("ớ", "o").Replace("ờ", "o").Replace("ở", "o").Replace("ỡ", "o").Replace("ợ", "o")
-                      .Replace("ú", "u").Replace("ù", "u").Replace("ủ", "u").Replace("ũ", "u").Replace("ụ", "u")
-                      .Replace("ư", "u").Replace("ứ", "u").Replace("ừ", "u").Replace("ử", "u").Replace("ữ", "u").Replace("ự", "u")
-                      .Replace("ý", "y").Replace("ỳ", "y").Replace("ỷ", "y").Replace("ỹ", "y").Replace("ỵ", "y")
-                      .Replace("đ", "d")
-                      .Replace(" ", "-")
-                      .Replace("--", "-")
-                      .Trim('-');
-        }
-
-        private async Task<string> SaveUploadedFile(IFormFile file, string folder)
-        {
-            if (file == null || file.Length == 0)
-                return string.Empty;
-
-            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", folder);
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(fileStream);
+                var product = await _context.Products.FindAsync(productId);
+                if (product == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm.";
+                    return RedirectToAction("Products");
+                }
+
+                product.Status = status;
+                product.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Cập nhật trạng thái sản phẩm thành công.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật trạng thái sản phẩm.";
             }
 
-            return $"/images/{folder}/{uniqueFileName}";
+            return RedirectToAction("Products");
+        }
+
+        // POST: Seller/UpdateProductFeatured
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProductFeatured(Guid productId, bool isFeatured)
+        {
+            try
+            {
+                var product = await _context.Products.FindAsync(productId);
+                if (product == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm.";
+                    return RedirectToAction("Products");
+                }
+
+                product.IsFeatured = isFeatured;
+                product.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = isFeatured ? "Đã đặt sản phẩm làm nổi bật." : "Đã bỏ nổi bật sản phẩm.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật sản phẩm.";
+            }
+
+            return RedirectToAction("Products");
+        }
+
+        // POST: Seller/DeleteProduct
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(Guid productId)
+        {
+            try
+            {
+                var product = await _context.Products
+                    .Include(p => p.ProductImages)
+                    .Include(p => p.ProductReviews)
+                    .Include(p => p.Wishlists)
+                    .Include(p => p.ShoppingCartItems)
+                    .FirstOrDefaultAsync(p => p.Id == productId);
+                
+                if (product == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm.";
+                    return RedirectToAction("Products");
+                }
+
+                // Remove related data first
+                _context.ProductImages.RemoveRange(product.ProductImages);
+                _context.ProductReviews.RemoveRange(product.ProductReviews);
+                _context.Wishlists.RemoveRange(product.Wishlists);
+                _context.ShoppingCartItems.RemoveRange(product.ShoppingCartItems);
+                
+                // Remove the product
+                _context.Products.Remove(product);
+                
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Xóa sản phẩm thành công.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa sản phẩm. Sản phẩm có thể đang được sử dụng trong đơn hàng.";
+            }
+
+            return RedirectToAction("Products");
+        }
+
+        #region Store Management
+        [HttpGet("store")]
+        public async Task<IActionResult> StoreManagement()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get seller's store
+            var sellerStore = await _context.SellerStores
+                .Include(ss => ss.Store)
+                .FirstOrDefaultAsync(ss => ss.SellerId == currentUser.Id && ss.IsActive);
+
+            if (sellerStore?.Store == null)
+            {
+                // Create a basic view model for sellers without a store
+                var emptyViewModel = new StoreManagementViewModel
+                {
+                    Store = null,
+                    Statistics = new StoreStatistics()
+                };
+                return View(emptyViewModel);
+            }
+
+            var store = sellerStore.Store;
+
+            // Get inventory
+            var inventory = await _context.StoreInventories
+                .Include(si => si.Product)
+                .Where(si => si.StoreId == store.Id)
+                .Select(si => new StoreInventoryItem
+                {
+                    Id = si.Id,
+                    ProductName = si.Product.Name,
+                    ProductImageUrl = si.Product.FeaturedImageUrl ?? "",
+                    ProductSku = si.Product.SKU,
+                    Quantity = si.Quantity,
+                    MinimumStock = si.MinimumStock,
+                    MaximumStock = si.MaximumStock,
+                    Location = si.Location,
+                    LastUpdated = si.LastUpdated
+                })
+                .OrderBy(si => si.ProductName)
+                .ToListAsync();
+
+            // Get settings
+            var settings = await _context.StoreSettings
+                .Include(ss => ss.UpdatedByUser)
+                .Where(ss => ss.StoreId == store.Id)
+                .Select(ss => new StoreSettingItem
+                {
+                    Id = ss.Id,
+                    SettingKey = ss.SettingKey,
+                    SettingValue = ss.SettingValue,
+                    Description = ss.Description,
+                    UpdatedAt = ss.UpdatedAt,
+                    UpdatedByName = $"{ss.UpdatedByUser.FirstName} {ss.UpdatedByUser.LastName}".Trim()
+                })
+                .OrderBy(ss => ss.SettingKey)
+                .ToListAsync();
+
+            // Get store staff
+            var storeStaff = await _context.SellerStores
+                .Include(ss => ss.Seller)
+                .Where(ss => ss.StoreId == store.Id && ss.IsActive)
+                .ToListAsync();
+
+            // Calculate statistics
+            var statistics = new StoreStatistics
+            {
+                TotalProducts = inventory.Count,
+                LowStockProducts = inventory.Count(i => i.Quantity <= i.MinimumStock),
+                OutOfStockProducts = inventory.Count(i => i.Quantity <= 0),
+                TotalInventoryValue = await _context.StoreInventories
+                    .Include(si => si.Product)
+                    .Where(si => si.StoreId == store.Id)
+                    .SumAsync(si => si.Quantity * si.Product.Price),
+                StaffCount = storeStaff.Count,
+                MonthlyRevenue = 0, // TODO: Calculate based on actual sales
+                MonthlyOrders = 0 // TODO: Calculate based on actual orders
+            };
+
+            var viewModel = new StoreManagementViewModel
+            {
+                Store = store,
+                Inventory = inventory,
+                Settings = settings,
+                Statistics = statistics,
+                StoreStaff = storeStaff
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpGet("store/settings")]
+        public async Task<IActionResult> StoreSettings()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var sellerStore = await _context.SellerStores
+                .Include(ss => ss.Store)
+                .FirstOrDefaultAsync(ss => ss.SellerId == currentUser.Id && ss.IsActive);
+
+            if (sellerStore?.Store == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa được gán vào cửa hàng nào.";
+                return RedirectToAction("StoreManagement");
+            }
+
+            var store = sellerStore.Store;
+            var additionalSettings = await _context.StoreSettings
+                .Where(ss => ss.StoreId == store.Id)
+                .ToDictionaryAsync(ss => ss.SettingKey, ss => ss.SettingValue);
+
+            var viewModel = new StoreSettingsViewModel
+            {
+                StoreId = store.Id,
+                StoreName = store.Name,
+                StoreAddress = store.Address,
+                Phone = store.Phone,
+                Email = store.Email,
+                Website = store.Website,
+                WorkingHours = store.WorkingHours,
+                Description = store.Description,
+                SocialMedia = store.SocialMedia,
+                IsActive = store.IsActive,
+                AdditionalSettings = additionalSettings
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost("store/settings")]
+        public async Task<IActionResult> StoreSettings(StoreSettingsViewModel model)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var sellerStore = await _context.SellerStores
+                .Include(ss => ss.Store)
+                .FirstOrDefaultAsync(ss => ss.SellerId == currentUser.Id && ss.IsActive);
+
+            if (sellerStore?.Store == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var store = sellerStore.Store;
+                store.Name = model.StoreName;
+                store.Address = model.StoreAddress;
+                store.Phone = model.Phone;
+                store.Email = model.Email;
+                store.Website = model.Website;
+                store.WorkingHours = model.WorkingHours;
+                store.Description = model.Description;
+                store.SocialMedia = model.SocialMedia;
+                store.IsActive = model.IsActive;
+                store.UpdatedAt = DateTime.UtcNow;
+
+                // Update additional settings
+                var existingSettings = await _context.StoreSettings
+                    .Where(ss => ss.StoreId == store.Id)
+                    .ToListAsync();
+
+                foreach (var setting in model.AdditionalSettings)
+                {
+                    var existingSetting = existingSettings.FirstOrDefault(s => s.SettingKey == setting.Key);
+                    if (existingSetting != null)
+                    {
+                        existingSetting.SettingValue = setting.Value;
+                        existingSetting.UpdatedAt = DateTime.UtcNow;
+                        existingSetting.UpdatedBy = currentUser.Id;
+                    }
+                    else
+                    {
+                        _context.StoreSettings.Add(new StoreSettings
+                        {
+                            Id = Guid.NewGuid(),
+                            StoreId = store.Id,
+                            SettingKey = setting.Key,
+                            SettingValue = setting.Value,
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = currentUser.Id
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Cập nhật cài đặt cửa hàng thành công!";
+                return RedirectToAction("StoreManagement");
+            }
+
+            return View(model);
+        }
+
+        [HttpPost("store/inventory/update")]
+        public async Task<IActionResult> UpdateInventory(Guid productId, int quantity, int minStock, int maxStock, string? location)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var sellerStore = await _context.SellerStores
+                .FirstOrDefaultAsync(ss => ss.SellerId == currentUser.Id && ss.IsActive);
+
+            if (sellerStore == null)
+            {
+                return Json(new { success = false, message = "Store not found" });
+            }
+
+            var inventory = await _context.StoreInventories
+                .FirstOrDefaultAsync(si => si.StoreId == sellerStore.StoreId && si.ProductId == productId);
+
+            if (inventory == null)
+            {
+                // Create new inventory entry
+                inventory = new StoreInventory
+                {
+                    Id = Guid.NewGuid(),
+                    StoreId = sellerStore.StoreId,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    MinimumStock = minStock,
+                    MaximumStock = maxStock,
+                    Location = location,
+                    LastUpdated = DateTime.UtcNow,
+                    UpdatedBy = currentUser.Id
+                };
+                _context.StoreInventories.Add(inventory);
+            }
+            else
+            {
+                // Update existing inventory
+                inventory.Quantity = quantity;
+                inventory.MinimumStock = minStock;
+                inventory.MaximumStock = maxStock;
+                inventory.Location = location;
+                inventory.LastUpdated = DateTime.UtcNow;
+                inventory.UpdatedBy = currentUser.Id;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Cập nhật kho thành công!" });
         }
         #endregion
     }
