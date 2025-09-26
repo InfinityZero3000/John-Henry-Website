@@ -80,7 +80,7 @@
                                         <button class="btn btn-outline-secondary btn-sm" 
                                                 onclick="updateQuantity('@item.Id', @(item.Quantity - 1))"
                                                 @(item.Quantity <= 1 ? "disabled" : "")>
-                                            <i class="fas fa-minus"></i>
+                                            <i data-lucide="minus"></i>
                                         </button>
                                         <input type="number" 
                                                class="form-control quantity-input" 
@@ -90,7 +90,7 @@
                                                onchange="updateQuantity('@item.Id', this.value)">
                                         <button class="btn btn-outline-secondary btn-sm" 
                                                 onclick="updateQuantity('@item.Id', @(item.Quantity + 1))">
-                                            <i class="fas fa-plus"></i>
+                                            <i data-lucide="plus"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -104,7 +104,7 @@
                                         <button class="btn btn-outline-danger btn-sm" 
                                                 onclick="removeItem('@item.Id')"
                                                 title="Xóa sản phẩm">
-                                            <i class="fas fa-trash"></i>
+                                            <i data-lucide="trash"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -118,13 +118,13 @@
                 <div class="cart-actions mt-4">
                     <div class="row">
                         <div class="col-md-6">
-                            <a href="/Products" class="btn btn-outline-primary">
-                                <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+                            <a href="/" class="btn btn-outline-primary">
+                                <i data-lucide="arrow-left" class="me-2"></i>Tiếp tục mua sắm
                             </a>
                         </div>
                         <div class="col-md-6 text-end">
                             <button class="btn btn-outline-secondary me-2" onclick="clearCart()">
-                                <i class="fas fa-trash me-2"></i>Xóa tất cả
+                                <i data-lucide="trash" class="me-2"></i>Xóa tất cả
                             </button>
                         </div>
                     </div>
@@ -135,12 +135,12 @@
                 <!-- Empty Cart -->
                 <div class="empty-cart text-center py-5">
                     <div class="empty-cart-icon mb-4">
-                        <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+                        <i data-lucide="shopping-cart" class="w-16 h-16 text-muted"></i>
                     </div>
                     <h4 class="mb-3">Giỏ hàng của bạn đang trống</h4>
                     <p class="text-muted mb-4">Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!</p>
-                    <a href="/Products" class="btn btn-primary">
-                        <i class="fas fa-shopping-bag me-2"></i>Bắt đầu mua sắm
+                    <a href="/" class="btn btn-primary">
+                        <i data-lucide="shopping-bag" class="me-2"></i>Bắt đầu mua sắm
                     </a>
                 </div>
             }
@@ -177,7 +177,7 @@
                                 <div id="appliedCoupon" class="applied-coupon mt-2" style="display: none;">
                                     <div class="alert alert-success d-flex justify-content-between align-items-center">
                                         <div>
-                                            <i class="fas fa-check-circle me-2"></i>
+                                            <i data-lucide="check-circle" class="me-2"></i>
                                             <span id="couponInfo"></span>
                                         </div>
                                         <button type="button" class="btn-close" onclick="removeCoupon()"></button>
@@ -202,7 +202,7 @@
                             <!-- Checkout Button -->
                             <div class="mt-4">
                                 <a href="/Cart/Checkout" class="btn btn-primary btn-lg w-100">
-                                    <i class="fas fa-credit-card me-2"></i>Thanh toán
+                                    <i data-lucide="credit-card" class="me-2"></i>Thanh toán
                                 </a>
                             </div>
 

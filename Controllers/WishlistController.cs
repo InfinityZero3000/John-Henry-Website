@@ -261,5 +261,46 @@ namespace JohnHenryFashionWeb.Controllers
 
             return Json(new { wishlistCount = wishlistCount });
         }
+
+        // GET: Wishlist/IsInWishlist
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> IsInWishlist(string productId)
+        {
+            if (string.IsNullOrEmpty(productId))
+            {
+                return Json(new { isInWishlist = false });
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { isInWishlist = false });
+            }
+
+            // Try to find product by SKU first, then by Id
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.SKU == productId);
+
+            if (product == null)
+            {
+                // Try to parse as Guid and search by Id
+                if (Guid.TryParse(productId, out var guid))
+                {
+                    product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.Id == guid);
+                }
+            }
+
+            if (product == null)
+            {
+                return Json(new { isInWishlist = false });
+            }
+
+            var isInWishlist = await _context.Wishlists
+                .AnyAsync(w => w.UserId == userId && w.ProductId == product.Id);
+
+            return Json(new { isInWishlist = isInWishlist });
+        }
     }
 }

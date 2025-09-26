@@ -1,0 +1,329 @@
+@model JohnHenryFashionWeb.ViewModels.UserDashboardViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle fa-4x text-primary"></i>
+                    </div>
+                    <h5 class="mt-2">@Model.User.FirstName @Model.User.LastName</h5>
+                    <p class="text-muted">@Model.User.Email</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="@Url.Action("Index", "UserDashboard")">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Profile", "UserDashboard")">
+                            <i class="fas fa-user me-2"></i>
+                            Hồ sơ cá nhân
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Orders", "UserDashboard")">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            Đơn hàng của tôi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Wishlist">
+                            <i class="fas fa-heart me-2"></i>
+                            Sản phẩm yêu thích
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("ChangePassword", "Account")">
+                            <i class="fas fa-lock me-2"></i>
+                            Đổi mật khẩu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Notifications", "UserDashboard")">
+                            <i class="fas fa-bell me-2"></i>
+                            Thông báo
+                            @if (Model.UnreadNotifications > 0)
+                            {
+                                <span class="badge bg-danger">@Model.UnreadNotifications</span>
+                            }
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Bảng điều khiển</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-home me-1"></i>
+                            Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Tổng đơn hàng
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalOrders</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Tổng chi tiêu
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalSpent.ToString("N0") VND</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Sản phẩm yêu thích
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.WishlistCount</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-heart fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Giỏ hàng
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.CartItemsCount</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-shopping-bag fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                    <a href="@Url.Action("Orders", "UserDashboard")" class="btn btn-sm btn-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders != null && Model.RecentOrders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>#@order.Id.ToString("D6")</td>
+                                            <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                            <td>@order.TotalAmount.ToString("N0") VND</td>
+                                            <td>
+                                                <span class="badge bg-@(order.Status == "completed" ? "success" : order.Status == "pending" ? "warning" : "secondary")">
+                                                    @(order.Status == "completed" ? "Hoàn thành" : 
+                                                      order.Status == "pending" ? "Đang xử lý" : 
+                                                      order.Status == "shipped" ? "Đang giao" : 
+                                                      order.Status == "cancelled" ? "Đã hủy" : "Khác")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                                    Chi tiết
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Bạn chưa có đơn hàng nào.</p>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                                Mua sắm ngay
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Hành động nhanh</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <a href="@Url.Action("Profile", "UserDashboard")" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-user me-2"></i>
+                                    Cập nhật thông tin cá nhân
+                                </a>
+                                <a href="@Url.Action("ChangePassword", "Account")" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Đổi mật khẩu
+                                </a>
+                                <a href="/Wishlist" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-heart me-2"></i>
+                                    Xem sản phẩm yêu thích
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action" id="cart-icon">
+                                    <i class="fas fa-shopping-bag me-2"></i>
+                                    Xem giỏ hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Thông báo mới</h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.UnreadNotifications > 0)
+                            {
+                                <p class="text-info">
+                                    <i class="fas fa-bell me-2"></i>
+                                    Bạn có @Model.UnreadNotifications thông báo chưa đọc.
+                                </p>
+                                <a href="@Url.Action("Notifications", "UserDashboard")" class="btn btn-sm btn-primary">
+                                    Xem thông báo
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="text-muted">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Bạn đã đọc hết tất cả thông báo.
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df!important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a!important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc!important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e!important;
+}
+
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.shadow {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15)!important;
+}
+
+@@media (max-width: 767.98px) {
+    .sidebar {
+        top: 5rem;
+    }
+}
+</style>

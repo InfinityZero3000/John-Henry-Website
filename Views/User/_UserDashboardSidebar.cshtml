@@ -1,0 +1,73 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+            @if (!string.IsNullOrEmpty(user?.Avatar))
+            {
+                <img src="@user.Avatar" alt="Avatar" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+            }
+            else
+            {
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                    <i class="fas fa-user text-white fs-4"></i>
+                </div>
+            }
+            <div>
+                <h5 class="mb-0">@user?.FullName</h5>
+                <small class="text-muted">@user?.Email</small>
+            </div>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link @(currentAction == "Index" && currentController == "UserDashboard" ? "active" : "")" 
+               href="@Url.Action("Index", "UserDashboard")">
+                <i class="fas fa-tachometer-alt me-2"></i> Tổng quan
+            </a>
+            <a class="nav-link @(currentAction == "Profile" ? "active" : "")" 
+               href="@Url.Action("Profile", "UserDashboard")">
+                <i class="fas fa-user me-2"></i> Thông tin cá nhân
+            </a>
+            <a class="nav-link @(currentAction == "Orders" ? "active" : "")" 
+               href="@Url.Action("Orders", "UserDashboard")">
+                <i class="fas fa-shopping-bag me-2"></i> Đơn hàng
+            </a>
+            <a class="nav-link @(currentController == "Wishlist" ? "active" : "")" 
+               href="@Url.Action("Index", "Wishlist")">
+                <i class="fas fa-heart me-2"></i> Danh sách yêu thích
+            </a>
+            <a class="nav-link @(currentAction == "Addresses" ? "active" : "")" 
+               href="@Url.Action("Addresses", "UserDashboard")">
+                <i class="fas fa-map-marker-alt me-2"></i> Địa chỉ
+            </a>
+            <a class="nav-link @(currentAction == "Notifications" ? "active" : "")" 
+               href="@Url.Action("Notifications", "UserDashboard")">
+                <i class="fas fa-bell me-2"></i> Thông báo
+            </a>
+            <a class="nav-link @(currentAction == "Security" ? "active" : "")" 
+               href="@Url.Action("Security", "UserDashboard")">
+                <i class="fas fa-shield-alt me-2"></i> Bảo mật
+            </a>
+            <hr>
+            <a class="nav-link @(currentController == "Cart" ? "active" : "")" 
+               href="@Url.Action("Index", "Cart")">
+                <i class="fas fa-shopping-cart me-2"></i> Giỏ hàng
+            </a>
+            <a class="nav-link text-danger" href="#" onclick="document.getElementById('logoutForm').submit();">
+                <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Logout Form -->
+<form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+</form>

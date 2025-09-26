@@ -7,16 +7,10 @@
 <section class="blog-hero-banner">
     <div class="blog-banner-container">
         <img src="~/images/Banner/banner-blog.jpg" alt="John Henry Blog" class="blog-banner-img">
-        <div class="blog-banner-overlay">
-            <div class="blog-banner-content text-center text-white">
-                <h1 class="blog-banner-title">John Henry Blog</h1>
-                <p class="blog-banner-subtitle">Khám phá những xu hướng thời trang mới nhất và bí quyết phối đồ</p>
-            </div>
         </div>
     </div>
 </section>
 
-<!-- Blog Content Section -->
 <section class="blog-content-section py-5">
     <div class="container">
         @if (ViewBag.DatabaseError != null)
@@ -204,17 +198,17 @@
 
 <style>
     :root {
-        --jh-red: #CE193A;
+        --jh-red: #951329;
         --jh-dark-red: #95122A;
         --jh-white: #FFFFFF;
         --jh-gold: #FFD700;
-        --primary-color: #CE193A;
+        --primary-color: #951329;
     }
 
     /* Blog Hero Banner */
     .blog-hero-banner {
         position: relative;
-        height: 400px;
+        height: 700px;
         overflow: hidden;
     }
 
@@ -495,7 +489,7 @@
         }
 
         .blog-hero-banner {
-            height: 300px;
+            height: 700px;
         }
 
         .blog-post-image {

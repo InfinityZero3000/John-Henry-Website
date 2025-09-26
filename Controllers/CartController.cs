@@ -214,6 +214,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         // GET: Cart/GetCartCount
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCartCount()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -227,6 +228,30 @@ namespace JohnHenryFashionWeb.Controllers
                 .SumAsync(c => c.Quantity);
 
             return Json(new { cartCount = cartCount });
+        }
+
+        // GET: Cart/GetSidebarData
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetSidebarData()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return PartialView("_CartSidebar", new List<ShoppingCartItem>());
+            }
+
+            var cartItems = await _context.ShoppingCartItems
+                .Include(c => c.Product)
+                .ThenInclude(p => p.Category)
+                .Where(c => c.UserId == userId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.CartTotal = cartItems.Sum(c => c.Price * c.Quantity);
+            ViewBag.CartCount = cartItems.Sum(c => c.Quantity);
+
+            return PartialView("_CartSidebar", cartItems);
         }
     }
 }

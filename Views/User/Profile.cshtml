@@ -1,0 +1,214 @@
+@model JohnHenryFashionWeb.ViewModels.UserProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid my-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            @await Html.PartialAsync("_UserDashboardSidebar")
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        Thông tin cá nhân
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Profile" method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-3 text-center mb-4">
+                                <div class="position-relative d-inline-block">
+                                    @if (!string.IsNullOrEmpty(Model.Avatar))
+                                    {
+                                        <img id="avatar-preview" src="@Model.Avatar" alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div id="avatar-preview" class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                            <i class="fas fa-user text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 35px; height: 35px;" onclick="document.getElementById('avatar-upload').click()">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                </div>
+                                <input type="file" id="avatar-upload" name="AvatarFile" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
+                                <div class="mt-2">
+                                    <small class="text-muted">Click vào camera để thay đổi ảnh đại diện</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="FirstName" class="form-label"></label>
+                                            <input asp-for="FirstName" class="form-control" />
+                                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="LastName" class="form-label"></label>
+                                            <input asp-for="LastName" class="form-control" />
+                                            <span asp-validation-for="LastName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="Email" class="form-label"></label>
+                                            <input asp-for="Email" class="form-control" readonly />
+                                            <small class="form-text text-muted">Email không thể thay đổi</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="PhoneNumber" class="form-label"></label>
+                                            <input asp-for="PhoneNumber" class="form-control" />
+                                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="DateOfBirth" class="form-label"></label>
+                                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="Gender" class="form-label"></label>
+                                            <select asp-for="Gender" class="form-select">
+                                                <option value="">Chọn giới tính</option>
+                                                <option value="Male">Nam</option>
+                                                <option value="Female">Nữ</option>
+                                                <option value="Other">Khác</option>
+                                            </select>
+                                            <span asp-validation-for="Gender" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <a href="@Url.Action("Index", "UserDashboard")" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Quay lại
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>
+                                        Lưu thay đổi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lock me-2"></i>
+                        Đổi mật khẩu
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="changePasswordForm" asp-controller="Account" asp-action="ChangePassword" method="post">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="CurrentPassword" class="form-label">Mật khẩu hiện tại</label>
+                                    <input type="password" id="CurrentPassword" name="CurrentPassword" class="form-control" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="NewPassword" class="form-label">Mật khẩu mới</label>
+                                    <input type="password" id="NewPassword" name="NewPassword" class="form-control" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="ConfirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                                    <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required />
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-key me-2"></i>
+                            Đổi mật khẩu
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatar-preview');
+                    if (preview.tagName === 'IMG') {
+                        preview.src = e.target.result;
+                    } else {
+                        // Replace div with img
+                        const img = document.createElement('img');
+                        img.id = 'avatar-preview';
+                        img.src = e.target.result;
+                        img.alt = 'Avatar';
+                        img.className = 'rounded-circle';
+                        img.style.cssText = 'width: 150px; height: 150px; object-fit: cover;';
+                        preview.parentNode.replaceChild(img, preview);
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Handle change password form
+        document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('NewPassword').value;
+            const confirmPassword = document.getElementById('ConfirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('Mật khẩu mới và xác nhận mật khẩu không khớp!');
+                return false;
+            }
+            
+            if (newPassword.length < 8) {
+                e.preventDefault();
+                alert('Mật khẩu mới phải có ít nhất 8 ký tự!');
+                return false;
+            }
+        });
+    </script>
+}

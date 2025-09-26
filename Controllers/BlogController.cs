@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using JohnHenryFashionWeb.Data;
 using JohnHenryFashionWeb.Models;
 using JohnHenryFashionWeb.ViewModels;
+using JohnHenryFashionWeb.Services;
 using System.Security.Claims;
 
 namespace JohnHenryFashionWeb.Controllers
@@ -73,6 +74,14 @@ namespace JohnHenryFashionWeb.Controllers
                     .Take(3)
                     .ToListAsync();
 
+                // Set up breadcrumbs
+                var breadcrumbs = new List<BreadcrumbItem>
+                {
+                    new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+                    new BreadcrumbItem { Name = "BLOG", Url = "" }
+                };
+                ViewBag.Breadcrumbs = breadcrumbs;
+
                 return View(posts);
             }
             catch (Exception ex)
@@ -119,6 +128,15 @@ namespace JohnHenryFashionWeb.Controllers
                     .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
                     .Take(3)
                     .ToListAsync();
+
+                // Set up breadcrumbs
+                var breadcrumbs = new List<BreadcrumbItem>
+                {
+                    new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+                    new BreadcrumbItem { Name = "BLOG", Url = Url.Action("Index", "Blog") ?? "/Blog" },
+                    new BreadcrumbItem { Name = post.Title, Url = "" }
+                };
+                ViewBag.Breadcrumbs = breadcrumbs;
 
                 return View(post);
             }
@@ -182,6 +200,15 @@ namespace JohnHenryFashionWeb.Controllers
                 TotalPosts = totalPosts
             };
 
+            // Set up breadcrumbs
+            var breadcrumbs = new List<BreadcrumbItem>
+            {
+                new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+                new BreadcrumbItem { Name = "BLOG", Url = Url.Action("Index", "Blog") ?? "/Blog" },
+                new BreadcrumbItem { Name = category.Name, Url = "" }
+            };
+            ViewBag.Breadcrumbs = breadcrumbs;
+
             return View(viewModel);
         }
 
@@ -193,6 +220,15 @@ namespace JohnHenryFashionWeb.Controllers
                 .Where(c => c.IsActive)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
+
+            // Set up breadcrumbs
+            var breadcrumbs = new List<BreadcrumbItem>
+            {
+                new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+                new BreadcrumbItem { Name = "BLOG", Url = Url.Action("Index", "Blog") ?? "/Blog" },
+                new BreadcrumbItem { Name = "Tạo bài viết", Url = "" }
+            };
+            ViewBag.Breadcrumbs = breadcrumbs;
 
             return View();
         }
@@ -248,6 +284,15 @@ namespace JohnHenryFashionWeb.Controllers
                 .Where(c => c.IsActive)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
+
+            // Set up breadcrumbs
+            var breadcrumbs = new List<BreadcrumbItem>
+            {
+                new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+                new BreadcrumbItem { Name = "BLOG", Url = Url.Action("Index", "Blog") ?? "/Blog" },
+                new BreadcrumbItem { Name = "Chỉnh sửa bài viết", Url = "" }
+            };
+            ViewBag.Breadcrumbs = breadcrumbs;
 
             return View(post);
         }

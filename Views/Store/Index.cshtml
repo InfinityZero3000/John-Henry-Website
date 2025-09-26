@@ -1,0 +1,526 @@
+@model JohnHenryFashionWeb.ViewModels.StoreLocatorViewModel
+@{
+    ViewData["Title"] = "Hệ Thống Cửa Hàng John Henry & Freelancer";
+    ViewData["Description"] = "Tìm kiếm cửa hàng John Henry và Freelancer gần bạn. Hệ thống cửa hàng trên toàn quốc với sản phẩm thời trang chất lượng.";
+}
+
+<!-- Store Locator Page -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Store List Sidebar -->
+        <div class="col-lg-4 col-md-5" id="storeListSidebar">
+            <!-- Filter Controls -->
+            <div class="filter-section mb-3">
+                <form asp-action="Index" method="get" id="storeFilterForm">
+                    <div class="row g-2">
+                        <!-- Province/City Selection -->
+                        <div class="col-6">
+                            <select asp-for="SelectedProvince" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">Chọn Tỉnh/thành phố</option>
+                                @foreach (var province in Model.Provinces)
+                                {
+                                    <option value="@province" selected="@(Model.SelectedProvince == province)">
+                                        @province
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <!-- City Selection -->
+                        <div class="col-6">
+                            <select asp-for="SelectedCity" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">Chọn Quận/huyện</option>
+                                @foreach (var city in Model.Cities)
+                                {
+                                    <option value="@city" selected="@(Model.SelectedCity == city)">
+                                        @city
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Store Count -->
+            <div class="store-count mb-3">
+                <span class="text-muted small">Tìm thấy @Model.Stores.Count cửa hàng</span>
+            </div>
+
+            <!-- Store List -->
+            <div class="store-list" style="max-height: 600px; overflow-y: auto;">
+                @if (Model.Stores.Any())
+                {
+                    @foreach (var store in Model.Stores)
+                    {
+                        <div class="store-item mb-3 p-3 border rounded bg-white shadow-sm" data-lat="@store.Latitude" data-lng="@store.Longitude" onclick="showStoreOnMap('@store.Latitude', '@store.Longitude', '@store.Name')">
+                            <div class="store-header mb-2">
+                                <h6 class="store-name mb-1 text-dark fw-bold">@store.Name</h6>
+                                <div class="store-address text-muted small">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    @store.DisplayAddress
+                                </div>
+                            </div>
+                            
+                            <div class="store-details">
+                                @if (!string.IsNullOrEmpty(store.Phone))
+                                {
+                                    <div class="store-phone mb-1">
+                                        <i class="fas fa-phone text-success me-2"></i>
+                                        <a href="tel:@store.Phone" class="text-decoration-none">@store.DisplayPhone</a>
+                                    </div>
+                                }
+                                
+                                <div class="store-hours mb-2 text-muted small">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Thời gian hoạt động: @store.DisplayWorkingHours
+                                </div>
+                                
+                                <div class="store-actions">
+                                    <button class="btn btn-link p-0 text-primary small" onclick="event.stopPropagation(); showStoreOnMap('@store.Latitude', '@store.Longitude', '@store.Name')">
+                                        <i class="fas fa-directions me-1"></i>Chỉ đường
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-store-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Không tìm thấy cửa hàng</p>
+                        <a href="@Url.Action("Index")" class="btn btn-primary btn-sm">Xem tất cả</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <div class="col-lg-8 col-md-7">
+            <div class="map-container">
+                <!-- Google Maps Display -->
+                <div id="map-display" style="height: 600px; width: 100%;">
+                    @if (Model.Stores.Any(s => s.HasGoogleMap))
+                    {
+                        <!-- Default map - first available store -->
+                        var firstStoreWithMap = Model.Stores.FirstOrDefault(s => s.HasGoogleMap);
+                        if (firstStoreWithMap != null)
+                        {
+                            <iframe id="current-map-iframe" 
+                                    src="@firstStoreWithMap.GoogleMapIframe" 
+                                    width="100%" 
+                                    height="600" 
+                                    style="border:0;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Fallback map for Vietnam -->
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-light border">
+                            <div class="text-center">
+                                <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Chưa có bản đồ</h5>
+                                <p class="text-muted small">Vui lòng chọn một cửa hàng để xem bản đồ</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <!-- Store Information Panel -->
+                <div id="store-info-panel" class="mt-3 p-3 bg-white border rounded shadow-sm" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 id="info-store-name" class="fw-bold text-primary mb-2"></h6>
+                            <p id="info-store-address" class="mb-1 text-muted"><i class="fas fa-map-marker-alt me-2"></i></p>
+                            <p id="info-store-phone" class="mb-1 text-muted"><i class="fas fa-phone me-2"></i></p>
+                            <p id="info-store-hours" class="mb-0 text-muted"><i class="fas fa-clock me-2"></i></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button id="call-button" class="btn btn-success btn-sm me-2" style="display: none;">
+                                <i class="fas fa-phone"></i> Gọi
+                            </button>
+                            <button id="directions-button" class="btn btn-primary btn-sm" onclick="getDirections()">
+                                <i class="fas fa-route"></i> Chỉ đường
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentStoreData = null;
+
+        // Store data from server
+        const storeData = @Html.Raw(Json.Serialize(Model.Stores));
+
+        // Show store on map
+        function showStoreOnMap(lat, lng, name) {
+            if (!lat || !lng) return;
+            
+            // Find store data
+            const store = storeData.find(s => 
+                Math.abs(parseFloat(s.latitude) - parseFloat(lat)) < 0.0001 && 
+                Math.abs(parseFloat(s.longitude) - parseFloat(lng)) < 0.0001
+            );
+            
+            if (!store) return;
+            
+            currentStoreData = store;
+            
+            // Update map iframe if store has Google Map
+            if (store.hasGoogleMap && store.googleMapIframe) {
+                const iframe = document.getElementById('current-map-iframe');
+                if (iframe) {
+                    iframe.src = store.googleMapIframe;
+                }
+                
+                // Show and update store info panel
+                updateStoreInfoPanel(store);
+            }
+
+            // Highlight selected store in list
+            document.querySelectorAll('.store-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            const selectedStore = document.querySelector(`[data-lat="${lat}"][data-lng="${lng}"]`);
+            if (selectedStore) {
+                selectedStore.classList.add('selected');
+                
+                // Scroll selected store into view
+                selectedStore.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
+            }
+        }
+
+        // Update store information panel
+        function updateStoreInfoPanel(store) {
+            const panel = document.getElementById('store-info-panel');
+            const nameEl = document.getElementById('info-store-name');
+            const addressEl = document.getElementById('info-store-address');
+            const phoneEl = document.getElementById('info-store-phone');
+            const hoursEl = document.getElementById('info-store-hours');
+            const callBtn = document.getElementById('call-button');
+            
+            if (panel && nameEl && addressEl && phoneEl && hoursEl) {
+                nameEl.textContent = store.name;
+                addressEl.innerHTML = `<i class="fas fa-map-marker-alt me-2"></i>${store.displayAddress}`;
+                phoneEl.innerHTML = `<i class="fas fa-phone me-2"></i>${store.displayPhone}`;
+                hoursEl.innerHTML = `<i class="fas fa-clock me-2"></i>${store.displayWorkingHours}`;
+                
+                // Update call button
+                if (store.phone && callBtn) {
+                    callBtn.style.display = 'inline-block';
+                    callBtn.onclick = () => window.location.href = `tel:${store.phone}`;
+                } else if (callBtn) {
+                    callBtn.style.display = 'none';
+                }
+                
+                panel.style.display = 'block';
+            }
+        }
+
+        // Get directions to current store
+        function getDirections() {
+            if (!currentStoreData || !currentStoreData.latitude || !currentStoreData.longitude) {
+                alert('Vui lòng chọn một cửa hàng trước');
+                return;
+            }
+            
+            const lat = currentStoreData.latitude;
+            const lng = currentStoreData.longitude;
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const origin = `${position.coords.latitude},${position.coords.longitude}`;
+                    const destination = `${lat},${lng}`;
+                    const url = `https://www.google.com/maps/dir/${origin}/${destination}`;
+                    window.open(url, '_blank');
+                }, () => {
+                    // Fallback if geolocation fails
+                    const url = `https://www.google.com/maps/dir//${lat},${lng}`;
+                    window.open(url, '_blank');
+                });
+            } else {
+                const url = `https://www.google.com/maps/dir//${lat},${lng}`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // If there are stores with maps, show the first one
+            const firstStoreWithMap = storeData.find(s => s.hasGoogleMap);
+            if (firstStoreWithMap) {
+                setTimeout(() => {
+                    showStoreOnMap(firstStoreWithMap.latitude, firstStoreWithMap.longitude, firstStoreWithMap.name);
+                }, 500);
+            }
+            
+            // Add click handlers to store items
+            document.querySelectorAll('.store-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const lat = this.getAttribute('data-lat');
+                    const lng = this.getAttribute('data-lng');
+                    const name = this.querySelector('.store-name')?.textContent || '';
+                    
+                    if (lat && lng) {
+                        showStoreOnMap(lat, lng, name);
+                    }
+                });
+            });
+        });
+
+        // Handle responsive behavior
+        window.addEventListener('resize', function() {
+            // Adjust iframe height for mobile if needed
+            const iframe = document.getElementById('current-map-iframe');
+            if (iframe && window.innerWidth <= 767) {
+                iframe.style.height = '350px';
+            } else if (iframe) {
+                iframe.style.height = '600px';
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .store-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .store-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-color: #951329;
+        }
+
+        .store-item.selected {
+            border-color: #951329;
+            background-color: #f8f9fa !important;
+            box-shadow: 0 4px 15px rgba(149,19,41,0.15);
+        }
+
+        .store-name {
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+        .store-address {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .store-phone {
+            font-size: 13px;
+        }
+
+        .store-hours {
+            font-size: 12px;
+        }
+
+        .store-actions {
+            font-size: 12px;
+        }
+
+        .filter-section .form-select {
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        .store-count {
+            font-size: 13px;
+        }
+
+        .store-list {
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
+        }
+
+        .store-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .store-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .store-list::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+        }
+
+        .store-list::-webkit-scrollbar-thumb:hover {
+            background-color: #999;
+        }
+
+        #map-display {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #current-map-iframe {
+            border-radius: 8px;
+        }
+
+        #store-info-panel {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        #store-info-panel h6 {
+            color: #951329;
+            font-size: 16px;
+        }
+
+        #store-info-panel .text-muted {
+            color: #6c757d !important;
+            font-size: 14px;
+        }
+
+        .map-container {
+            position: sticky;
+            top: 20px;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-primary {
+            background-color: #951329;
+            border-color: #951329;
+        }
+
+        .btn-primary:hover {
+            background-color: #7a0f21;
+            border-color: #6d0e1d;
+        }
+
+        @@media (max-width: 991.98px) {
+            .map-container {
+                position: static;
+                margin-top: 20px;
+            }
+            
+            #map-display {
+                height: 400px !important;
+            }
+            
+            #current-map-iframe {
+                height: 400px !important;
+            }
+            
+            .store-list {
+                max-height: 400px !important;
+            }
+        }
+
+        @@media (max-width: 767.98px) {
+            #map-display {
+                height: 350px !important;
+            }
+            
+            #current-map-iframe {
+                height: 350px !important;
+            }
+            
+            .container-fluid {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .store-list {
+                max-height: 300px !important;
+            }
+
+            .store-item {
+                padding: 15px !important;
+            }
+
+            #store-info-panel {
+                margin-top: 15px;
+                padding: 15px !important;
+            }
+
+            #store-info-panel .row {
+                flex-direction: column;
+            }
+
+            #store-info-panel .col-md-4 {
+                margin-top: 10px;
+                text-align: left !important;
+            }
+        }
+
+        .fas {
+            width: 14px;
+        }
+
+        .btn-link {
+            text-decoration: none !important;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline !important;
+        }
+
+        /* Loading animation */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #951329;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Google Maps specific styles */
+        .google-map-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .google-map-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+    </style>
+}
