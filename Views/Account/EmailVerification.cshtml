@@ -1,0 +1,266 @@
+@model JohnHenryFashionWeb.ViewModels.EmailVerificationViewModel
+@{
+    ViewData["Title"] = "Xác thực Email";
+}
+
+<style>
+    .verification-container {
+        max-width: 500px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .verification-header {
+        background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .verification-content {
+        padding: 40px;
+    }
+    
+    .code-input {
+        font-size: 24px;
+        text-align: center;
+        letter-spacing: 8px;
+        font-weight: bold;
+        border: 3px solid #e9ecef;
+        border-radius: 10px;
+        padding: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .code-input:focus {
+        border-color: var(--jh-red);
+        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
+    }
+    
+    .masked-email {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .btn-verify {
+        background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-verify:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(206, 25, 58, 0.3);
+        color: white;
+    }
+    
+    .btn-resend {
+        color: var(--jh-red);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .btn-resend:hover {
+        color: var(--jh-dark-red);
+        text-decoration: underline;
+    }
+    
+    .verification-info {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    
+    .timer {
+        font-weight: bold;
+        color: var(--jh-red);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="verification-container">
+        <div class="verification-header">
+            <div class="text-center mb-3">
+                <i class="fas fa-envelope-circle-check fa-3x mb-3"></i>
+                <h3 class="mb-0">Xác thực Email</h3>
+                <p class="mb-0 mt-2">Nhập mã xác thực được gửi đến email của bạn</p>
+            </div>
+        </div>
+        
+        <div class="verification-content">
+            <div class="verification-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Một mã xác thực 6 số đã được gửi đến email của bạn. Mã này có hiệu lực trong 10 phút.
+            </div>
+            
+            <div class="masked-email">
+                <i class="fas fa-envelope me-2"></i>
+                <strong>@Model.MaskedEmail</strong>
+            </div>
+            
+            <form asp-action="EmailVerification" method="post" id="verificationForm">
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="ReturnUrl" />
+                
+                <div class="mb-4">
+                    <label asp-for="Code" class="form-label">
+                        <i class="fas fa-key me-2"></i>Mã xác thực
+                    </label>
+                    <input asp-for="Code" class="form-control code-input" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+                
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-verify" id="verifyBtn">
+                        <i class="fas fa-check-circle me-2"></i>Xác thực
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-muted mb-2">
+                        Không nhận được mã? 
+                        <span id="timer" class="timer"></span>
+                    </p>
+                    <button type="button" class="btn btn-link btn-resend" id="resendBtn" onclick="resendCode()" disabled>
+                        <i class="fas fa-redo me-1"></i>Gửi lại mã
+                    </button>
+                </div>
+            </form>
+            
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle me-2"></i>@ViewBag.Message
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let timeLeft = 60; // 60 seconds before allowing resend
+        let timerInterval;
+        
+        function startTimer() {
+            const timerElement = document.getElementById('timer');
+            const resendBtn = document.getElementById('resendBtn');
+            
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.textContent = '';
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove('disabled');
+                } else {
+                    timerElement.textContent = `(${timeLeft}s)`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+        
+        function resendCode() {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...';
+            
+            fetch('@Url.Action("ResendEmailVerificationCode")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: 'email=' + encodeURIComponent('@Model.Email')
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    timeLeft = 60;
+                    startTimer();
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success mt-3';
+                    alertDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>' + data.message;
+                    document.querySelector('.verification-content').appendChild(alertDiv);
+                    
+                    // Remove alert after 5 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 5000);
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                    resendBtn.disabled = false;
+                }
+                resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i>Gửi lại mã';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi lại mã.');
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i>Gửi lại mã';
+            });
+        }
+        
+        // Auto-focus on code input
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.querySelector('.code-input');
+            codeInput.focus();
+            
+            // Format input to only accept numbers
+            codeInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length === 6) {
+                    document.getElementById('verifyBtn').focus();
+                }
+            });
+            
+            // Start countdown timer
+            startTimer();
+        });
+        
+        // Handle form submission
+        document.getElementById('verificationForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('verifyBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xác thực...';
+            
+            // Re-enable button after 3 seconds if form validation fails
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Xác thực';
+            }, 3000);
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+        }
+        
+        .fas {
+            color: var(--jh-red);
+        }
+        
+        .verification-header .fas {
+            color: white;
+        }
+    </style>
+}

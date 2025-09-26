@@ -22,6 +22,7 @@ namespace JohnHenryFashionWeb.Controllers
         private readonly IEmailService _emailService;
         private readonly IAuthService _authService;
         private readonly ICacheService _cacheService;
+        private readonly IConfiguration _configuration;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -31,7 +32,8 @@ namespace JohnHenryFashionWeb.Controllers
             ISecurityService securityService,
             IEmailService emailService,
             IAuthService authService,
-            ICacheService cacheService)
+            ICacheService cacheService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -41,6 +43,7 @@ namespace JohnHenryFashionWeb.Controllers
             _emailService = emailService;
             _authService = authService;
             _cacheService = cacheService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -159,20 +162,47 @@ namespace JohnHenryFashionWeb.Controllers
                 {
                     _logger.LogInformation("User created a new account with password.");
                     
-                    // Generate email confirmation token
-                    var code = await _authService.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.Action("ConfirmEmail", "Account",
-                        new { userId = user.Id, code }, Request.Scheme);
+                    // Check if email verification is required
+                    if (model.RequireEmailVerification)
+                    {
+                        // Generate 6-digit verification code
+                        var verificationCode = new Random().Next(100000, 999999).ToString();
+                        
+                        // Store verification code in cache or database (for 10 minutes)
+                        var cacheKey = $"email_verification_{user.Email}";
+                        await _cacheService.SetAsync(cacheKey, verificationCode, TimeSpan.FromMinutes(10));
+                        
+                        // Send verification code email
+                        await _emailService.SendEmailAsync(user.Email, "Mã xác thực tài khoản John Henry",
+                            $@"
+                            <h2>Xác thực tài khoản</h2>
+                            <p>Chào {user.FirstName} {user.LastName},</p>
+                            <p>Mã xác thực của bạn là: <strong style='font-size: 24px; color: #007bff;'>{verificationCode}</strong></p>
+                            <p>Mã này sẽ hết hiệu lực sau 10 phút.</p>
+                            <p>Trân trọng,<br>Đội ngũ John Henry</p>
+                            ", isHtml: true);
 
-                    // Send confirmation email
-                    await _emailService.SendEmailAsync(user.Email, "Xác nhận tài khoản",
-                        $"Vui lòng xác nhận tài khoản của bạn bằng cách click vào link: <a href='{callbackUrl}'>Xác nhận email</a>", isHtml: true);
+                        // Add user to default role but keep email unconfirmed
+                        await _userManager.AddToRoleAsync(user, "Customer");
 
-                    // Add user to default role
-                    await _userManager.AddToRoleAsync(user, "Customer");
+                        // Redirect to email verification page
+                        return RedirectToAction("EmailVerification", new { email = user.Email, returnUrl });
+                    }
+                    else
+                    {
+                        // Original flow with email confirmation link
+                        var code = await _authService.GenerateEmailConfirmationTokenAsync(user);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account",
+                            new { userId = user.Id, code }, Request.Scheme);
 
-                    ViewBag.Message = "Tài khoản đã được tạo thành công. Vui lòng kiểm tra email để xác nhận tài khoản.";
-                    return View("RegisterConfirmation");
+                        await _emailService.SendEmailAsync(user.Email, "Xác nhận tài khoản",
+                            $"Vui lòng xác nhận tài khoản của bạn bằng cách click vào link: <a href='{callbackUrl}'>Xác nhận email</a>", isHtml: true);
+
+                        await _userManager.AddToRoleAsync(user, "Customer");
+
+                        ViewBag.Message = "Tài khoản đã được tạo thành công. Vui lòng kiểm tra email để xác nhận tài khoản.";
+                        return View("RegisterConfirmation");
+                    }
                 }
                 
                 AddErrors(result);
@@ -232,67 +262,111 @@ namespace JohnHenryFashionWeb.Controllers
             }
             else
             {
-                // If the user does not have an account, then create one.
-                ViewData["ReturnUrl"] = returnUrl;
-                ViewData["LoginProvider"] = info.LoginProvider;
-                
+                // If the user does not have an account, then create one automatically.
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
                 var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
-                
-                return View("ExternalLogin", new ExternalLoginViewModel 
-                { 
-                    Email = email ?? "", 
-                    FirstName = firstName ?? "", 
-                    LastName = lastName ?? "" 
-                });
-            }
-        }
+                var fullName = info.Principal.FindFirstValue(ClaimTypes.Name);
 
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string? returnUrl = null)
-        {
-            if (ModelState.IsValid)
-            {
-                // Get the information about the user from the external login provider
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
+                // Parse name if firstName/lastName are null
+                if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
                 {
-                    ErrorMessage = "Lỗi tải thông tin đăng nhập từ bên ngoài trong quá trình xác nhận.";
-                    return View(model);
+                    if (!string.IsNullOrEmpty(fullName))
+                    {
+                        var nameParts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        firstName = nameParts.FirstOrDefault() ?? "";
+                        lastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
+                    }
                 }
 
+                if (string.IsNullOrEmpty(email))
+                {
+                    ErrorMessage = "Không thể lấy thông tin email từ tài khoản Google.";
+                    _logger.LogError("Failed to get email from Google OAuth for provider {Provider}", info.LoginProvider);
+                    return RedirectToAction(nameof(Login));
+                }
+
+                _logger.LogInformation("Google OAuth: Email={Email}, FirstName={FirstName}, LastName={LastName}", email, firstName, lastName);
+
+                // Check if user with this email already exists
+                var existingUser = await _userManager.FindByEmailAsync(email);
+                if (existingUser != null)
+                {
+                    // Link this external login to existing account
+                    var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
+                    if (addLoginResult.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(existingUser, isPersistent: false);
+                        _logger.LogInformation("External login linked to existing user {Email}", email);
+                        return await RedirectToLocal(returnUrl);
+                    }
+                    else
+                    {
+                        _logger.LogError("Failed to link external login to existing user {Email}: {Errors}", 
+                            email, string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
+                        ErrorMessage = "Đã có tài khoản tồn tại với email này. Vui lòng đăng nhập bằng email/mật khẩu.";
+                        return RedirectToAction(nameof(Login));
+                    }
+                }
+
+                // Check configuration for Google email confirmation
+                var requireEmailConfirmationForGoogle = bool.Parse(_configuration["REQUIRE_EMAIL_CONFIRMATION_FOR_GOOGLE"] ?? "true");
+                var googleAutoConfirmEmail = bool.Parse(_configuration["GOOGLE_AUTO_CONFIRM_EMAIL"] ?? "false");
+                
+                // Create new user automatically
                 var user = new ApplicationUser
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
+                    UserName = email,
+                    Email = email,
+                    FirstName = firstName ?? "User",
+                    LastName = lastName ?? "",
                     IsActive = true,
+                    EmailConfirmed = googleAutoConfirmEmail || !requireEmailConfirmationForGoogle, // Auto confirm if configured or not required
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                var result = await _userManager.CreateAsync(user);
+                var createUserResult = await _userManager.CreateAsync(user);
                 
-                if (result.Succeeded)
+                if (createUserResult.Succeeded)
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
+                    // Add user to Customer role
+                    await _userManager.AddToRoleAsync(user, "Customer");
+                    
+                    // Add external login
+                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                    if (addLoginResult.Succeeded)
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-                        return await RedirectToLocal(returnUrl);
+                        // Check if email confirmation is required for Google users
+                        if (requireEmailConfirmationForGoogle && !user.EmailConfirmed)
+                        {
+                            // Send email confirmation
+                            await SendEmailConfirmationForGoogleUser(user);
+                            TempData["Message"] = "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác nhận tài khoản.";
+                            return RedirectToAction(nameof(Login));
+                        }
+                        else
+                        {
+                            // Sign in immediately
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            _logger.LogInformation("User created and logged in with {Name} provider.", info.LoginProvider);
+                            
+                            // Send welcome email asynchronously
+                            _ = SendWelcomeEmailAsync(user);
+                            
+                            return await RedirectToLocal(returnUrl);
+                        }
                     }
                 }
                 
-                AddErrors(result);
+                // If we got this far, something failed
+                ErrorMessage = "Có lỗi xảy ra khi tạo tài khoản từ Google.";
+                foreach (var error in createUserResult.Errors)
+                {
+                    _logger.LogError("Google account creation error: {Error}", error.Description);
+                }
+                return RedirectToAction(nameof(Login));
             }
-
-            ViewData["ReturnUrl"] = returnUrl;
-            return View(model);
         }
 
         [HttpGet]
@@ -313,10 +387,59 @@ namespace JohnHenryFashionWeb.Controllers
                 throw new ApplicationException($"Unable to load two-factor authentication user.");
             }
 
-            var model = new LoginWith2faViewModel { RememberMe = rememberMe };
+            var model = new TwoFactorAuthenticationViewModel 
+            { 
+                RememberMe = rememberMe,
+                ReturnUrl = returnUrl,
+                Provider = "Email" // Default provider
+            };
             ViewData["ReturnUrl"] = returnUrl;
 
             return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyTwoFactorLogin(TwoFactorAuthenticationViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("LoginWith2fa", model);
+            }
+
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Có lỗi xảy ra khi xác thực.");
+                return View("LoginWith2fa", model);
+            }
+
+            var result = await _signInManager.TwoFactorSignInAsync(model.Provider ?? "Email", model.Code, 
+                model.RememberMe, model.RememberMachine);
+
+            if (result.Succeeded)
+            {
+                await _securityService.RecordLoginAttemptAsync(user.Id, Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "", true);
+                
+                if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                {
+                    return Redirect(model.ReturnUrl);
+                }
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError("", "Tài khoản đã bị khóa do quá nhiều lần đăng nhập sai.");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Mã xác thực không chính xác.");
+                await _securityService.RecordLoginAttemptAsync(user.Id, Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "", false);
+            }
+
+            return View("LoginWith2fa", model);
         }
 
         [HttpGet]
@@ -523,16 +646,28 @@ namespace JohnHenryFashionWeb.Controllers
                     _logger.LogInformation($"Redirecting seller user {currentUser.Email} to seller dashboard");
                     return RedirectToAction("Dashboard", "Seller");
                 }
+                // Check if user is regular customer and redirect to home page
+                else if (roles.Contains(UserRoles.Customer) || roles.Count == 0)
+                {
+                    _logger.LogInformation($"Redirecting customer user {currentUser.Email} to home page");
+                    return RedirectToAction("Index", "Home");
+                }
             }
             
-            // For regular users, check returnUrl
+            // For other cases, check returnUrl
             if (Url.IsLocalUrl(returnUrl))
             {
                 _logger.LogInformation($"Redirecting to returnUrl: {returnUrl}");
                 return Redirect(returnUrl);
             }
             
-            // Default redirect to home for customers
+            // Default redirect to home page for authenticated users, home for others
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                _logger.LogInformation("Redirecting authenticated user to home page");
+                return RedirectToAction("Index", "Home");
+            }
+            
             _logger.LogInformation("Redirecting to home page");
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
@@ -858,6 +993,112 @@ namespace JohnHenryFashionWeb.Controllers
             return Json(new { success = true, message = "Mã xác thực đã được gửi lại." });
         }
 
+        // Email Verification with code
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult EmailVerification(string email, string? returnUrl = null)
+        {
+            var model = new EmailVerificationViewModel
+            {
+                Email = email,
+                ReturnUrl = returnUrl,
+                CodeSentTime = DateTime.UtcNow
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmailVerification(EmailVerificationViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Get stored verification code from cache
+            var cacheKey = $"email_verification_{model.Email}";
+            var storedCode = await _cacheService.GetAsync<string>(cacheKey);
+
+            if (string.IsNullOrEmpty(storedCode))
+            {
+                ModelState.AddModelError("", "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã mới.");
+                return View(model);
+            }
+
+            if (storedCode != model.Code)
+            {
+                ModelState.AddModelError("Code", "Mã xác thực không chính xác.");
+                return View(model);
+            }
+
+            // Find user and confirm email
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Không tìm thấy người dùng.");
+                return View(model);
+            }
+
+            // Confirm email
+            user.EmailConfirmed = true;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                // Remove code from cache
+                await _cacheService.RemoveAsync(cacheKey);
+
+                // Sign in user
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                ViewBag.Message = "Email đã được xác thực thành công! Tài khoản của bạn đã được kích hoạt.";
+                
+                if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                {
+                    return Redirect(model.ReturnUrl);
+                }
+                
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError("", "Có lỗi xảy ra khi xác thực email.");
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendEmailVerificationCode(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy người dùng." });
+            }
+
+            // Generate new verification code
+            var verificationCode = new Random().Next(100000, 999999).ToString();
+            
+            // Store in cache
+            var cacheKey = $"email_verification_{email}";
+            await _cacheService.SetAsync(cacheKey, verificationCode, TimeSpan.FromMinutes(10));
+            
+            // Send new code
+            await _emailService.SendEmailAsync(email, "Mã xác thực tài khoản John Henry",
+                $@"
+                <h2>Xác thực tài khoản</h2>
+                <p>Chào {user.FirstName} {user.LastName},</p>
+                <p>Mã xác thực mới của bạn là: <strong style='font-size: 24px; color: #007bff;'>{verificationCode}</strong></p>
+                <p>Mã này sẽ hết hiệu lực sau 10 phút.</p>
+                <p>Trân trọng,<br>Đội ngũ John Henry</p>
+                ", isHtml: true);
+
+            return Json(new { success = true, message = "Mã xác thực đã được gửi lại thành công." });
+        }
+
         // Confirm Email
         [HttpGet]
         [AllowAnonymous]
@@ -1124,6 +1365,60 @@ namespace JohnHenryFashionWeb.Controllers
             }
 
             return result.ToString().ToLowerInvariant();
+        }
+
+        #endregion
+
+        #region Google OAuth Email Helpers
+
+        private async Task SendEmailConfirmationForGoogleUser(ApplicationUser user)
+        {
+            try
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
+                    new { userId = user.Id, token = token }, Request.Scheme);
+
+                await _emailService.SendEmailAsync(user.Email, "Xác nhận tài khoản John Henry Fashion",
+                    $@"
+                    <h2>Xác nhận tài khoản của bạn</h2>
+                    <p>Xin chào {user.FirstName} {user.LastName},</p>
+                    <p>Cảm ơn bạn đã đăng ký tài khoản John Henry Fashion thông qua Google.</p>
+                    <p>Để hoàn tất việc tạo tài khoản, vui lòng click vào link bên dưới:</p>
+                    <p><a href='{confirmationLink}' style='background-color: #951329; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Xác nhận tài khoản</a></p>
+                    <p>Nếu bạn không thể click vào link, vui lòng copy và paste URL sau vào trình duyệt:</p>
+                    <p>{confirmationLink}</p>
+                    <p>Trân trọng,<br>Đội ngũ John Henry Fashion</p>
+                    ", isHtml: true);
+
+                _logger.LogInformation("Email confirmation sent to Google user {Email}", user.Email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email confirmation to Google user {Email}", user.Email);
+            }
+        }
+
+        private Task SendWelcomeEmailAsync(ApplicationUser user)
+        {
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailService.SendEmailAsync(user.Email, "Chào mừng bạn đến với John Henry Fashion",
+                        $@"
+                        <h2>Chào mừng {user.FirstName} {user.LastName}!</h2>
+                        <p>Tài khoản của bạn đã được tạo thành công thông qua Google.</p>
+                        <p>Bạn có thể bắt đầu mua sắm ngay bây giờ!</p>
+                        <p>Cảm ơn bạn đã gia nhập cộng đồng John Henry Fashion!</p>
+                        <p>Trân trọng,<br>Đội ngũ John Henry</p>
+                        ", isHtml: true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Failed to send welcome email to {Email}: {Error}", user.Email, ex.Message);
+                }
+            });
         }
 
         #endregion

@@ -6,10 +6,10 @@
 <style>
     .video-background {
         position: fixed;
-        top: 0;
+        top: 140px;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: calc(100vh - 80px);
         z-index: -1;
         overflow: hidden;
     }
@@ -21,32 +21,26 @@
         object-position: center center;
     }
     
-    .video-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: -1;
-    }
-    
     .auth-container {
         position: relative;
         z-index: 1;
         min-height: 100vh;
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         padding: 40px 0;
     }
-    
+
     .auth-card {
-        background: rgba(255, 255, 255, 0.75);
+        background: rgba(255, 255, 255, 0.30);
         backdrop-filter: blur(15px);
         border: none;
         border-radius: 0;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
         animation: fadeInUp 0.8s ease-out;
+        max-width: 460px;
+        margin-right: 10%;
+        transform: translateY(-80px);
     }
     
     @@keyframes fadeInUp {
@@ -63,6 +57,7 @@
     @@media (max-width: 768px) {
         .auth-container {
             padding: 20px 0;
+            justify-content: center;
         }
         
         .video-background {
@@ -70,7 +65,11 @@
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+        }
+        
+        .auth-card {
+            margin-right: 0;
         }
     }
 </style>
@@ -81,20 +80,19 @@
         <source src="~/videos/0_Woman_Shopping_3840x2160.mov" type="video/mp4">
         <source src="~/videos/0_Woman_Shopping_3840x2160.mov" type="video/quicktime">
         <!-- Fallback image for browsers that don't support video -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%;"></div>
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); width: 100%; height: 100%;"></div>
     </video>
 </div>
-<div class="video-overlay"></div>
 
 <div class="auth-container">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <div class="card auth-card shadow-lg">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <h2 class="card-title text-dark fw-bold">Đăng nhập</h2>
-                            <p class="text-muted">Chào mừng bạn quay trở lại John Henry Fashion</p>
+        <div class="row justify-content-end">
+            <div class="col-lg-5 col-md-6">
+                <div class="card auth-card">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <h2 class="card-title text-dark fw-bold fs-4">Đăng nhập</h2>
+                            <p class="text-muted small">Chào mừng bạn quay trở lại John Henry Fashion</p>
                         </div>
 
                         @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
@@ -133,10 +131,6 @@
                                 </button>
                             </div>
                         </form>
-
-                        <div class="divider my-4">
-                            <span class="divider-text">Hoặc đăng nhập với</span>
-                        </div>
 
                         <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" role="form">
                             <div class="d-grid mb-3">
@@ -177,13 +171,6 @@
         height: 1px;
         background: #dee2e6;
     }
-    
-    .divider-text {
-        background: white;
-        padding: 0 1rem;
-        color: #6c757d;
-        font-size: 0.875rem;
-    }
 
     .card {
         border-radius: 15px;
@@ -206,7 +193,7 @@
     }
 
     .form-control:focus {
-        border-color: #667eea;
+        border-color: #000000;
         box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
     }
 </style>

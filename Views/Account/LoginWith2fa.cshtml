@@ -1,0 +1,204 @@
+@model JohnHenryFashionWeb.ViewModels.TwoFactorAuthenticationViewModel
+@{
+    ViewData["Title"] = "Xác thực hai yếu tố";
+}
+
+<style>
+    .two-factor-container {
+        max-width: 450px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .two-factor-header {
+        background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .two-factor-content {
+        padding: 40px;
+    }
+    
+    .code-input {
+        font-size: 20px;
+        text-align: center;
+        letter-spacing: 6px;
+        font-weight: bold;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .code-input:focus {
+        border-color: var(--jh-red);
+        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
+    }
+    
+    .btn-verify {
+        background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-verify:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(206, 25, 58, 0.3);
+        color: white;
+    }
+    
+    .info-box {
+        background: #f8f9fa;
+        border-left: 4px solid var(--jh-red);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="two-factor-container">
+        <div class="two-factor-header">
+            <div class="text-center mb-3">
+                <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                <h3 class="mb-0">Xác thực hai yếu tố</h3>
+                <p class="mb-0 mt-2">Nhập mã xác thực để tiếp tục đăng nhập</p>
+            </div>
+        </div>
+        
+        <div class="two-factor-content">
+            <div class="info-box">
+                <i class="fas fa-info-circle me-2"></i>
+                @if (Model.Provider == "Email")
+                {
+                    <span>Mã xác thực đã được gửi đến email của bạn.</span>
+                }
+                else
+                {
+                    <span>Nhập mã từ ứng dụng xác thực của bạn.</span>
+                }
+            </div>
+            
+            <form asp-action="VerifyTwoFactorLogin" method="post" id="twoFactorForm">
+                <input type="hidden" asp-for="Provider" />
+                <input type="hidden" asp-for="RememberMe" />
+                <input type="hidden" asp-for="ReturnUrl" />
+                
+                <div class="mb-4">
+                    <label asp-for="Code" class="form-label">
+                        <i class="fas fa-key me-2"></i>@Html.DisplayNameFor(m => m.Code)
+                    </label>
+                    <input asp-for="Code" class="form-control code-input" maxlength="7" placeholder="000000" autocomplete="one-time-code" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input asp-for="RememberMachine" class="form-check-input" type="checkbox" />
+                        <label asp-for="RememberMachine" class="form-check-label">
+                            @Html.DisplayNameFor(m => m.RememberMachine)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-verify" id="verifyBtn">
+                        <i class="fas fa-check-circle me-2"></i>Xác thực và đăng nhập
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    @if (Model.Provider == "Email")
+                    {
+                        <button type="button" class="btn btn-link" onclick="resendCode()">
+                            <i class="fas fa-redo me-1"></i>Gửi lại mã
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function resendCode() {
+            // Implementation for resending 2FA code
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...';
+            
+            fetch('@Url.Action("ResendTwoFactorCode")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ provider: '@Model.Provider' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Mã xác thực đã được gửi lại.');
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-redo me-1"></i>Gửi lại mã';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi lại mã.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-redo me-1"></i>Gửi lại mã';
+            });
+        }
+        
+        // Auto-focus and format input
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.querySelector('.code-input');
+            codeInput.focus();
+            
+            codeInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length >= 6) {
+                    document.getElementById('verifyBtn').focus();
+                }
+            });
+        });
+        
+        // Handle form submission
+        document.getElementById('twoFactorForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('verifyBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xác thực...';
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            min-height: 100vh;
+        }
+        
+        .fas {
+            color: var(--jh-red);
+        }
+        
+        .two-factor-header .fas {
+            color: white;
+        }
+    </style>
+}

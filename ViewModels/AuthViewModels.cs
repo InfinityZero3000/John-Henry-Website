@@ -52,6 +52,49 @@ public class TwoFactorAuthenticationViewModel
     public string? ReturnUrl { get; set; }
 }
 
+public class EmailVerificationViewModel
+{
+    [Required(ErrorMessage = "Mã xác thực là bắt buộc")]
+    [StringLength(6, ErrorMessage = "Mã xác thực phải có 6 ký tự")]
+    [DataType(DataType.Text)]
+    [Display(Name = "Mã xác thực")]
+    public string Code { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    public string? ReturnUrl { get; set; }
+
+    public bool IsResent { get; set; } = false;
+
+    public DateTime? CodeSentTime { get; set; }
+
+    [Display(Name = "Mã xác thực đã được gửi đến email của bạn")]
+    public string MaskedEmail => MaskEmail(Email);
+
+    private string MaskEmail(string email)
+    {
+        if (string.IsNullOrEmpty(email) || !email.Contains('@'))
+            return "***@***.com";
+
+        var parts = email.Split('@');
+        var username = parts[0];
+        var domain = parts[1];
+
+        var maskedUsername = username.Length > 2 
+            ? username.Substring(0, 2) + new string('*', username.Length - 2)
+            : new string('*', username.Length);
+
+        var domainParts = domain.Split('.');
+        var maskedDomain = domainParts.Length > 1
+            ? new string('*', domainParts[0].Length) + "." + domainParts[domainParts.Length - 1]
+            : new string('*', domain.Length);
+
+        return $"{maskedUsername}@{maskedDomain}";
+    }
+}
+
 public class EnableAuthenticatorViewModel
 {
     [Required(ErrorMessage = "Mã xác thực là bắt buộc")]

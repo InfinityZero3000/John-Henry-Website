@@ -55,6 +55,9 @@ namespace JohnHenryFashionWeb.ViewModels
         [Required(ErrorMessage = "Bạn phải đồng ý với điều khoản sử dụng")]
         [Display(Name = "Tôi đồng ý với điều khoản sử dụng")]
         public bool AgreeToTerms { get; set; }
+
+        // For email verification during registration
+        public bool RequireEmailVerification { get; set; } = true;
     }
 
     public class ExternalLoginViewModel
