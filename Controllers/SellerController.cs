@@ -1573,6 +1573,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         #region Store Management
         [HttpGet("store")]
+        [HttpGet("store-management")]
         public async Task<IActionResult> StoreManagement()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -1830,6 +1831,7 @@ namespace JohnHenryFashionWeb.Controllers
 
             return Json(new { success = true, message = "Cập nhật kho thành công!" });
         }
+        
         #endregion
     }
 }
