@@ -5,6 +5,16 @@
 }
 
 <div class="container-fluid">
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i data-lucide="check-circle" class="me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <!-- Header Section -->
     <div class="row">
         <div class="col-12">
@@ -25,7 +35,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-store me-2"></i>Cài đặt Kinh doanh
+                            <i data-lucide="store" class="me-2"></i>Cài đặt Kinh doanh
                         </h5>
                     </div>
                     <div class="card-body">
@@ -117,7 +127,7 @@
                 <div class="card mt-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-bell me-2"></i>Cài đặt Thông báo
+                            <i data-lucide="bell" class="me-2"></i>Cài đặt Thông báo
                         </h5>
                     </div>
                     <div class="card-body">
@@ -168,7 +178,7 @@
                 <div class="card mt-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-boxes me-2"></i>Cài đặt Kho hàng
+                            <i data-lucide="package" class="me-2"></i>Cài đặt Kho hàng
                         </h5>
                     </div>
                     <div class="card-body">
@@ -210,13 +220,13 @@
                     <div class="card-body">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Lưu cài đặt
+                                <i data-lucide="save" class="me-2"></i>Lưu cài đặt
                             </button>
                             <button type="button" class="btn btn-secondary" onclick="resetForm()">
-                                <i class="fas fa-undo me-2"></i>Khôi phục
+                                <i data-lucide="rotate-ccw" class="me-2"></i>Khôi phục
                             </button>
                             <a href="@Url.Action("Dashboard", "Seller")" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-2"></i>Hủy
+                                <i data-lucide="x" class="me-2"></i>Hủy
                             </a>
                         </div>
                     </div>
@@ -229,7 +239,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-line me-2"></i>Thống kê nhanh
+                            <i data-lucide="trending-up" class="me-2"></i>Thống kê nhanh
                         </h5>
                     </div>
                     <div class="card-body">
@@ -252,7 +262,7 @@
                 <div class="card mt-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Trạng thái Cửa hàng
+                            <i data-lucide="info" class="me-2"></i>Trạng thái Cửa hàng
                         </h5>
                     </div>
                     <div class="card-body">
@@ -262,13 +272,13 @@
                                 @if (Model.IsStoreActive)
                                 {
                                     <span class="badge bg-success">
-                                        <i class="fas fa-check-circle me-1"></i>Đang hoạt động
+                                        <i data-lucide="check-circle" class="me-1"></i>Đang hoạt động
                                     </span>
                                 }
                                 else
                                 {
                                     <span class="badge bg-danger">
-                                        <i class="fas fa-times-circle me-1"></i>Đã tắt
+                                        <i data-lucide="x-circle" class="me-1"></i>Đã tắt
                                     </span>
                                 }
                             </div>
@@ -287,7 +297,7 @@
                 <div class="card mt-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-question-circle me-2"></i>Trợ giúp
+                            <i data-lucide="help-circle" class="me-2"></i>Trợ giúp
                         </h5>
                     </div>
                     <div class="card-body">
@@ -296,10 +306,10 @@
                         </p>
                         <div class="d-grid gap-2">
                             <a href="#" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
-                                <i class="fas fa-book me-2"></i>Hướng dẫn
+                                <i data-lucide="book-open" class="me-2"></i>Hướng dẫn
                             </a>
                             <a href="mailto:support@johnhenry.vn" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-envelope me-2"></i>Liên hệ hỗ trợ
+                                <i data-lucide="mail" class="me-2"></i>Liên hệ hỗ trợ
                             </a>
                         </div>
                     </div>
@@ -315,7 +325,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-question-circle me-2"></i>Hướng dẫn Cài đặt
+                    <i data-lucide="help-circle" class="me-2"></i>Hướng dẫn Cài đặt
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

@@ -1,0 +1,194 @@
+@model StoreManagementViewModel
+@{
+    ViewData["Title"] = "Quản lý cửa hàng";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="dashboard-modern">
+    <div class="container-fluid">
+        <div class="dashboard-header">
+            <div class="content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="live-indicator"></span>
+                            <span class="badge bg-success me-2">Live Dashboard</span>
+                        </div>
+                        <h2 class="mb-1">Quản lý cửa hàng</h2>
+                        <p class="mb-0">Quản lý thông tin và cài đặt cửa hàng của bạn</p>
+                    </div>
+                    @if (Model.Store != null)
+                    {
+                        <a href="@Url.Action("StoreSettings", "Seller")" class="btn btn-primary">
+                            <i data-lucide="settings"></i>
+                            Cài đặt cửa hàng
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Store == null)
+        {
+            <div class="empty-state">
+                <i data-lucide="store" class="display-1 text-muted mb-4"></i>
+                <h4>Chưa có cửa hàng</h4>
+                <p class="text-muted mb-4">Bạn chưa có cửa hàng nào. Hãy tạo cửa hàng để bắt đầu bán hàng.</p>
+                <a href="@Url.Action("CreateStore", "Seller")" class="btn btn-primary">
+                    <i data-lucide="plus"></i>
+                    Tạo cửa hàng mới
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <!-- Store Information -->
+                <div class="col-xl-8 col-lg-7">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <h5 class="card-title mb-0">Thông tin cửa hàng</h5>
+                            <a href="@Url.Action("EditStore", "Seller")" class="btn btn-outline-primary btn-sm">
+                                <i data-lucide="edit"></i>
+                                Chỉnh sửa
+                            </a>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Tên cửa hàng</label>
+                                    <div class="fw-semibold">@Model.Store.Name</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Mô tả</label>
+                                    <div class="fw-semibold">@(Model.Store.Description ?? "Chưa có mô tả")</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Trạng thái</label>
+                                    <div>
+                                        @if (Model.Store.IsActive)
+                                        {
+                                            <span class="badge bg-success">Đang hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Tạm dừng</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Địa chỉ</label>
+                                    <div class="fw-semibold">@(Model.Store.Address ?? "Chưa cập nhật")</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Số điện thoại</label>
+                                    <div class="fw-semibold">@(Model.Store.Phone ?? "Chưa cập nhật")</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Email</label>
+                                    <div class="fw-semibold">@(Model.Store.Email ?? "Chưa cập nhật")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Store Statistics -->
+                <div class="col-xl-4 col-lg-5">
+                    <div class="stat-card">
+                        <h5 class="card-title mb-4">Thống kê tổng quan</h5>
+                        
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Tổng sản phẩm</span>
+                                <span class="fw-bold">@Model.Statistics.TotalProducts</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 6px;">
+                                <div class="progress-bar bg-primary" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Sản phẩm hết kho</span>
+                                <span class="fw-bold">@Model.Statistics.OutOfStockProducts</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: @(Model.Statistics.TotalProducts > 0 ? (Model.Statistics.OutOfStockProducts * 100 / Model.Statistics.TotalProducts) : 0)%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Đơn hàng tháng này</span>
+                                <span class="fw-bold">@Model.Statistics.MonthlyOrders</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 6px;">
+                                <div class="progress-bar bg-info" style="width: 75%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Doanh thu tháng</span>
+                                <span class="fw-bold">@Model.Statistics.MonthlyRevenue.ToString("N0") đ</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="stat-card">
+                        <h5 class="card-title mb-4">Thao tác nhanh</h5>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="@Url.Action("CreateProduct", "Seller")" class="action-btn">
+                                    <i data-lucide="plus"></i>
+                                    <div class="fw-semibold">Thêm sản phẩm</div>
+                                    <small class="text-muted">Tạo sản phẩm mới</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="@Url.Action("Products", "Seller")" class="action-btn">
+                                    <i data-lucide="package"></i>
+                                    <div class="fw-semibold">Quản lý sản phẩm</div>
+                                    <small class="text-muted">Xem tất cả sản phẩm</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="@Url.Action("Orders", "Seller")" class="action-btn">
+                                    <i data-lucide="shopping-cart"></i>
+                                    <div class="fw-semibold">Đơn hàng</div>
+                                    <small class="text-muted">Xử lý đơn hàng</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="@Url.Action("Analytics", "Seller")" class="action-btn">
+                                    <i data-lucide="bar-chart-3"></i>
+                                    <div class="fw-semibold">Báo cáo</div>
+                                    <small class="text-muted">Xem thống kê</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+}
