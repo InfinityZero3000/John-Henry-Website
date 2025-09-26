@@ -1843,7 +1843,6 @@
   word-break: break-word !important;
 }
 
-/* rtl:end:remove */
 .text-primary {
   --bs-text-opacity: 1;
   color: rgba(var(--bs-primary-rgb), var(--bs-text-opacity)) !important;

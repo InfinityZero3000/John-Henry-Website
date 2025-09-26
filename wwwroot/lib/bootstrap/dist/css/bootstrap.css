@@ -3191,10 +3191,10 @@ textarea.form-control-lg {
 
 .btn-outline-primary {
   --bs-btn-color: #0d6efd;
-  --bs-btn-border-color: #0d6efd;
+  --bs-btn-border-color: #ffffff;
   --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: #0d6efd;
-  --bs-btn-hover-border-color: #0d6efd;
+  --bs-btn-hover-border-color: #ffffff;
   --bs-btn-focus-shadow-rgb: 13, 110, 253;
   --bs-btn-active-color: #fff;
   --bs-btn-active-bg: #0d6efd;
