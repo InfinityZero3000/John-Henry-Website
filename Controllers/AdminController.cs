@@ -1762,6 +1762,35 @@ namespace JohnHenryFashionWeb.Controllers
             
             return View();
         }
+        
+        [HttpGet("inventory")]
+        public async Task<IActionResult> Inventory()
+        {
+            ViewData["CurrentSection"] = "inventory";
+            ViewData["Title"] = "Quản lý tồn kho";
+            
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .OrderBy(p => p.Name)
+                .ToListAsync();
+                
+            return View(products);
+        }
+        
+        [HttpGet("advanced-users")]
+        public async Task<IActionResult> AdvancedUsers()
+        {
+            ViewData["CurrentSection"] = "advanced-users";
+            ViewData["Title"] = "Quản lý người dùng nâng cao";
+            
+            var users = await _context.Users
+                .Include(u => u.Orders)
+                .OrderBy(u => u.UserName)
+                .ToListAsync();
+                
+            return View(users);
+        }
         #endregion
     }
 }
