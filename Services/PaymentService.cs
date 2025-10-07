@@ -88,7 +88,7 @@ namespace JohnHenryFashionWeb.Services
                     "vnpay" => await ProcessVNPayPaymentAsync(new VNPayPaymentRequest
                     {
                         Amount = request.Amount,
-                        OrderId = request.OrderId,
+                        OrderId = request.OrderId ?? string.Empty,
                         OrderInfo = request.OrderInfo,
                         ReturnUrl = request.ReturnUrl,
                         IpAddress = request.IpAddress
@@ -105,7 +105,7 @@ namespace JohnHenryFashionWeb.Services
                     {
                         Amount = request.Amount,
                         Currency = request.Currency,
-                        PaymentMethodId = request.PaymentMethodId,
+                        PaymentMethodId = request.PaymentMethodId ?? string.Empty,
                         CustomerId = request.UserId
                     }),
                     "cod" => await ProcessCODPaymentAsync(request),
@@ -142,8 +142,9 @@ namespace JohnHenryFashionWeb.Services
         {
             try
             {
+                await Task.CompletedTask;
                 var vnpayConfig = _configuration.GetSection("PaymentGateways:VNPay");
-                var vnp_TmnCode = vnpayConfig["TmnCode"];
+                var vnp_TmnCode = vnpayConfig["TmnCode"] ?? string.Empty;
                 var vnp_HashSecret = vnpayConfig["HashSecret"];
                 var vnp_Url = vnpayConfig["Url"];
 
@@ -330,6 +331,7 @@ namespace JohnHenryFashionWeb.Services
 
         private async Task<PaymentResult> ProcessCODPaymentAsync(PaymentRequest request)
         {
+            await Task.CompletedTask;
             // Cash on Delivery - always success for now
             return new PaymentResult
             {

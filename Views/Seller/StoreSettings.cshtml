@@ -1,0 +1,219 @@
+@model StoreSettingsViewModel
+@{
+    ViewData["Title"] = "Cài đặt cửa hàng";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="seller-modern">
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="page-header">
+            <div class="content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="mb-2">
+                            <i data-lucide="settings-2" style="width: 32px; height: 32px; margin-right: 1rem;"></i>
+                            Cài đặt cửa hàng
+                        </h1>
+                        <p class="text-muted mb-0">Quản lý thông tin và cấu hình cửa hàng của bạn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i data-lucide="check-circle" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i data-lucide="alert-circle" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Settings Form -->
+        <form asp-action="StoreSettings" method="post" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="StoreId" />
+
+            <div class="row g-4">
+                <!-- Basic Information Card -->
+                <div class="col-lg-8">
+                    <div class="filter-card">
+                        <h4 class="mb-4">
+                            <i data-lucide="store" style="width: 24px; height: 24px; margin-right: 0.5rem;"></i>
+                            Thông tin cơ bản
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="StoreName" class="form-label">Tên cửa hàng <span class="text-danger">*</span></label>
+                                <input asp-for="StoreName" class="form-control" required />
+                                <span asp-validation-for="StoreName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label">Mô tả</label>
+                                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Mô tả về cửa hàng của bạn..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="StoreAddress" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                <textarea asp-for="StoreAddress" class="form-control" rows="2" required></textarea>
+                                <span asp-validation-for="StoreAddress" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Phone" class="form-label">Số điện thoại</label>
+                                <input asp-for="Phone" class="form-control" type="tel" placeholder="0123456789" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">Email</label>
+                                <input asp-for="Email" class="form-control" type="email" placeholder="store@example.com" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Website" class="form-label">Website</label>
+                                <input asp-for="Website" class="form-control" type="url" placeholder="https://yourwebsite.com" />
+                                <span asp-validation-for="Website" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="WorkingHours" class="form-label">Giờ làm việc</label>
+                                <input asp-for="WorkingHours" class="form-control" placeholder="8:00 - 22:00" />
+                                <span asp-validation-for="WorkingHours" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="SocialMedia" class="form-label">Mạng xã hội (JSON)</label>
+                                <textarea asp-for="SocialMedia" class="form-control" rows="3" 
+                                    placeholder='{"facebook": "https://facebook.com/yourpage", "instagram": "https://instagram.com/yourpage"}'></textarea>
+                                <small class="form-text text-muted">Nhập định dạng JSON. Ví dụ: {"facebook": "url", "instagram": "url"}</small>
+                                <span asp-validation-for="SocialMedia" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status and Actions Card -->
+                <div class="col-lg-4">
+                    <div class="filter-card">
+                        <h4 class="mb-4">
+                            <i data-lucide="toggle-left" style="width: 24px; height: 24px; margin-right: 0.5rem;"></i>
+                            Trạng thái
+                        </h4>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch">
+                                <label class="form-check-label" for="isActiveSwitch">
+                                    Cửa hàng hoạt động
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Khi tắt, cửa hàng sẽ không hiển thị cho khách hàng</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-lucide="save" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                                Lưu thay đổi
+                            </button>
+                            <a href="@Url.Action("StoreManagement", "Seller")" class="btn btn-light">
+                                <i data-lucide="x" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                                Hủy
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Info Card -->
+                    <div class="filter-card mt-4">
+                        <h5 class="mb-3">
+                            <i data-lucide="info" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+                            Thông tin
+                        </h5>
+                        <div class="small text-muted">
+                            <p class="mb-2">
+                                <strong>ID Cửa hàng:</strong><br />
+                                <code class="text-muted">@Model.StoreId</code>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Trạng thái:</strong>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success">Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Tạm dừng</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Settings (if needed) -->
+            @if (Model.AdditionalSettings != null && Model.AdditionalSettings.Any())
+            {
+                <div class="filter-card mt-4">
+                    <h4 class="mb-4">
+                        <i data-lucide="sliders" style="width: 24px; height: 24px; margin-right: 0.5rem;"></i>
+                        Cài đặt bổ sung
+                    </h4>
+                    <div class="row g-3">
+                        @foreach (var setting in Model.AdditionalSettings)
+                        {
+                            <div class="col-md-6">
+                                <label class="form-label">@setting.Key</label>
+                                <input type="text" class="form-control" value="@setting.Value" 
+                                    name="AdditionalSettings[@setting.Key]" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            
+            // Form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}

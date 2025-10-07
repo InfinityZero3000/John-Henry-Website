@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-    <!-- Products now uses the clean seller-modern.css file instead of inline purple styles -->
+    <!-- Products now uses the clean dashboard.css file instead of inline purple styles -->
 }
 
 <div class="products-modern">
@@ -309,10 +309,6 @@
                         </ul>
                     </nav>
                 }
-            }
-            else
-            {
-                                }
             </div>
         }
         else
@@ -321,14 +317,14 @@
                 <i class="fas fa-box-open"></i>
                 <h4 class="text-muted mb-3">Chưa có sản phẩm nào</h4>
                 <p class="text-muted mb-4">Bắt đầu bán hàng bằng cách thêm sản phẩm đầu tiên của bạn</p>
-                <a href="@Url.Action("CreateProduct", "Seller")" class="btn btn-primary btn-lg">
+                <a href="@Url.Action("CreateProduct", "Seller")" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>
                     Thêm sản phẩm đầu tiên
                 </a>
             </div>
         }
     </div>
-}
+</div>
 
 <!-- Hidden forms for AJAX actions -->
 <form id="statusForm" method="post" style="display: none;">
@@ -357,23 +353,28 @@
 
         // Update product status (Active/Inactive)
         function updateProductStatus(productId, status) {
-            document.getElementById('statusProductId').value = productId;
-            document.getElementById('statusValue').value = status;
-            document.getElementById('statusForm').action = '@Url.Action("UpdateProductStatus", "Seller")';
-            document.getElementById('statusForm').submit();
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?')) {
+                document.getElementById('statusProductId').value = productId;
+                document.getElementById('statusValue').value = status;
+                document.getElementById('statusForm').action = '@Url.Action("UpdateProductStatus", "Seller")';
+                document.getElementById('statusForm').submit();
+            }
         }
 
         // Toggle featured status
         function toggleFeatured(productId, isFeatured) {
-            document.getElementById('featuredProductId').value = productId;
-            document.getElementById('featuredValue').value = isFeatured;
-            document.getElementById('featuredForm').action = '@Url.Action("ToggleFeatured", "Seller")';
-            document.getElementById('featuredForm').submit();
+            const action = isFeatured === 'true' ? 'đặt làm nổi bật' : 'bỏ nổi bật';
+            if (confirm(`Bạn có chắc chắn muốn ${action} sản phẩm này?`)) {
+                document.getElementById('featuredProductId').value = productId;
+                document.getElementById('featuredValue').value = isFeatured;
+                document.getElementById('featuredForm').action = '@Url.Action("UpdateProductFeatured", "Seller")';
+                document.getElementById('featuredForm').submit();
+            }
         }
 
         // Delete product
         function deleteProduct(productId, productName) {
-            if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`)) {
+            if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"? Hành động này không thể hoàn tác.`)) {
                 document.getElementById('deleteProductId').value = productId;
                 document.getElementById('deleteForm').action = '@Url.Action("DeleteProduct", "Seller")';
                 document.getElementById('deleteForm').submit();
@@ -381,96 +382,10 @@
         }
 
         // Auto-submit form when filter changes
-        document.querySelectorAll('select[name="categoryId"], select[name="status"]').forEach(select => {
+        document.querySelectorAll('select[name="categoryId"], select[name="status"]').forEach(function(select) {
             select.addEventListener('change', function() {
                 this.form.submit();
             });
         });
     </script>
 }
-            }
-        </div>
-    </div>
-</div>
-
-<!-- Hidden forms for AJAX actions -->
-<form id="statusForm" method="post" style="display: none;">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="productId" id="statusProductId">
-    <input type="hidden" name="status" id="statusValue">
-</form>
-
-<form id="featuredForm" method="post" style="display: none;">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="productId" id="featuredProductId">
-    <input type="hidden" name="isFeatured" id="featuredValue">
-</form>
-
-<form id="deleteForm" method="post" style="display: none;">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="productId" id="deleteProductId">
-</form>
-
-<style>
-.product-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-
-.card-img-top {
-    transition: transform 0.3s ease;
-}
-
-.product-card:hover .card-img-top {
-    transform: scale(1.05);
-}
-
-.badge {
-    font-size: 0.75em;
-}
-
-.btn-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-}
-</style>
-
-<script>
-function updateProductStatus(productId, status) {
-    if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?')) {
-        document.getElementById('statusProductId').value = productId;
-        document.getElementById('statusValue').value = status;
-        document.getElementById('statusForm').action = '@Url.Action("UpdateProductStatus", "Seller")';
-        document.getElementById('statusForm').submit();
-    }
-}
-
-function toggleFeatured(productId, isFeatured) {
-    const action = isFeatured === 'true' ? 'đặt làm nổi bật' : 'bỏ nổi bật';
-    if (confirm(`Bạn có chắc chắn muốn ${action} sản phẩm này?`)) {
-        document.getElementById('featuredProductId').value = productId;
-        document.getElementById('featuredValue').value = isFeatured;
-        document.getElementById('featuredForm').action = '@Url.Action("UpdateProductFeatured", "Seller")';
-        document.getElementById('featuredForm').submit();
-    }
-}
-
-function deleteProduct(productId, productName) {
-    if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"? Hành động này không thể hoàn tác.`)) {
-        document.getElementById('deleteProductId').value = productId;
-        document.getElementById('deleteForm').action = '@Url.Action("DeleteProduct", "Seller")';
-        document.getElementById('deleteForm').submit();
-    }
-}
-
-// Auto-submit form when filter changes
-document.querySelectorAll('select[name="categoryId"], select[name="status"]').forEach(function(select) {
-    select.addEventListener('change', function() {
-        this.form.submit();
-    });
-});
-</script>

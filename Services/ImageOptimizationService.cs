@@ -61,6 +61,7 @@ namespace JohnHenryFashionWeb.Services
         {
             try
             {
+                await Task.CompletedTask;
                 var fullPath = Path.Combine(_environment.WebRootPath, imagePath.TrimStart('/'));
                 if (!File.Exists(fullPath))
                     throw new FileNotFoundException("Image not found");
@@ -95,6 +96,7 @@ namespace JohnHenryFashionWeb.Services
         {
             try
             {
+                await Task.CompletedTask;
                 var fullPath = Path.Combine(_environment.WebRootPath, imagePath.TrimStart('/'));
                 if (!File.Exists(fullPath))
                     throw new FileNotFoundException("Image not found");

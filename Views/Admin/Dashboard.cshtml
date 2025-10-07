@@ -7,898 +7,685 @@
 
 @section Styles {
     <style>
-        .dashboard-modern {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            min-height: 100vh;
-            padding: 2rem 0;
+        .admin-content {
+            padding: 1.5rem;
+            max-width: 100%;
+            background: #f5f6fa;
         }
 
-        .dashboard-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 2rem;
-            border-radius: 20px;
-            margin-bottom: 2rem;
+        .admin-header {
+            background: #fff;
+            padding: 1.25rem 1.5rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            border-left: 3px solid #0066cc;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+        }
+
+        .admin-header p {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 0.5rem;
+            display: inline-block;
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: #fff;
+            border: 1px solid #e3e6ec;
+            border-radius: 8px;
+            padding: 1.25rem;
+            height: 100%;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .dashboard-header::before {
+        .kpi-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .dashboard-header .content {
-            position: relative;
-            z-index: 1;
+        .kpi-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            border-color: #d0d5dd;
         }
 
-        .live-indicator {
-            width: 12px;
-            height: 12px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            margin-right: 0.5rem;
+        .kpi-card:hover::before {
+            opacity: 1;
         }
 
-        @@keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(45deg, var(--jh-red), var(--jh-dark-red));
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card:hover::before {
-            transform: scaleY(1);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            background: linear-gradient(45deg, var(--jh-red), var(--jh-dark-red));
-            box-shadow: 0 4px 15px rgba(206, 25, 58, 0.3);
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: #6b7280;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-trend {
-            display: flex;
-            align-items: center;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .trend-positive {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
-        }
-
-        .trend-negative {
-            background: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
-        }
-
-        .charts-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .time-selector {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .time-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid #e5e7eb;
-            background: white;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .time-btn.active,
-        .time-btn:hover {
-            background: var(--jh-red);
-            color: white;
-            border-color: var(--jh-red);
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .quick-action-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .quick-action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .action-icon {
+        .kpi-card .kpi-icon {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
-            color: white;
+            font-size: 1.375rem;
             flex-shrink: 0;
         }
 
-        .action-content h4 {
-            margin: 0 0 0.25rem 0;
+        .kpi-card .kpi-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0.375rem 0 0.25rem;
+            line-height: 1.2;
+        }
+
+        .kpi-card .kpi-label {
+            color: #6c757d;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .kpi-card .kpi-growth {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: #f0fdf4;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Quick Actions */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.875rem;
+        }
+
+        .quick-action-btn {
+            background: #fff;
+            border: 1px solid #e3e6ec;
+            border-radius: 8px;
+            padding: 1.25rem 0.875rem;
+            text-align: center;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.625rem;
+            position: relative;
+        }
+
+        .quick-action-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: #f8f9fa;
+            border-color: currentColor;
+            color: inherit;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn:hover::after {
+            width: 60%;
+        }
+
+        .quick-action-btn i {
+            font-size: 1.75rem;
+            margin-bottom: 0.125rem;
+        }
+
+        .quick-action-btn span {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: #fff;
+            border: 1px solid #e3e6ec;
+            border-radius: 8px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .section-card-header {
+            padding: 0.875rem 1.25rem;
+            background: #fafbfc;
+            border-bottom: 1px solid #e3e6ec;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-card-header h5 {
+            margin: 0;
             font-size: 1rem;
             font-weight: 600;
-            color: #1f2937;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
         }
 
-        .action-content p {
-            margin: 0;
+        .section-card-header h5 i {
             font-size: 0.875rem;
-            color: #6b7280;
+            margin-right: 0.5rem;
+            opacity: 0.7;
         }
 
-        .recent-activities {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .section-card-body {
+            padding: 1.25rem;
         }
 
-        .activity-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, var(--jh-red), var(--jh-dark-red));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-content h5 {
-            margin: 0 0 0.25rem 0;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .activity-content p {
-            margin: 0;
-            font-size: 0.8rem;
-            color: #6b7280;
-        }
-
-        .activity-time {
-            font-size: 0.75rem;
-            color: #9ca3af;
-        }
-
-        .system-alerts {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .alert-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            background: rgba(59, 130, 246, 0.1);
-            border-left: 4px solid #3b82f6;
-        }
-
-        .alert-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .alert-icon {
-            width: 24px;
-            height: 24px;
-            color: #3b82f6;
-        }
-
-        .responsive-grid {
-            display: grid;
-            gap: 2rem;
-        }
-
-        @@media (min-width: 1024px) {
-            .responsive-grid {
-                grid-template-columns: 2fr 1fr;
-            }
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title i {
-            font-size: 1.25rem;
-        }
-
-        .stat-icon {
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 5px;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #64748b;
-            font-weight: 500;
-            margin-bottom: 10px;
-        }
-
-        .stat-change {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .stat-change.positive {
-            color: #16a34a;
-        }
-
-        .stat-change.negative {
-            color: #dc2626;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .chart-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .chart-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chart-control {
-            padding: 6px 12px;
-            border: 1px solid #e2e8f0;
+        /* System Health */
+        .health-metric {
+            text-align: center;
+            padding: 0.875rem;
             border-radius: 6px;
-            background: white;
-            color: #64748b;
-            font-size: 12px;
-            cursor: pointer;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
             transition: all 0.2s ease;
         }
 
-        .chart-control:hover,
-        .chart-control.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+        .health-metric:hover {
+            background: #fff;
+            border-color: #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .activities-list {
-            max-height: 400px;
-            overflow-y: auto;
+        .health-metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+            line-height: 1;
         }
 
+        .health-metric-label {
+            font-size: 0.6875rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .health-status {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #28a745;
+            line-height: 1;
+        }
+
+        /* Activity Timeline */
         .activity-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px 0;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 0.875rem;
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.2s ease;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
         }
 
         .activity-item:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .activity-item:hover {
+            background: #f8f9fa;
         }
 
         .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            color: white;
             flex-shrink: 0;
+            font-size: 1.125rem;
         }
 
         .activity-content {
             flex: 1;
+            margin: 0 1rem;
+            min-width: 0;
         }
 
-        .activity-text {
-            font-size: 14px;
-            color: #1e293b;
-            margin-bottom: 2px;
+        .activity-title {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+            font-size: 0.9375rem;
+        }
+
+        .activity-meta {
+            font-size: 0.8125rem;
+            color: #6c757d;
         }
 
         .activity-time {
-            font-size: 12px;
-            color: #64748b;
+            text-align: right;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        .alerts-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-        }
-
-        .alert-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid;
-        }
-
-        .alert-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .alert-item.warning {
-            background: #fef3c7;
-            border-color: #f59e0b;
-        }
-
-        .alert-item.info {
-            background: #dbeafe;
-            border-color: #3b82f6;
-        }
-
-        .alert-item.success {
-            background: #dcfce7;
-            border-color: #16a34a;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .quick-action {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .quick-action:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .quick-action-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            margin: 0 auto 15px;
-        }
-
-        .quick-action-title {
-            font-size: 14px;
+        .activity-time .badge {
             font-weight: 600;
-            color: #1e293b;
+            padding: 0.375rem 0.625rem;
         }
 
-        .real-time-indicator {
+        /* Alert Styles */
+        .alert {
+            border-radius: 6px;
+            border-left: 3px solid;
+            padding: 0.875rem 1rem;
+        }
+
+        .alert-warning {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .alert-info {
+            border-left-color: #17a2b8;
+            background: #f0f9fb;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 320px;
+            margin-top: 0.5rem;
+        }
+
+        /* Period Toggle */
+        .period-toggle {
             display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            color: #16a34a;
-        }
-
-        .real-time-dot {
-            width: 8px;
-            height: 8px;
-            background: #16a34a;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @@keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .system-health {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-        }
-
-        .health-score {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .health-circle {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            position: relative;
-            background: conic-gradient(#16a34a 85%, #f1f5f9 85%);
-        }
-
-        .health-circle::before {
-            content: '';
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: white;
-            position: absolute;
-        }
-
-        .health-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #16a34a;
-            position: relative;
-            z-index: 1;
-        }
-
-        .responsive-table {
-            overflow-x: auto;
-        }
-
-        .table-modern {
-            background: white;
-            border-radius: 10px;
+            border: 1px solid #e3e6ec;
+            border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            background: #fff;
         }
 
-        .table-modern th {
-            background: #f8fafc;
+        .period-toggle button {
             border: none;
+            background: transparent;
+            padding: 0.375rem 0.875rem;
+            font-size: 0.8125rem;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .period-toggle button:not(:last-child) {
+            border-right: 1px solid #e3e6ec;
+        }
+
+        .period-toggle button:hover {
+            background: #f8f9fa;
+            color: #0066cc;
+        }
+
+        .period-toggle button.active {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state i {
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h6 {
+            color: #6c757d;
             font-weight: 600;
-            color: #374151;
-            padding: 15px;
+            margin-bottom: 0.5rem;
         }
 
-        .table-modern td {
-            border: none;
-            padding: 15px;
-            vertical-align: middle;
+        .empty-state p {
+            color: #adb5bd;
+            font-size: 0.875rem;
         }
 
-        .table-modern tbody tr {
-            transition: background-color 0.2s ease;
-        }
+        /* Responsive */
+        @@media (max-width: 992px) {
+            .admin-content {
+                padding: 1rem;
+            }
 
-        .table-modern tbody tr:hover {
-            background-color: #f8fafc;
-        }
+            .admin-header h1 {
+                font-size: 1.25rem;
+            }
 
-        @@media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            .quick-actions-grid {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 1.5rem;
+            }
+
+            .chart-container {
+                height: 250px;
             }
         }
 
-        @@media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
+        @@media (max-width: 576px) {
+            .admin-header {
+                padding: 1rem;
             }
-            
-            .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
+
+            .kpi-card {
+                padding: 1rem;
+            }
+
+            .section-card-body {
+                padding: 1rem;
             }
         }
     </style>
 }
 
-<!-- Dashboard Header -->
-<div class="dashboard-header">
-    <div class="content">
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
         <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard Quản trị
+                </h1>
+                <p class="mb-0">Tổng quan hệ thống quản trị</p>
+            </div>
             <div class="text-end">
-                <div class="real-time-indicator mb-2">
-                    <div class="real-time-dot"></div>
-                    <span>Dữ liệu thời gian thực</span>
+                <div class="d-flex align-items-center justify-content-end text-success mb-1">
+                    <div class="live-indicator"></div>
+                    <small style="font-weight: 500;">Dữ liệu thời gian thực</small>
                 </div>
-                <div class="small opacity-75">Cập nhật lần cuối: @DateTime.Now.ToString("HH:mm")</div>
+                <small class="text-muted" style="font-size: 0.75rem;">Cập nhật: @DateTime.Now.ToString("HH:mm:ss")</small>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Key Metrics -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
-            <i class="fas fa-dollar-sign"></i>
-        </div>
-        <div class="stat-value">@((Model.DashboardSummary?.TodayRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
-        <div class="stat-label">Doanh thu hôm nay</div>
-        <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>+@((Model.DashboardSummary?.RevenueGrowth ?? 0).ToString("F1"))%</span>
-            <span class="text-muted">so với hôm qua</span>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
-            <i class="fas fa-shopping-cart"></i>
-        </div>
-        <div class="stat-value">@(Model.DashboardSummary?.TodayOrders ?? 0)</div>
-        <div class="stat-label">Đơn hàng hôm nay</div>
-        <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>+@((Model.DashboardSummary?.OrdersGrowth ?? 0).ToString("F1"))%</span>
-            <span class="text-muted">so với hôm qua</span>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(45deg, #8b5cf6, #7c3aed);">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-value">@(Model.DashboardSummary?.TodayVisitors ?? 0)</div>
-        <div class="stat-label">Khách truy cập</div>
-        <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>+@((Model.DashboardSummary?.VisitorsGrowth ?? 0).ToString("F1"))%</span>
-            <span class="text-muted">so với hôm qua</span>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">
-            <i class="fas fa-chart-line"></i>
-        </div>
-        <div class="stat-value">@((Model.DashboardSummary?.ConversionRate ?? 0).ToString("F1"))%</div>
-        <div class="stat-label">Tỷ lệ chuyển đổi</div>
-        <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>+@((Model.DashboardSummary?.ConversionGrowth ?? 0).ToString("F1"))%</span>
-            <span class="text-muted">so với hôm qua</span>
-        </div>
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="quick-actions">
-    <a href="@Url.Action("Orders", "Admin")" class="quick-action">
-        <div class="quick-action-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
-            <i class="fas fa-shopping-cart"></i>
-        </div>
-        <div class="quick-action-title">Xem đơn hàng</div>
-    </a>
-
-    <a href="@Url.Action("Users", "Admin")" class="quick-action">
-        <div class="quick-action-icon" style="background: linear-gradient(45deg, #8b5cf6, #7c3aed);">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="quick-action-title">Quản lý user</div>
-    </a>
-
-    <a href="@Url.Action("Reports", "Admin")" class="quick-action">
-        <div class="quick-action-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">
-            <i class="fas fa-chart-bar"></i>
-        </div>
-        <div class="quick-action-title">Báo cáo</div>
-    </a>
-
-    <a href="@Url.Action("Analytics", "Admin")" class="quick-action">
-        <div class="quick-action-icon" style="background: linear-gradient(45deg, #ef4444, #dc2626);">
-            <i class="fas fa-analytics"></i>
-        </div>
-        <div class="quick-action-title">Phân tích</div>
-    </a>
-
-    <a href="@Url.Action("Settings", "Admin")" class="quick-action">
-        <div class="quick-action-icon" style="background: linear-gradient(45deg, #64748b, #475569);">
-            <i class="fas fa-cog"></i>
-        </div>
-        <div class="quick-action-title">Cài đặt</div>
-    </a>
-</div>
-
-<!-- System Alerts -->
-@if (Model.SystemAlerts?.Any() == true)
-{
-    <div class="alerts-container">
-        <h5 class="mb-3"><i class="fas fa-bell me-2"></i>Cảnh báo hệ thống</h5>
-        @foreach (var alert in Model.SystemAlerts)
-        {
-            <div class="alert-item @alert.Type">
-                <div style="flex-shrink: 0;">
-                    <i class="@alert.Icon" style="font-size: 18px;"></i>
+    <!-- Key Performance Indicators -->
+    <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-start">
+                        <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="kpi-label">Doanh thu hôm nay</div>
+                            <div class="kpi-value">@((Model.DashboardSummary?.TodayRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
+                            <div class="kpi-growth text-success">
+                                <i class="fas fa-arrow-up"></i>
+                                +@((Model.DashboardSummary?.RevenueGrowth ?? 0).ToString("F1"))% so với hôm qua
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-weight: 600;">@alert.Message</div>
-                    @if (!string.IsNullOrEmpty(alert.Action))
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-start">
+                        <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="kpi-label">Đơn hàng hôm nay</div>
+                            <div class="kpi-value">@(Model.DashboardSummary?.TodayOrders ?? 0)</div>
+                            <div class="kpi-growth text-success">
+                                <i class="fas fa-arrow-up"></i>
+                                +@((Model.DashboardSummary?.OrdersGrowth ?? 0).ToString("F1"))% so với hôm qua
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-start">
+                        <div class="kpi-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="kpi-label">Khách truy cập</div>
+                            <div class="kpi-value">@(Model.DashboardSummary?.TodayVisitors ?? 0)</div>
+                            <div class="kpi-growth text-success">
+                                <i class="fas fa-arrow-up"></i>
+                                +@((Model.DashboardSummary?.VisitorsGrowth ?? 0).ToString("F1"))% so với hôm qua
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="d-flex align-items-start">
+                        <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="kpi-label">Tỷ lệ chuyển đổi</div>
+                            <div class="kpi-value">@((Model.DashboardSummary?.ConversionRate ?? 0).ToString("F1"))%</div>
+                            <div class="kpi-growth text-success">
+                                <i class="fas fa-arrow-up"></i>
+                                +@((Model.DashboardSummary?.ConversionGrowth ?? 0).ToString("F1"))% so với hôm qua
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-card">
+            <div class="section-card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Thao tác nhanh</h5>
+            </div>
+            <div class="section-card-body">
+                <div class="quick-actions-grid">
+                    <a href="@Url.Action("Orders", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-shopping-cart text-primary"></i>
+                        <span>Đơn hàng</span>
+                    </a>
+                    <a href="@Url.Action("Products", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-box text-success"></i>
+                        <span>Sản phẩm</span>
+                    </a>
+                    <a href="@Url.Action("Categories", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-tags text-info"></i>
+                        <span>Danh mục</span>
+                    </a>
+                    <a href="@Url.Action("Users", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-users text-secondary"></i>
+                        <span>Người dùng</span>
+                    </a>
+                    <a href="@Url.Action("Blog", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-newspaper text-info"></i>
+                        <span>Blog</span>
+                    </a>
+                    <a href="@Url.Action("Reports", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-chart-bar text-warning"></i>
+                        <span>Báo cáo</span>
+                    </a>
+                    <a href="@Url.Action("Analytics", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-chart-line text-danger"></i>
+                        <span>Phân tích</span>
+                    </a>
+                    <a href="@Url.Action("Settings", "Admin")" class="quick-action-btn">
+                        <i class="fas fa-cog text-dark"></i>
+                        <span>Cài đặt</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Alerts -->
+    @if (Model.SystemAlerts?.Any() == true)
+        {
+            <div class="section-card">
+                <div class="section-card-header">
+                    <h5><i class="fas fa-bell me-2"></i>Cảnh báo hệ thống</h5>
+                </div>
+                <div class="section-card-body">
+                    @foreach (var alert in Model.SystemAlerts)
                     {
-                        <a href="@alert.Action" class="small">Xem chi tiết</a>
+                        <div class="alert alert-@(alert.Type == "warning" ? "warning" : alert.Type == "info" ? "info" : "primary") d-flex align-items-start mb-2" role="alert">
+                            <i class="@alert.Icon me-3 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <strong>@alert.Message</strong>
+                                @if (!string.IsNullOrEmpty(alert.Action))
+                                {
+                                    <div class="mt-1">
+                                        <a href="@alert.Action" class="alert-link">Xem chi tiết →</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     }
                 </div>
             </div>
         }
-    </div>
-}
 
-<!-- Main Dashboard Grid -->
-<div class="dashboard-grid">
-    <!-- Sales Chart -->
-    <div class="chart-container">
-        <div class="chart-header">
-            <h5 class="chart-title">Doanh thu theo thời gian</h5>
-            <div class="chart-controls">
-                <button class="chart-control active" data-period="7">7 ngày</button>
-                <button class="chart-control" data-period="30">30 ngày</button>
-                <button class="chart-control" data-period="90">3 tháng</button>
+    <!-- Charts Section -->
+    <div class="row g-3 mb-4">
+        <!-- Revenue Chart -->
+        <div class="col-lg-8">
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h5><i class="fas fa-chart-line me-2"></i>Doanh thu theo thời gian</h5>
+                            <div class="period-toggle">
+                                <button class="active" data-period="7">7 ngày</button>
+                                <button data-period="30">30 ngày</button>
+                                <button data-period="90">3 tháng</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-card-body">
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div style="height: 350px;">
-            <canvas id="salesChart" width="100%" height="350"></canvas>
-        </div>
-    </div>
-
-    <!-- System Health -->
-    <div class="system-health">
-        <h5 class="mb-3"><i class="fas fa-heartbeat me-2"></i>Sức khỏe hệ thống</h5>
-        <div class="health-score">
-            <div class="health-circle">
-                <div class="health-value">98%</div>
-            </div>
-            <div class="small text-muted">Hoạt động tốt</div>
         </div>
         
-        <div class="row text-center">
-            <div class="col-6 mb-3">
-                <div class="small text-muted">CPU</div>
-                <div class="h6 mb-0">45%</div>
-            </div>
-            <div class="col-6 mb-3">
-                <div class="small text-muted">RAM</div>
-                <div class="h6 mb-0">68%</div>
-            </div>
-            <div class="col-6">
-                <div class="small text-muted">Disk</div>
-                <div class="h6 mb-0">23%</div>
-            </div>
-            <div class="col-6">
-                <div class="small text-muted">Online</div>
-                <div class="h6 mb-0">@(Model.DashboardSummary?.ActiveUsers ?? 0)</div>
+        <!-- System Health -->
+        <div class="col-lg-4">
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <h5><i class="fas fa-heartbeat me-2"></i>Sức khỏe hệ thống</h5>
+                    </div>
+                    <div class="section-card-body">
+                        <div class="text-center mb-3">
+                            <div class="health-status">98%</div>
+                            <div class="text-muted" style="font-size: 0.875rem; font-weight: 500;">Hoạt động tốt</div>
+                        </div>
+                        
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="health-metric">
+                                    <div class="health-metric-value">45%</div>
+                                    <div class="health-metric-label">CPU Usage</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="health-metric">
+                                    <div class="health-metric-value">68%</div>
+                                    <div class="health-metric-label">Memory</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="health-metric">
+                                    <div class="health-metric-value">23%</div>
+                                    <div class="health-metric-label">Storage</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="health-metric">
+                                    <div class="health-metric-value">@(Model.DashboardSummary?.ActiveUsers ?? 0)</div>
+                                    <div class="health-metric-label">Online</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Recent Activity & Top Products -->
-<div class="row">
-    <div class="col-lg-6">
-        <div class="chart-container">
-            <div class="chart-header">
-                <h5 class="chart-title">Hoạt động gần đây</h5>
+    <!-- Recent Activity -->
+    <div class="section-card">
+            <div class="section-card-header">
+                <h5><i class="fas fa-clock me-2"></i>Hoạt động gần đây</h5>
             </div>
-            <div class="activities-list">
+            <div class="section-card-body">
                 @if (Model.RecentOrders?.Any() == true)
                 {
                     @foreach (var order in Model.RecentOrders.Take(5))
                     {
                         <div class="activity-item">
-                            <div class="activity-icon" style="background: linear-gradient(45deg, #10b981, #16a34a);">
+                            <div class="activity-icon bg-success bg-opacity-10 text-success">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                             <div class="activity-content">
-                                <div class="activity-text">
-                                    Đơn hàng mới <strong>#@order.OrderNumber</strong> từ @order.User?.Email
-                                </div>
-                                <div class="activity-time">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div class="activity-title">Đơn hàng mới #@order.OrderNumber</div>
+                                <div class="activity-meta">từ @order.User?.Email</div>
                             </div>
-                            <div class="text-end">
+                            <div class="activity-time">
+                                <div class="small text-muted mb-1">@order.CreatedAt.ToString("dd/MM HH:mm")</div>
                                 <span class="badge bg-success">@order.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
                             </div>
                         </div>
@@ -909,17 +696,26 @@
                     @foreach (var user in Model.RecentUsers.Take(3))
                     {
                         <div class="activity-item">
-                            <div class="activity-icon" style="background: linear-gradient(45deg, #3b82f6, #1d4ed8);">
+                            <div class="activity-icon bg-primary bg-opacity-10 text-primary">
                                 <i class="fas fa-user-plus"></i>
                             </div>
                             <div class="activity-content">
-                                <div class="activity-text">
-                                    Người dùng mới đăng ký: <strong>@user.Email</strong>
-                                </div>
-                                <div class="activity-time">@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div class="activity-title">Người dùng mới</div>
+                                <div class="activity-meta">@user.Email</div>
+                            </div>
+                            <div class="activity-time">
+                                <div class="small text-muted">@user.CreatedAt.ToString("dd/MM HH:mm")</div>
                             </div>
                         </div>
                     }
+                }
+                @if ((Model.RecentOrders?.Any() != true) && (Model.RecentUsers?.Any() != true))
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-inbox fa-3x"></i>
+                        <h6>Chưa có hoạt động gần đây</h6>
+                        <p>Các hoạt động mới sẽ hiển thị tại đây</p>
+                    </div>
                 }
             </div>
         </div>
@@ -982,9 +778,9 @@
         });
 
         // Chart period controls
-        document.querySelectorAll('.chart-control').forEach(btn => {
+        document.querySelectorAll('.period-toggle button').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.chart-control').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.period-toggle button').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 
                 // Update chart data based on period

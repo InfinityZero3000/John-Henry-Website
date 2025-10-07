@@ -134,6 +134,7 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 // This would typically come from a time-series database
                 // For now, we'll generate sample data
+                await Task.CompletedTask;
                 var data = GenerateSampleChartData(type, hours);
                 return Json(data);
             }

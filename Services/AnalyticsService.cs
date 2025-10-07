@@ -390,8 +390,8 @@ namespace JohnHenryFashionWeb.Services
                     .GroupBy(a => new { a.EntityId, a.Source })
                     .Select(g => new CampaignData 
                     { 
-                        CampaignId = g.Key.EntityId, 
-                        Source = g.Key.Source, 
+                        CampaignId = g.Key.EntityId ?? string.Empty, 
+                        Source = g.Key.Source ?? string.Empty, 
                         Clicks = g.Count() 
                     })
                     .ToListAsync();
@@ -401,7 +401,7 @@ namespace JohnHenryFashionWeb.Services
                     .GroupBy(a => a.EntityId)
                     .Select(g => new EmailData 
                     { 
-                        EmailId = g.Key, 
+                        EmailId = g.Key ?? string.Empty, 
                         Opens = g.Count(),
                         UniqueOpens = g.Select(x => x.UserId).Distinct().Count()
                     })
@@ -536,6 +536,7 @@ namespace JohnHenryFashionWeb.Services
             };
 
             _context.AnalyticsData.Add(analyticsData);
+            await Task.CompletedTask;
         }
 
         private List<DailyData> GetDailyUserData(List<UserSession> sessions, List<PageView> pageViews, DateTime from, DateTime to)
@@ -652,7 +653,7 @@ namespace JohnHenryFashionWeb.Services
                 .GroupBy(p => p.Referrer)
                 .Select(g => new ReferrerData
                 {
-                    Referrer = g.Key,
+                    Referrer = g.Key ?? string.Empty,
                     Visits = g.Count(),
                     UniqueVisitors = g.Select(p => p.UserId).Distinct().Count()
                 })
@@ -668,7 +669,7 @@ namespace JohnHenryFashionWeb.Services
                 .GroupBy(a => a.Source)
                 .Select(g => new SourceData
                 {
-                    Source = g.Key,
+                    Source = g.Key ?? string.Empty,
                     Events = g.Count(),
                     UniqueUsers = g.Select(a => a.UserId).Distinct().Count()
                 })
@@ -901,6 +902,7 @@ namespace JohnHenryFashionWeb.Services
 
         public async Task<byte[]> ExportAnalyticsDataAsync(DateTime from, DateTime to, string format = "excel")
         {
+            await Task.CompletedTask;
             // Implementation for exporting analytics data
             // This would use a library like EPPlus for Excel or similar
             throw new NotImplementedException("Export functionality to be implemented");
@@ -908,6 +910,7 @@ namespace JohnHenryFashionWeb.Services
 
         public async Task<string> GenerateAnalyticsReportAsync(DateTime from, DateTime to, string reportType)
         {
+            await Task.CompletedTask;
             // Implementation for generating comprehensive analytics reports
             // This would create formatted reports in HTML, PDF, etc.
             throw new NotImplementedException("Report generation to be implemented");

@@ -235,9 +235,9 @@ namespace JohnHenryFashionWeb.Controllers.Api
                 if (!string.IsNullOrEmpty(search))
                 {
                     query = query.Where(o => o.OrderNumber.Contains(search) ||
-                                           o.User.Email.Contains(search) ||
-                                           (o.User.FirstName != null && o.User.FirstName.Contains(search)) ||
-                                           (o.User.LastName != null && o.User.LastName.Contains(search)));
+                                           (o.User != null && o.User.Email != null && o.User.Email.Contains(search)) ||
+                                           (o.User != null && o.User.FirstName != null && o.User.FirstName.Contains(search)) ||
+                                           (o.User != null && o.User.LastName != null && o.User.LastName.Contains(search)));
                 }
 
                 if (!string.IsNullOrEmpty(status))
@@ -389,7 +389,7 @@ namespace JohnHenryFashionWeb.Controllers.Api
 
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(u => u.Email.Contains(search) ||
+                    query = query.Where(u => (u.Email != null && u.Email.Contains(search)) ||
                                            (u.FirstName != null && u.FirstName.Contains(search)) ||
                                            (u.LastName != null && u.LastName.Contains(search)));
                 }

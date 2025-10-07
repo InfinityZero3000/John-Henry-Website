@@ -25,8 +25,10 @@ public class RateLimitingMiddleware
         var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var cacheKey = $"rate_limit_{clientIp}";
         
-        if (_cache.TryGetValue(cacheKey, out List<DateTime> requests))
+        List<DateTime> requests;
+        if (_cache.TryGetValue(cacheKey, out List<DateTime>? cachedRequests) && cachedRequests != null)
         {
+            requests = cachedRequests;
             // Remove requests older than 1 minute
             requests.RemoveAll(r => r < DateTime.UtcNow.AddMinutes(-1));
             

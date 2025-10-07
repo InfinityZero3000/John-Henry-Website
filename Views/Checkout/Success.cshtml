@@ -138,20 +138,23 @@
                         @if (!string.IsNullOrEmpty(Model.ShippingAddress))
                         {
                             var shippingAddress = System.Text.Json.JsonSerializer.Deserialize<AddressViewModel>(Model.ShippingAddress);
-                            <div class="shipping-info mb-4">
-                                <h6>
-                                    <i class="fas fa-truck me-2"></i>
-                                    Địa chỉ giao hàng
-                                </h6>
-                                <div class="address-details">
-                                    <p class="mb-1"><strong>@shippingAddress.FullName</strong></p>
-                                    <p class="mb-1">@shippingAddress.PhoneNumber</p>
-                                    <p class="mb-0">
-                                        @shippingAddress.Address, @shippingAddress.Ward, 
-                                        @shippingAddress.District, @shippingAddress.City
-                                    </p>
+                            if (shippingAddress != null)
+                            {
+                                <div class="shipping-info mb-4">
+                                    <h6>
+                                        <i class="fas fa-truck me-2"></i>
+                                        Địa chỉ giao hàng
+                                    </h6>
+                                    <div class="address-details">
+                                        <p class="mb-1"><strong>@shippingAddress.FullName</strong></p>
+                                        <p class="mb-1">@shippingAddress.PhoneNumber</p>
+                                        <p class="mb-0">
+                                            @shippingAddress.Address, @shippingAddress.Ward, 
+                                            @shippingAddress.District, @shippingAddress.City
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         }
 
                         <!-- Order Items -->

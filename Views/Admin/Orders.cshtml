@@ -8,490 +8,246 @@
 
 @section Styles {
     <style>
-        .orders-modern {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .page-header-modern {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .page-title-modern {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .page-subtitle {
-            color: #6b7280;
-            font-size: 1rem;
-            margin-bottom: 0;
-        }
-
-        .stats-grid-modern {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card-modern {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card-modern::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(45deg, #ce193a, #a01527);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card-modern:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card-modern:hover::before {
-            transform: scaleY(1);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-icon-modern {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            background: linear-gradient(45deg, #ce193a, #a01527);
-            box-shadow: 0 4px 15px rgba(206, 25, 58, 0.3);
-        }
-
-        .stat-value-modern {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-            line-height: 1;
-        }
-
-        .stat-label-modern {
-            color: #6b7280;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filters-card-modern {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .filter-section-title {
-            font-size: 1.25rem;
+        .table th {
+            border-top: none;
             font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: #495057;
+            background-color: #f8f9fa;
         }
 
-        .form-control-modern {
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control-modern:focus {
-            background: white;
-            border-color: #ce193a;
-            box-shadow: 0 0 0 3px rgba(206, 25, 58, 0.1);
-        }
-
-        .btn-modern {
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary-modern {
-            background: linear-gradient(45deg, #ce193a, #a01527);
-            color: white;
-        }
-
-        .btn-primary-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(206, 25, 58, 0.3);
-        }
-
-        .orders-table-modern {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .table-header-modern {
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .table-title-modern {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .table-modern {
-            margin-bottom: 0;
-        }
-
-        .table-modern th {
-            background: transparent;
-            border: none;
-            padding: 1rem 1.5rem;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .table-modern td {
-            border: none;
-            padding: 1.5rem;
+        .table td {
             vertical-align: middle;
-            border-bottom: 1px solid #f3f4f6;
         }
 
-        .table-modern tbody tr:hover {
-            background: rgba(206, 25, 58, 0.05);
-        }
-
-        .status-badge-modern {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-        }
-
-        .status-pending { background: #fef3c7; color: #d97706; }
-        .status-processing { background: #dbeafe; color: #2563eb; }
-        .status-shipped { background: #dcfce7; color: #16a34a; }
-        .status-delivered { background: #e0e7ff; color: #4f46e5; }
-        .status-cancelled { background: #fee2e2; color: #dc2626; }
-
-        .order-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .status-pending { 
+            background-color: #fff3cd; 
+            color: #856404; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
             font-size: 0.875rem;
         }
 
-        .action-btn:hover {
-            transform: translateY(-2px);
+        .status-processing { 
+            background-color: #cce7ff; 
+            color: #0c5460; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
 
-        .action-view {
-            background: #dbeafe;
-            color: #2563eb;
+        .status-shipped { 
+            background-color: #d4edda; 
+            color: #155724; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
 
-        .action-edit {
-            background: #fef3c7;
-            color: #d97706;
+        .status-delivered { 
+            background-color: #d1ecf1; 
+            color: #0c5460; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
 
-        .action-delete {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .bulk-actions-modern {
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1rem;
-            display: none;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .bulk-actions-modern.show {
-            display: flex;
-        }
-
-        .pagination-modern {
-            display: flex;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-
-        .pagination-modern .page-link {
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            margin: 0 0.25rem;
-            color: #374151;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .pagination-modern .page-link:hover,
-        .pagination-modern .page-link.active {
-            background: linear-gradient(45deg, #ce193a, #a01527);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(206, 25, 58, 0.3);
-        }
-
-        @@media (max-width: 768px) {
-            .stats-grid-modern {
-                grid-template-columns: 1fr;
-            }
-            
-            .orders-modern {
-                padding: 1rem;
-            }
+        .status-cancelled { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
     </style>
 }
 
-<div class="orders-modern">
-    <!-- Page Header -->
-    <div class="page-header-modern">
-        <div class="d-flex justify-content-between align-items-start">
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="page-title-modern">
-                    <i class="fas fa-shopping-cart"></i>
-                    Quản lý đơn hàng
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-shopping-cart me-2"></i>Quản lý đơn hàng
                 </h1>
-                <p class="page-subtitle">Theo dõi và quản lý tất cả đơn hàng trong hệ thống</p>
+                <p class="text-muted mb-0">Theo dõi và quản lý tất cả đơn hàng trong hệ thống</p>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn-modern btn-primary-modern" onclick="exportOrders()">
-                    <i class="fas fa-download me-2"></i>Xuất báo cáo
+            <div class="header-actions">
+                <button class="btn btn-success me-2" onclick="exportOrders()">
+                    <i class="fas fa-download me-1"></i>Xuất báo cáo
                 </button>
-                <button class="btn-modern btn-primary-modern" onclick="refreshOrders()">
-                    <i class="fas fa-sync-alt me-2"></i>Làm mới
+                <button class="btn btn-primary" onclick="refreshOrders()">
+                    <i class="fas fa-sync-alt me-1"></i>Làm mới
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="stats-grid-modern">
-        <div class="stat-card-modern">
-            <div class="stat-header">
-                <div class="stat-icon-modern">
-                    <i class="fas fa-clock"></i>
-                </div>
-            </div>
-            <div class="stat-value-modern">@(Model?.PendingOrdersCount ?? 0)</div>
-            <div class="stat-label-modern">Chờ xử lý</div>
-        </div>
-
-        <div class="stat-card-modern">
-            <div class="stat-header">
-                <div class="stat-icon-modern">
-                    <i class="fas fa-cogs"></i>
-                </div>
-            </div>
-            <div class="stat-value-modern">@(Model?.ProcessingOrdersCount ?? 0)</div>
-            <div class="stat-label-modern">Đang xử lý</div>
-        </div>
-
-        <div class="stat-card-modern">
-            <div class="stat-header">
-                <div class="stat-icon-modern">
-                    <i class="fas fa-shipping-fast"></i>
-                </div>
-            </div>
-            <div class="stat-value-modern">@(Model?.ShippedOrdersCount ?? 0)</div>
-            <div class="stat-label-modern">Đã giao hàng</div>
-        </div>
-
-        <div class="stat-card-modern">
-            <div class="stat-header">
-                <div class="stat-icon-modern">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-            </div>
-            <div class="stat-value-modern">@((Model?.TotalRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
-            <div class="stat-label-modern">Tổng doanh thu</div>
-        </div>
-    </div>
-
-    <!-- Advanced Filters -->
-    <div class="filters-card-modern">
-        <h5 class="filter-section-title">
-            <i class="fas fa-filter"></i>
-            Bộ lọc nâng cao
-        </h5>
-        <form method="get" id="orderFilterForm">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label fw-medium">Tìm kiếm</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control-modern border-start-0" 
-                               name="search" placeholder="Mã đơn hàng, khách hàng..." 
-                               value="@(Model?.SearchTerm ?? "")">
+    <!-- Content Section -->
+    <div class="content-wrapper">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">@(Model?.PendingOrdersCount ?? 0)</h4>
+                                <p class="mb-0">Chờ xử lý</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-medium">Trạng thái</label>
-                    <select name="status" class="form-control-modern">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="Pending" selected="@(Model?.StatusFilter == "Pending")">Chờ xử lý</option>
-                        <option value="Processing" selected="@(Model?.StatusFilter == "Processing")">Đang xử lý</option>
-                        <option value="Shipped" selected="@(Model?.StatusFilter == "Shipped")">Đã giao</option>
-                        <option value="Delivered" selected="@(Model?.StatusFilter == "Delivered")">Hoàn thành</option>
-                        <option value="Cancelled" selected="@(Model?.StatusFilter == "Cancelled")">Đã hủy</option>
-                    </select>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">@(Model?.ProcessingOrdersCount ?? 0)</h4>
+                                <p class="mb-0">Đang xử lý</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-cogs fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-medium">Từ ngày</label>
-                    <input type="date" class="form-control-modern" name="fromDate" 
-                           value="@(Model?.FromDate?.ToString("yyyy-MM-dd") ?? "")">
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">@(Model?.ShippedOrdersCount ?? 0)</h4>
+                                <p class="mb-0">Đã giao hàng</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-shipping-fast fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-medium">Đến ngày</label>
-                    <input type="date" class="form-control-modern" name="toDate" 
-                           value="@(Model?.ToDate?.ToString("yyyy-MM-dd") ?? "")">
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">@((Model?.TotalRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</h4>
+                                <p class="mb-0">Tổng doanh thu</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-dollar-sign fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-medium">Sắp xếp theo</label>
-                    <select name="sortBy" class="form-control-modern">
-                        <option value="newest" selected="@(Model?.SortBy == "newest")">Mới nhất</option>
-                        <option value="oldest" selected="@(Model?.SortBy == "oldest")">Cũ nhất</option>
-                        <option value="amount_high" selected="@(Model?.SortBy == "amount_high")">Giá trị cao</option>
-                        <option value="amount_low" selected="@(Model?.SortBy == "amount_low")">Giá trị thấp</option>
-                    </select>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-filter me-2"></i>Bộ lọc và tìm kiếm
+                        </h5>
+                        <form method="get" id="orderFilterForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tìm kiếm</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="search" 
+                                               placeholder="Mã đơn hàng, khách hàng..." 
+                                               value="@(Model?.SearchTerm ?? "")">
+                                        <button type="submit" class="btn btn-outline-secondary">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Trạng thái</label>
+                                    <select name="status" class="form-select">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="Pending">Chờ xử lý</option>
+                                        <option value="Processing">Đang xử lý</option>
+                                        <option value="Shipped">Đã giao</option>
+                                        <option value="Delivered">Hoàn thành</option>
+                                        <option value="Cancelled">Đã hủy</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Từ ngày</label>
+                                    <input type="date" class="form-control" name="fromDate" 
+                                           value="@(Model?.FromDate?.ToString("yyyy-MM-dd") ?? "")">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Đến ngày</label>
+                                    <input type="date" class="form-control" name="toDate" 
+                                           value="@(Model?.ToDate?.ToString("yyyy-MM-dd") ?? "")">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Sắp xếp theo</label>
+                                    <select name="sortBy" class="form-select">
+                                        <option value="newest">Mới nhất</option>
+                                        <option value="oldest">Cũ nhất</option>
+                                        <option value="amount_high">Giá trị cao</option>
+                                        <option value="amount_low">Giá trị thấp</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn-modern btn-primary-modern w-100">
-                        <i class="fas fa-search"></i>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Thống kê nhanh</h5>
+                        <p class="text-muted mb-0">
+                            Tổng: @(Model?.Orders?.Count() ?? 0) đơn hàng
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="alert alert-info" id="bulkActions" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="selectedCount">0</span> đơn hàng được chọn
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-success me-1" onclick="updateSelectedOrders('Processing')">
+                        <i class="fas fa-play me-1"></i>Xử lý
+                    </button>
+                    <button class="btn btn-sm btn-info me-1" onclick="updateSelectedOrders('Shipped')">
+                        <i class="fas fa-shipping-fast me-1"></i>Giao hàng
+                    </button>
+                    <button class="btn btn-sm btn-primary me-1" onclick="updateSelectedOrders('Delivered')">
+                        <i class="fas fa-check me-1"></i>Hoàn thành
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="updateSelectedOrders('Cancelled')">
+                        <i class="fas fa-times me-1"></i>Hủy đơn
                     </button>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
 
-    <!-- Bulk Actions -->
-    <div class="bulk-actions-modern" id="bulkActions">
-        <div class="d-flex align-items-center gap-2">
-            <i class="fas fa-check-circle text-primary"></i>
-            <span class="fw-medium">
-                <span id="selectedCount">0</span> đơn hàng được chọn
-            </span>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn-modern" style="background: #dcfce7; color: #16a34a;" 
-                    onclick="updateSelectedOrders('Processing')">
-                <i class="fas fa-play me-1"></i> Xử lý
-            </button>
-            <button class="btn-modern" style="background: #dbeafe; color: #2563eb;" 
-                    onclick="updateSelectedOrders('Shipped')">
-                <i class="fas fa-shipping-fast me-1"></i> Giao hàng
-            </button>
-            <button class="btn-modern" style="background: #e0e7ff; color: #4f46e5;" 
-                    onclick="updateSelectedOrders('Delivered')">
-                <i class="fas fa-check me-1"></i> Hoàn thành
-            </button>
-            <button class="btn-modern" style="background: #fee2e2; color: #dc2626;" 
-                    onclick="updateSelectedOrders('Cancelled')">
-                <i class="fas fa-times me-1"></i> Hủy đơn
-            </button>
-        </div>
-    </div>
-
-    <!-- Orders Table -->
-    <div class="orders-table-modern">
-        <div class="table-header-modern">
-            <h5 class="table-title-modern">
-                <i class="fas fa-list"></i>
-                Danh sách đơn hàng (@(Model?.Orders?.Count() ?? 0) đơn hàng)
-            </h5>
-        </div>
-        
-        <div class="table-responsive">
-            <table class="table table-modern">
+        <!-- Orders Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Danh sách đơn hàng</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
                 <thead>
                     <tr>
                         <th width="50">
@@ -540,21 +296,21 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="status-badge-modern status-@order.Status.ToLower()">
+                                    <span class="badge status-@order.Status.ToLower()">
                                         @order.Status
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="order-actions">
-                                        <button class="action-btn action-view" title="Xem chi tiết" 
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="Xem chi tiết" 
                                                 onclick="viewOrder('@order.Id')">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button class="action-btn action-edit" title="Chỉnh sửa" 
+                                        <button class="btn btn-sm btn-outline-warning" title="Chỉnh sửa" 
                                                 onclick="editOrder('@order.Id')">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="action-btn action-delete" title="Xóa" 
+                                        <button class="btn btn-sm btn-outline-danger" title="Xóa" 
                                                 onclick="deleteOrder('@order.Id')">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -577,17 +333,33 @@
                     }
                 </tbody>
             </table>
+                </div>
+            </div>
         </div>
 
         <!-- Pagination -->
         @if (Model?.Orders != null && Model.Orders.Any())
         {
-            <div class="pagination-modern">
-                <a href="#" class="page-link">«</a>
-                <a href="#" class="page-link active">1</a>
-                <a href="#" class="page-link">2</a>
-                <a href="#" class="page-link">3</a>
-                <a href="#" class="page-link">»</a>
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Pagination">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link" href="#">«</a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">»</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         }
     </div>
@@ -617,10 +389,10 @@
             const selectedCount = document.getElementById('selectedCount');
             
             if (checkedBoxes.length > 0) {
-                bulkActions.classList.add('show');
+                bulkActions.style.display = 'block';
                 selectedCount.textContent = checkedBoxes.length;
             } else {
-                bulkActions.classList.remove('show');
+                bulkActions.style.display = 'none';
             }
         }
 

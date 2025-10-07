@@ -138,8 +138,8 @@ namespace JohnHenryFashionWeb.Controllers
                 var session = new CheckoutSession
                 {
                     Id = Guid.NewGuid(),
-                    UserId = userId,
-                    Email = model.Email,
+                    UserId = userId ?? string.Empty,
+                    Email = model.Email ?? string.Empty,
                     Status = "active",
                     TotalAmount = total,
                     ShippingFee = shippingFee,
@@ -263,8 +263,8 @@ namespace JohnHenryFashionWeb.Controllers
                     Currency = "VND",
                     PaymentMethod = model.PaymentMethod,
                     OrderInfo = $"Thanh toán đơn hàng #{order.OrderNumber}",
-                    ReturnUrl = Url.Action("PaymentReturn", "Checkout", null, Request.Scheme),
-                    NotifyUrl = Url.Action("PaymentNotify", "Checkout", null, Request.Scheme),
+                    ReturnUrl = Url.Action("PaymentReturn", "Checkout", null, Request.Scheme) ?? string.Empty,
+                    NotifyUrl = Url.Action("PaymentNotify", "Checkout", null, Request.Scheme) ?? string.Empty,
                     IpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "",
                     UserAgent = Request.Headers["User-Agent"].ToString(),
                     PaymentMethodId = model.PaymentMethodId
@@ -444,8 +444,8 @@ namespace JohnHenryFashionWeb.Controllers
                 if (user != null)
                 {
                     model.Email = user.Email ?? "";
-                    model.FirstName = user.FirstName;
-                    model.LastName = user.LastName;
+                    model.FirstName = user.FirstName ?? string.Empty;
+                    model.LastName = user.LastName ?? string.Empty;
                     model.PhoneNumber = user.PhoneNumber ?? "";
 
                     // Get user addresses

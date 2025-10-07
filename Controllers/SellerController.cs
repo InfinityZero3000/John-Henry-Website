@@ -372,7 +372,10 @@ namespace JohnHenryFashionWeb.Controllers
                     foreach (var image in model.GalleryImages)
                     {
                         var imageUrl = await SaveUploadedFile(image, "products");
-                        galleryUrls.Add(imageUrl);
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            galleryUrls.Add(imageUrl);
+                        }
                     }
                     product.GalleryImages = galleryUrls.ToArray();
                 }
@@ -489,7 +492,10 @@ namespace JohnHenryFashionWeb.Controllers
                     foreach (var image in model.GalleryImages)
                     {
                         var imageUrl = await SaveUploadedFile(image, "products");
-                        galleryUrls.Add(imageUrl);
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            galleryUrls.Add(imageUrl);
+                        }
                     }
                     product.GalleryImages = galleryUrls.ToArray();
                 }
@@ -640,6 +646,10 @@ namespace JohnHenryFashionWeb.Controllers
         public async Task<IActionResult> Profile()
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
             
             var viewModel = new SellerProfileViewModel
             {
@@ -1493,7 +1503,7 @@ namespace JohnHenryFashionWeb.Controllers
                 
                 TempData["SuccessMessage"] = "Cập nhật trạng thái sản phẩm thành công.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật trạng thái sản phẩm.";
             }
@@ -1522,7 +1532,7 @@ namespace JohnHenryFashionWeb.Controllers
                 
                 TempData["SuccessMessage"] = isFeatured ? "Đã đặt sản phẩm làm nổi bật." : "Đã bỏ nổi bật sản phẩm.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật sản phẩm.";
             }
@@ -1563,7 +1573,7 @@ namespace JohnHenryFashionWeb.Controllers
                 
                 TempData["SuccessMessage"] = "Xóa sản phẩm thành công.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa sản phẩm. Sản phẩm có thể đang được sử dụng trong đơn hàng.";
             }

@@ -628,27 +628,36 @@ namespace JohnHenryFashionWeb.Controllers
 
         private async Task<IActionResult> RedirectToLocal(string? returnUrl, ApplicationUser? user = null)
         {
-            // Check user roles first, regardless of returnUrl for admin users
+            // Check user roles first, regardless of returnUrl for admin/seller users
             var currentUser = user ?? await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
                 var roles = await _userManager.GetRolesAsync(currentUser);
                 _logger.LogInformation($"User {currentUser.Email} has roles: {string.Join(", ", roles)}");
                 
+                // Admin and Seller should always go to their dashboards
                 if (roles.Contains(UserRoles.Admin))
                 {
                     _logger.LogInformation($"Redirecting admin user {currentUser.Email} to admin dashboard");
                     return RedirectToAction("Dashboard", "Admin", new { area = "" });
                 }
-                // Check if user is seller and redirect to seller dashboard
                 else if (roles.Contains(UserRoles.Seller))
                 {
                     _logger.LogInformation($"Redirecting seller user {currentUser.Email} to seller dashboard");
                     return RedirectToAction("Dashboard", "Seller");
                 }
-                // Check if user is regular customer and redirect to home page
-                else if (roles.Contains(UserRoles.Customer) || roles.Count == 0)
+                
+                // For customers, check returnUrl first before redirecting to home
+                if (roles.Contains(UserRoles.Customer) || roles.Count == 0)
                 {
+                    // If there's a valid returnUrl, use it for customers
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        _logger.LogInformation($"Redirecting customer user {currentUser.Email} to returnUrl: {returnUrl}");
+                        return Redirect(returnUrl);
+                    }
+                    
+                    // Otherwise redirect to home page
                     _logger.LogInformation($"Redirecting customer user {currentUser.Email} to home page");
                     return RedirectToAction("Index", "Home");
                 }
@@ -1379,7 +1388,7 @@ namespace JohnHenryFashionWeb.Controllers
                 var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
                     new { userId = user.Id, token = token }, Request.Scheme);
 
-                await _emailService.SendEmailAsync(user.Email, "Xác nhận tài khoản John Henry Fashion",
+                await _emailService.SendEmailAsync(user.Email ?? string.Empty, "Xác nhận tài khoản John Henry Fashion",
                     $@"
                     <h2>Xác nhận tài khoản của bạn</h2>
                     <p>Xin chào {user.FirstName} {user.LastName},</p>
@@ -1405,7 +1414,7 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 try
                 {
-                    await _emailService.SendEmailAsync(user.Email, "Chào mừng bạn đến với John Henry Fashion",
+                    await _emailService.SendEmailAsync(user.Email ?? string.Empty, "Chào mừng bạn đến với John Henry Fashion",
                         $@"
                         <h2>Chào mừng {user.FirstName} {user.LastName}!</h2>
                         <p>Tài khoản của bạn đã được tạo thành công thông qua Google.</p>

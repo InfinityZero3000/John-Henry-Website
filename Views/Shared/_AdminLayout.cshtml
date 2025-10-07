@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="admin">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - John Henry Admin Panel</title>
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
-    
-    <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="~/css/dashboard.css" rel="stylesheet" />
     
     <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
@@ -20,700 +18,281 @@
     <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     
     <style>
-        :root {
-            --primary-color: #FF4747;
-            --primary-gradient: linear-gradient(135deg, #FF4747 0%, #CC3636 100%);
-            --secondary-color: #f8f9fa;
-            --accent-color: #059669;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --dark-color: #1e293b;
-            --light-color: #ffffff;
-            --sidebar-width: 280px;
-            --header-height: 70px;
-            --border-radius: 12px;
-            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
+        .menu-item .menu-link:hover {
+            background: rgba(255,255,255,0.15) !important;
+            backdrop-filter: blur(20px) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            color: var(--dark-color);
-            overflow-x: hidden;
-        }
-
-        /* Sidebar Styles */
-        .admin-sidebar {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            height: 100vh !important;
-            width: 280px !important; 
-            background: linear-gradient(180deg, #332b2c 0%, #a01527 100%) !important;
-            z-index: 1000 !important;
-            transition: var(--transition);
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-            transform: translateX(0) !important; 
-            display: block !important;
-            visibility: visible !important;
-        }
-
-        .admin-sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .admin-sidebar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .admin-sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .sidebar-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: white;
-            text-decoration: none;
-        }
-
-        .brand-logo {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-        }
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .brand-text {
-            font-size: 18px;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .brand-subtitle {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-top: 2px;
-        }
-
-        /* Navigation Menu */
-        .sidebar-nav {
-            padding: 20px 0;
-        }
-
-        .nav-section {
-            margin-bottom: 30px;
-        }
-
-        .nav-section-title {
-            padding: 0 20px 10px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .nav-item {
-            margin: 2px 15px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
-            font-size: 14px;
-            font-weight: 500;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 100%;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
-            transition: width 0.3s ease;
-            z-index: -1;
-        }
-
-        .nav-link:hover::before {
-            width: 100%;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .nav-link.active {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 3px solid white;
-        }
-
-        .nav-link i {
-            width: 20px;
-            margin-right: 12px;
-            text-align: center;
-            font-size: 16px;
-        }
-
-        .nav-badge {
-            margin-left: auto;
-            background: var(--accent-color);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* Main Content */
-        .admin-content {
-            margin-left: 280px !important; 
-            min-height: 100vh;
-            background-color: #ffffff;
-        }
-
-        .admin-header {
-            height: var(--header-height);
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: between;
-            padding: 0 25px;
-            position: sticky;
-            top: 0;
-            z-index: 900;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .sidebar-toggle {
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: var(--dark-color);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .sidebar-toggle:hover {
-            background: var(--secondary-color);
-        }
-
-        .header-search {
-            position: relative;
-            width: 300px;
-        }
-
-        .header-search input {
-            width: 100%;
-            padding: 10px 15px 10px 40px;
-            border: 1px solid #e2e8f0;
-            border-radius: 25px;
-            background: var(--secondary-color);
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .header-search input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .header-search i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-left: auto;
-        }
-
-        .header-notification {
-            position: relative;
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: var(--dark-color);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .header-notification:hover {
-            background: var(--secondary-color);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 8px;
-            height: 8px;
-            background: var(--danger-color);
-            border-radius: 50%;
-        }
-
-        .user-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            border-radius: 25px;
-            background: var(--secondary-color);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .user-dropdown:hover {
-            background: #e2e8f0;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--primary-gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .user-role {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            padding: 25px;
-        }
-
-        /* Cards */
-        .admin-card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            border: 1px solid #f1f5f9;
-            transition: var(--transition);
-        }
-
-        .admin-card:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        
+        .sidebar-footer a:hover {
+            background: rgba(255,255,255,0.25) !important;
+            backdrop-filter: blur(15px) !important;
             transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
         }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid #f1f5f9;
-            font-weight: 600;
-            color: var(--dark-color);
+        
+        .sidebar-footer button:hover {
+            background: rgba(220, 53, 69, 0.3) !important;
+            backdrop-filter: blur(15px) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.2);
         }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        /* Responsive */
-        @@media (max-width: 1400px) {
-            :root {
-                --sidebar-width: 70px;
-            }
-
-            .sidebar-brand .brand-text,
-            .nav-section-title,
-            .nav-link span {
-                display: none;
-            }
-
-            .nav-link {
-                justify-content: center;
-                padding: 12px;
-            }
-
-            .nav-link i {
-                margin-right: 0;
-            }
-        }
-
-        @@media (min-width: 769px) {
-            .admin-sidebar {
-                transform: translateX(0) !important;
-                display: block !important;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .admin-sidebar {
-                transform: translateX(-100%);
-            }
-
-            .admin-sidebar.show {
-                transform: translateX(0);
-            }
-
-            .admin-content {
-                margin-left: 0;
-            }
-
-            .header-search {
-                display: none;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @@keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-success { background: #dcfce7; color: #16a34a; }
-        .status-warning { background: #fef3c7; color: #d97706; }
-        .status-danger { background: #fee2e2; color: #dc2626; }
-        .status-info { background: #dbeafe; color: #2563eb; }
-        .status-secondary { background: #f1f5f9; color: #64748b; }
-
-        /* Utility Classes */
-        .text-primary { color: var(--primary-color) !important; }
-        .bg-primary { background-color: var(--primary-color) !important; }
-        .border-primary { border-color: var(--primary-color) !important; }
     </style>
-
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="admin-layout">
-    <!-- Sidebar -->
-    <aside class="admin-sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-brand">
-                <div class="brand-logo">
-                    <i data-lucide="heart"></i>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="brand-text">Admin Dashboard</span>
                 </div>
-                <div>
-                    <div class="brand-text">John Henry</div>
-                    <div class="brand-subtitle">Admin Panel</div>
-                </div>
-            </a>
-        </div>
-
-        <nav class="sidebar-nav">
-            <div class="nav-section">
-                <div class="nav-section-title">DANH MỤC & THƯƠNG HIỆU</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Categories", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "categories" ? "active" : "")">
-                        <i data-lucide="list"></i>
-                        <span>Danh mục</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Brands", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "brands" ? "active" : "")">
-                        <i data-lucide="award"></i>
-                        <span>Thương hiệu</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">QUẢN LÝ ĐƠN HÀNG</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Orders", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "orders" ? "active" : "")">
-                        <i data-lucide="shopping-cart"></i>
-                        <span>Đơn hàng</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Reviews", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "reviews" ? "active" : "")">
-                        <i data-lucide="star"></i>
-                        <span>Đánh giá</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Coupons", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "coupons" ? "active" : "")">
-                        <i data-lucide="ticket"></i>
-                        <span>Mã giảm giá</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">QUẢN LÝ NGƯỜI DÙNG</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Users", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "users" ? "active" : "")">
-                        <i data-lucide="users"></i>
-                        <span>Người dùng</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Sellers", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "sellers" ? "active" : "")">
-                        <i data-lucide="store"></i>
-                        <span>Người bán</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Permissions", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "permissions" ? "active" : "")">
-                        <i data-lucide="shield"></i>
-                        <span>Phân quyền</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">NỘI DUNG & MARKETING</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Blog", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "blog" ? "active" : "")">
-                        <i data-lucide="edit"></i>
-                        <span>Blog</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Pages", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "pages" ? "active" : "")">
-                        <i data-lucide="file-text"></i>
-                        <span>Trang tĩnh</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Banners", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "banners" ? "active" : "")">
-                        <i data-lucide="image"></i>
-                        <span>Banner quảng cáo</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">BÁO CÁO & PHÂN TÍCH</div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Reports", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "reports" ? "active" : "")">
-                        <i data-lucide="trending-up"></i>
-                        <span>Báo cáo</span>
-                        <span class="nav-badge">Mới</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Performance", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "performance" ? "active" : "")">
-                        <i data-lucide="activity"></i>
-                        <span>Hiệu suất</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="@Url.Action("Logs", "Admin")" class="nav-link @(ViewData["CurrentSection"]?.ToString() == "logs" ? "active" : "")">
-                        <i data-lucide="clipboard-list"></i>
-                        <span>Nhật ký hệ thống</span>
-                    </a>
-                </div>
-            </div>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="admin-content">
-        <!-- Header -->
-        <header class="admin-header">
-            <div class="header-left">
                 <button class="sidebar-toggle" id="sidebarToggle">
                     <i data-lucide="menu"></i>
                 </button>
-                
-                <div class="header-search">
-                    <i data-lucide="search"></i>
-                    <input type="text" placeholder="Tìm kiếm đơn hàng, khách hàng...">
-                </div>
             </div>
 
-            <div class="header-right">
-                <button class="header-notification" title="Thông báo">
-                    <i data-lucide="bell"></i>
-                    <span class="notification-badge"></span>
-                </button>
+            <div class="sidebar-content">
 
-                <button class="header-notification" title="Tin nhắn">
-                    <i data-lucide="mail"></i>
-                </button>
+                <ul class="sidebar-menu" style="list-style: none; padding: 0;">
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Dashboard", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Dashboard" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Dashboard" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="gauge" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
 
-                <div class="dropdown">
-                    <div class="user-dropdown" data-bs-toggle="dropdown">
-                        <div class="user-avatar">
-                            @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ SẢN PHẨM</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Products", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Products" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Products" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="package" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Sản phẩm của tôi</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("CreateProduct", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "CreateProduct" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "CreateProduct" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="plus" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Thêm sản phẩm</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Inventory", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Inventory" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Inventory" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="warehouse" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Quản lý kho</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ ĐƠN HÀNG</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Orders", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Orders" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Orders" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="shopping-cart" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Đơn hàng</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Reviews", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Reviews" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Reviews" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="star" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Quản lý đánh giá</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Coupons", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Coupons" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Coupons" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="ticket" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Mã giảm giá</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ CỬA HÀNG</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("StoreManagement", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "StoreManagement" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "StoreManagement" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="store" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Cửa hàng của tôi</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("StoreSettings", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "StoreSettings" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "StoreSettings" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="settings-2" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Cài đặt cửa hàng</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">BÁO CÁO & THỐNG KÊ</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Sales", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Sales" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Sales" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="trending-up" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Báo cáo bán hàng</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Analytics", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Analytics" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Analytics" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="bar-chart-3" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Phân tích</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">CÀI ĐẶT</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Profile", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Profile" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Profile" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="user-cog" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Hồ sơ cửa hàng</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Settings", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Settings" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Settings" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                            <i data-lucide="settings" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer" style="padding: 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-sm w-100 mb-3" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <i data-lucide="home" style="width: 16px;"></i>
+                    <span>Về trang chủ</span>
+                </a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form" style="margin: 0;">
+                    <button type="submit" class="btn btn-sm w-100" style="background: rgba(220, 53, 69, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(220, 53, 69, 0.3); color: #ff6b7a; border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i data-lucide="log-out" style="width: 16px;"></i>
+                        <span>Đăng xuất</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <!-- Top Header -->
+            <header class="admin-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggleTop">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    @* Chỉ hiển thị breadcrumb khi có dữ liệu breadcrumb *@
+                    @if (ViewData["Breadcrumb"] != null)
+                    {
+                        <div class="breadcrumb-wrapper">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+                                    @Html.Raw(ViewData["Breadcrumb"])
+                                </ol>
+                            </nav>
                         </div>
-                        <div class="user-info">
-                            <div class="user-name">@(User.Identity?.Name ?? "Admin")</div>
-                            <div class="user-role">Quản trị viên</div>
+                    }
+                </div>
+
+                <div class="header-right">
+                    <div class="header-notifications">
+                        <div class="dropdown">
+                            <button class="btn btn-link notification-btn" type="button" data-bs-toggle="dropdown">
+                                <i data-lucide="bell"></i>
+                                <span class="notification-badge">2</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                                <li><h6 class="dropdown-header">Thông báo</h6></li>
+                                <li><a class="dropdown-item" href="#"><i data-lucide="shopping-cart" class="text-info"></i> Đơn hàng mới</a></li>
+                                <li><a class="dropdown-item" href="#"><i data-lucide="alert-circle" class="text-warning"></i> Sản phẩm sắp hết hàng</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="#">Xem tất cả</a></li>
+                            </ul>
                         </div>
-                        <i data-lucide="chevron-down"></i>
                     </div>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="#"><i data-lucide="user" class="me-2"></i>Hồ sơ</a></li>
-                        <li><a class="dropdown-item" href="#"><i data-lucide="settings" class="me-2"></i>Cài đặt</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i data-lucide="log-out" class="me-2"></i>Đăng xuất</a></li>
-                    </ul>
+
+                    <div class="user-dropdown">
+                        <div class="dropdown">
+                            <button class="btn btn-link user-btn" type="button" data-bs-toggle="dropdown">
+                                <i data-lucide="user-circle"></i>
+                                <span>@User.Identity?.Name</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i data-lucide="user"></i> Hồ sơ</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Settings", "Admin")"><i data-lucide="settings"></i> Cài đặt</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item"><i data-lucide="log-out"></i> Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        <!-- Page Content -->
-        <div class="main-content">
-            @RenderBody()
+            <!-- Content Area -->
+            <main class="admin-content">
+                @RenderBody()
+            </main>
         </div>
-    </main>
+    </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin-script.js"></script>
+    
     <script>
-        // Sidebar Toggle
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
+        // Sidebar toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggleTop');
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('show');
-        });
+            const sidebarClose = document.getElementById('sidebarToggle');
 
-        // Close sidebar on mobile when clicking outside
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.getElementById('sidebarToggle');
-            
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(e.target) && 
-                !toggle.contains(e.target)) {
-                sidebar.classList.remove('show');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    updateToggleIcon();
+                });
             }
-        });
 
-        // Global search functionality
-        document.querySelector('.header-search input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query) {
-                    // Implement global search
-                    window.location.href = `/admin/search?q=${encodeURIComponent(query)}`;
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    updateToggleIcon();
+                });
+            }
+
+            // Update toggle icon based on sidebar state
+            function updateToggleIcon() {
+                const icon = sidebarClose.querySelector('i');
+                if (sidebar.classList.contains('active')) {
+                    icon.setAttribute('data-lucide', 'x'); // X when open
+                } else {
+                    icon.setAttribute('data-lucide', 'menu'); // Menu when closed
                 }
+                lucide.createIcons(); // Re-render icons
             }
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('active');
+                        updateToggleIcon();
+                    }
+                }
+            });
+
+            // Initialize icon state
+            updateToggleIcon();
+            
+            // Initialize Lucide icons
+            lucide.createIcons();
         });
-
-        // Real-time notifications (placeholder)
-        function updateNotifications() {
-            // Placeholder for real-time notification updates
-            console.log('Checking for new notifications...');
-        }
-
-        // Update notifications every 30 seconds
-        setInterval(updateNotifications, 30000);
-
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Initialize Lucide icons
-        lucide.createIcons();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
