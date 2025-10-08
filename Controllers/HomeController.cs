@@ -49,7 +49,7 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult JohnHenry()
+    public async Task<IActionResult> JohnHenry()
     {
         // Generate breadcrumbs for John Henry page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -65,7 +65,16 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "JOHN HENRY - Thời trang nam nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập JOHN HENRY với các sản phẩm thời trang nam nữ chất lượng cao, phong cách hiện đại và sang trọng.";
 
-        return View();
+        // Load products from database - John Henry collection (Men's fashion)
+        var johnHenryCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nam");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
     public IActionResult Freelancer()
@@ -203,6 +212,46 @@ public class HomeController : Controller
         ViewBag.Breadcrumbs = breadcrumbs;
         ViewBag.MetaTitle = "Quần Nam JOHN HENRY - Thời trang nam cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập quần nam JOHN HENRY với đa dạng các loại quần jean, quần khaki, quần short chất lượng cao, phong cách hiện đại.";
+
+        return View();
+    }
+
+    public IActionResult JohnHenryAccessories()
+    {
+        // Generate breadcrumbs for John Henry Accessories page
+        var breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+            new BreadcrumbItem { Name = "JOHN HENRY", Url = Url.Action("JohnHenry", "Home") ?? "/Home/JohnHenry" },
+            new BreadcrumbItem { Name = "PHỤ KIỆN NAM", Url = "" }
+        };
+
+        var breadcrumbJsonLd = _seoService.GenerateBreadcrumbJsonLd(breadcrumbs);
+
+        ViewBag.BreadcrumbJsonLd = breadcrumbJsonLd;
+        ViewBag.Breadcrumbs = breadcrumbs;
+        ViewBag.MetaTitle = "Phụ Kiện Nam JOHN HENRY - Thời trang nam cao cấp";
+        ViewBag.MetaDescription = "Khám phá bộ sưu tập phụ kiện nam JOHN HENRY với đa dạng các loại thắt lưng, cà vạt, ví da, túi xách chất lượng cao, phong cách hiện đại.";
+
+        return View();
+    }
+
+    public IActionResult FreelancerAccessories()
+    {
+        // Generate breadcrumbs for Freelancer Accessories page
+        var breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+            new BreadcrumbItem { Name = "FREELANCER", Url = Url.Action("Freelancer", "Home") ?? "/Home/Freelancer" },
+            new BreadcrumbItem { Name = "PHỤ KIỆN NỮ", Url = "" }
+        };
+
+        var breadcrumbJsonLd = _seoService.GenerateBreadcrumbJsonLd(breadcrumbs);
+
+        ViewBag.BreadcrumbJsonLd = breadcrumbJsonLd;
+        ViewBag.Breadcrumbs = breadcrumbs;
+        ViewBag.MetaTitle = "Phụ Kiện Nữ FREELANCER - Thời trang nữ cao cấp";
+        ViewBag.MetaDescription = "Khám phá bộ sưu tập phụ kiện nữ FREELANCER với đa dạng các loại túi xách, ví, khăn quàng, trang sức chất lượng cao, phong cách hiện đại.";
 
         return View();
     }
