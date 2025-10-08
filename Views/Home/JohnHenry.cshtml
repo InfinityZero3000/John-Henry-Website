@@ -74,7 +74,6 @@ f@{
             max-width: 300px;
             background-color: white;
             padding: 25px;
-            border-radius: 8px;
             height: fit-content;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
@@ -120,19 +119,18 @@ f@{
             font-weight: 400;
         }
 
-        /* Fix for consistent alignment */
-        .filter-option .d-flex {
-            width: 100%;
-        }
-
         .filter-option.has-subcategory {
-            cursor: pointer;
+            cursor: default;
         }
 
         .filter-option .expand-icon {
             cursor: pointer;
             transition: transform 0.3s ease;
             font-size: 12px;
+        }
+
+        .filter-option .expand-icon:hover {
+            color: inherit;
         }
 
         .filter-option .expand-icon.expanded {
@@ -148,25 +146,12 @@ f@{
             max-height: 0;
             opacity: 0;
             transition: all 0.3s ease-out;
-            width: 100%;
         }
 
         .subcategories.show {
-            display: block !important;
-            max-height: 300px !important;
-            opacity: 1 !important;
-            animation: slideDownSmooth 0.3s ease-out;
-        }
-
-        @@keyframes slideDownSmooth {
-            from {
-                max-height: 0;
-                opacity: 0;
-            }
-            to {
-                max-height: 300px;
-                opacity: 1;
-            }
+            display: block;
+            max-height: 300px;
+            opacity: 1;
         }
 
         .subcategory-item {
@@ -175,7 +160,6 @@ f@{
             font-size: 14px;
             margin-left: 10px;
             position: relative;
-            width: 100%;
         }
 
         .subcategory-item label {
@@ -183,72 +167,12 @@ f@{
             color: #555;
             font-weight: 400;
             margin-left: 8px;
-            width: 100%;
         }
 
         .subcategory-item input[type="radio"] {
             width: 16px;
             height: 16px;
             accent-color: var(--jh-red);
-            flex-shrink: 0;
-        }
-
-        .john-henry-page .filter-option {
-            margin-bottom: 10px;
-            padding: 0;
-        }
-        
-        .john-henry-page .filter-option.has-subcategory > .d-flex {
-            position: relative;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-        
-        .john-henry-page .filter-option label {
-            cursor: pointer;
-            margin: 0 !important;
-            font-weight: normal;
-            color: #333;
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
-        
-        .john-henry-page .filter-option .expand-icon {
-            cursor: pointer;
-            font-size: 14px;
-            color: #6c757d;
-            transition: transform 0.3s ease;
-            padding: 4px;
-            flex-shrink: 0;
-            margin-left: auto;
-        }
-        
-        .john-henry-page .filter-option .expand-icon.rotated {
-            transform: rotate(45deg);
-        }
-        
-        .john-henry-page .filter-option .expand-icon:hover {
-            color: #007bff;
-        }
-        
-        /* Remove conflicting John Henry subcategories styles */
-        .john-henry-page .subcategories {
-            padding-left: 20px;
-            margin-top: 8px;
-        }
-        
-        .john-henry-page .subcategories.show {
-            /* Inherit from main .subcategories.show rule above */
-        }
-        
-        .john-henry-page .subcategory-item {
-            padding: 5px 0;
-        }
-        
-        .john-henry-page .subcategory-item label {
-            color: #666;
-            font-size: 0.9em;
         }
         
         /* Prevent any content injection */
@@ -319,85 +243,93 @@ f@{
             color: white !important;
         }
 
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .color-options-new .color-row {
+            padding: 5px 0;
         }
 
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .color-square {
+            border-radius: 2px;
+            flex-shrink: 0;
         }
 
-        .filter-option input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-
-        .filter-option label {
-            margin: 0;
-            font-size: 14px;
-            color: #555;
-            cursor: pointer;
+        .price-range-new .form-range {
+            accent-color: var(--jh-red);
         }
 
         .color-options {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .color-option {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            border: 2px solid #ddd;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             cursor: pointer;
+            border: 2px solid #ddd;
+            transition: all 0.2s ease;
             position: relative;
         }
 
+        .color-option:hover {
+            transform: scale(1.1);
+            border-color: var(--jh-red);
+        }
+
+        .color-option.selected {
+            border-color: var(--jh-red);
+            border-width: 3px;
+        }
+
         .color-option.selected::after {
-            content: "✓";
+            content: '✓';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
-            font-size: 12px;
+            color: var(--jh-red);
             font-weight: bold;
+            font-size: 12px;
         }
 
         .price-range {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .price-input {
-            width: 80px;
-            padding: 5px 8px;
+            width: 100px;
+            padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .size-options {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+            margin-top: 10px;
         }
 
         .size-option {
             padding: 8px 12px;
             border: 1px solid #ddd;
-            background: white;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
-            min-width: 40px;
-            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .size-option:hover {
+            border-color: var(--jh-red);
+            color: var(--jh-red);
         }
 
         .size-option.selected {
@@ -410,7 +342,6 @@ f@{
             background: none;
             border: 1px solid #ddd;
             padding: 8px 16px;
-            border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
             color: #666;
@@ -423,7 +354,6 @@ f@{
         .products-header {
             background-color: white;
             padding: 20px 25px;
-            border-radius: 8px;
             margin-bottom: 20px;
             display: flex;
             justify-content: between;
@@ -457,7 +387,6 @@ f@{
 
         .product-card {
             background: white;
-            border-radius: 8px;
             overflow: hidden;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -550,12 +479,7 @@ f@{
             }
 
             .sidebar {
-                max-width: auto;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
+                max-width: none;
             }
         }
     </style>
@@ -591,7 +515,7 @@ f@{
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label class="d-flex align-items-center mb-0">
                                         <input type="radio" name="category" value="ao" class="me-2">
-                                        <span>Áo</span>
+                                        Áo
                                     </label>
                                     <i class="fas fa-plus text-muted expand-icon" data-target="ao-subcategories"></i>
                                 </div>
@@ -599,25 +523,25 @@ f@{
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-polo" class="me-2">
-                                            <span>Áo Polo</span>
+                                            Áo Polo
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-so-mi" class="me-2">
-                                            <span>Áo Sơ mi</span>
+                                            Áo Sơ mi
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-len" class="me-2">
-                                            <span>Áo Len</span>
+                                            Áo Len
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-khoac" class="me-2">
-                                            <span>Áo Khoác</span>
+                                            Áo Khoác
                                         </label>
                                     </div>
                                 </div>
@@ -626,7 +550,7 @@ f@{
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label class="d-flex align-items-center mb-0">
                                         <input type="radio" name="category" value="quan" class="me-2">
-                                        <span>Quần</span>
+                                        Quần
                                     </label>
                                     <i class="fas fa-plus text-muted expand-icon" data-target="quan-subcategories"></i>
                                 </div>
@@ -634,25 +558,25 @@ f@{
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-khaki" class="me-2">
-                                            <span>Quần Khaki</span>
+                                            Quần Khaki
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-jeans" class="me-2">
-                                            <span>Quần Jeans</span>
+                                            Quần Jeans
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-tay" class="me-2">
-                                            <span>Quần Tây</span>
+                                            Quần Tây
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-short" class="me-2">
-                                            <span>Quần Short</span>
+                                            Quần Short
                                         </label>
                                     </div>
                                 </div>
@@ -661,7 +585,7 @@ f@{
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label class="d-flex align-items-center mb-0">
                                         <input type="radio" name="category" value="phu-kien" class="me-2">
-                                        <span>Phụ kiện</span>
+                                        Phụ kiện
                                     </label>
                                     <i class="fas fa-plus text-muted expand-icon" data-target="phu-kien-subcategories"></i>
                                 </div>
@@ -669,25 +593,25 @@ f@{
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="vi-nam" class="me-2">
-                                            <span>Ví Nam</span>
+                                            Ví Nam
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="that-lung" class="me-2">
-                                            <span>Thắt Lưng</span>
+                                            Thắt Lưng
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="giay-dep" class="me-2">
-                                            <span>Giày Dép</span>
+                                            Giày Dép
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="tui-xach" class="me-2">
-                                            <span>Túi Xách</span>
+                                            Túi Xách
                                         </label>
                                     </div>
                                 </div>
@@ -1217,10 +1141,10 @@ f@{
             subcategoryInputs.forEach(input => {
                 input.addEventListener('change', function() {
                     if (this.checked) {
-                        // Also check the parent category
+                        // Uncheck parent category radio button
                         const parentCategory = this.closest('.filter-option').querySelector('input[type="radio"]');
                         if (parentCategory) {
-                            parentCategory.checked = true;
+                            parentCategory.checked = false;
                         }
                         console.log('Subcategory selected:', this.value);
                     }

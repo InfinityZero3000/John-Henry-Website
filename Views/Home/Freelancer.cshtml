@@ -88,7 +88,6 @@
             max-width: 300px;
             background-color: white;
             padding: 25px;
-            border-radius: 8px;
             height: fit-content;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
@@ -135,13 +134,17 @@
         }
 
         .filter-option.has-subcategory {
-            cursor: pointer;
+            cursor: default;
         }
 
         .filter-option .expand-icon {
             cursor: pointer;
             transition: transform 0.3s ease;
             font-size: 12px;
+        }
+
+        .filter-option .expand-icon:hover {
+            color: inherit;
         }
 
         .filter-option .expand-icon.expanded {
@@ -344,7 +347,6 @@
         .products-header {
             background-color: white;
             padding: 20px 25px;
-            border-radius: 8px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
@@ -1019,10 +1021,10 @@
             subcategoryInputs.forEach(input => {
                 input.addEventListener('change', function() {
                     if (this.checked) {
-                        // Also check the parent category
+                        // Uncheck parent category radio button
                         const parentCategory = this.closest('.filter-option').querySelector('input[type="radio"]');
                         if (parentCategory) {
-                            parentCategory.checked = true;
+                            parentCategory.checked = false;
                         }
                         console.log('Subcategory selected:', this.value);
                     }

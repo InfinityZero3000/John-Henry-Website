@@ -311,7 +311,6 @@
             min-width: 280px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15);
             border: none;
-            border-radius: 8px;
             padding: 0;
             display: none;
             z-index: 1200;
@@ -455,11 +454,11 @@
         }
         
         /* Dropdown Styles */
-        .nav-item {
+        .nav-menu .nav-item {
             position: relative;
         }
         
-        .dropdown-menu {
+        .nav-menu .nav-item .dropdown-menu {
             position: absolute;
             top: 100%;
             left: 0;
@@ -470,34 +469,34 @@
             border: none;
             border-radius: 0;
             padding: 35px !important;
-            display: none;
+            display: none !important;
             z-index: 1000;
             opacity: 0;
             transform: translateY(-10px);
             transition: all 0.3s ease;
         }
         
-        .nav-item:hover .dropdown-menu {
-            display: block;
+        .nav-menu .nav-item:hover .dropdown-menu {
+            display: block !important;
             opacity: 1;
             transform: translateY(0);
         }
         
-        .dropdown-content {
+        .nav-menu .dropdown-content {
             display: flex;
             flex-direction: column;
             gap: 30px !important;
             align-items: start;
         }
         
-        .dropdown-categories {
+        .nav-menu .dropdown-categories {
             display: flex;
             flex-direction: column;
             gap: 25px !important;
             width: 100%;
         }
         
-        .dropdown-category {
+        .nav-menu .dropdown-category {
             display: block;
             color: #333;
             text-decoration: none;
@@ -509,15 +508,15 @@
             position: relative;
         }
         
-        .dropdown-category:hover {
+        .nav-menu .dropdown-category:hover {
             color: var(--jh-red);
         }
         
-        .dropdown-category.active {
+        .nav-menu .dropdown-category.active {
             color: var(--jh-red);
         }
         
-        .dropdown-category.with-arrow::after {
+        .nav-menu .dropdown-category.with-arrow::after {
             content: '\f054' !important; /* Font Awesome chevron-right */
             font-family: 'Font Awesome 6 Free' !important;
             font-weight: 900 !important;
@@ -528,11 +527,11 @@
             vertical-align: middle !important;
         }
         
-        .dropdown-category.with-arrow:hover::after {
+        .nav-menu .dropdown-category.with-arrow:hover::after {
             color: #95122A !important;
         }
         
-        .dropdown-subcategories {
+        .nav-menu .dropdown-subcategories {
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -541,11 +540,11 @@
         }
         
         /* Submenu Styles */
-        .dropdown-category-item {
+        .nav-menu .dropdown-category-item {
             position: relative;
         }
         
-        .submenu {
+        .nav-menu .dropdown-menu .submenu {
             position: absolute;
             left: 100%;
             top: 0;
@@ -553,7 +552,7 @@
             min-width: 250px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             padding: 15px;
-            display: none;
+            display: none !important;
             z-index: 1001;
             opacity: 0;
             transform: translateX(-10px);
@@ -561,13 +560,13 @@
             border-left: 3px solid var(--jh-red);
         }
         
-        .dropdown-category-item:hover .submenu {
-            display: block;
+        .nav-menu .dropdown-category-item:hover .submenu {
+            display: block !important;
             opacity: 1;
             transform: translateX(0);
         }
         
-        .submenu-item {
+        .nav-menu .submenu-item {
             display: block;
             color: #333;
             text-decoration: none;
@@ -579,17 +578,17 @@
             border-bottom: 1px solid #f0f0f0;
         }
         
-        .submenu-item:last-child {
+        .nav-menu .submenu-item:last-child {
             border-bottom: none;
         }
         
-        .submenu-item:hover {
+        .nav-menu .submenu-item:hover {
             color: var(--jh-red);
             background: #f8f9fa;
             padding-left: 10px;
         }
         
-        .subcategory-item {
+        .nav-menu .subcategory-item {
             display: block;
             color: #333;
             text-decoration: none;
@@ -600,7 +599,7 @@
             transition: all 0.3s ease;
         }
         
-        .subcategory-item:hover {
+        .nav-menu .subcategory-item:hover {
             color: var(--jh-red);
             transform: translateX(5px);
         }
