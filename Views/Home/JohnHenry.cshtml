@@ -1,4 +1,5 @@
-f@{
+@model List<JohnHenryFashionWeb.Models.Product>
+@{
     ViewData["Title"] = "JOHN HENRY";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -6,6 +7,7 @@ f@{
 @section Styles {
     <link rel="stylesheet" href="~/css/john-henry-style.css" />
     <link rel="stylesheet" href="~/css/dropdown.css" />
+    <link rel="stylesheet" href="~/css/product-filter-style.css" />
     <style>
 
         :root {
@@ -70,191 +72,7 @@ f@{
             padding: 30px 0;
         }
 
-        .sidebar {
-            max-width: 300px;
-            background-color: white;
-            padding: 25px;
-            height: fit-content;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .filter-section {
-            margin-bottom: 30px;
-        }
-
-        .filter-section h5 {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 16px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-section h5 i {
-            font-size: 12px;
-            transition: transform 0.2s ease;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .filter-option {
-            padding: 5px 0;
-        }
-
-        .filter-option input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--jh-red);
-        }
-
-        .filter-option label {
-            font-size: 14px;
-            color: #555;
-            cursor: pointer;
-            font-weight: 400;
-        }
-
-        .filter-option.has-subcategory {
-            cursor: default;
-        }
-
-        .filter-option .expand-icon {
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            font-size: 12px;
-        }
-
-        .filter-option .expand-icon:hover {
-            color: inherit;
-        }
-
-        .filter-option .expand-icon.expanded {
-            transform: rotate(45deg);
-        }
-
-        .subcategories {
-            display: none;
-            margin-left: 0;
-            margin-top: 8px;
-            padding-left: 0;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            transition: all 0.3s ease-out;
-        }
-
-        .subcategories.show {
-            display: block;
-            max-height: 300px;
-            opacity: 1;
-        }
-
-        .subcategory-item {
-            padding: 8px 0;
-            padding-left: 20px;
-            font-size: 14px;
-            margin-left: 10px;
-            position: relative;
-        }
-
-        .subcategory-item label {
-            font-size: 14px;
-            color: #555;
-            font-weight: 400;
-            margin-left: 8px;
-        }
-
-        .subcategory-item input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--jh-red);
-        }
-        
-        /* Prevent any content injection */
-        .john-henry-page .filter-option label::after,
-        .john-henry-page .filter-option label::before,
-        .john-henry-page .filter-option span::after,
-        .john-henry-page .filter-option span::before {
-            content: none !important;
-            display: none !important;
-        }
-
-        .color-options-new .color-row {
-            padding: 5px 0;
-        }
-
-        .color-square {
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .price-range-new .form-range {
-            accent-color: var(--jh-red);
-        }
-
-        .price-inputs .input-group-text {
-            font-size: 11px;
-            padding: 0.25rem 0.4rem;
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-
-        .price-inputs .form-control {
-            font-size: 12px;
-            padding: 0.25rem 0.4rem;
-        }
-
-        .size-section .size-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .size-btn {
-            min-width: 50px;
-            height: 50px;
-            padding: 0;
-            font-size: 14px;
-            font-weight: 400;
-            border: 1.5px solid #d0d0d0;
-            border-radius: 0;
-            background-color: white;
-            color: #333;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .size-btn:hover {
-            background-color: #000;
-            border-color: #000;
-            color: white;
-        }
-
-        .size-btn.active {
-            background-color: #000 !important;
-            border-color: #000 !important;
-            color: white !important;
-        }
-
-        .color-options-new .color-row {
-            padding: 5px 0;
-        }
-
-        .color-square {
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .price-range-new .form-range {
-            accent-color: var(--jh-red);
-        }
+        /* Filter styles now in product-filter-style.css */
 
         .color-options {
             display: flex;
@@ -760,189 +578,39 @@ f@{
 
                     <div class="products-grid">
                         <div class="row g-4">
-                            <!-- Product 1 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nam/Áo Hoodie Nam Tay Dài TS25FH22C-LS.jpg" alt="Áo Hoodie Nam Tay Dài" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Hoodie Nam Tay Dài TS25FH22C-LS</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">800.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-hoodie-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-hoodie-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product-card-new">
+                                            <div class="product-image-container">
+                                                <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                            </div>
+                                            <div class="product-info">
+                                                <h6 class="product-name">@product.Name</h6>
+                                                <div class="product-price-actions">
+                                                    <div class="product-price">@(product.SalePrice?.ToString("N0") ?? product.Price.ToString("N0"))₫</div>
+                                                    <div class="product-actions">
+                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.Id', this)">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center py-5">
+                                    <p class="text-muted">Không có sản phẩm nào</p>
                                 </div>
-                            </div>
-
-                            <!-- Product 2 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nam/Áo Polo Nam Tay Ngắn Form Vừa KS25FH43C-SCCA.jpg" alt="Áo Polo Nam Tay Ngắn" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Polo Nam Tay Ngắn Form Vừa</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">650.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-polo-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-polo-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 3 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Khoác Nam Cá Tính JK25FH04C-PA</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">1.500.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-jacket-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-jacket-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 4 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH09P-KA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Khoác Nam Cá Tính JK25FH09P-KA</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">1.100.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-jacket-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-jacket-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 5 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nam/Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB.jpg" alt="Áo Len Nam Tay Dài" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">720.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-sweater-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-sweater-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 6 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Quần nam/Quần Jeans Nam Form Ôm JN25FH39C-SL.jpg" alt="Quần Jeans Nam Form Ôm" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Quần Jeans Nam Form Ôm JN25FH39C-SL</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">950.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-jeans-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-jeans-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 7 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Quần nam/Quần Khaki Nam Form Vừa KP25FH18C-NMSC.jpg" alt="Quần Khaki Nam Form Vừa" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Quần Khaki Nam Form Vừa KP25FH18C-NMSC</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">780.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-khaki-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-khaki-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 8 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Quần nam/Quần Short Nam Form Trên Gối SP25FH26P-AK.jpg" alt="Quần Short Nam Form Trên Gối" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Quần Short Nam Form Trên Gối SP25FH26P-AK</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">650.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-shorts-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-shorts-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -954,11 +622,78 @@ f@{
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const allProducts = document.querySelectorAll('.col-xl-3');
+            
+            // Helper function to normalize Vietnamese text for comparison
+            function normalizeVietnamese(str) {
+                // Convert to lowercase and normalize Unicode
+                return str.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                    .replace(/đ/g, 'd')
+                    .replace(/Đ/g, 'd');
+            }
+            
+            // Helper function to filter products
+            function filterProducts() {
+                const selectedCategory = document.querySelector('input[name="category"]:checked');
+                const selectedColor = document.querySelector('input[name="color"]:checked');
+                const activeSizes = document.querySelectorAll('.size-btn.active');
+                
+                allProducts.forEach(product => {
+                    let showProduct = true;
+                    const productName = product.querySelector('.product-name')?.textContent || '';
+                    
+                    // Category filtering
+                    if (selectedCategory) {
+                        const categoryValue = selectedCategory.value;
+                        showProduct = checkCategoryMatch(productName, categoryValue);
+                    }
+                    
+                    // Show/hide product
+                    product.style.display = showProduct ? '' : 'none';
+                });
+            }
+            
+            // Check if product name matches category
+            function checkCategoryMatch(productName, category) {
+                // Normalize product name for comparison
+                const normalizedName = normalizeVietnamese(productName);
+                
+                const categoryKeywords = {
+                    'ao': ['ao'],
+                    'ao-polo': ['polo'],
+                    'ao-so-mi': ['so mi', 'somi'],
+                    'ao-len': ['len', 'sweater'],
+                    'ao-khoac': ['khoac', 'jacket'],
+                    'quan': ['quan'],
+                    'quan-khaki': ['khaki'],
+                    'quan-jeans': ['jeans', 'jean'],
+                    'quan-tay': ['tay'],
+                    'quan-short': ['short'],
+                    'phu-kien': ['mu', 'giay', 'dep', 'that lung', 'vi', 'tui', 'mat kinh'],
+                    'vi-nam': ['vi'],
+                    'that-lung': ['that lung'],
+                    'giay-dep': ['giay', 'dep'],
+                    'tui-xach': ['tui']
+                };
+                
+                const keywords = categoryKeywords[category];
+                if (!keywords) return true;
+                
+                // Check if any keyword matches (case-insensitive, accent-insensitive)
+                return keywords.some(keyword => {
+                    const normalizedKeyword = normalizeVietnamese(keyword);
+                    return normalizedName.includes(normalizedKeyword);
+                });
+            }
+
             // Color filter functionality
             const colorRadios = document.querySelectorAll('input[name="color"]');
             colorRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Color selected:', this.value);
+                    filterProducts();
                 });
             });
 
@@ -967,6 +702,7 @@ f@{
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Category selected:', this.value);
+                    filterProducts();
                 });
             });
 
@@ -1018,6 +754,11 @@ f@{
                     if (priceRange) {
                         priceRange.value = '1500000';
                     }
+
+                    // Show all products
+                    allProducts.forEach(product => {
+                        product.style.display = '';
+                    });
 
                     console.log('Filters cleared');
                 });

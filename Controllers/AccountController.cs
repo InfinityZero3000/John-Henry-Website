@@ -248,7 +248,7 @@ namespace JohnHenryFashionWeb.Controllers
             }
 
             // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
             
             if (result.Succeeded)
             {
@@ -296,7 +296,7 @@ namespace JohnHenryFashionWeb.Controllers
                     var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
                     if (addLoginResult.Succeeded)
                     {
-                        await _signInManager.SignInAsync(existingUser, isPersistent: false);
+                        await _signInManager.SignInAsync(existingUser, isPersistent: true);
                         _logger.LogInformation("External login linked to existing user {Email}", email);
                         return await RedirectToLocal(returnUrl);
                     }
@@ -348,7 +348,7 @@ namespace JohnHenryFashionWeb.Controllers
                         else
                         {
                             // Sign in immediately
-                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            await _signInManager.SignInAsync(user, isPersistent: true);
                             _logger.LogInformation("User created and logged in with {Name} provider.", info.LoginProvider);
                             
                             // Send welcome email asynchronously

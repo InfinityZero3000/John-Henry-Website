@@ -1,0 +1,242 @@
+/* ================================================
+   PRODUCT FILTER STYLES - COMMON FOR ALL PAGES
+   John Henry & Freelancer Product Pages
+   ================================================ */
+
+:root {
+    --jh-red: #951329;
+    --jh-dark-red: #95122A;
+    --jh-white: #FFFFFF;
+    --jh-gold: #FFD700;
+}
+
+/* ================================================
+   SIDEBAR & FILTER SECTIONS
+   ================================================ */
+
+.sidebar {
+    max-width: 300px;
+    background-color: white;
+    padding: 25px;
+    height: fit-content;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.filter-section {
+    margin-bottom: 30px;
+}
+
+.filter-section h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-section h5 i {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+/* ================================================
+   FILTER OPTIONS & CATEGORIES
+   ================================================ */
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-option {
+    padding: 5px 0;
+}
+
+.filter-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--jh-red);
+}
+
+.filter-option label {
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.filter-option.has-subcategory {
+    cursor: default;
+}
+
+.filter-option .expand-icon {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+}
+
+.filter-option .expand-icon:hover {
+    color: inherit;
+}
+
+.filter-option .expand-icon.expanded {
+    transform: rotate(45deg);
+}
+
+/* ================================================
+   SUBCATEGORIES
+   ================================================ */
+
+.subcategories {
+    display: none;
+    margin-left: 0;
+    margin-top: 8px;
+    padding-left: 0;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+
+.subcategories.show {
+    display: block;
+    max-height: 300px;
+    opacity: 1;
+}
+
+.subcategory-item {
+    padding: 8px 0;
+    padding-left: 20px;
+    font-size: 14px;
+    margin-left: 10px;
+    position: relative;
+}
+
+.subcategory-item label {
+    font-size: 14px;
+    color: #555;
+    font-weight: 400;
+    margin-left: 8px;
+}
+
+.subcategory-item input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--jh-red);
+}
+
+/* Prevent any content injection */
+.filter-option label::after,
+.filter-option label::before,
+.filter-option span::after,
+.filter-option span::before {
+    content: none !important;
+    display: none !important;
+}
+
+/* ================================================
+   COLOR FILTER
+   ================================================ */
+
+.color-options-new .color-row {
+    padding: 5px 0;
+}
+
+.color-square {
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ================================================
+   PRICE RANGE FILTER
+   ================================================ */
+
+.price-range-new .form-range {
+    accent-color: var(--jh-red);
+}
+
+.price-inputs .input-group-text {
+    font-size: 11px;
+    padding: 0.25rem 0.4rem;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.price-inputs .form-control {
+    font-size: 12px;
+    padding: 0.25rem 0.4rem;
+}
+
+/* ================================================
+   SIZE FILTER
+   ================================================ */
+
+.size-section .size-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.size-btn {
+    min-width: 50px;
+    height: 50px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 400;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 0;
+    background-color: white;
+    color: #333;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.size-btn:hover {
+    background-color: #000;
+    border-color: #000;
+    color: white;
+}
+
+.size-btn.active {
+    background-color: #000 !important;
+    border-color: #000 !important;
+    color: white !important;
+}
+
+/* ================================================
+   CLEAR FILTERS BUTTON
+   ================================================ */
+
+.clear-filters {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.clear-filters:hover {
+    background-color: #f8f9fa;
+    border-color: #aaa;
+}
+
+/* ================================================
+   RESPONSIVE STYLES
+   ================================================ */
+
+@media (max-width: 768px) {
+    .sidebar {
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .filter-section {
+        margin-bottom: 20px;
+    }
+}

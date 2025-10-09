@@ -370,7 +370,7 @@
                 const originalIcon = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 
-                const response = await fetch('/Wishlist/AddToCart', {
+                const response = await fetch('/wishlist/addtocart', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -449,7 +449,7 @@
             
             for (const productId of productIds) {
                 try {
-                    const response = await fetch('/Wishlist/AddToCart', {
+                    const response = await fetch('/wishlist/addtocart', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

@@ -1,0 +1,280 @@
+@model JohnHenryFashionWeb.Models.Product
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Chỉnh sửa sản phẩm</h2>
+                    <p class="text-muted">Cập nhật thông tin sản phẩm: <strong>@Model.Name</strong></p>
+                </div>
+                <a href="/seller/products" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-body p-4">
+                    <form method="post" action="/seller/products/@Model.Id" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle text-primary"></i> Thông tin cơ bản
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">
+                                        Tên sản phẩm <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="Name" class="form-control" required value="@Model.Name">
+                                    <small class="form-text text-muted">Tên sản phẩm sẽ hiển thị trên trang chủ</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        SKU <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="SKU" class="form-control" required value="@Model.SKU">
+                                    <small class="form-text text-muted">Mã sản phẩm duy nhất</small>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Slug (URL thân thiện)</label>
+                                    <input type="text" name="Slug" class="form-control" value="@Model.Slug">
+                                    <small class="form-text text-muted">URL hiển thị trên trình duyệt</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-tags text-success"></i> Giá và tồn kho
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        Giá gốc (₫) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="Price" class="form-control" required min="0" step="1000" value="@Model.Price">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Giá khuyến mãi (₫)</label>
+                                    <input type="number" name="SalePrice" class="form-control" min="0" step="1000" value="@Model.SalePrice">
+                                    <small class="form-text text-muted">Để trống nếu không giảm giá</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        Số lượng tồn kho <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="StockQuantity" class="form-control" required min="0" value="@Model.StockQuantity">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-list-ul text-info"></i> Chi tiết sản phẩm
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        Danh mục <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="CategoryId" class="form-select" required>
+                                        <option value="">-- Chọn danh mục --</option>
+                                        @if (ViewBag.Categories != null)
+                                        {
+                                            @foreach (var category in (ViewBag.Categories as List<JohnHenryFashionWeb.Models.Category>) ?? new List<JohnHenryFashionWeb.Models.Category>())
+                                            {
+                                                <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Thương hiệu</label>
+                                    <select name="BrandId" class="form-select">
+                                        <option value="">-- Chọn thương hiệu --</option>
+                                        @if (ViewBag.Brands != null)
+                                        {
+                                            @foreach (var brand in (ViewBag.Brands as List<JohnHenryFashionWeb.Models.Brand>) ?? new List<JohnHenryFashionWeb.Models.Brand>())
+                                            {
+                                                <option value="@brand.Id" selected="@(Model.BrandId == brand.Id)">@brand.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Chất liệu</label>
+                                    <input type="text" name="Material" class="form-control" value="@Model.Material">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Kích thước</label>
+                                    <input type="text" name="Size" class="form-control" value="@Model.Size">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Màu sắc</label>
+                                    <input type="text" name="Color" class="form-control" value="@Model.Color">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-image text-warning"></i> Hình ảnh sản phẩm
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Hình ảnh hiện tại</label>
+                                    @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
+                                    {
+                                        <div class="border rounded p-3 bg-light text-center">
+                                            <img src="@Model.FeaturedImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 200px;">
+                                        </div>
+                                        <input type="hidden" name="CurrentImageUrl" value="@Model.FeaturedImageUrl" />
+                                    }
+                                    else
+                                    {
+                                        <div class="border rounded p-3 bg-light text-center" style="min-height: 200px;">
+                                            <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                            <p class="text-muted mb-0">Chưa có ảnh</p>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Thay đổi hình ảnh (tùy chọn)</label>
+                                    <input type="file" name="imageFile" class="form-control mb-2" accept="image/*" id="imageInput">
+                                    <small class="form-text text-muted d-block mb-2">Định dạng: JPG, PNG, WEBP (Tối đa 5MB)</small>
+                                    <small class="text-info">
+                                        <i class="fas fa-info-circle"></i> Để trống nếu không muốn thay đổi ảnh
+                                    </small>
+                                    <div id="imagePreview" class="border rounded p-3 text-center bg-light mt-3" style="min-height: 200px; display: none;">
+                                        <img id="previewImg" src="" class="img-fluid rounded" style="max-height: 200px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Options -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-toggle-on text-secondary"></i> Trạng thái
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="IsActive" id="isActive" checked="@Model.IsActive">
+                                        <label class="form-check-label" for="isActive">
+                                            <strong>Hiển thị sản phẩm</strong>
+                                            <br><small class="text-muted">Sản phẩm sẽ hiển thị trên trang chủ</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="IsFeatured" id="isFeatured" checked="@Model.IsFeatured">
+                                        <label class="form-check-label" for="isFeatured">
+                                            <strong>Sản phẩm nổi bật</strong>
+                                            <br><small class="text-muted">Hiển thị ở vị trí ưu tiên</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata -->
+                        <div class="mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <small class="text-muted">
+                                        <strong>Thông tin bổ sung:</strong><br>
+                                        ID: <code>@Model.Id</code><br>
+                                        Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")<br>
+                                        Cập nhật lần cuối: @Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="/seller/products" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save"></i> Cập nhật sản phẩm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image preview for new upload
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            var preview = document.getElementById('imagePreview');
+            var previewImg = document.getElementById('previewImg');
+            var file = e.target.files[0];
+            
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Auto-generate slug from product name if slug is empty
+        document.querySelector('input[name="Name"]').addEventListener('blur', function() {
+            var slugInput = document.querySelector('input[name="Slug"]');
+            if (!slugInput.value) {
+                var slug = this.value
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/đ/g, 'd')
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                slugInput.value = slug;
+            }
+        });
+    </script>
+}

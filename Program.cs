@@ -161,7 +161,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax; // Changed from Strict to Lax for better OAuth support
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
     options.LoginPath = "/Account/Login";
@@ -289,6 +289,13 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
     options.Level = CompressionLevel.SmallestSize;
 });
 
+// Configure routing options to be case-insensitive
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.LowercaseUrls = true;
+    options.LowercaseQueryStrings = false; // Keep query strings as-is
+});
+
 // Add Controllers with Views and API support
 builder.Services.AddControllersWithViews(options =>
 {
@@ -355,6 +362,18 @@ app.UseStaticFiles(new StaticFileOptions
         ctx.Context.Response.Headers[HeaderNames.CacheControl] =
             "public,max-age=" + durationInSeconds;
     }
+});
+
+// Add URL rewriting middleware to redirect uppercase URLs to lowercase
+app.Use(async (context, next) =>
+{
+    var url = context.Request.Path.Value;
+    if (!string.IsNullOrEmpty(url) && url != url.ToLowerInvariant())
+    {
+        context.Response.Redirect(url.ToLowerInvariant() + context.Request.QueryString, permanent: true);
+        return;
+    }
+    await next();
 });
 
 app.UseRouting();

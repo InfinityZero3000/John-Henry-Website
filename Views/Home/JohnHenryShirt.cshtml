@@ -1,3 +1,4 @@
+@model List<JohnHenryFashionWeb.Models.Product>
 @{
     ViewData["Title"] = "ÁO NAM JOHN HENRY";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,6 +7,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/john-henry-style.css" />
     <link rel="stylesheet" href="~/css/dropdown.css" />
+    <link rel="stylesheet" href="~/css/product-filter-style.css" />
     <style>
 
         :root {
@@ -70,350 +72,7 @@
             padding: 30px 0;
         }
 
-        .sidebar {
-            max-width: 300px;
-            background-color: white;
-            padding: 25px;
-            height: fit-content;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .filter-section {
-            margin-bottom: 30px;
-        }
-
-        .filter-section h5 {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 16px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-section h5 i {
-            font-size: 12px;
-            transition: transform 0.2s ease;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .filter-option {
-            padding: 5px 0;
-        }
-
-        .filter-option input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--jh-red);
-        }
-
-        .filter-option label {
-            font-size: 14px;
-            color: #555;
-            cursor: pointer;
-            font-weight: 400;
-        }
-
-        /* Fix for consistent alignment */
-        .filter-option .d-flex {
-            width: 100%;
-        }
-
-        .filter-option.has-subcategory {
-            cursor: pointer;
-        }
-
-        .filter-option .expand-icon {
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            font-size: 12px;
-        }
-
-        .filter-option .expand-icon.expanded {
-            transform: rotate(45deg);
-        }
-
-        .subcategories {
-            display: none;
-            margin-left: 0;
-            margin-top: 8px;
-            padding-left: 0;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            transition: all 0.3s ease-out;
-            width: 100%;
-        }
-
-        .subcategories.show {
-            display: block !important;
-            max-height: 300px !important;
-            opacity: 1 !important;
-            animation: slideDownSmooth 0.3s ease-out;
-        }
-
-        @@keyframes slideDownSmooth {
-            from {
-                max-height: 0;
-                opacity: 0;
-            }
-            to {
-                max-height: 300px;
-                opacity: 1;
-            }
-        }
-
-        .subcategory-item {
-            padding: 8px 0;
-            padding-left: 20px;
-            font-size: 14px;
-            margin-left: 10px;
-            position: relative;
-            width: 100%;
-        }
-
-        .subcategory-item label {
-            font-size: 14px;
-            color: #555;
-            font-weight: 400;
-            margin-left: 8px;
-            width: 100%;
-        }
-
-        .subcategory-item input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--jh-red);
-            flex-shrink: 0;
-        }
-
-        .john-henry-page .filter-option {
-            margin-bottom: 10px;
-            padding: 0;
-        }
-        
-        .john-henry-page .filter-option.has-subcategory > .d-flex {
-            position: relative;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-        
-        .john-henry-page .filter-option label {
-            cursor: pointer;
-            margin: 0 !important;
-            font-weight: normal;
-            color: #333;
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
-        
-        .john-henry-page .filter-option .expand-icon {
-            cursor: pointer;
-            font-size: 14px;
-            color: #6c757d;
-            transition: transform 0.3s ease;
-            padding: 4px;
-            flex-shrink: 0;
-            margin-left: auto;
-        }
-        
-        .john-henry-page .filter-option .expand-icon.rotated {
-            transform: rotate(45deg);
-        }
-        
-        .john-henry-page .filter-option .expand-icon:hover {
-            color: #007bff;
-        }
-        
-        /* Remove conflicting John Henry subcategories styles */
-        .john-henry-page .subcategories {
-            padding-left: 20px;
-            margin-top: 8px;
-        }
-        
-        .john-henry-page .subcategories.show {
-            /* Inherit from main .subcategories.show rule above */
-        }
-        
-        .john-henry-page .subcategory-item {
-            padding: 5px 0;
-        }
-        
-        .john-henry-page .subcategory-item label {
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        /* Prevent any content injection */
-        .john-henry-page .filter-option label::after,
-        .john-henry-page .filter-option label::before,
-        .john-henry-page .filter-option span::after,
-        .john-henry-page .filter-option span::before {
-            content: none !important;
-            display: none !important;
-        }
-
-        .color-options-new .color-row {
-            padding: 5px 0;
-        }
-
-        .color-square {
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .price-range-new .form-range {
-            accent-color: var(--jh-red);
-        }
-
-        .price-inputs .input-group-text {
-            font-size: 11px;
-            padding: 0.25rem 0.4rem;
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-
-        .price-inputs .form-control {
-            font-size: 12px;
-            padding: 0.25rem 0.4rem;
-        }
-
-        .size-section .size-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .size-btn {
-            min-width: 50px;
-            height: 50px;
-            padding: 0;
-            font-size: 14px;
-            font-weight: 400;
-            border: 1.5px solid #d0d0d0;
-            border-radius: 0;
-            background-color: white;
-            color: #333;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .size-btn:hover {
-            background-color: #000;
-            border-color: #000;
-            color: white;
-        }
-
-        .size-btn.active {
-            background-color: #000 !important;
-            border-color: #000 !important;
-            color: white !important;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .filter-option input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-
-        .filter-option label {
-            margin: 0;
-            font-size: 14px;
-            color: #555;
-            cursor: pointer;
-        }
-
-        .color-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .color-option {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            border: 2px solid #ddd;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .color-option.selected::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .price-range {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .price-input {
-            width: 80px;
-            padding: 5px 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        .size-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .size-option {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .size-option.selected {
-            background-color: var(--jh-red);
-            color: white;
-            border-color: var(--jh-red);
-        }
-
-        .clear-filters {
-            background: none;
-            border: 1px solid #ddd;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 13px;
-            color: #666;
-        }
+        /* Filter styles now in product-filter-style.css */
 
         .products-section {
             flex: 1;
@@ -588,7 +247,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label class="d-flex align-items-center mb-0">
                                         <input type="radio" name="category" value="ao" class="me-2">
-                                        <span>Áo</span>
+                                        Áo
                                     </label>
                                     <i class="fas fa-plus text-muted expand-icon" data-target="ao-subcategories"></i>
                                 </div>
@@ -596,25 +255,25 @@
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-polo" class="me-2">
-                                            <span>Áo Polo</span>
+                                            Áo Polo
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-so-mi" class="me-2">
-                                            <span>Áo Sơ mi</span>
+                                            Áo Sơ mi
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-len" class="me-2">
-                                            <span>Áo Len</span>
+                                            Áo Len
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="ao-khoac" class="me-2">
-                                            <span>Áo Khoác</span>
+                                            Áo Khoác
                                         </label>
                                     </div>
                                 </div>
@@ -623,7 +282,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label class="d-flex align-items-center mb-0">
                                         <input type="radio" name="category" value="quan" class="me-2">
-                                        <span>Quần</span>
+                                        Quần
                                     </label>
                                     <i class="fas fa-plus text-muted expand-icon" data-target="quan-subcategories"></i>
                                 </div>
@@ -631,60 +290,25 @@
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-khaki" class="me-2">
-                                            <span>Quần Khaki</span>
+                                            Quần Khaki
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-jeans" class="me-2">
-                                            <span>Quần Jeans</span>
+                                            Quần Jeans
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-tay" class="me-2">
-                                            <span>Quần Tây</span>
+                                            Quần Tây
                                         </label>
                                     </div>
                                     <div class="subcategory-item d-flex align-items-center">
                                         <label class="d-flex align-items-center mb-0">
                                             <input type="radio" name="category" value="quan-short" class="me-2">
-                                            <span>Quần Short</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="filter-option has-subcategory">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <label class="d-flex align-items-center mb-0">
-                                        <input type="radio" name="category" value="phu-kien" class="me-2">
-                                        <span>Phụ kiện</span>
-                                    </label>
-                                    <i class="fas fa-plus text-muted expand-icon" data-target="phu-kien-subcategories"></i>
-                                </div>
-                                <div class="subcategories" id="phu-kien-subcategories">
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="vi-nam" class="me-2">
-                                            <span>Ví Nam</span>
-                                        </label>
-                                    </div>
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="that-lung" class="me-2">
-                                            <span>Thắt Lưng</span>
-                                        </label>
-                                    </div>
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="giay-dep" class="me-2">
-                                            <span>Giày Dép</span>
-                                        </label>
-                                    </div>
-                                    <div class="subcategory-item d-flex align-items-center">
-                                        <label class="d-flex align-items-center mb-0">
-                                            <input type="radio" name="category" value="tui-xach" class="me-2">
-                                            <span>Túi Xách</span>
+                                            Quần Short
                                         </label>
                                     </div>
                                 </div>
@@ -833,28 +457,39 @@
 
                     <div class="products-grid">
                         <div class="row g-4">
-                            <!-- Product 1 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nam/Áo Hoodie Nam Tay Dài TS25FH22C-LS.jpg" alt="Áo Hoodie Nam Tay Dài" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Hoodie Nam Tay Dài TS25FH22C-LS</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">800.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-hoodie-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-hoodie-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product-card-new">
+                                            <div class="product-image-container">
+                                                <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                            </div>
+                                            <div class="product-info">
+                                                <h6 class="product-name">@product.Name</h6>
+                                                <div class="product-price-actions">
+                                                    <div class="product-price">@(product.SalePrice?.ToString("N0") ?? product.Price.ToString("N0"))₫</div>
+                                                    <div class="product-actions">
+                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.Id', this)">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center py-5">
+                                    <p class="text-muted">Không có sản phẩm nào</p>
                                 </div>
-                            </div>
+                            }
 
                             <!-- Product 2 -->
                             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
@@ -1027,11 +662,79 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const allProducts = document.querySelectorAll('.col-xl-3');
+            
+            // Helper function to normalize Vietnamese text for comparison
+            function normalizeVietnamese(str) {
+                // Convert to lowercase and normalize Unicode
+                return str.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                    .replace(/đ/g, 'd')
+                    .replace(/Đ/g, 'd');
+            }
+            
+            // Helper function to filter products
+            function filterProducts() {
+                const selectedCategory = document.querySelector('input[name="category"]:checked');
+                const selectedColor = document.querySelector('input[name="color"]:checked');
+                const activeSizes = document.querySelectorAll('.size-btn.active');
+                
+                allProducts.forEach(product => {
+                    let showProduct = true;
+                    const productName = product.querySelector('.product-name')?.textContent || '';
+                    
+                    // Category filtering
+                    if (selectedCategory) {
+                        const categoryValue = selectedCategory.value;
+                        showProduct = checkCategoryMatch(productName, categoryValue);
+                    }
+                    
+                    // Show/hide product
+                    product.style.display = showProduct ? '' : 'none';
+                });
+            }
+            
+            // Check if product name matches category
+            function checkCategoryMatch(productName, category) {
+                // Normalize product name for comparison
+                const normalizedName = normalizeVietnamese(productName);
+                
+                const categoryKeywords = {
+                    'ao': ['ao'],
+                    'ao-polo': ['polo'],
+                    'ao-so-mi': ['so mi', 'somi'],
+                    'ao-len': ['len', 'sweater'],
+                    'ao-khoac': ['khoac', 'jacket'],
+                    'ao-thun': ['thun'],
+                    'quan': ['quan'],
+                    'quan-khaki': ['khaki'],
+                    'quan-jeans': ['jeans', 'jean'],
+                    'quan-tay': ['tay'],
+                    'quan-short': ['short'],
+                    'phu-kien': ['mu', 'giay', 'dep', 'that lung', 'vi', 'tui', 'mat kinh'],
+                    'vi-nam': ['vi'],
+                    'that-lung': ['that lung'],
+                    'giay-dep': ['giay', 'dep'],
+                    'tui-xach': ['tui']
+                };
+                
+                const keywords = categoryKeywords[category];
+                if (!keywords) return true;
+                
+                // Check if any keyword matches (case-insensitive, accent-insensitive)
+                return keywords.some(keyword => {
+                    const normalizedKeyword = normalizeVietnamese(keyword);
+                    return normalizedName.includes(normalizedKeyword);
+                });
+            }
+
             // Color filter functionality
             const colorRadios = document.querySelectorAll('input[name="color"]');
             colorRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Color selected:', this.value);
+                    filterProducts();
                 });
             });
 
@@ -1040,6 +743,7 @@
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Category selected:', this.value);
+                    filterProducts();
                 });
             });
 
@@ -1091,6 +795,11 @@
                     if (priceRange) {
                         priceRange.value = '1500000';
                     }
+
+                    // Show all products
+                    allProducts.forEach(product => {
+                        product.style.display = '';
+                    });
 
                     console.log('Filters cleared');
                 });

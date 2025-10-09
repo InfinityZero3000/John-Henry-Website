@@ -54,7 +54,6 @@
     <link rel="preload" href="~/css/site.css" as="style">
     <link rel="preload" href="~/css/john-henry-style.css" as="style">
     <link rel="preload" href="~/lib/bootstrap/dist/css/bootstrap.min.css" as="style">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
     
     <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
@@ -68,7 +67,7 @@
     
     <!-- Favicon and app icons -->
     <link rel="icon" type="image/x-icon" href="~/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="~/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/logo.png">
     <link rel="manifest" href="~/manifest.json">
     
     <script type="importmap"></script>
@@ -80,7 +79,6 @@
     
     <!-- Load Lucide synchronously for icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script async src="https://unpkg.com/@@lottiefiles/lottie-player@@latest/dist/lottie-player.js"></script>
     
     @await RenderSectionAsync("Styles", required: false)
     <style>
@@ -1606,7 +1604,7 @@
                 if (size) formData.append('size', size);
                 if (color) formData.append('color', color);
 
-                const response = await fetch('/Products/AddToCart', {
+                const response = await fetch('/products/addtocart', {
                     method: 'POST',
                     body: formData
                 });
@@ -1701,40 +1699,50 @@
             // Back to Top Button Functionality
             const backToTopBtn = document.getElementById('backToTop');
             
-            // Show/hide button based on scroll position
-            window.addEventListener('scroll', function() {
-                if (window.pageYOffset > 300) {
-                    backToTopBtn.classList.add('show');
-                } else {
-                    backToTopBtn.classList.remove('show');
-                }
-            });
-            
-            // Smooth scroll to top when clicked
-            backToTopBtn.addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
+            if (backToTopBtn) {
+                // Show/hide button based on scroll position
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        backToTopBtn.classList.add('show');
+                    } else {
+                        backToTopBtn.classList.remove('show');
+                    }
                 });
-            });
+                
+                // Smooth scroll to top when clicked
+                backToTopBtn.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
 
             // Logo Lottie animation on page load
             const logoAnimation = document.getElementById('logoAnimation');
             const brandText = document.getElementById('brandText');
             
-            // Hide brand text initially and show after logo animation
-            brandText.style.opacity = '0';
-            
-            // Play logo animation and then show text
-            setTimeout(() => {
-                gsap.to(brandText, { duration: 1, opacity: 1, x: 0, ease: "power2.out" });
-            }, 1000);
+            if (logoAnimation && brandText) {
+                // Hide brand text initially and show after logo animation
+                brandText.style.opacity = '0';
+                
+                // Play logo animation and then show text
+                setTimeout(() => {
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(brandText, { duration: 1, opacity: 1, x: 0, ease: "power2.out" });
+                    } else {
+                        brandText.style.opacity = '1';
+                    }
+                }, 1000);
+            }
             
             // Logo hover effect
             const logoContainer = document.getElementById('logoContainer');
-            logoContainer.addEventListener('mouseenter', () => {
-                logoAnimation.play();
-            });
+            if (logoContainer && logoAnimation && typeof logoAnimation.play === 'function') {
+                logoContainer.addEventListener('mouseenter', () => {
+                    logoAnimation.play();
+                });
+            }
 
             // Header is now fixed and won't move on scroll
             const header = document.querySelector('.main-header');

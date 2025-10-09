@@ -11,15 +11,10 @@
   "lang": "vi",
   "icons": [
     {
-      "src": "/images/icon-192x192.png",
-      "sizes": "192x192",
+      "src": "/images/logo.png",
+      "sizes": "any",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/images/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
     }
   ]
 }

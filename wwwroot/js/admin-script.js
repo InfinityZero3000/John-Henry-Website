@@ -742,7 +742,8 @@ class AdminDashboard {
     }
 
     refreshDashboardData() {
-        this.showNotification('Refreshing dashboard data...', 'info');
+        // Notification disabled to reduce UI clutter
+        // this.showNotification('Refreshing dashboard data...', 'info');
         
         // Mock data refresh
         setTimeout(() => {
@@ -764,7 +765,8 @@ class AdminDashboard {
                 this.ordersChart.update();
             }
             
-            this.showNotification('Dashboard data refreshed!', 'success');
+            // Notification disabled to reduce UI clutter
+            // this.showNotification('Dashboard data refreshed!', 'success');
         }, 1500);
     }
 
@@ -773,12 +775,12 @@ class AdminDashboard {
     }
 
     startDataRefresh() {
-        // Auto-refresh dashboard data
-        setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                this.refreshDashboardData();
-            }
-        }, this.dataRefreshInterval);
+        // Auto-refresh disabled to reduce unnecessary notifications and CPU usage
+        // setInterval(() => {
+        //     if (document.visibilityState === 'visible') {
+        //         this.refreshDashboardData();
+        //     }
+        // }, this.dataRefreshInterval);
     }
 
     // Restore saved preferences

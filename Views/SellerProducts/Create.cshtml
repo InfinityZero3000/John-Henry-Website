@@ -1,0 +1,261 @@
+@model JohnHenryFashionWeb.Models.Product
+@{
+    ViewData["Title"] = "Thêm sản phẩm mới";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Thêm sản phẩm mới</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/seller">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/seller/products">Sản phẩm</a></li>
+                    <li class="breadcrumb-item active">Thêm mới</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="/seller/products" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form method="post" action="/seller/products/create" enctype="multipart/form-data">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">Thông tin sản phẩm</h6>
+                    </div>
+                    <div class="card-body">
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- Basic Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold">
+                                    Tên sản phẩm <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="Name" class="form-control" required placeholder="Ví dụ: Áo sơ mi nam trắng tay dài">
+                                <small class="form-text text-muted">Tên sản phẩm sẽ hiển thị trên trang chủ</small>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">
+                                    SKU <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="SKU" class="form-control" required placeholder="SM-NAM-001">
+                                <small class="form-text text-muted">Mã sản phẩm duy nhất</small>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Slug (URL thân thiện)</label>
+                                <input type="text" name="Slug" class="form-control" placeholder="ao-so-mi-nam-trang-tay-dai">
+                                <small class="form-text text-muted">Để trống để tự động tạo từ tên sản phẩm</small>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i data-lucide="dollar-sign"></i> Giá và tồn kho
+                                </h6>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">
+                                    Giá gốc (₫) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="Price" class="form-control" required min="0" step="1000" placeholder="500000">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Giá khuyến mãi (₫)</label>
+                                <input type="number" name="SalePrice" class="form-control" min="0" step="1000" placeholder="450000">
+                                <small class="form-text text-muted">Để trống nếu không giảm giá</small>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">
+                                    Số lượng tồn kho <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="StockQuantity" class="form-control" required min="0" value="0">
+                            </div>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i data-lucide="list"></i> Chi tiết sản phẩm
+                                </h6>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">
+                                    Danh mục <span class="text-danger">*</span>
+                                </label>
+                                    <select name="CategoryId" class="form-select" required>
+                                        <option value="">-- Chọn danh mục --</option>
+                                        @if (ViewBag.Categories != null)
+                                        {
+                                            @foreach (var category in (ViewBag.Categories as List<JohnHenryFashionWeb.Models.Category>) ?? new List<JohnHenryFashionWeb.Models.Category>())
+                                            {
+                                                <option value="@category.Id">@category.Name</option>
+                                            }
+                                        }
+                                    </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Thương hiệu</label>
+                                    <select name="BrandId" class="form-select">
+                                        <option value="">-- Chọn thương hiệu --</option>
+                                        @if (ViewBag.Brands != null)
+                                        {
+                                            @foreach (var brand in (ViewBag.Brands as List<JohnHenryFashionWeb.Models.Brand>) ?? new List<JohnHenryFashionWeb.Models.Brand>())
+                                            {
+                                                <option value="@brand.Id">@brand.Name</option>
+                                            }
+                                        }
+                                    </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Chất liệu</label>
+                                <input type="text" name="Material" class="form-control" placeholder="Ví dụ: Cotton 100%">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Kích thước</label>
+                                <input type="text" name="Size" class="form-control" placeholder="Ví dụ: S, M, L, XL">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Màu sắc</label>
+                                <input type="text" name="Color" class="form-control" placeholder="Ví dụ: Trắng, Đen, Xanh">
+                            </div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i data-lucide="image"></i> Hình ảnh sản phẩm
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    Hình ảnh chính <span class="text-danger">*</span>
+                                </label>
+                                <input type="file" name="imageFile" class="form-control" accept="image/*" required id="imageInput">
+                                <small class="form-text text-muted">Định dạng: JPG, PNG, WEBP (Tối đa 5MB)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Xem trước</label>
+                                <div id="imagePreview" class="border rounded p-3 text-center bg-light" style="min-height: 200px;">
+                                    <i data-lucide="upload-cloud" style="width: 48px; height: 48px;" class="text-muted mb-2"></i>
+                                    <p class="text-muted mb-0">Chưa chọn ảnh</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Options -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i data-lucide="toggle-left"></i> Trạng thái
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="IsActive" id="isActive" checked>
+                                    <label class="form-check-label" for="isActive">
+                                        <strong>Hiển thị sản phẩm</strong>
+                                        <br><small class="text-muted">Sản phẩm sẽ hiển thị trên trang chủ</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="IsFeatured" id="isFeatured">
+                                    <label class="form-check-label" for="isFeatured">
+                                        <strong>Sản phẩm nổi bật</strong>
+                                        <br><small class="text-muted">Hiển thị ở vị trí ưu tiên</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                            <a href="/seller/products" class="btn btn-secondary">
+                                <i data-lucide="x"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i data-lucide="save"></i> Lưu sản phẩm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // Image preview
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            var preview = document.getElementById('imagePreview');
+            var file = e.target.files[0];
+            
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" class="img-fluid rounded" style="max-height: 200px;">';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '<i data-lucide="upload-cloud" style="width: 48px; height: 48px;" class="text-muted mb-2"></i><p class="text-muted mb-0">Chưa chọn ảnh</p>';
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        });
+
+        // Auto-generate slug from product name
+        var nameInput = document.querySelector('input[name="Name"]');
+        var slugInput = document.querySelector('input[name="Slug"]');
+        if (nameInput && slugInput) {
+            nameInput.addEventListener('blur', function() {
+                if (!slugInput.value) {
+                    var slug = this.value
+                        .toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/đ/g, 'd')
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+                    slugInput.value = slug;
+                }
+            });
+        }
+    </script>
+}

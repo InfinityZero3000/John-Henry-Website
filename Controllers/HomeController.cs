@@ -44,11 +44,6 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
     public async Task<IActionResult> JohnHenry()
     {
         // Generate breadcrumbs for John Henry page
@@ -77,7 +72,7 @@ public class HomeController : Controller
         return View(products);
     }
 
-    public IActionResult Freelancer()
+    public async Task<IActionResult> Freelancer()
     {
         // Generate breadcrumbs for Freelancer page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -93,10 +88,19 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "FREELANCER - Thời trang nữ hiện đại";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập FREELANCER với các sản phẩm thời trang nữ chất lượng cao, phong cách hiện đại và sang trọng dành riêng cho phái đẹp.";
 
-        return View();
+        // Load products from database - Freelancer collection (Women's fashion)
+        var freelancerCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult FreelancerDress()
+    public async Task<IActionResult> FreelancerDress()
     {
         // Generate breadcrumbs for Freelancer Dress page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -113,10 +117,20 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Váy FREELANCER - Thời trang nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập váy FREELANCER với đa dạng các loại váy công sở, váy dạ tiệc, váy maxi chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load women's dresses from database
+        var freelancerCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
+            .Where(p => p.Name.Contains("Váy") || p.Name.Contains("váy") || p.Name.Contains("Dress"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult FreelancerShirt()
+    public async Task<IActionResult> FreelancerShirt()
     {
         // Generate breadcrumbs for Freelancer Shirt page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -133,10 +147,20 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Áo Nữ FREELANCER - Thời trang nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập áo nữ FREELANCER với đa dạng các loại áo blouse, áo thun, áo len, áo khoác chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load women's shirts from database
+        var freelancerCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
+            .Where(p => p.Name.Contains("Áo") || p.Name.Contains("áo") || p.Name.Contains("Shirt") || p.Name.Contains("Blouse"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult FreelancerTrousers()
+    public async Task<IActionResult> FreelancerTrousers()
     {
         // Generate breadcrumbs for Freelancer Trousers page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -153,10 +177,20 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Quần Nữ FREELANCER - Thời trang nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập quần nữ FREELANCER với đa dạng các loại quần jean, quần âu, quần short chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load women's trousers from database
+        var freelancerCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
+            .Where(p => p.Name.Contains("Quần") || p.Name.Contains("quần") || p.Name.Contains("Trouser"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult FreelancerSkirt()
+    public async Task<IActionResult> FreelancerSkirt()
     {
         // Generate breadcrumbs for Freelancer Skirt page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -173,10 +207,20 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Chân Váy FREELANCER - Thời trang nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập chân váy FREELANCER với đa dạng các loại chân váy bút chì, chân váy xòe, chân váy midi chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load women's skirts from database
+        var freelancerCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
+            .Where(p => p.Name.Contains("Chân váy") || p.Name.Contains("chân váy") || p.Name.Contains("Skirt"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult JohnHenryShirt()
+    public async Task<IActionResult> JohnHenryShirt()
     {
         // Generate breadcrumbs for John Henry Shirt page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -193,10 +237,20 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Áo Nam JOHN HENRY - Thời trang nam cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập áo nam JOHN HENRY với đa dạng các loại áo polo, áo sơ mi, áo thun, áo len chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load men's shirts from database
+        var johnHenryCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nam");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
+            .Where(p => p.Name.Contains("Áo") || p.Name.Contains("áo") || p.Name.Contains("Shirt"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult JohnHenryTrousers()
+    public async Task<IActionResult> JohnHenryTrousers()
     {
         // Generate breadcrumbs for John Henry Trousers page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -213,10 +267,20 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Quần Nam JOHN HENRY - Thời trang nam cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập quần nam JOHN HENRY với đa dạng các loại quần jean, quần khaki, quần short chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load men's trousers from database
+        var johnHenryCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nam");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
+            .Where(p => p.Name.Contains("Quần") || p.Name.Contains("quần") || p.Name.Contains("Trouser"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
-    public IActionResult JohnHenryAccessories()
+    public async Task<IActionResult> JohnHenryAccessories()
     {
         // Generate breadcrumbs for John Henry Accessories page
         var breadcrumbs = new List<BreadcrumbItem>
@@ -233,7 +297,18 @@ public class HomeController : Controller
         ViewBag.MetaTitle = "Phụ Kiện Nam JOHN HENRY - Thời trang nam cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập phụ kiện nam JOHN HENRY với đa dạng các loại thắt lưng, cà vạt, ví da, túi xách chất lượng cao, phong cách hiện đại.";
 
-        return View();
+        // Load men's accessories from database
+        var johnHenryCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Name == "Thời trang nam");
+        
+        var products = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
+            .Where(p => p.Name.Contains("Phụ kiện") || p.Name.Contains("Thắt lưng") || p.Name.Contains("Cà vạt") || 
+                       p.Name.Contains("Ví") || p.Name.Contains("Túi") || p.Name.Contains("Accessory"))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return View(products);
     }
 
     public IActionResult FreelancerAccessories()

@@ -104,6 +104,10 @@ namespace JohnHenryFashionWeb.Controllers
             };
         }
 
+        // NOTE: Product management methods have been moved to SellerProductsController
+        // to avoid routing conflicts. Use /seller/products routes instead.
+        
+        /*
         [HttpGet("products")]
         public async Task<IActionResult> Products(int page = 1, int pageSize = 12, string search = "", Guid? categoryId = null, string status = "")
         {
@@ -312,9 +316,11 @@ namespace JohnHenryFashionWeb.Controllers
             return RedirectToAction(nameof(OrderDetail), new { id });
         }
 
-        // Copy the same product management methods from AdminController
-        // but with seller-specific permissions if needed
+        // NOTE: Product create/edit methods removed to avoid routing conflicts with SellerProductsController
+        // Use /seller/products routes in SellerProductsController instead
 
+        /*
+        // Removed CreateProduct and EditProduct methods - now handled by SellerProductsController
         [HttpGet("products/create")]
         public async Task<IActionResult> CreateProduct()
         {
@@ -513,6 +519,7 @@ namespace JohnHenryFashionWeb.Controllers
 
             return View(model);
         }
+        */
 
         [HttpGet("inventory")]
         public async Task<IActionResult> Inventory(string search = "", bool lowStock = false)

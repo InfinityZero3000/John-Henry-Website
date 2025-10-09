@@ -1,3 +1,4 @@
+@model List<JohnHenryFashionWeb.Models.Product>
 @{
     ViewData["Title"] = "CHÂN VÁY FREELANCER";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,6 +7,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/freelancer-style.css" />
     <link rel="stylesheet" href="~/css/dropdown.css" />
+    <link rel="stylesheet" href="~/css/product-filter-style.css" />
     <style>
         :root {
             --jh-red: #951329;
@@ -84,166 +86,7 @@
             padding: 30px 0;
         }
 
-        .sidebar {
-            max-width: 300px;
-            background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            height: fit-content;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .filter-section {
-            margin-bottom: 30px;
-        }
-
-        .filter-section h5 {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 16px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-section h5 i {
-            font-size: 12px;
-            transition: transform 0.2s ease;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .filter-option {
-            padding: 5px 0;
-        }
-
-        .filter-option input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--jh-red);
-        }
-
-        .filter-option label {
-            font-size: 14px;
-            color: #555;
-            cursor: pointer;
-            font-weight: 400;
-        }
-
-        .filter-option.has-subcategory {
-            cursor: pointer;
-        }
-
-        .filter-option .expand-icon {
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            font-size: 12px;
-        }
-
-        .filter-option .expand-icon.expanded {
-            transform: rotate(45deg);
-        }
-
-        .subcategories {
-            display: none;
-            margin-left: 0;
-            margin-top: 8px;
-            padding-left: 0;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            transition: all 0.3s ease-out;
-        }
-
-        .subcategories.show {
-            display: block;
-            max-height: 300px;
-            opacity: 1;
-        }
-
-        .subcategory-item {
-            padding: 8px 0;
-            padding-left: 20px;
-            font-size: 14px;
-            margin-left: 10px;
-            position: relative;
-        }
-
-        .subcategory-item label {
-            font-size: 14px;
-            color: #555;
-            font-weight: 400;
-            margin-left: 8px;
-        }
-
-        .subcategory-item input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--jh-red);
-        }
-
-        .color-options-new .color-row {
-            padding: 5px 0;
-        }
-
-        .color-square {
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .price-range-new .form-range {
-            accent-color: var(--jh-red);
-        }
-
-        .price-inputs .input-group-text {
-            font-size: 11px;
-            padding: 0.25rem 0.4rem;
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-
-        .price-inputs .form-control {
-            font-size: 12px;
-            padding: 0.25rem 0.4rem;
-        }
-
-        .size-section .size-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .size-btn {
-            min-width: 50px;
-            height: 50px;
-            padding: 0;
-            font-size: 14px;
-            font-weight: 400;
-            border: 1.5px solid #d0d0d0;
-            border-radius: 0;
-            background-color: white;
-            color: #333;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .size-btn:hover {
-            background-color: #000;
-            border-color: #000;
-            color: white;
-        }
-
-        .size-btn.active {
-            background-color: #000 !important;
-            border-color: #000 !important;
-            color: white !important;
-        }
+        /* Filter styles now in product-filter-style.css */
 
         .products-section {
             flex: 1;
@@ -551,6 +394,49 @@
 
 @section Scripts {
     <script>
+        function normalizeVietnamese(str) {
+            return str.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'd');
+        }
+
+        function checkCategoryMatch(productName, category) {
+            const normalizedName = normalizeVietnamese(productName);
+            
+            const categoryKeywords = {
+                'chan-vay': ['chan vay', 'vay'],
+                'chan-vay-ngan': ['vay ngan'],
+                'chan-vay-dai': ['vay dai'],
+                'chan-vay-cong-so': ['vay cong so'],
+                'chan-vay-xe': ['vay xe']
+            };
+
+            const keywords = categoryKeywords[category];
+            if (!keywords) return true;
+            
+            return keywords.some(keyword => normalizedName.includes(normalizeVietnamese(keyword)));
+        }
+
+        function filterProducts() {
+            const allProducts = document.querySelectorAll('.product-item');
+            const selectedCategory = document.querySelector('input[name="category"]:checked')?.value;
+            
+            allProducts.forEach(product => {
+                const productName = product.querySelector('.product-name')?.textContent || '';
+                let shouldShow = true;
+                
+                if (selectedCategory && selectedCategory !== 'all') {
+                    shouldShow = checkCategoryMatch(productName, selectedCategory);
+                }
+                
+                product.style.display = shouldShow ? '' : 'none';
+            });
+            
+            console.log('Filtered by category:', selectedCategory);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Color filter functionality
             const colorRadios = document.querySelectorAll('input[name="color"]');
@@ -564,7 +450,7 @@
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
-                    console.log('Category selected:', this.value);
+                    filterProducts();
                 });
             });
 
@@ -617,6 +503,8 @@
                         priceRange.value = '1500000';
                     }
 
+                    const allProducts = document.querySelectorAll('.product-item');
+                    allProducts.forEach(product => { product.style.display = ''; });
                     console.log('Filters cleared');
                 });
             }
