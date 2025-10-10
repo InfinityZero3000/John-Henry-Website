@@ -13,7 +13,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
+      # Init folder removed - using EF Core migrations instead
+      # - ./database/init:/docker-entrypoint-initdb.d
     restart: unless-stopped
     networks:
       - johnhenry_network
@@ -25,10 +26,15 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@johnhenry.com
       PGADMIN_DEFAULT_PASSWORD: admin123
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+      PGPASSFILE: /pgadmin4/pgpass
     ports:
       - "8080:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./database/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./database/pgadmin/pgpass:/pgadmin4/pgpass
     depends_on:
       - postgres
     restart: unless-stopped
