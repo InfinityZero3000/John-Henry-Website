@@ -1,0 +1,33 @@
+@model JohnHenryFashionWeb.ViewModels.ProductViewModel
+
+<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+    <div class="product-card-new">
+        <div class="product-image-container">
+            <a href="@Url.Action("ProductDetail", "Home", new { id = Model.Id })">
+                <img src="@Model.FeaturedImageUrl" alt="@Model.Name" class="product-image">
+            </a>
+            @if (Model.IsNew)
+            {
+                <span class="new-badge">MỚI</span>
+            }
+        </div>
+        <div class="product-info">
+            <a href="@Url.Action("ProductDetail", "Home", new { id = Model.Id })" style="text-decoration: none; color: inherit;">
+                <h6 class="product-name">@Model.Name</h6>
+            </a>
+            <div class="product-price-actions">
+                <div class="product-price">
+                    <span class="current-price">@Model.Price.ToString("N0")₫</span>
+                </div>
+                <div class="product-actions">
+                    <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@Model.Id">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@Model.Id', this)">
+                        <i class="fas fa-shopping-bag"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

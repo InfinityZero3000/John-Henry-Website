@@ -65,11 +65,16 @@ public class HomeController : Controller
             .FirstOrDefaultAsync(c => c.Name == "Thời trang nam");
         
         var products = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
             .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return View(products);
+        // Map to ProductViewModel
+        var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
+
+        return View(productViewModels);
     }
 
     public async Task<IActionResult> Freelancer()
@@ -93,11 +98,16 @@ public class HomeController : Controller
             .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
         
         var products = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
             .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return View(products);
+        // Map to ProductViewModel
+        var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
+
+        return View(productViewModels);
     }
 
     public async Task<IActionResult> FreelancerDress()
@@ -386,6 +396,25 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "This is a test page to demonstrate SEO implementation with structured data and meta tags";
 
         return View();
+    }
+
+    private ProductViewModel MapToProductViewModel(Product product)
+    {
+        return new ProductViewModel
+        {
+            Id = product.Id,
+            Name = product.Name,
+            SKU = product.SKU,
+            Price = product.Price, // Chỉ dùng giá gốc từ database
+            FeaturedImageUrl = product.FeaturedImageUrl ?? "/images/default-product.jpg",
+            StockQuantity = product.StockQuantity,
+            CategoryName = product.Category?.Name ?? "Chưa phân loại",
+            BrandName = product.Brand?.Name,
+            Rating = product.Rating,
+            ReviewCount = product.ReviewCount,
+            IsNew = product.CreatedAt > DateTime.UtcNow.AddDays(-30),
+            IsFeatured = product.IsFeatured
+        };
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

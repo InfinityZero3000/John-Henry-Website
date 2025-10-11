@@ -206,12 +206,13 @@ body {
     color: var(--jh-red);
 }
 
-.original-price {
+/* REMOVED - Không dùng sale price nữa */
+/* .original-price {
     font-size: 18px;
     text-decoration: line-through;
     color: #999;
     margin-left: 10px;
-}
+} */
 
 .current-price {
     font-size: 32px;
@@ -219,7 +220,8 @@ body {
     color: var(--jh-red);
 }
 
-.discount-badge {
+/* REMOVED - Không dùng discount badge nữa */
+/* .discount-badge {
     background-color: var(--jh-red);
     color: white;
     padding: 4px 8px;
@@ -227,7 +229,7 @@ body {
     font-size: 12px;
     font-weight: bold;
     margin-left: 10px;
-}
+} */
 
 /* Product Options */
 .option-label {
@@ -1076,12 +1078,6 @@ body {
     }
 }
 
-/* Sale Badge Styles */
-.sale-badge {
-    font-size: 0.75rem;
-    font-weight: 700;
-    z-index: 2;
-}
 
 /* Price Group Styles */
 .price-group {
@@ -1092,9 +1088,7 @@ body {
     flex-wrap: wrap;
 }
 
-.original-price {
-    font-size: 0.9rem;
-}
+
 
 /* Unified Grid System */
 .collections-section .row {

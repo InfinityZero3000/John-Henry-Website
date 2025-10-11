@@ -1,4 +1,4 @@
-@model List<JohnHenryFashionWeb.Models.Product>
+@model List<JohnHenryFashionWeb.ViewModels.ProductViewModel>
 @{
     ViewData["Title"] = "FREELANCER";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -396,12 +396,22 @@
                                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                         <div class="product-card-new">
                                             <div class="product-image-container">
-                                                <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })">
+                                                    <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                                </a>
+                                                @if (product.IsNew)
+                                                {
+                                                    <span class="new-badge">MỚI</span>
+                                                }
                                             </div>
                                             <div class="product-info">
-                                                <h6 class="product-name">@product.Name</h6>
+                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                                    <h6 class="product-name">@product.Name</h6>
+                                                </a>
                                                 <div class="product-price-actions">
-                                                    <div class="product-price">@(product.SalePrice?.ToString("N0") ?? product.Price.ToString("N0"))₫</div>
+                                                    <div class="product-price">
+                                                        <span class="current-price">@product.Price.ToString("N0")₫</span>
+                                                    </div>
                                                     <div class="product-actions">
                                                         <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
                                                             <i class="far fa-heart"></i>
