@@ -1,0 +1,144 @@
+@*
+    Pagination Component
+    Usage: @Html.Partial("_Pagination")
+    Requires ViewBag.CurrentPage, ViewBag.TotalPages
+*@
+
+@if (ViewBag.TotalPages > 1)
+{
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+    var totalProducts = (int)ViewBag.TotalProducts;
+    
+    @* Get current path for proper pagination links *@
+    var currentPath = Context.Request.Path;
+    
+    <nav aria-label="Product pagination" class="pagination-container">
+        <div class="pagination-info">
+            <p class="text-muted mb-3">
+                Hiển thị trang @currentPage/@totalPages (Tổng: @totalProducts sản phẩm)
+            </p>
+        </div>
+        <ul class="pagination justify-content-center">
+            @* First Page *@
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@currentPath?page=1" aria-label="Trang đầu">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            
+            @* Previous Page *@
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@currentPath?page=@(currentPage - 1)" aria-label="Trang trước">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            
+            @* Page Numbers *@
+            @{
+                // Show max 7 page numbers
+                var startPage = Math.Max(1, currentPage - 3);
+                var endPage = Math.Min(totalPages, currentPage + 3);
+                
+                // Adjust if at start or end
+                if (currentPage <= 4)
+                {
+                    endPage = Math.Min(7, totalPages);
+                }
+                else if (currentPage >= totalPages - 3)
+                {
+                    startPage = Math.Max(1, totalPages - 6);
+                }
+            }
+            
+            @if (startPage > 1)
+            {
+                <li class="page-item"><a class="page-link" href="@currentPath?page=1">1</a></li>
+                if (startPage > 2)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+            }
+            
+            @for (var i = startPage; i <= endPage; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@currentPath?page=@i">@i</a>
+                </li>
+            }
+            
+            @if (endPage < totalPages)
+            {
+                if (endPage < totalPages - 1)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+                <li class="page-item"><a class="page-link" href="@currentPath?page=@totalPages">@totalPages</a></li>
+            }
+            
+            @* Next Page *@
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@currentPath?page=@(currentPage + 1)" aria-label="Trang sau">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            
+            @* Last Page *@
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@currentPath?page=@totalPages" aria-label="Trang cuối">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    
+    <style>
+        .pagination-container {
+            margin: 40px 0;
+        }
+        
+        .pagination-info {
+            text-align: center;
+        }
+        
+        .pagination {
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .pagination .page-link {
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #333;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #333;
+            border-color: #333;
+            color: white;
+        }
+        
+        .pagination .page-link.disabled {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        
+        @@media (max-width: 576px) {
+            .pagination {
+                font-size: 0.875rem;
+            }
+            
+            .pagination .page-link {
+                padding: 6px 10px;
+            }
+        }
+    </style>
+}

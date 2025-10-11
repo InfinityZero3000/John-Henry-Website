@@ -54,12 +54,12 @@
             border-bottom: 1px solid #e9ecef;
         }
 
-        .breadcrumb-nav .breadcrumb {
-            background: none;
-            margin: 0;
-            padding: 0;
-            font-size: 14px;
-        }
+            .breadcrumb-nav .breadcrumb {
+                background: none;
+                margin: 0;
+                padding: 0;
+                font-size: 14px;
+            }
 
         .breadcrumb-nav .breadcrumb-item + .breadcrumb-item::before {
             content: ">";
@@ -594,6 +594,9 @@
                             }
                         </div>
                     </div>
+                    
+                    @* Pagination - moved outside products-grid *@
+                    @Html.Partial("_Pagination")
                 </div>
             </div>
         </div>
@@ -603,7 +606,15 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Debug logging
+            console.log('=== PAGINATION DEBUG ===');
+            console.log('Current Page:', @ViewBag.CurrentPage);
+            console.log('Total Pages:', @ViewBag.TotalPages);
+            console.log('Total Products:', @ViewBag.TotalProducts);
+            console.log('Products in Model:', @(Model?.Count ?? 0));
+            
             const allProducts = document.querySelectorAll('.col-xl-3');
+            console.log('Products found in DOM:', allProducts.length);
             
             // Helper function to normalize Vietnamese text for comparison
             function normalizeVietnamese(str) {
@@ -669,21 +680,24 @@
                 });
             }
 
-            // Color filter functionality
+            // Color filter functionality - DISABLED for pagination
+            // Client-side filtering is disabled because we're using server-side pagination
             const colorRadios = document.querySelectorAll('input[name="color"]');
             colorRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Color selected:', this.value);
-                    filterProducts();
+                    // filterProducts(); // Disabled - using server-side filtering instead
+                    console.log('Note: Client-side filtering disabled. Please use server-side filters.');
                 });
             });
 
-            // Category filter functionality  
+            // Category filter functionality - DISABLED for pagination
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Category selected:', this.value);
-                    filterProducts();
+                    // filterProducts(); // Disabled - using server-side filtering instead
+                    console.log('Note: Client-side filtering disabled. Please use server-side filters.');
                 });
             });
 

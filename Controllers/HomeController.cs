@@ -44,8 +44,11 @@ public class HomeController : Controller
         return View();
     }
 
-    public async Task<IActionResult> JohnHenry()
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public async Task<IActionResult> JohnHenry(int page = 1)
     {
+        const int pageSize = 40; // 10 rows x 4 products per row
+        
         // Generate breadcrumbs for John Henry page
         var breadcrumbs = new List<BreadcrumbItem>
         {
@@ -64,21 +67,41 @@ public class HomeController : Controller
         var johnHenryCategory = await _context.Categories
             .FirstOrDefaultAsync(c => c.Name == "Thời trang nam");
         
+        // Get total count for pagination
+        var totalProducts = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
+            .CountAsync();
+        
+        // Calculate pagination
+        var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+        page = Math.Max(1, Math.Min(page, totalPages)); // Ensure page is in valid range
+        
         var products = await _context.Products
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Where(p => p.IsActive && p.CategoryId == johnHenryCategory!.Id)
             .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         // Map to ProductViewModel
         var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
 
+        // Pass pagination info to view
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = totalPages;
+        ViewBag.TotalProducts = totalProducts;
+        ViewBag.PageSize = pageSize;
+
         return View(productViewModels);
     }
 
-    public async Task<IActionResult> Freelancer()
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public async Task<IActionResult> Freelancer(int page = 1)
     {
+        const int pageSize = 40; // 10 rows x 4 products per row
+        
         // Generate breadcrumbs for Freelancer page
         var breadcrumbs = new List<BreadcrumbItem>
         {
@@ -97,15 +120,32 @@ public class HomeController : Controller
         var freelancerCategory = await _context.Categories
             .FirstOrDefaultAsync(c => c.Name == "Thời trang nữ");
         
+        // Get total count for pagination
+        var totalProducts = await _context.Products
+            .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
+            .CountAsync();
+        
+        // Calculate pagination
+        var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+        page = Math.Max(1, Math.Min(page, totalPages)); // Ensure page is in valid range
+        
         var products = await _context.Products
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Where(p => p.IsActive && p.CategoryId == freelancerCategory!.Id)
             .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         // Map to ProductViewModel
         var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
+
+        // Pass pagination info to view
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = totalPages;
+        ViewBag.TotalProducts = totalProducts;
+        ViewBag.PageSize = pageSize;
 
         return View(productViewModels);
     }

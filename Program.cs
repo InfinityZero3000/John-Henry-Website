@@ -364,17 +364,10 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
-// Add URL rewriting middleware to redirect uppercase URLs to lowercase
-app.Use(async (context, next) =>
-{
-    var url = context.Request.Path.Value;
-    if (!string.IsNullOrEmpty(url) && url != url.ToLowerInvariant())
-    {
-        context.Response.Redirect(url.ToLowerInvariant() + context.Request.QueryString, permanent: true);
-        return;
-    }
-    await next();
-});
+// Note: Removed lowercase URL redirect middleware because:
+// - Image files are stored in UPPERCASE (BE25FH45-HL.jpg)
+// - Middleware would redirect to lowercase, causing 404 errors
+// - Database FeaturedImageUrl paths already match actual file cases
 
 app.UseRouting();
 
