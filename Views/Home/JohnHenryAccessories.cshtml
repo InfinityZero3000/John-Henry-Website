@@ -428,191 +428,44 @@
 
                     <div class="products-grid">
                         <div class="row g-4">
-                            <!-- Product 1 - Thắt Lưng -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Thắt Lưng Nam Đầu Kim BE25FH45-HL.jpg" alt="Thắt Lưng Nam Đầu Kim" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Thắt Lưng Nam Đầu Kim BE25FH45-HL</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">350.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-belt-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-belt-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product-card-new">
+                                            <div class="product-image-container">
+                                                <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                            </div>
+                                            <div class="product-info">
+                                                <h6 class="product-name">@product.Name</h6>
+                                                <div class="product-price-actions">
+                                                    <div class="product-price">@(product.SalePrice?.ToString("N0") ?? product.Price.ToString("N0"))₫</div>
+                                                    <div class="product-actions">
+                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.Id', this)">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center py-5">
+                                    <p class="text-muted">Không có sản phẩm nào</p>
                                 </div>
-                            </div>
-
-                            <!-- Product 2 - Thắt Lưng -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Thắt Lưng Nam Đầu Tăng Đơ BE25FH46-EP.jpg" alt="Thắt Lưng Nam Đầu Tăng Đơ" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Thắt Lưng Nam Đầu Tăng Đơ BE25FH46-EP</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">380.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-belt-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-belt-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 3 - Thắt Lưng -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Thắt Lưng Nam Đầu Tăng Đơ BE25FH48-EP.jpg" alt="Thắt Lưng Nam Đầu Tăng Đơ" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Thắt Lưng Nam Đầu Tăng Đơ BE25FH48-EP</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">390.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-belt-003">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-belt-003', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 4 - Dép -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Dép Kẹp Tiện Lợi SO25FH06P-SA.jpg" alt="Dép Kẹp Tiện Lợi" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Dép Kẹp Tiện Lợi SO25FH06P-SA</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">250.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-sandal-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-sandal-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 5 - Dép -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Dép Quai Ngang SO25FH07P-SA.jpg" alt="Dép Quai Ngang" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Dép Quai Ngang SO25FH07P-SA</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">270.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-sandal-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-sandal-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 6 - Giày -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Giày Tây Nam SO25FH15P-DS.jpg" alt="Giày Tây Nam" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Giày Tây Nam SO25FH15P-DS</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">1.200.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-shoes-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-shoes-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 7 - Mũ -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Mũ Lưỡi Trai Thời Trang CA26SS06P.jpg" alt="Mũ Lưỡi Trai Thời Trang" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Mũ Lưỡi Trai Thời Trang CA26SS06P</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">200.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-cap-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-cap-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 8 - Mũ -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nam/Mũ Lưỡi Trai Thời Trang CA26SS07M.jpg" alt="Mũ Lưỡi Trai Thời Trang" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Mũ Lưỡi Trai Thời Trang CA26SS07M</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">220.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-cap-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-cap-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            }
                         </div>
                     </div>
+                    
+                    @* Pagination Component *@
+                    <partial name="_Pagination" />
                 </div>
             </div>
         </div>
@@ -621,6 +474,14 @@
 
 @section Scripts {
     <script>
+        // Pagination Debug Info
+        console.log('=== PAGINATION DEBUG ===');
+        console.log('Current Page:', @ViewBag.CurrentPage);
+        console.log('Total Pages:', @ViewBag.TotalPages);
+        console.log('Total Products:', @ViewBag.TotalProducts);
+        console.log('Page Size:', @ViewBag.PageSize);
+        console.log('========================');
+        
         document.addEventListener('DOMContentLoaded', function() {
             const allProducts = document.querySelectorAll('.col-xl-3');
             
@@ -649,12 +510,12 @@
 
             const colorRadios = document.querySelectorAll('input[name="color"]');
             colorRadios.forEach(radio => {
-                radio.addEventListener('change', () => { console.log('Color:', radio.value); filterProducts(); });
+                radio.addEventListener('change', () => { console.log('Color:', radio.value); /* filterProducts(); */ }); // Disabled for pagination
             });
 
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
-                radio.addEventListener('change', () => { console.log('Category:', radio.value); filterProducts(); });
+                radio.addEventListener('change', () => { console.log('Category:', radio.value); /* filterProducts(); */ }); // Disabled for pagination
             });
 
             // Size button functionality
