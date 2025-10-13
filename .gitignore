@@ -575,5 +575,5 @@ target/
 # README.md
 
 # Documentation that changes frequently
-DATABASE_README.md
+
 wwwroot/videos/0_Woman_Shopping_3840x2160.mov filter=lfs diff=lfs merge=lfs -text
