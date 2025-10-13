@@ -1875,6 +1875,79 @@ namespace JohnHenryFashionWeb.Controllers
             return View(users);
         }
         #endregion
+        /// <summary>
+        /// Fix sunglasses products category assignment
+        /// Moves FWSG* products from "Chân váy nữ" to "Phụ kiện nữ"
+        /// </summary>
+        [HttpPost("fix-sunglasses-category")]
+        public async Task<IActionResult> FixSunglassesCategory()
+        {
+            try
+            {
+                // Get the correct category ID for "Phụ kiện nữ"
+                var accessoriesCategory = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Name == "Phụ kiện nữ");
+                
+                if (accessoriesCategory == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Category 'Phụ kiện nữ' not found"
+                    });
+                }
+
+                // Find all sunglasses products (SKU starting with FWSG)
+                var sunglassesProducts = await _context.Products
+                    .Where(p => p.SKU.StartsWith("FWSG") && p.IsActive)
+                    .ToListAsync();
+
+                if (!sunglassesProducts.Any())
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "No sunglasses products found",
+                        productsUpdated = 0
+                    });
+                }
+
+                // Update category for each sunglasses product
+                var oldCategoryIds = new Dictionary<Guid, string>();
+                foreach (var product in sunglassesProducts)
+                {
+                    var oldCategory = await _context.Categories
+                        .FirstOrDefaultAsync(c => c.Id == product.CategoryId);
+                    
+                    oldCategoryIds[product.Id] = oldCategory?.Name ?? "Unknown";
+                    product.CategoryId = accessoriesCategory.Id;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Successfully updated {sunglassesProducts.Count} sunglasses products",
+                    productsUpdated = sunglassesProducts.Count,
+                    products = sunglassesProducts.Select(p => new
+                    {
+                        sku = p.SKU,
+                        name = p.Name,
+                        oldCategory = oldCategoryIds[p.Id],
+                        newCategory = "Phụ kiện nữ"
+                    }).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Error: {ex.Message}"
+                });
+            }
+        }
     }
 }
 
