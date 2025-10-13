@@ -310,56 +310,52 @@
                         </div>
                     </div>
 
-                    <div class="products-grid">
+                                        <div class="products-grid">
                         <div class="row g-4">
-                            <!-- Sample dress products - in reality these would be filtered from the backend -->
-                            <!-- Product 1 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Đầm nữ/Đầm Midi Freelancer FWDR25SS01C.jpg" alt="Đầm Midi Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Đầm Midi Freelancer FWDR25SS01C</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">1.200.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-dress-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-dress-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product-card-new">
+                                            <div class="product-image-container">
+                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })">
+                                                    <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                                </a>
+                                            </div>
+                                            <div class="product-info">
+                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                                    <h6 class="product-name">@product.Name</h6>
+                                                </a>
+                                                <div class="product-price-actions">
+                                                    <div class="product-price">
+                                                        <span class="current-price">@product.Price.ToString("N0")₫</span>
+                                                    </div>
+                                                    <div class="product-actions">
+                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.Id', this)">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center py-5">
+                                    <p class="text-muted">Không có sản phẩm nào</p>
                                 </div>
-                            </div>
-
-                            <!-- Product 2 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Chân váy/Chân Váy Midi Freelancer FWSK25SS01C.jpg" alt="Chân Váy Midi Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Chân Váy Midi Freelancer FWSK25SS01C</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">800.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-skirt-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-skirt-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            }
                         </div>
                     </div>
+                    
+                    @* Pagination *@
+                    @Html.Partial("_Pagination")
                 </div>
             </div>
         </div>
@@ -368,6 +364,14 @@
 
 @section Scripts {
     <script>
+        // Pagination Debug Info
+        console.log('=== PAGINATION DEBUG ===');
+        console.log('Current Page:', @ViewBag.CurrentPage);
+        console.log('Total Pages:', @ViewBag.TotalPages);
+        console.log('Total Products:', @ViewBag.TotalProducts);
+        console.log('Page Size:', @ViewBag.PageSize);
+        console.log('========================');
+        
         function normalizeVietnamese(str) {
             return str.toLowerCase()
                 .normalize('NFD')
@@ -424,7 +428,7 @@
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
-                    filterProducts();
+                    // filterProducts(); // Disabled for pagination
                 });
             });
 

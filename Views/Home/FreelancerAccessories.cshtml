@@ -325,145 +325,46 @@
 
                     <div class="products-grid">
                         <div class="row g-4">
-                            <!-- Product 1 - Mắt Kính -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nữ/Mắt Kính FWSG23SS01G.jpg" alt="Mắt Kính Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Mắt Kính FWSG23SS01G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">450.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-sunglasses-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-sunglasses-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product-card-new">
+                                            <div class="product-image-container">
+                                                <img src="@product.MainImageUrl" alt="@product.Name" class="product-image" loading="lazy">
+                                            </div>
+                                            <div class="product-info">
+                                                <h6 class="product-name">@product.Name</h6>
+                                                <div class="product-price-actions">
+                                                    <div class="product-price">@product.Price.ToString("N0")₫</div>
+                                                    <div class="product-actions">
+                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.Id', this)">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 2 - Mắt Kính -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nữ/Mắt Kính FWSG23SS02G.jpg" alt="Mắt Kính Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Mắt Kính FWSG23SS02G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">480.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-sunglasses-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-sunglasses-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-info text-center">
+                                        <p class="mb-0">Không có sản phẩm nào</p>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Product 3 - Mắt Kính -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nữ/Mắt Kính FWSG23SS03G.jpg" alt="Mắt Kính Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Mắt Kính FWSG23SS03G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">460.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-sunglasses-003">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-sunglasses-003', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 4 - Thắt Lưng -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nữ/Thắt Lưng Nữ Cá Tính FWBE23SS02.jpg" alt="Thắt Lưng Nữ Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Thắt Lưng Nữ Cá Tính FWBE23SS02</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">320.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-belt-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-belt-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 5 - Combo Mắt Kính -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nữ/Combo Mắt Kính Nữ FWSG23SS01G + Hộp Mắt Kính SG23-BOX2.jpg" alt="Combo Mắt Kính Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Combo Mắt Kính + Hộp FWSG23SS01G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">550.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-combo-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-combo-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 6 - Combo Mắt Kính -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Phụ kiện nữ/Combo Mắt Kính Nữ FWSG23SS02G + Hộp Mắt Kính SG23-BOX3.jpg" alt="Combo Mắt Kính Freelancer" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Combo Mắt Kính + Hộp FWSG23SS02G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">580.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-combo-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-combo-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            }
                         </div>
                     </div>
+                    
+                    @* Pagination Component *@
+                    <partial name="_Pagination" />
                 </div>
             </div>
         </div>

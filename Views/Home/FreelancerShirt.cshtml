@@ -329,102 +329,52 @@
                         </div>
                     </div>
 
-                    <div class="products-grid">
+                                        <div class="products-grid">
                         <div class="row g-4">
-                            <!-- Sample shirt products -->
-                            <!-- Product 1 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nữ/Áo Blouse Cổ Trụ Freelancer FWBL25SS07C.jpg" alt="Áo Blouse Cổ Trụ Freelancer FWBL25SS07C" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Blouse Cổ Trụ Freelancer FWBL25SS07C</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">700.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product-card-new">
+                                            <div class="product-image-container">
+                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })">
+                                                    <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
+                                                </a>
+                                            </div>
+                                            <div class="product-info">
+                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                                    <h6 class="product-name">@product.Name</h6>
+                                                </a>
+                                                <div class="product-price-actions">
+                                                    <div class="product-price">
+                                                        <span class="current-price">@product.Price.ToString("N0")₫</span>
+                                                    </div>
+                                                    <div class="product-actions">
+                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.Id', this)">
+                                                            <i class="fas fa-shopping-bag"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center py-5">
+                                    <p class="text-muted">Không có sản phẩm nào</p>
                                 </div>
-                            </div>
-
-                            <!-- Product 2 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nữ/Áo Blouse Freelancer FWBL25SS03C.jpg" alt="Áo Blouse Freelancer FWBL25SS03C" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Blouse Freelancer FWBL25SS03C</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">600.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-002">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-002', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 3 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nữ/Áo Polo Cổ V – FWKS25SS02G.jpg" alt="Áo Polo Cổ V – FWKS25SS02G" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Polo Cổ V – FWKS25SS02G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">700.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-polo-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-polo-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Product 4 -->
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-card-new">
-                                    <div class="product-image-container">
-                                        <img src="~/images/Áo nữ/Áo Sơ Mi Freelancer – FWWS25SS06G.jpg" alt="Áo Sơ Mi Freelancer – FWWS25SS06G" class="product-image">
-                                    </div>
-                                    <div class="product-info">
-                                        <h6 class="product-name">Áo Sơ Mi Freelancer – FWWS25SS06G</h6>
-                                        <div class="product-price-actions">
-                                            <div class="product-price">700.000₫</div>
-                                            <div class="product-actions">
-                                                <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-shirt-001">
-                                                    <i class="far fa-heart"></i>
-                                                </button>
-                                                <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-shirt-001', this)">
-                                                    <i class="fas fa-shopping-bag"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            }
                         </div>
                     </div>
+                    
+                    @* Pagination *@
+                    @Html.Partial("_Pagination")
                 </div>
             </div>
         </div>
@@ -433,6 +383,14 @@
 
 @section Scripts {
     <script>
+        // Pagination Debug Info
+        console.log('=== PAGINATION DEBUG ===');
+        console.log('Current Page:', @ViewBag.CurrentPage);
+        console.log('Total Pages:', @ViewBag.TotalPages);
+        console.log('Total Products:', @ViewBag.TotalProducts);
+        console.log('Page Size:', @ViewBag.PageSize);
+        console.log('========================');
+        
         document.addEventListener('DOMContentLoaded', function() {
             const allProducts = document.querySelectorAll('.col-xl-3');
             
@@ -461,12 +419,12 @@
 
             const colorRadios = document.querySelectorAll('input[name="color"]');
             colorRadios.forEach(radio => {
-                radio.addEventListener('change', () => { console.log('Color:', radio.value); filterProducts(); });
+                radio.addEventListener('change', () => { console.log('Color:', radio.value); /* filterProducts(); */ }); // Disabled for pagination
             });
 
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
-                radio.addEventListener('change', () => { console.log('Category:', radio.value); filterProducts(); });
+                radio.addEventListener('change', () => { console.log('Category:', radio.value); /* filterProducts(); */ }); // Disabled for pagination
             });
 
             // Size button functionality
