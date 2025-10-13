@@ -1,0 +1,96 @@
+[
+  {
+    "page": "JohnHenry",
+    "status": "✅ OK",
+    "backend_total": 535,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "Freelancer",
+    "status": "✅ OK",
+    "backend_total": 363,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "FreelancerDress",
+    "status": "✅ OK",
+    "backend_total": 89,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "FreelancerShirt",
+    "status": "✅ OK",
+    "backend_total": 185,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "FreelancerTrousers",
+    "status": "✅ OK",
+    "backend_total": 51,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "FreelancerSkirt",
+    "status": "⚠️ NO DATA",
+    "backend_total": 0,
+    "frontend_count": 36,
+    "expected": 0,
+    "issues": [
+      "Backend returns 0 products"
+    ],
+    "skus": []
+  },
+  {
+    "page": "FreelancerAccessories",
+    "status": "⚠️ NO DATA",
+    "backend_total": 0,
+    "frontend_count": 2,
+    "expected": 0,
+    "issues": [
+      "Backend returns 0 products"
+    ],
+    "skus": []
+  },
+  {
+    "page": "JohnHenryShirt",
+    "status": "✅ OK",
+    "backend_total": 319,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "JohnHenryTrousers",
+    "status": "✅ OK",
+    "backend_total": 143,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  },
+  {
+    "page": "JohnHenryAccessories",
+    "status": "✅ OK",
+    "backend_total": 45,
+    "frontend_count": 40,
+    "expected": 40,
+    "issues": [],
+    "skus": []
+  }
+]
