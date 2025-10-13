@@ -109,193 +109,35 @@
             
             <div class="products-grid">
                 <div class="row g-4">
-                    <!-- Product 1 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <a href="@Url.Action("Products", "Home")">
-                                    <img src="~/images/Áo nam/Áo Hoodie Nam Tay Dài TS25FH22C-LS.jpg" alt="Áo Hoodie Nam Tay Dài" class="product-image">
-                                </a>
-                            </div>
-                            <div class="product-info">
-                                <a href="@Url.Action("Products", "Home")" style="text-decoration: none; color: inherit;">
-                                    <h6 class="product-name">Áo Hoodie Nam Tay Dài TS25FH22C-LS</h6>
-                                </a>
-                                <div class="product-price-actions">
-                                    <div class="product-price">800.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="TS25FH22C-LS">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('TS25FH22C-LS', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
+                    @foreach (var product in ViewBag.JohnHenryProducts)
+                    {
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="product-card-new">
+                                <div class="product-image-container">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })">
+                                        <img src="@product.MainImageUrl" alt="@product.Name" class="product-image" onerror="this.src='/images/default-product.jpg'">
+                                    </a>
+                                </div>
+                                <div class="product-info">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                        <h6 class="product-name">@product.Name</h6>
+                                    </a>
+                                    <div class="product-price-actions">
+                                        <div class="product-price">@product.Price.ToString("N0")₫</div>
+                                        <div class="product-actions">
+                                            <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.SKU">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+                                            <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.SKU', this)">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Product 2 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Polo Nam Tay Ngắn Form Vừa KS25FH43C-SCCA.jpg" alt="Áo Polo Nam Tay Ngắn" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Polo Nam Tay Ngắn Form Vừa</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">650.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="KS25FH43C-SCCA">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('KS25FH43C-SCCA', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 3 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Khoác Nam Cá Tính JK25FH04C-PA</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">1.500.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="JK25FH04C-PA">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('JK25FH04C-PA', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 4 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH09P-KA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Khoác Nam Cá Tính JK25FH09P-KA</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">1.100.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="JK25FH09P-KA">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('JK25FH09P-KA', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 5 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Khoác Nam Thời Trang JK25FH02P-CT.jpg" alt="Áo Khoác Nam Thời Trang" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Khoác Nam Thời Trang JK25FH02P-CT</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">1.500.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 6 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB.jpg" alt="Áo Len Nam Tay Dài" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">720.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="SW25FH04M-LB">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('SW25FH04M-LB', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 7 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Quần nam/Quần Jeans Nam Form Ôm JN25FH39C-SL.jpg" alt="Quần Jeans Nam Form Ôm" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Quần Jeans Nam Form Ôm JN25FH39C-SL</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">950.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-jeans-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-jeans-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 8 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Quần nam/Quần Khaki Nam Form Vừa KP25FH20C-NMWFRG.jpg" alt="Quần Khaki Nam Form Vừa" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Quần Khaki Nam Form Vừa KP25FH20C-NMWFRG</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">780.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="john-henry-khaki-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('john-henry-khaki-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    }
+
                 </div>
                 
                 <!-- View All Button -->
@@ -323,194 +165,39 @@
                 
                 <div class="products-grid">
                 <div class="row g-4">
-                    <!-- Product 1 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nữ/Áo Blouse Nữ Thời Trang FWBL25SS01C.jpg" alt="Áo Blouse Nữ Thời Trang" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Blouse Nữ Thời Trang</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">750.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-blouse-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-blouse-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
+                    @foreach (var product in ViewBag.FreelancerProducts)
+                    {
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="product-card-new">
+                                <div class="product-image-container">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })">
+                                        <img src="@product.MainImageUrl" alt="@product.Name" class="product-image" onerror="this.src='/images/default-product.jpg'">
+                                    </a>
+                                </div>
+                                <div class="product-info">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                        <h6 class="product-name">@product.Name</h6>
+                                    </a>
+                                    <div class="product-price-actions">
+                                        <div class="product-price">@product.Price.ToString("N0")₫</div>
+                                        <div class="product-actions">
+                                            <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.SKU">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+                                            <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.SKU', this)">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Product 2 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nữ/Áo Polo Nữ Cổ Lưới FWKS25SS11G.jpg" alt="Áo Polo Nữ Cổ Lưới" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Polo Nữ Cổ Lưới</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">680.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-polo-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-polo-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 3 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nữ/Áo Sơ Mi Freelancer FWWS25SS04C.jpg" alt="Áo Sơ Mi Freelancer" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Sơ Mi Nữ Tay Ngắn</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">890.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-shirt-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-shirt-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 4 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nữ/Áo Thun Freelancer – FWTS25SS05G.jpg" alt="Áo Thun Freelancer" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Thun Freelancer</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">450.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-tshirt-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-tshirt-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 5 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Đầm nữ/Đầm Nữ Thời Trang FWDR25SS08G.jpg" alt="Đầm Nữ Thời Trang" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Đầm Nữ Thời Trang</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">1.200.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-dress-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-dress-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 6 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Đầm nữ/Đầm Cổ Vest Thanh Lịch FWDR24SS21C.jpg" alt="Đầm Cổ Vest Thanh Lịch" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Đầm Cổ Vest Thanh Lịch</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">2.500.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-dress-002">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-dress-002', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 7 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Chân váy nữ/Chân Váy Freelancer – FWSK25SS02G.jpg" alt="Chân Váy Freelancer" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Chân Váy Freelancer</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">650.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-skirt-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-skirt-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 8 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Chân váy nữ/Chân Váy Freelancer – FWSK25SS04G.jpg" alt="Chân Váy Freelancer" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Chân Váy Freelancer</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">720.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="freelancer-skirt-002">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('freelancer-skirt-002', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
                 
                 <!-- View All Button -->
                 <div class="text-center mt-5">
-                    <a href="@Url.Action("Products", "Home")" class="btn btn-outline-primary view-all-btn px-5">
+                    <a href="@Url.Action("Freelancer", "Home")" class="btn btn-outline-primary view-all-btn px-5">
                         XEM THÊM
                     </a>
                 </div>
@@ -533,189 +220,34 @@
             
             <div class="products-grid">
                 <div class="row g-4">
-                    <!-- Product 1 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Khoác Nam Cá Tính" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Khoác Nam Cá Tính</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">1.200.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-jacket-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-jacket-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
+                    @foreach (var product in ViewBag.BestSellerProducts)
+                    {
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="product-card-new">
+                                <div class="product-image-container">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })">
+                                        <img src="@product.MainImageUrl" alt="@product.Name" class="product-image" onerror="this.src='/images/default-product.jpg'">
+                                    </a>
+                                </div>
+                                <div class="product-info">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                        <h6 class="product-name">@product.Name</h6>
+                                    </a>
+                                    <div class="product-price-actions">
+                                        <div class="product-price">@product.Price.ToString("N0")₫</div>
+                                        <div class="product-actions">
+                                            <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.SKU">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+                                            <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('@product.SKU', this)">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Product 2 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nam/Áo Len Nam Tay Dài Form Vừa SW25FH04M-LB.jpg" alt="Áo Len Nam Tay Dài" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Len Nam Tay Dài</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">720.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-sweater-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-sweater-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 3 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nữ/Áo Blouse Nữ Thời Trang FWBL25SS01C.jpg" alt="Áo Blouse Nữ Thời Trang" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Blouse Nữ Thời Trang</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">562.500₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-blouse-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-blouse-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 4 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Áo nữ/Áo Polo Nữ Cổ Lưới FWKS25SS11G.jpg" alt="Áo Polo Nữ Cổ Lưới" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Áo Polo Nữ Cổ Lưới</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">578.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-polo-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-polo-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 5 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Đầm nữ/Đầm Nữ Thời Trang FWDR25SS016G.jpg" alt="Đầm Nữ Thời Trang" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Đầm Nữ Thời Trang</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">1.200.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-dress-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-dress-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 6 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Đầm nữ/Đầm Trắng Dáng Wrap Cổ Tim FWDR25SS17C.jpg" alt="Đầm Dạ Hội Nữ Lụa" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Đầm Dạ Hội Nữ Lụa</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">2.500.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-dress-002">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-dress-002', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 7 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Quần nam/Quần Jeans Nam Form Vừa JN25FH38C-RG.jpg" alt="Quần Jeans Nam Form Vừa" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Quần Jeans Nam Form Vừa</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">950.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-jeans-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-jeans-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product 8 -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="product-card-new">
-                            <div class="product-image-container">
-                                <img src="~/images/Chân váy nữ/Chân Váy Nữ Thanh Lịch FWSK24FH01C.jpg" alt="Chân Váy Nữ Thanh Lịch" class="product-image">
-                            </div>
-                            <div class="product-info">
-                                <h6 class="product-name">Chân Váy Nữ Thanh Lịch</h6>
-                                <div class="product-price-actions">
-                                    <div class="product-price">650.000₫</div>
-                                    <div class="product-actions">
-                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="bestseller-skirt-001">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCart('bestseller-skirt-001', this)">
-                                            <i class="fas fa-shopping-bag"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
@@ -740,7 +272,7 @@
             <div class="col-lg-6">
                 <div class="category-card">
                     <div class="category-image-container">
-                        <img src="~/images/Áo nam/Áo Khoác Nam Cá Tính JK25FH04C-PA.jpg" alt="Áo Nam" class="category-image">
+                        <img src="~/images/Banner/banner-man-2.jpg" alt="Áo Nam" class="category-image">
                         <div class="category-overlay">
                             <div class="category-content">
                                 <h3 class="category-title">ÁO NAM</h3>
@@ -759,7 +291,7 @@
             <div class="col-lg-6">
                 <div class="category-card">
                     <div class="category-image-container">
-                        <img src="~/images/Áo nữ/Áo Blouse Nữ Thời Trang FWBL25SS01C.jpg" alt="Áo Nữ" class="category-image">
+                        <img src="~/images/Banner/banner-women-2.jpg" alt="Áo Nữ" class="category-image">
                         <div class="category-overlay">
                             <div class="category-content">
                                 <h3 class="category-title">ÁO NỮ</h3>
@@ -1299,7 +831,7 @@
     }
     
     .product-name {
-        font-size: 0.8rem;
+        font-size: 14px;
         font-weight: 700;
         color: #333;
         margin: 0 0 5px 0;
@@ -1524,59 +1056,11 @@
         transform: scale(1.1);
     }
     
-    .product-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background: var(--primary-color);
-        color: white;
-        padding: 5px 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .product-badge.sale-badge {
-        background: #ff6b35;
-    }
-    
     .product-code {
         font-size: 0.85rem;
         color: #666;
         margin: 0 0 15px 0;
         font-weight: 500;
-    }
-    
-    .current-price {
-        font-size: 1.2rem;
-        font-weight: 900;
-        color: var(--primary-color);
-        margin-right: 10px;
-    }
-    
-    .old-price {
-        font-size: 1rem;
-        color: #999;
-        text-decoration: line-through;
-        font-weight: 500;
-    }
-    
-    .product-rating {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-    }
-    
-    .product-rating i {
-        color: #ffd700;
-        font-size: 0.9rem;
-    }
-    
-    .rating-count {
-        font-size: 0.85rem;
-        color: #666;
-        margin-left: 8px;
     }
     
     .view-all-btn {
