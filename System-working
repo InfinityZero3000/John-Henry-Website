@@ -118,3 +118,53 @@ tiny dùng để làm gì ?
 brew services start postgresql@14 -- khởi động postgresql
 
 dotnet ef database update -- tạo database theo code
+
+DATABASE RELATIONSHIPS
+
+┌─────────────┐         ┌──────────────┐
+│ SupportTicket│────────▶│ ApplicationUser │
+│             │ UserId  │ (Customer)    │
+└─────────────┘         └──────────────┘
+      │
+      │ AssignedTo
+      ▼
+┌──────────────┐
+│ ApplicationUser │
+│ (Admin)      │
+└──────────────┘
+      │
+      │ TicketId
+      ▼
+┌──────────────┐
+│ TicketReply  │
+└──────────────┘
+
+┌─────────────┐         ┌──────────────┐
+│   Dispute   │────────▶│    Order     │
+│             │ OrderId │              │
+└─────────────┘         └──────────────┘
+      │
+      │ CustomerId
+      ▼
+┌──────────────┐
+│ ApplicationUser │
+│ (Customer)   │
+└──────────────┘
+      │
+      │ SellerId
+      ▼
+┌──────────────┐
+│ ApplicationUser │
+│ (Seller)     │
+└──────────────┘
+      │
+      │ ResolvedBy
+      ▼
+┌──────────────┐
+│ ApplicationUser │
+│ (Admin)      │
+└──────────────┘
+
+
+thực hiện viết tài liệu SRS cho hệ thống, thực hiện tạo các sơ đồ ERD cho database
+bổ sung các view, Controllers còn thiếu trong admin, kiểm tra và hoàn thiện seller
