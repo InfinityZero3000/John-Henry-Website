@@ -1,80 +1,122 @@
 @model List<Brand>
 @{
     ViewData["Title"] = "Quản lý Thương hiệu";
-    ViewData["CurrentSection"] = "brands";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Thương hiệu</li>";
+    
+    // Calculate statistics
+    var totalBrands = Model?.Count ?? 0;
+    var activeBrands = Model?.Count(b => b.IsActive) ?? 0;
+    var inactiveBrands = totalBrands - activeBrands;
+    var totalProducts = Model?.Sum(b => b.Products?.Count ?? 0) ?? 0;
 }
 
 <div class="admin-content">
     <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-tags me-2"></i>Quản lý Thương hiệu
-                </h1>
-                <p class="text-muted mb-0">Quản lý các thương hiệu sản phẩm</p>
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="tag"></i>
+                Quản lý Thương hiệu
+            </h1>
+            <a href="@Url.Action("CreateBrand")" class="admin-btn admin-btn-primary">
+                <i data-lucide="plus"></i>
+                Thêm Thương hiệu
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng thương hiệu</h3>
+                    <p class="value">@totalBrands</p>
+                    <p class="change">Tất cả thương hiệu</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="tag"></i>
+                </div>
             </div>
-            <div class="header-actions">
-                <a href="@Url.Action("CreateBrand")" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Thêm Thương hiệu
-                </a>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang hoạt động</h3>
+                    <p class="value">@activeBrands</p>
+                    <p class="change">@((totalBrands > 0 ? (activeBrands * 100.0 / totalBrands).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tạm dừng</h3>
+                    <p class="value">@inactiveBrands</p>
+                    <p class="change">@((totalBrands > 0 ? (inactiveBrands * 100.0 / totalBrands).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="pause-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng sản phẩm</h3>
+                    <p class="value">@totalProducts</p>
+                    <p class="change">Trong tất cả thương hiệu</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="package"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Search and Actions Section -->
-    <div class="content-wrapper">
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="search-container">
-                    <form method="get" class="search-form">
-                        <div class="input-group">
-                            <input type="text" name="search" value="@ViewBag.Search" 
-                                   placeholder="Tìm kiếm thương hiệu..." class="form-control">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-outline-secondary">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <input type="hidden" name="page" value="1">
-                    </form>
-                </div>
-            </div>
-            <div class="col-md-6 text-end">
-                <div class="info-stats">
-                    <span class="badge bg-secondary me-2">
-                        Tổng: @ViewBag.TotalBrands thương hiệu
-                    </span>
-                    <span class="badge bg-info">
-                        Trang @ViewBag.CurrentPage/@ViewBag.TotalPages
-                    </span>
-                </div>
-            </div>
-        </div>
-        <!-- Brands Table -->
-        <div class="table-container">
-            <div class="card">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Logo</th>
-                                    <th>Tên thương hiệu</th>
-                                    <th>Mô tả</th>
-                                    <th>Website</th>
-                                    <th>Số sản phẩm</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày tạo</th>
-                                    <th class="text-center">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+    <!-- Search and Filters -->
+    <div class="admin-filters">
+        <form method="get" class="admin-search-box">
+            <i data-lucide="search"></i>
+            <input type="text" name="search" value="@ViewBag.Search" 
+                   placeholder="Tìm kiếm thương hiệu..." class="admin-search-input">
+            <input type="hidden" name="page" value="1">
+            <button type="submit" class="admin-btn admin-btn-primary">Tìm kiếm</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search))
+            {
+                <a href="@Url.Action("Brands")" class="admin-btn admin-btn-secondary">
+                    <i data-lucide="rotate-ccw"></i>
+                    Đặt lại
+                </a>
+            }
+        </form>
+    </div>
+    <!-- Brands Table -->
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Logo</th>
+                    <th>Tên thương hiệu</th>
+                    <th>Mô tả</th>
+                    <th>Website</th>
+                    <th>Số sản phẩm</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
                 @if (Model != null && Model.Any())
                 {
-                    @foreach (var brand in Model)
+                    foreach (var brand in Model)
                     {
                         <tr>
                             <td>
@@ -87,7 +129,7 @@
                                 {
                                     <div class="brand-logo-placeholder rounded d-flex align-items-center justify-content-center bg-light" 
                                          style="width: 50px; height: 50px;">
-                                        <i class="fas fa-image text-muted"></i>
+                                        <i data-lucide="image"></i>
                                     </div>
                                 }
                             </td>
@@ -110,7 +152,7 @@
                                 @if (!string.IsNullOrEmpty(brand.Website))
                                 {
                                     <a href="@brand.Website" target="_blank" class="text-primary text-decoration-none">
-                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        <i data-lucide="external-link"></i>
                                         Website
                                     </a>
                                 }
@@ -127,31 +169,37 @@
                             <td>
                                 @if (brand.IsActive)
                                 {
-                                    <span class="badge bg-success">Hoạt động</span>
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="check-circle"></i>
+                                        Hoạt động
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Tạm dừng</span>
+                                    <span class="admin-badge admin-badge-secondary">
+                                        <i data-lucide="pause-circle"></i>
+                                        Tạm dừng
+                                    </span>
                                 }
                             </td>
                             <td>
                                 @brand.CreatedAt.ToString("dd/MM/yyyy")
                             </td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                     <a href="@Url.Action("EditBrand", new { id = brand.Id })" 
-                                       class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
+                                       class="admin-btn admin-btn-sm admin-btn-primary" title="Chỉnh sửa">
+                                        <i data-lucide="edit"></i>
                                     </a>
                                     
                                     <form method="post" action="@Url.Action("ToggleBrandStatus", new { id = brand.Id })" 
                                           style="display: inline;">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" 
-                                                class="btn btn-sm @(brand.IsActive ? "btn-outline-warning" : "btn-outline-success")" 
+                                                class="admin-btn admin-btn-sm @(brand.IsActive ? "admin-btn-warning" : "admin-btn-success")" 
                                                 title="@(brand.IsActive ? "Tạm dừng" : "Kích hoạt")"
                                                 onclick="return confirm('@(brand.IsActive ? "Bạn có chắc muốn tạm dừng thương hiệu này?" : "Bạn có chắc muốn kích hoạt thương hiệu này?")')">
-                                            <i class="fas @(brand.IsActive ? "fa-pause" : "fa-play")"></i>
+                                            <i data-lucide="@(brand.IsActive ? "pause" : "play")"></i>
                                         </button>
                                     </form>
 
@@ -160,17 +208,17 @@
                                         <form method="post" action="@Url.Action("DeleteBrand", new { id = brand.Id })" 
                                               style="display: inline;">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                            <button type="submit" class="admin-btn admin-btn-sm admin-btn-danger" 
                                                     title="Xóa"
                                                     onclick="return confirm('Bạn có chắc muốn xóa thương hiệu này? Hành động này không thể hoàn tác!')">
-                                                <i class="fas fa-trash"></i>
+                                                <i data-lucide="trash-2"></i>
                                             </button>
                                         </form>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-sm btn-outline-danger" disabled title="Không thể xóa vì có sản phẩm">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="admin-btn admin-btn-sm admin-btn-secondary" disabled title="Không thể xóa - có sản phẩm">
+                                            <i data-lucide="trash-2"></i>
                                         </button>
                                     }
                                 </div>
@@ -181,51 +229,60 @@
                 else
                 {
                     <tr>
-                        <td colspan="8" class="text-center py-5">
-                            <div class="empty-state">
-                                <div class="empty-icon mb-3">
-                                    <i class="fas fa-tags fa-3x text-muted"></i>
-                                </div>
-                                <h5 class="text-muted mb-3">Chưa có thương hiệu nào</h5>
-                                <p class="text-muted mb-3">Bắt đầu bằng cách thêm thương hiệu đầu tiên cho cửa hàng của bạn.</p>
-                                <a href="@Url.Action("CreateBrand")" class="btn btn-primary">
-                                    <i class="fas fa-plus me-1"></i>
-                                    Thêm thương hiệu đầu tiên
-                                </a>
+                        <td colspan="8">
+                            <div class="admin-empty-state">
+                                <i data-lucide="tag" class="admin-empty-icon"></i>
+                                @if (!string.IsNullOrEmpty(ViewBag.Search))
+                                {
+                                    <h3>Không tìm thấy thương hiệu</h3>
+                                    <p>Không có thương hiệu nào khớp với tìm kiếm "@ViewBag.Search"</p>
+                                    <a href="@Url.Action("Brands")" class="admin-btn admin-btn-secondary">
+                                        <i data-lucide="rotate-ccw"></i>
+                                        Xóa bộ lọc
+                                    </a>
+                                }
+                                else
+                                {
+                                    <h3>Chưa có thương hiệu nào</h3>
+                                    <p>Bắt đầu bằng cách thêm thương hiệu đầu tiên cho cửa hàng của bạn</p>
+                                    <a href="@Url.Action("CreateBrand")" class="admin-btn admin-btn-primary">
+                                        <i data-lucide="plus"></i>
+                                        Thêm thương hiệu đầu tiên
+                                    </a>
+                                }
                             </div>
                         </td>
                     </tr>
                 }
             </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        @if (ViewBag.TotalPages > 1)
-        {
-            <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Pagination">
-                    <ul class="pagination">
-                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                        {
-                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Brands", new { page = i, search = ViewBag.Search })">
-                                    @i
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </nav>
-            </div>
-        }
+        </table>
     </div>
+
+    <!-- Pagination -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="admin-pagination">
+            <nav aria-label="Pagination">
+                <ul class="pagination">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Brands", new { page = i, search = ViewBag.Search })">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
 
 @section Scripts {
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
         // Auto-hide alerts after 3 seconds
         setTimeout(function() {
             $('.alert').fadeOut();

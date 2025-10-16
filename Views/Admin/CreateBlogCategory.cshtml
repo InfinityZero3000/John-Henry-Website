@@ -2,279 +2,234 @@
 
 @{
     ViewData["Title"] = "Tạo danh mục blog";
+    ViewData["CurrentSection"] = "Blog";
+    ViewData["PageIcon"] = "folder-plus";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Tạo danh mục blog mới</h1>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="folder-plus"></i>
+                Tạo danh mục blog mới
+            </h1>
+        </div>
+        <div class="admin-page-header-actions">
+            <a href="@Url.Action("Blog", "Admin")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h3><i data-lucide="info"></i> Thông tin danh mục blog</h3>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="@Url.Action("Blog", "Admin")">Blog</a></li>
-                        <li class="breadcrumb-item active">Tạo danh mục</li>
-                    </ol>
+                <div class="admin-card-body">
+                    <form asp-action="CreateBlogCategory" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="admin-alert admin-alert-danger"></div>
+
+                        <div class="admin-form-group">
+                            <label asp-for="Name" class="admin-form-label">
+                                Tên danh mục <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="admin-form-control" placeholder="Nhập tên danh mục blog..." id="Name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <small class="admin-form-help">
+                                Tên danh mục sẽ hiển thị trên website và được sử dụng để phân loại bài viết blog.
+                            </small>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label asp-for="Slug" class="admin-form-label">
+                                Slug (URL thân thiện)
+                            </label>
+                            <input asp-for="Slug" class="admin-form-control" placeholder="ten-danh-muc-blog" id="Slug" />
+                            <span asp-validation-for="Slug" class="text-danger"></span>
+                            <small class="admin-form-help">
+                                Slug sẽ được tự động tạo từ tên danh mục nếu để trống. Ví dụ: "tin-tuc-thoi-trang"
+                            </small>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label asp-for="Description" class="admin-form-label">
+                                Mô tả
+                            </label>
+                            <textarea asp-for="Description" class="admin-form-control" rows="4" 
+                                      placeholder="Nhập mô tả ngắn gọn về danh mục này..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="admin-form-help">
+                                Mô tả sẽ hiển thị trên trang danh mục và có thể được sử dụng cho SEO.
+                            </small>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label for="ParentId" class="admin-form-label">
+                                Danh mục cha
+                            </label>
+                            <select name="ParentId" class="admin-form-select select2" style="width: 100%;">
+                                <option value="">-- Không có danh mục cha --</option>
+                                @* Sẽ được load từ Controller *@
+                            </select>
+                            <small class="admin-form-help">
+                                Chọn danh mục cha nếu đây là danh mục con.
+                            </small>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label for="ImageFile" class="admin-form-label">
+                                Hình ảnh đại diện
+                            </label>
+                            <input type="file" class="admin-form-control" id="ImageFile" name="ImageFile" accept="image/*">
+                            <small class="admin-form-help">
+                                Định dạng: JPG, PNG, GIF. Kích thước khuyến nghị: 800x600px.
+                            </small>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label asp-for="SortOrder" class="admin-form-label">
+                                Thứ tự hiển thị
+                            </label>
+                            <input asp-for="SortOrder" type="number" class="admin-form-control" min="0" value="0" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                            <small class="admin-form-help">
+                                Số thứ tự hiển thị danh mục (0 = hiển thị đầu tiên).
+                            </small>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <div class="admin-form-check">
+                                <input asp-for="IsActive" class="admin-form-check-input" type="checkbox" checked />
+                                <label asp-for="IsActive" class="admin-form-check-label">
+                                    Kích hoạt danh mục
+                                </label>
+                            </div>
+                            <small class="admin-form-help">
+                                Danh mục chỉ hiển thị trên website khi được kích hoạt.
+                            </small>
+                        </div>
+
+                        <div class="admin-form-actions">
+                            <button type="submit" class="admin-btn admin-btn-primary">
+                                <i data-lucide="save"></i> Tạo danh mục
+                            </button>
+                            <a href="@Url.Action("Blog", "Admin")" class="admin-btn admin-btn-secondary">
+                                <i data-lucide="x"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                    </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Hướng dẫn -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h3><i data-lucide="help-circle"></i> Hướng dẫn</h3>
+                </div>
+                <div class="admin-card-body">
+                    <div class="admin-alert admin-alert-info">
+                        <h6><i data-lucide="lightbulb"></i> Mẹo tạo danh mục hiệu quả:</h6>
+                        <ul class="mb-0">
+                            <li>Tên danh mục nên ngắn gọn, dễ hiểu</li>
+                            <li>Sử dụng mô tả để giải thích rõ nội dung</li>
+                            <li>Chọn hình ảnh phù hợp với chủ đề</li>
+                            <li>Sắp xếp thứ tự hiển thị hợp lý</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="admin-alert admin-alert-warning mt-3">
+                        <h6><i data-lucide="alert-triangle"></i> Lưu ý:</h6>
+                        <ul class="mb-0">
+                            <li>Slug phải là duy nhất</li>
+                            <li>Tên danh mục không được trùng lặp</li>
+                            <li>Danh mục cha không thể là chính nó</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Xem trước -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h3><i data-lucide="eye"></i> Xem trước hình ảnh</h3>
+                </div>
+                <div class="admin-card-body text-center">
+                    <img id="imagePreview" src="/images/placeholder-category.jpg" 
+                         alt="Xem trước" class="img-fluid rounded" 
+                         style="max-height: 200px; display: none;">
+                    <p id="noImageText" class="text-muted">Chưa chọn hình ảnh</p>
                 </div>
             </div>
         </div>
     </div>
-
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-folder-plus"></i>
-                                Thông tin danh mục blog
-                            </h3>
-                        </div>
-                        <form asp-action="CreateBlogCategory" method="post" enctype="multipart/form-data">
-                            <div class="card-body">
-                                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-                                <div class="form-group">
-                                    <label asp-for="Name" class="form-label">
-                                        Tên danh mục <span class="text-danger">*</span>
-                                    </label>
-                                    <input asp-for="Name" class="form-control" placeholder="Nhập tên danh mục blog..." />
-                                    <span asp-validation-for="Name" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        Tên danh mục sẽ hiển thị trên website và được sử dụng để phân loại bài viết blog.
-                                    </small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label asp-for="Slug" class="form-label">
-                                        Slug (URL thân thiện)
-                                    </label>
-                                    <input asp-for="Slug" class="form-control" placeholder="ten-danh-muc-blog" />
-                                    <span asp-validation-for="Slug" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        Slug sẽ được tự động tạo từ tên danh mục nếu để trống. Ví dụ: "tin-tuc-thoi-trang"
-                                    </small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label asp-for="Description" class="form-label">
-                                        Mô tả
-                                    </label>
-                                    <textarea asp-for="Description" class="form-control" rows="4" 
-                                              placeholder="Nhập mô tả ngắn gọn về danh mục này..."></textarea>
-                                    <span asp-validation-for="Description" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        Mô tả sẽ hiển thị trên trang danh mục và có thể được sử dụng cho SEO.
-                                    </small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="ParentId" class="form-label">
-                                        Danh mục cha
-                                    </label>
-                                    <select name="ParentId" class="form-control select2" style="width: 100%;">
-                                        <option value="">-- Không có danh mục cha --</option>
-                                        @* Sẽ được load từ Controller *@
-                                    </select>
-                                    <small class="form-text text-muted">
-                                        Chọn danh mục cha nếu đây là danh mục con.
-                                    </small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="ImageFile" class="form-label">
-                                        Hình ảnh đại diện
-                                    </label>
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="ImageFile" name="ImageFile" accept="image/*">
-                                        <label class="custom-file-label" for="ImageFile">Chọn hình ảnh...</label>
-                                    </div>
-                                    <small class="form-text text-muted">
-                                        Định dạng: JPG, PNG, GIF. Kích thước khuyến nghị: 800x600px.
-                                    </small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label asp-for="SortOrder" class="form-label">
-                                        Thứ tự hiển thị
-                                    </label>
-                                    <input asp-for="SortOrder" type="number" class="form-control" min="0" value="0" />
-                                    <span asp-validation-for="SortOrder" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        Số thứ tự hiển thị danh mục (0 = hiển thị đầu tiên).
-                                    </small>
-                                </div>
-
-                                <div class="form-check">
-                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
-                                    <label asp-for="IsActive" class="form-check-label">
-                                        Kích hoạt danh mục
-                                    </label>
-                                    <small class="form-text text-muted d-block">
-                                        Danh mục chỉ hiển thị trên website khi được kích hoạt.
-                                    </small>
-                                </div>
-                            </div>
-
-                            <div class="card-footer">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save"></i> Tạo danh mục
-                                        </button>
-                                        <a href="@Url.Action("Blog", "Admin")" class="btn btn-secondary ml-2">
-                                            <i class="fas fa-times"></i> Hủy
-                                        </a>
-                                    </div>
-                                    <div class="col-sm-6 text-right">
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle"></i>
-                                            Tất cả các trường có dấu (*) là bắt buộc
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <!-- Hướng dẫn -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-question-circle"></i>
-                                Hướng dẫn
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-info">
-                                <h6><i class="fas fa-lightbulb"></i> Mẹo tạo danh mục hiệu quả:</h6>
-                                <ul class="mb-0">
-                                    <li>Tên danh mục nên ngắn gọn, dễ hiểu</li>
-                                    <li>Sử dụng mô tả để giải thích rõ nội dung</li>
-                                    <li>Chọn hình ảnh phù hợp với chủ đề</li>
-                                    <li>Sắp xếp thứ tự hiển thị hợp lý</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="alert alert-warning">
-                                <h6><i class="fas fa-exclamation-triangle"></i> Lưu ý:</h6>
-                                <ul class="mb-0">
-                                    <li>Slug phải là duy nhất</li>
-                                    <li>Tên danh mục không được trùng lặp</li>
-                                    <li>Danh mục cha không thể là chính nó</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Xem trước -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-eye"></i>
-                                Xem trước hình ảnh
-                            </h3>
-                        </div>
-                        <div class="card-body text-center">
-                            <img id="imagePreview" src="/images/placeholder-category.jpg" 
-                                 alt="Xem trước" class="img-fluid rounded" 
-                                 style="max-height: 200px; display: none;">
-                            <p id="noImageText" class="text-muted">Chưa chọn hình ảnh</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        $(document).ready(function() {
-            // Khởi tạo Select2
-            $('.select2').select2({
-                theme: 'bootstrap4',
-                placeholder: 'Chọn danh mục cha...'
-            });
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-            // Tự động tạo slug từ tên danh mục
-            $('#Name').on('input', function() {
-                var name = $(this).val();
-                var slug = name.toLowerCase()
-                    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
-                    .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
-                    .replace(/[ìíịỉĩ]/g, 'i')
-                    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
-                    .replace(/[ùúụủũưừứựửữ]/g, 'u')
-                    .replace(/[ỳýỵỷỹ]/g, 'y')
-                    .replace(/đ/g, 'd')
-                    .replace(/[^a-z0-9 -]/g, '')
-                    .replace(/\s+/g, '-')
-                    .replace(/-+/g, '-')
-                    .trim('-');
-                    
-                if ($('#Slug').val() === '' || $('#Slug').data('auto-generated')) {
-                    $('#Slug').val(slug).data('auto-generated', true);
+        // Tự động tạo slug từ tên danh mục
+        document.getElementById('Name').addEventListener('input', function() {
+            var name = this.value;
+            var slug = name.toLowerCase()
+                .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+                .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+                .replace(/[ìíịỉĩ]/g, 'i')
+                .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+                .replace(/[ùúụủũưừứựửữ]/g, 'u')
+                .replace(/[ỳýỵỷỹ]/g, 'y')
+                .replace(/đ/g, 'd')
+                .replace(/[^a-z0-9 -]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+                
+            var slugInput = document.getElementById('Slug');
+            if (slugInput.value === '' || slugInput.dataset.autoGenerated === 'true') {
+                slugInput.value = slug;
+                slugInput.dataset.autoGenerated = 'true';
+            }
+        });
+
+        // Đánh dấu slug được nhập thủ công
+        document.getElementById('Slug').addEventListener('input', function() {
+            this.dataset.autoGenerated = 'false';
+        });
+
+        // Xem trước hình ảnh
+        document.getElementById('ImageFile').addEventListener('change', function() {
+            var file = this.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('noImageText').style.display = 'none';
                 }
-            });
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('noImageText').style.display = 'block';
+            }
+        });
 
-            // Đánh dấu slug được nhập thủ công
-            $('#Slug').on('input', function() {
-                $(this).data('auto-generated', false);
-            });
-
-            // Xem trước hình ảnh
-            $('#ImageFile').on('change', function() {
-                var file = this.files[0];
-                if (file) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#imagePreview').attr('src', e.target.result).show();
-                        $('#noImageText').hide();
-                    }
-                    reader.readAsDataURL(file);
-                    
-                    // Cập nhật label
-                    var fileName = file.name;
-                    $(this).next('.custom-file-label').text(fileName);
-                } else {
-                    $('#imagePreview').hide();
-                    $('#noImageText').show();
-                    $(this).next('.custom-file-label').text('Chọn hình ảnh...');
-                }
-            });
-
-            // Validation cho slug
-            $('#Slug').on('blur', function() {
-                var slug = $(this).val();
-                if (slug && !/^[a-z0-9-]+$/.test(slug)) {
-                    alert('Slug chỉ được chứa chữ cái thường, số và dấu gạch ngang!');
-                    $(this).focus();
-                }
-            });
+        // Validation cho slug
+        document.getElementById('Slug').addEventListener('blur', function() {
+            var slug = this.value;
+            if (slug && !/^[a-z0-9-]+$/.test(slug)) {
+                alert('Slug chỉ được chứa chữ cái thường, số và dấu gạch ngang!');
+                this.focus();
+            }
         });
     </script>
-    
-    <style>
-        .select2-container--bootstrap4 .select2-selection {
-            height: calc(2.25rem + 2px) !important;
-        }
-        
-        .custom-file-label::after {
-            content: "Chọn";
-        }
-        
-        #imagePreview {
-            border: 2px dashed #dee2e6;
-            padding: 10px;
-        }
-    </style>
 }

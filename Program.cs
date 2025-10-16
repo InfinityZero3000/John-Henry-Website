@@ -246,6 +246,7 @@ builder.Services.AddScoped<JohnHenryFashionWeb.Services.IAuthService, JohnHenryF
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IPaymentService, JohnHenryFashionWeb.Services.PaymentService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IUserManagementService, JohnHenryFashionWeb.Services.UserManagementService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IAuditLogService, JohnHenryFashionWeb.Services.AuditLogService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.SeedDataService>();
 
 // Add Application Insights
 builder.Services.AddApplicationInsightsTelemetry();
@@ -316,6 +317,27 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Seed Admin System Data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Starting Admin System Data Seeding...");
+        
+        var seedService = services.GetRequiredService<JohnHenryFashionWeb.Services.SeedDataService>();
+        await seedService.SeedAdminSystemDataAsync();
+        
+        logger.LogInformation("Admin System Data Seeding completed successfully!");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding admin system data.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

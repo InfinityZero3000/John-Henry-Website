@@ -20,7 +20,6 @@ namespace JohnHenryFashionWeb.Controllers
                 // General Settings
                 SiteName = "John Henry Fashion",
                 SiteDescription = "Premium Fashion Store",
-                SiteUrl = "https://johnhenryfashion.com",
                 AdminEmail = "admin@johnhenryfashion.com",
                 SupportEmail = "support@johnhenryfashion.com",
                 

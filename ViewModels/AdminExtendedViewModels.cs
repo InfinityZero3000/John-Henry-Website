@@ -36,22 +36,6 @@ namespace JohnHenryFashionWeb.ViewModels
         public int OnlineUsers { get; set; }
     }
 
-    public class AdvancedUsersViewModel
-    {
-        public List<EnhancedUserViewModel> Users { get; set; } = new();
-        public UserStatistics Statistics { get; set; } = new();
-        public string SearchTerm { get; set; } = string.Empty;
-        public string RoleFilter { get; set; } = string.Empty;
-        public string StatusFilter { get; set; } = string.Empty;
-        public string SortBy { get; set; } = "created";
-        public string SortDirection { get; set; } = "desc";
-        public int PageSize { get; set; } = 10;
-        public int CurrentPage { get; set; } = 1;
-        public int TotalUsers { get; set; }
-        public int TotalPages => (int)Math.Ceiling((double)TotalUsers / PageSize);
-        public List<string> AvailableRoles { get; set; } = new() { "Admin", "Seller", "Customer" };
-    }
-
     #endregion
 
     #region Performance & Security ViewModels
@@ -106,7 +90,6 @@ namespace JohnHenryFashionWeb.ViewModels
         // General Settings
         public string SiteName { get; set; } = "John Henry Fashion";
         public string? SiteDescription { get; set; }
-        public string? SiteUrl { get; set; }
         public string? AdminEmail { get; set; }
         public string? SupportEmail { get; set; }
         

@@ -1,111 +1,87 @@
 @{
     ViewData["Title"] = "Quản lý banner";
+    ViewData["CurrentSection"] = "Banners";
+    ViewData["PageIcon"] = "image";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="admin-content">
-    <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-image me-2"></i>Quản lý banner
-                </h1>
-                <p class="text-muted mb-0">Quản lý banner trang chủ và nội dung quảng cáo</p>
-            </div>
-            <div class="header-actions">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBannerModal">
-                    <i class="fas fa-plus me-1"></i>Tạo banner mới
-                </button>
-            </div>
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="image"></i>
+                Quản lý banner
+            </h1>
+        </div>
+        <div class="admin-page-header-actions">
+            <button class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#createBannerModal">
+                <i data-lucide="plus"></i>
+                Tạo banner mới
+            </button>
         </div>
     </div>
 
     <!-- Stats Section -->
-    <div class="content-wrapper">
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title">8</h4>
-                                <p class="card-text">Tổng banner</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-images fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card admin-stat-primary">
+            <div class="admin-stat-icon">
+                <i data-lucide="images"></i>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title">5</h4>
-                                <p class="card-text">Đang hiển thị</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-eye fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title">2</h4>
-                                <p class="card-text">Đã lên lịch</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-clock fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title">1,234</h4>
-                                <p class="card-text">Lượt click hôm nay</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-mouse-pointer fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-label">Tổng banner</div>
+                <div class="admin-stat-value">8</div>
             </div>
         </div>
+        <div class="admin-stat-card admin-stat-success">
+            <div class="admin-stat-icon">
+                <i data-lucide="eye"></i>
+            </div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-label">Đang hiển thị</div>
+                <div class="admin-stat-value">5</div>
+            </div>
+        </div>
+        <div class="admin-stat-card admin-stat-warning">
+            <div class="admin-stat-icon">
+                <i data-lucide="clock"></i>
+            </div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-label">Đã lên lịch</div>
+                <div class="admin-stat-value">2</div>
+            </div>
+        </div>
+        <div class="admin-stat-card admin-stat-info">
+            <div class="admin-stat-icon">
+                <i data-lucide="mouse-pointer"></i>
+            </div>
+            <div class="admin-stat-content">
+                <div class="admin-stat-label">Lượt click hôm nay</div>
+                <div class="admin-stat-value">1,234</div>
+            </div>
+        </div>
+    </div>
 
-        <!-- Banner Positions Section -->
-        <div class="row mb-4">
-            <div class="col-lg-8">
-                <!-- Main Homepage Banners -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Banner trang chủ chính</h5>
-                    </div>
-                    <div class="card-body">
+    <!-- Banner Positions Section -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <!-- Main Homepage Banners -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Banner trang chủ chính</h5>
+                </div>
+                <div class="admin-card-body">
                         <div class="banner-grid" id="mainBanners">
                             <div class="banner-slot active" data-position="main-1">
                                 <div class="banner-preview">
                                     <img src="https://via.placeholder.com/400x200/007bff/ffffff?text=Banner+1" alt="Banner 1" class="img-fluid">
                                     <div class="banner-overlay">
                                         <div class="banner-actions">
-                                            <button class="btn btn-sm btn-light" onclick="editBanner('main-1')">
-                                                <i class="fas fa-edit"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('main-1')">
+                                                <i data-lucide="edit"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-light" onclick="removeBanner('main-1')">
-                                                <i class="fas fa-trash"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="removeBanner('main-1')">
+                                                <i data-lucide="trash-2"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -121,11 +97,11 @@
                                     <img src="https://via.placeholder.com/400x200/28a745/ffffff?text=Banner+2" alt="Banner 2" class="img-fluid">
                                     <div class="banner-overlay">
                                         <div class="banner-actions">
-                                            <button class="btn btn-sm btn-light" onclick="editBanner('main-2')">
-                                                <i class="fas fa-edit"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('main-2')">
+                                                <i data-lucide="edit"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-light" onclick="removeBanner('main-2')">
-                                                <i class="fas fa-trash"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="removeBanner('main-2')">
+                                                <i data-lucide="trash-2"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -138,7 +114,7 @@
 
                             <div class="banner-slot empty" data-position="main-3">
                                 <div class="banner-placeholder" onclick="addBanner('main-3')">
-                                    <i class="fas fa-plus fa-2x"></i>
+                                    <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                                     <p class="mt-2">Thêm banner</p>
                                 </div>
                             </div>
@@ -146,12 +122,12 @@
                     </div>
                 </div>
 
-                <!-- Secondary Banners -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Banner phụ</h5>
-                    </div>
-                    <div class="card-body">
+            <!-- Secondary Banners -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Banner phụ</h5>
+                </div>
+                <div class="admin-card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="banner-slot active small" data-position="secondary-1">
@@ -159,11 +135,11 @@
                                         <img src="https://via.placeholder.com/300x150/dc3545/ffffff?text=Sale+Banner" alt="Sale Banner" class="img-fluid">
                                         <div class="banner-overlay">
                                             <div class="banner-actions">
-                                                <button class="btn btn-sm btn-light" onclick="editBanner('secondary-1')">
-                                                    <i class="fas fa-edit"></i>
+                                                <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('secondary-1')">
+                                                    <i data-lucide="edit"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-light" onclick="removeBanner('secondary-1')">
-                                                    <i class="fas fa-trash"></i>
+                                                <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="removeBanner('secondary-1')">
+                                                    <i data-lucide="trash-2"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -177,7 +153,7 @@
                             <div class="col-md-6">
                                 <div class="banner-slot empty small" data-position="secondary-2">
                                     <div class="banner-placeholder" onclick="addBanner('secondary-2')">
-                                        <i class="fas fa-plus fa-lg"></i>
+                                        <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
                                         <p class="mt-2">Thêm banner</p>
                                     </div>
                                 </div>
@@ -187,13 +163,13 @@
                 </div>
             </div>
 
-            <!-- Banner Management Sidebar -->
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Danh sách banner</h5>
-                    </div>
-                    <div class="card-body p-0">
+        <!-- Banner Management Sidebar -->
+        <div class="col-lg-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Danh sách banner</h5>
+                </div>
+                <div class="admin-card-body p-0">
                         <div class="list-group list-group-flush">
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -205,13 +181,13 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <span class="badge bg-success">Hoạt động</span>
+                                        <span class="admin-badge admin-badge-success">Hoạt động</span>
                                         <div class="btn-group btn-group-sm ms-1">
-                                            <button class="btn btn-outline-secondary" onclick="toggleBanner('banner-1')">
-                                                <i class="fas fa-eye-slash"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('banner-1')">
+                                                <i data-lucide="eye-off"></i>
                                             </button>
-                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-1')">
-                                                <i class="fas fa-edit"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-1')">
+                                                <i data-lucide="edit"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -228,13 +204,13 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <span class="badge bg-success">Hoạt động</span>
+                                        <span class="admin-badge admin-badge-success">Hoạt động</span>
                                         <div class="btn-group btn-group-sm ms-1">
-                                            <button class="btn btn-outline-secondary" onclick="toggleBanner('banner-2')">
-                                                <i class="fas fa-eye-slash"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('banner-2')">
+                                                <i data-lucide="eye-off"></i>
                                             </button>
-                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-2')">
-                                                <i class="fas fa-edit"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-2')">
+                                                <i data-lucide="edit"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -251,13 +227,13 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <span class="badge bg-success">Hoạt động</span>
+                                        <span class="admin-badge admin-badge-success">Hoạt động</span>
                                         <div class="btn-group btn-group-sm ms-1">
-                                            <button class="btn btn-outline-secondary" onclick="toggleBanner('banner-3')">
-                                                <i class="fas fa-eye-slash"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('banner-3')">
+                                                <i data-lucide="eye-off"></i>
                                             </button>
-                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-3')">
-                                                <i class="fas fa-edit"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-3')">
+                                                <i data-lucide="edit"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -274,13 +250,13 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <span class="badge bg-warning">Chờ lịch</span>
+                                        <span class="admin-badge admin-badge-warning">Chờ lịch</span>
                                         <div class="btn-group btn-group-sm ms-1">
-                                            <button class="btn btn-outline-secondary" onclick="scheduleNow('banner-4')">
-                                                <i class="fas fa-play"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="scheduleNow('banner-4')">
+                                                <i data-lucide="play"></i>
                                             </button>
-                                            <button class="btn btn-outline-secondary" onclick="editBanner('banner-4')">
-                                                <i class="fas fa-edit"></i>
+                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-4')">
+                                                <i data-lucide="edit"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -290,12 +266,12 @@
                     </div>
                 </div>
 
-                <!-- Performance Stats -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Thống kê hiệu suất</h5>
-                    </div>
-                    <div class="card-body">
+            <!-- Performance Stats -->
+            <div class="admin-card mt-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Thống kê hiệu suất</h5>
+                </div>
+                <div class="admin-card-body">
                         <div class="mb-3">
                             <div class="d-flex justify-content-between">
                                 <span>Lượt hiển thị hôm nay</span>
@@ -317,8 +293,7 @@
                         <div class="progress mb-2">
                             <div class="progress-bar bg-success" style="width: 10%"></div>
                         </div>
-                        <small class="text-muted">Banner có hiệu suất tốt (>5% CTR)</small>
-                    </div>
+                    <small class="text-muted">Banner có hiệu suất tốt (>5% CTR)</small>
                 </div>
             </div>
         </div>
@@ -337,15 +312,15 @@
                 <form id="createBannerForm" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="bannerTitle" class="form-label">Tiêu đề banner <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="bannerTitle" required>
+                            <div class="admin-form-group">
+                                <label for="bannerTitle" class="admin-label">Tiêu đề banner <span class="text-danger">*</span></label>
+                                <input type="text" class="admin-input" id="bannerTitle" required>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="bannerPosition" class="form-label">Vị trí hiển thị <span class="text-danger">*</span></label>
-                                <select class="form-select" id="bannerPosition" required>
+                            <div class="admin-form-group">
+                                <label for="bannerPosition" class="admin-label">Vị trí hiển thị <span class="text-danger">*</span></label>
+                                <select class="admin-input" id="bannerPosition" required>
                                     <option value="">Chọn vị trí</option>
                                     <option value="main">Trang chủ chính</option>
                                     <option value="secondary">Banner phụ</option>
@@ -356,42 +331,42 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="bannerImage" class="form-label">Hình ảnh banner <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="bannerImage" accept="image/*" required>
-                        <div class="form-text">Khuyến nghị: 1200x400px cho banner chính, 600x300px cho banner phụ</div>
+                    <div class="admin-form-group">
+                        <label for="bannerImage" class="admin-label">Hình ảnh banner <span class="text-danger">*</span></label>
+                        <input type="file" class="admin-input" id="bannerImage" accept="image/*" required>
+                        <small class="admin-form-help">Khuyến nghị: 1200x400px cho banner chính, 600x300px cho banner phụ</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="bannerUrl" class="form-label">URL liên kết</label>
-                        <input type="url" class="form-control" id="bannerUrl" placeholder="https://example.com">
+                    <div class="admin-form-group">
+                        <label for="bannerUrl" class="admin-label">URL liên kết</label>
+                        <input type="url" class="admin-input" id="bannerUrl" placeholder="https://example.com">
                     </div>
 
-                    <div class="mb-3">
-                        <label for="bannerAlt" class="form-label">Alt text</label>
-                        <input type="text" class="form-control" id="bannerAlt" placeholder="Mô tả hình ảnh">
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="startDate" class="form-label">Ngày bắt đầu</label>
-                                <input type="datetime-local" class="form-control" id="startDate">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="endDate" class="form-label">Ngày kết thúc</label>
-                                <input type="datetime-local" class="form-control" id="endDate">
-                            </div>
-                        </div>
+                    <div class="admin-form-group">
+                        <label for="bannerAlt" class="admin-label">Alt text</label>
+                        <input type="text" class="admin-input" id="bannerAlt" placeholder="Mô tả hình ảnh">
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="priority" class="form-label">Độ ưu tiên</label>
-                                <select class="form-select" id="priority">
+                            <div class="admin-form-group">
+                                <label for="startDate" class="admin-label">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="admin-input" id="startDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="endDate" class="admin-label">Ngày kết thúc</label>
+                                <input type="datetime-local" class="admin-input" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="priority" class="admin-label">Độ ưu tiên</label>
+                                <select class="admin-input" id="priority">
                                     <option value="1">Thấp</option>
                                     <option value="2" selected>Trung bình</option>
                                     <option value="3">Cao</option>
@@ -399,20 +374,18 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <div class="form-check mt-4">
-                                    <input class="form-check-input" type="checkbox" id="isActive" checked>
-                                    <label class="form-check-label" for="isActive">
-                                        Kích hoạt ngay
-                                    </label>
-                                </div>
+                            <div class="admin-form-group">
+                                <label class="admin-checkbox">
+                                    <input type="checkbox" id="isActive" checked>
+                                    <span>Kích hoạt ngay</span>
+                                </label>
                             </div>
                         </div>
                     </div>
 
                     <!-- Image Preview -->
-                    <div class="mb-3" id="imagePreview" style="display: none;">
-                        <label class="form-label">Xem trước</label>
+                    <div class="admin-form-group" id="imagePreview" style="display: none;">
+                        <label class="admin-label">Xem trước</label>
                         <div class="border rounded p-2">
                             <img id="previewImg" class="img-fluid" style="max-height: 200px;">
                         </div>
@@ -420,8 +393,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="createBanner()">Tạo banner</button>
+                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="admin-btn admin-btn-primary" onclick="createBanner()">Tạo banner</button>
             </div>
         </div>
     </div>
@@ -538,6 +511,17 @@
         document.getElementById('startDate').value = now.toISOString().slice(0, 16);
     });
 </script>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+}
 
 <style>
     .banner-grid {

@@ -1,175 +1,168 @@
 @model IEnumerable<JohnHenryFashionWeb.Models.Coupon>
 @{
     ViewData["Title"] = "Quản lý mã giảm giá";
+    ViewData["CurrentSection"] = "Coupons";
+    ViewData["PageIcon"] = "ticket";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="admin-content">
-    <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 mb-0">
-                    <i data-lucide="ticket" class="me-2"></i>Quản lý mã giảm giá
-                </h1>
-                <p class="text-muted mb-0">Quản lý các mã giảm giá và khuyến mãi</p>
-            </div>
-            <div class="header-actions">
-                <a href="@Url.Action("CreateCoupon", "Admin")" class="btn btn-primary">
-                    <i data-lucide="plus" class="me-1"></i>Tạo mã mới
-                </a>
-            </div>
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="ticket"></i>
+                Quản lý mã giảm giá
+            </h1>
+            <p class="admin-page-subtitle">Quản lý các mã giảm giá và khuyến mãi cho khách hàng</p>
+        </div>
+        <div class="admin-page-header-actions">
+            <a href="@Url.Action("CreateCoupon", "Admin")" class="admin-btn admin-btn-primary">
+                <i data-lucide="plus"></i>
+                Tạo mã mới
+            </a>
         </div>
     </div>
 
-    <!-- Content Section -->
-    <div class="content-wrapper">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Danh sách mã giảm giá</h5>
-                    </div>
-                    <div class="card-body">
-                        @if (Model.Any())
-                        {
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Mã</th>
-                                            <th>Tên</th>
-                                            <th>Loại</th>
-                                            <th>Giá trị</th>
-                                            <th>Ngày bắt đầu</th>
-                                            <th>Ngày kết thúc</th>
-                                            <th>Số lần sử dụng</th>
-                                            <th>Trạng thái</th>
-                                            <th>Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var coupon in Model)
+    <!-- Content -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title">Danh sách mã giảm giá</h5>
+        </div>
+        <div class="admin-card-body">
+            @if (Model.Any())
+            {
+                <div class="admin-table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Loại</th>
+                                <th>Giá trị</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Số lần sử dụng</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var coupon in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <code class="admin-code">@coupon.Code</code>
+                                    </td>
+                                    <td>@coupon.Name</td>
+                                    <td>
+                                        @if (coupon.Type == "percentage")
                                         {
-                                            <tr>
-                                                <td>
-                                                    <code class="bg-light p-1 rounded">@coupon.Code</code>
-                                                </td>
-                                                <td>@coupon.Name</td>
-                                                <td>
-                                                    @if (coupon.Type == "percentage")
-                                                    {
-                                                        <span class="badge bg-info">Phần trăm</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-success">Số tiền</span>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    @if (coupon.Type == "percentage")
-                                                    {
-                                                        <span>@coupon.Value%</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>@coupon.Value.ToString("N0") VNĐ</span>
-                                                    }
-                                                </td>
-                                                <td>@coupon.StartDate?.ToString("dd/MM/yyyy")</td>
-                                                <td>@coupon.EndDate?.ToString("dd/MM/yyyy")</td>
-                                                <td>
-                                                    <span>@coupon.UsageCount/@(coupon.UsageLimit?.ToString() ?? "∞")</span>
-                                                </td>
-                                                <td>
-                                                    @if (coupon.IsActive)
-                                                    {
-                                                        @if (coupon.EndDate.HasValue && coupon.EndDate < DateTime.Now)
-                                                        {
-                                                            <span class="badge bg-secondary">Hết hạn</span>
-                                                        }
-                                                        else if (coupon.UsageLimit.HasValue && coupon.UsageCount >= coupon.UsageLimit)
-                                                        {
-                                                            <span class="badge bg-warning">Hết lượt</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-success">Hoạt động</span>
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-danger">Tạm dừng</span>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        <form asp-action="ToggleCoupon" asp-route-id="@coupon.Id" method="post" class="d-inline">
-                                                            <button type="submit" class="btn btn-sm @(coupon.IsActive ? "btn-warning" : "btn-success")" 
-                                                                    title="@(coupon.IsActive ? "Tạm dừng" : "Kích hoạt")">
-                                                                <i class="fas @(coupon.IsActive ? "fa-pause" : "fa-play")"></i>
-                                                            </button>
-                                                        </form>
-                                                        <button type="button" class="btn btn-sm btn-info" 
-                                                                onclick="copyToClipboard('@coupon.Code')" title="Copy mã">
-                                                            <i data-lucide="copy"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <span class="admin-badge admin-badge-info">Phần trăm</span>
                                         }
-                                    </tbody>
-                                </table>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-center py-5">
-                                <i data-lucide="ticket" class="w-12 h-12 text-muted mb-3"></i>
-                                <h5 class="text-muted">Chưa có mã giảm giá nào</h5>
-                                <p class="text-muted">Tạo mã giảm giá đầu tiên để khuyến khích khách hàng mua sắm</p>
-                                <a href="@Url.Action("CreateCoupon", "Admin")" class="btn btn-primary">
-                                    <i data-lucide="plus" class="me-1"></i>Tạo mã giảm giá
-                                </a>
-                            </div>
-                        }
-                    </div>
+                                        else
+                                        {
+                                            <span class="admin-badge admin-badge-success">Số tiền</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (coupon.Type == "percentage")
+                                        {
+                                            <strong>@coupon.Value%</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong>@coupon.Value.ToString("N0") VNĐ</strong>
+                                        }
+                                    </td>
+                                    <td>@coupon.StartDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>@coupon.EndDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span>@coupon.UsageCount/@(coupon.UsageLimit?.ToString() ?? "∞")</span>
+                                    </td>
+                                    <td>
+                                        @if (coupon.IsActive)
+                                        {
+                                            @if (coupon.EndDate.HasValue && coupon.EndDate < DateTime.Now)
+                                            {
+                                                <span class="admin-badge admin-badge-secondary">Hết hạn</span>
+                                            }
+                                            else if (coupon.UsageLimit.HasValue && coupon.UsageCount >= coupon.UsageLimit)
+                                            {
+                                                <span class="admin-badge admin-badge-warning">Hết lượt</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="admin-badge admin-badge-success">Hoạt động</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-badge admin-badge-danger">Tạm dừng</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="admin-action-buttons">
+                                            <form asp-action="ToggleCoupon" asp-route-id="@coupon.Id" method="post" class="d-inline">
+                                                <button type="submit" class="admin-btn admin-btn-sm @(coupon.IsActive ? "admin-btn-warning" : "admin-btn-success")" 
+                                                        title="@(coupon.IsActive ? "Tạm dừng" : "Kích hoạt")">
+                                                    <i data-lucide="@(coupon.IsActive ? "pause" : "play")"></i>
+                                                </button>
+                                            </form>
+                                            <button type="button" class="admin-btn admin-btn-sm admin-btn-secondary" 
+                                                    onclick="copyToClipboard('@coupon.Code')" title="Copy mã">
+                                                <i data-lucide="copy"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="admin-empty-state">
+                    <i data-lucide="ticket" style="width: 64px; height: 64px;"></i>
+                    <h5>Chưa có mã giảm giá nào</h5>
+                    <p>Tạo mã giảm giá đầu tiên để khuyến khích khách hàng mua sắm</p>
+                    <a href="@Url.Action("CreateCoupon", "Admin")" class="admin-btn admin-btn-primary">
+                        <i data-lucide="plus"></i>
+                        Tạo mã giảm giá
+                    </a>
+                </div>
+            }
         </div>
     </div>
 </div>
 
-<script>
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            // Show success message
-            Swal.fire({
-                icon: 'success',
-                title: 'Đã copy!',
-                text: `Mã "${text}" đã được copy vào clipboard`,
-                showConfirmButton: false,
-                timer: 1500
-            });
-        }, function(err) {
-            console.error('Could not copy text: ', err);
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         });
-    }
-</script>
 
-<style>
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        color: #495057;
-        background-color: #f8f9fa;
-    }
-
-    .table td {
-        vertical-align: middle;
-    }
-
-    code {
-        font-size: 0.875em;
-    }
-</style>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã copy!',
+                        text: `Mã "${text}" đã được copy vào clipboard`,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    alert(`Mã "${text}" đã được copy!`);
+                }
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+}

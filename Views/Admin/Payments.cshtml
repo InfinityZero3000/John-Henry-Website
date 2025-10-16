@@ -1,0 +1,299 @@
+@{
+    ViewData["Title"] = "Quản lý thanh toán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Thanh toán</li>";
+    
+    var totalTransactions = ViewBag.TotalTransactions ?? 0;
+    var totalAmount = ViewBag.TotalAmount ?? 0m;
+    var pendingCount = ViewBag.PendingCount ?? 0;
+    var completedCount = ViewBag.CompletedCount ?? 0;
+    var failedCount = ViewBag.FailedCount ?? 0;
+    var recentTransactions = ViewBag.RecentTransactions as List<JohnHenryFashionWeb.Models.PaymentTransaction> ?? new List<JohnHenryFashionWeb.Models.PaymentTransaction>();
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <div>
+                <h1 class="admin-page-title">
+                    <i data-lucide="credit-card"></i>
+                    Thanh toán
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng doanh thu</h3>
+                    <p class="value">@totalAmount.ToString("N0") đ</p>
+                    <p class="change positive">
+                        <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
+                        Đã hoàn thành
+                    </p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Chờ xử lý</h3>
+                    <p class="value">@pendingCount</p>
+                    <p class="change">Cần xác nhận</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="clock"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Hoàn thành</h3>
+                    <p class="value">@completedCount</p>
+                    <p class="change">@((completedCount > 0 ? (completedCount * 100.0 / totalTransactions).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Thất bại</h3>
+                    <p class="value">@failedCount</p>
+                    <p class="change">Cần xử lý</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="x-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-card admin-mb-lg">
+        <div class="admin-card-header">
+            <h3>Hành động nhanh</h3>
+        </div>
+        <div class="admin-card-body">
+            <div class="admin-flex admin-gap-md" style="flex-wrap: wrap;">
+                <a href="/admin/payments/transactions?status=pending" class="admin-btn admin-btn-warning">
+                    <i data-lucide="clock"></i>
+                    Giao dịch chờ xử lý (@pendingCount)
+                </a>
+                <a href="/admin/payments/transactions?status=completed" class="admin-btn admin-btn-success">
+                    <i data-lucide="check-circle"></i>
+                    Giao dịch hoàn thành (@completedCount)
+                </a>
+                <a href="/admin/payments/transactions?status=failed" class="admin-btn admin-btn-danger">
+                    <i data-lucide="x-circle"></i>
+                    Giao dịch thất bại (@failedCount)
+                </a>
+                <a href="/admin/payments/transactions" class="admin-btn admin-btn-secondary">
+                    <i data-lucide="list"></i>
+                    Tất cả giao dịch (@totalTransactions)
+                </a>
+                <a href="/admin/payments/methods" class="admin-btn admin-btn-primary">
+                    <i data-lucide="credit-card"></i>
+                    Phương thức thanh toán
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    @if (recentTransactions.Any())
+    {
+        <div class="admin-card">
+            <div class="admin-card-header admin-flex-between">
+                <h3>Giao dịch gần đây</h3>
+                <a href="/admin/payments/transactions" class="admin-btn admin-btn-sm admin-btn-secondary">
+                    Xem tất cả
+                    <i data-lucide="arrow-right"></i>
+                </a>
+            </div>
+            <div class="admin-card-body" style="padding: 0;">
+                <div class="admin-table-wrapper" style="border: none; border-radius: 0;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Mã GD</th>
+                                <th>Đơn hàng</th>
+                                <th>Khách hàng</th>
+                                <th>Phương thức</th>
+                                <th>Số tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th style="width: 120px;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in recentTransactions)
+                            {
+                                <tr>
+                                    <td>
+                                        <code style="font-size: 0.8125rem; background: var(--admin-bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                            @(transaction.TransactionReference ?? transaction.Id.ToString().Substring(0, 12) + "...")
+                                        </code>
+                                    </td>
+                                    <td>
+                                        @if (transaction.Order != null)
+                                        {
+                                            <a href="/admin/orders/details/@transaction.OrderId" style="color: var(--admin-primary); font-weight: 500;">
+                                                #@transaction.Order.OrderNumber
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-badge admin-badge-secondary">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (transaction.Customer != null)
+                                        {
+                                            <div style="font-weight: 500;">@transaction.Customer.FullName</div>
+                                            <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@transaction.Customer.Email</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-badge admin-badge-secondary">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (transaction.PaymentMethod?.ToLower())
+                                        {
+                                            case "cod":
+                                                <span class="admin-badge admin-badge-warning">
+                                                    <i data-lucide="banknote" style="width: 12px; height: 12px;"></i>
+                                                    COD
+                                                </span>
+                                                break;
+                                            case "momo":
+                                                <span class="admin-badge" style="background: #A50064; color: white;">
+                                                    <i data-lucide="smartphone" style="width: 12px; height: 12px;"></i>
+                                                    MoMo
+                                                </span>
+                                                break;
+                                            case "bank_transfer":
+                                                <span class="admin-badge admin-badge-info">
+                                                    <i data-lucide="building" style="width: 12px; height: 12px;"></i>
+                                                    Chuyển khoản
+                                                </span>
+                                                break;
+                                            case "credit_card":
+                                                <span class="admin-badge admin-badge-primary" style="background: var(--admin-primary); color: white;">
+                                                    <i data-lucide="credit-card" style="width: 12px; height: 12px;"></i>
+                                                    Thẻ
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="admin-badge admin-badge-secondary">@transaction.PaymentMethod</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600; color: var(--status-success);">
+                                            @transaction.Amount.ToString("N0") đ
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @switch (transaction.Status?.ToLower())
+                                        {
+                                            case "pending":
+                                                <span class="admin-badge admin-badge-warning">
+                                                    <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                                                    Chờ xử lý
+                                                </span>
+                                                break;
+                                            case "completed":
+                                                <span class="admin-badge admin-badge-success">
+                                                    <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                                    Hoàn thành
+                                                </span>
+                                                break;
+                                            case "failed":
+                                                <span class="admin-badge admin-badge-danger">
+                                                    <i data-lucide="x-circle" style="width: 12px; height: 12px;"></i>
+                                                    Thất bại
+                                                </span>
+                                                break;
+                                            case "refunded":
+                                                <span class="admin-badge admin-badge-info">
+                                                    <i data-lucide="rotate-ccw" style="width: 12px; height: 12px;"></i>
+                                                    Hoàn tiền
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="admin-badge admin-badge-secondary">@transaction.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.875rem;">@transaction.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                        <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@transaction.CreatedAt.ToString("HH:mm")</div>
+                                    </td>
+                                    <td class="actions">
+                                        <a href="/admin/payments/transaction/@transaction.Id" class="admin-btn admin-btn-sm admin-btn-secondary">
+                                            <i data-lucide="eye"></i>
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Chưa có giao dịch</h3>
+                <p style="color: var(--admin-text-light); margin: 0;">Chưa có giao dịch thanh toán nào trong hệ thống</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Auto-hide success messages
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+    </script>
+}

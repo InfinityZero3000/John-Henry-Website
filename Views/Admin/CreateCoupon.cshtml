@@ -1,183 +1,178 @@
 @model JohnHenryFashionWeb.Models.Coupon
 @{
     ViewData["Title"] = "Tạo mã giảm giá";
+    ViewData["CurrentSection"] = "Coupons";
+    ViewData["PageIcon"] = "plus-circle";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="admin-content">
-    <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-plus me-2"></i>Tạo mã giảm giá
-                </h1>
-                <p class="text-muted mb-0">Tạo mã giảm giá mới để khuyến khích khách hàng</p>
-            </div>
-            <div class="header-actions">
-                <a href="@Url.Action("Coupons", "Admin")" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Quay lại
-                </a>
-            </div>
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="plus-circle"></i>
+                Tạo mã giảm giá
+            </h1>
+            <p class="admin-page-subtitle">Tạo mã giảm giá mới cho khách hàng</p>
+        </div>
+        <div class="admin-page-header-actions">
+            <a href="@Url.Action("Coupons", "Admin")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Quay lại
+            </a>
         </div>
     </div>
 
-    <!-- Content Section -->
-    <div class="content-wrapper">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Thông tin mã giảm giá</h5>
-                    </div>
-                    <div class="card-body">
-                        <form asp-action="CreateCoupon" method="post">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="Code" class="form-label">Mã giảm giá <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <input asp-for="Code" class="form-control" placeholder="Nhập mã (VD: SUMMER2024)">
-                                            <button type="button" class="btn btn-outline-secondary" onclick="generateCode()">
-                                                <i class="fas fa-random"></i> Tạo tự động
-                                            </button>
-                                        </div>
-                                        <span asp-validation-for="Code" class="text-danger"></span>
+    <!-- Content -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Thông tin mã giảm giá</h5>
+                </div>
+                <div class="admin-card-body">
+                    <form asp-action="CreateCoupon" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Code" class="admin-label">Mã giảm giá <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input asp-for="Code" class="admin-input" placeholder="Nhập mã (VD: SUMMER2024)">
+                                        <button type="button" class="admin-btn admin-btn-secondary" onclick="generateCode()">
+                                            <i data-lucide="shuffle"></i> Tạo tự động
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="Name" class="form-label">Tên mã giảm giá <span class="text-danger">*</span></label>
-                                        <input asp-for="Name" class="form-control" placeholder="VD: Khuyến mãi mùa hè">
-                                        <span asp-validation-for="Name" class="text-danger"></span>
-                                    </div>
+                                    <span asp-validation-for="Code" class="text-danger"></span>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Name" class="admin-label">Tên mã giảm giá <span class="text-danger">*</span></label>
+                                    <input asp-for="Name" class="admin-input" placeholder="VD: Khuyến mãi mùa hè">
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="Type" class="form-label">Loại giảm giá <span class="text-danger">*</span></label>
-                                        <select asp-for="Type" class="form-select" onchange="toggleDiscountType()">
-                                            <option value="">Chọn loại giảm giá</option>
-                                            <option value="percentage">Phần trăm (%)</option>
-                                            <option value="fixed">Số tiền cố định (VNĐ)</option>
-                                        </select>
-                                        <span asp-validation-for="Type" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="Value" class="form-label">Giá trị giảm <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <input asp-for="Value" type="number" class="form-control" placeholder="0" min="0">
-                                            <span class="input-group-text" id="discount-unit">%</span>
-                                        </div>
-                                        <span asp-validation-for="Value" class="text-danger"></span>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Type" class="admin-label">Loại giảm giá <span class="text-danger">*</span></label>
+                                    <select asp-for="Type" class="admin-input" onchange="toggleDiscountType()">
+                                        <option value="">Chọn loại giảm giá</option>
+                                        <option value="percentage">Phần trăm (%)</option>
+                                        <option value="fixed">Số tiền cố định (VNĐ)</option>
+                                    </select>
+                                    <span asp-validation-for="Type" class="text-danger"></span>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Value" class="admin-label">Giá trị giảm <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input asp-for="Value" type="number" class="admin-input" placeholder="0" min="0">
+                                        <span class="input-group-text" id="discount-unit">%</span>
+                                    </div>
+                                    <span asp-validation-for="Value" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="StartDate" class="form-label">Ngày bắt đầu</label>
-                                        <input asp-for="StartDate" type="date" class="form-control">
-                                        <span asp-validation-for="StartDate" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="EndDate" class="form-label">Ngày kết thúc</label>
-                                        <input asp-for="EndDate" type="date" class="form-control">
-                                        <span asp-validation-for="EndDate" class="text-danger"></span>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="StartDate" class="admin-label">Ngày bắt đầu</label>
+                                    <input asp-for="StartDate" type="date" class="admin-input">
+                                    <span asp-validation-for="StartDate" class="text-danger"></span>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="EndDate" class="admin-label">Ngày kết thúc</label>
+                                    <input asp-for="EndDate" type="date" class="admin-input">
+                                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="MinOrderAmount" class="form-label">Giá trị đơn hàng tối thiểu</label>
-                                        <div class="input-group">
-                                            <input asp-for="MinOrderAmount" type="number" class="form-control" placeholder="0" min="0">
-                                            <span class="input-group-text">VNĐ</span>
-                                        </div>
-                                        <span asp-validation-for="MinOrderAmount" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="MinOrderAmount" class="admin-label">Giá trị đơn hàng tối thiểu</label>
+                                    <div class="input-group">
+                                        <input asp-for="MinOrderAmount" type="number" class="admin-input" placeholder="0" min="0">
+                                        <span class="input-group-text">VNĐ</span>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="UsageLimit" class="form-label">Số lần sử dụng tối đa</label>
-                                        <input asp-for="UsageLimit" type="number" class="form-control" placeholder="Không giới hạn" min="1">
-                                        <span asp-validation-for="UsageLimit" class="text-danger"></span>
-                                    </div>
+                                    <span asp-validation-for="MinOrderAmount" class="text-danger"></span>
                                 </div>
                             </div>
-
-                            <div class="mb-3">
-                                <label asp-for="Description" class="form-label">Mô tả</label>
-                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả chi tiết về mã giảm giá..."></textarea>
-                                <span asp-validation-for="Description" class="text-danger"></span>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="UsageLimit" class="admin-label">Số lần sử dụng tối đa</label>
+                                    <input asp-for="UsageLimit" type="number" class="admin-input" placeholder="Không giới hạn" min="1">
+                                    <span asp-validation-for="UsageLimit" class="text-danger"></span>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="d-flex justify-content-end gap-2">
-                                <a href="@Url.Action("Coupons", "Admin")" class="btn btn-secondary">Hủy</a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i>Tạo mã giảm giá
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="admin-form-group">
+                            <label asp-for="Description" class="admin-label">Mô tả</label>
+                            <textarea asp-for="Description" class="admin-input" rows="3" placeholder="Mô tả chi tiết về mã giảm giá..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="admin-form-actions">
+                            <a href="@Url.Action("Coupons", "Admin")" class="admin-btn admin-btn-secondary">Hủy</a>
+                            <button type="submit" class="admin-btn admin-btn-primary">
+                                <i data-lucide="save"></i>
+                                Tạo mã giảm giá
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function generateCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-        for (let i = 0; i < 8; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Set default start date
+            const today = new Date().toISOString().split('T')[0];
+            const startDateInput = document.querySelector('#StartDate');
+            if (startDateInput && !startDateInput.value) {
+                startDateInput.value = today;
+            }
+        });
+
+        function generateCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.querySelector('#Code').value = result;
         }
-        document.querySelector('#Code').value = result;
-    }
 
-    function toggleDiscountType() {
-        const discountType = document.querySelector('#DiscountType').value;
-        const unit = document.querySelector('#discount-unit');
-        
-        if (discountType === 'percentage') {
-            unit.textContent = '%';
-            document.querySelector('#DiscountValue').setAttribute('max', '100');
-        } else if (discountType === 'fixed') {
-            unit.textContent = 'VNĐ';
-            document.querySelector('#DiscountValue').removeAttribute('max');
+        function toggleDiscountType() {
+            const discountType = document.querySelector('#Type').value;
+            const unit = document.querySelector('#discount-unit');
+            const valueInput = document.querySelector('#Value');
+            
+            if (discountType === 'percentage') {
+                unit.textContent = '%';
+                valueInput.setAttribute('max', '100');
+            } else if (discountType === 'fixed') {
+                unit.textContent = 'VNĐ';
+                valueInput.removeAttribute('max');
+            }
         }
-    }
-
-    // Set default dates
-    document.addEventListener('DOMContentLoaded', function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.querySelector('#StartDate').value = today;
-    });
-</script>
-
-<style>
-    .form-label {
-        font-weight: 600;
-        color: #495057;
-    }
-
-    .input-group-text {
-        background-color: #f8f9fa;
-        border-color: #ced4da;
-    }
-
-    .card {
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        border: 1px solid rgba(0, 0, 0, 0.125);
-    }
-</style>
+    </script>
+}

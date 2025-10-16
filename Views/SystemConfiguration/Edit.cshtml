@@ -1,0 +1,163 @@
+@model JohnHenryFashionWeb.Models.SystemConfiguration
+@{
+    ViewData["Title"] = "Edit Setting";
+    var categories = ViewBag.Categories as string[] ?? Array.Empty<string>();
+    var types = ViewBag.Types as string[] ?? Array.Empty<string>();
+}
+
+<style>
+    .glassmorphism {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-gradient {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a47d5 100%);
+    }
+
+    .form-label {
+        color: white;
+        font-weight: 500;
+    }
+
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: white;
+        box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-select option {
+        background: #1a1a2e;
+        color: white;
+    }
+
+    .form-check-input {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .form-check-label {
+        color: rgba(255, 255, 255, 0.9);
+    }
+</style>
+
+<div class="settings-gradient min-vh-100 py-5">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="glassmorphism p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="text-white mb-1">
+                                <i class="fas fa-cog me-2"></i>Edit Setting
+                            </h2>
+                            <p class="text-white-50 mb-0">Update system configuration</p>
+                        </div>
+                        <a href="@Url.Action("Index")" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="glassmorphism p-4">
+                    <form method="post" action="@Url.Action("Edit", new { id = Model.Id })">
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.Id)
+                        @Html.HiddenFor(m => m.CreatedAt)
+                        @Html.HiddenFor(m => m.Key)
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Key</label>
+                                <input type="text" class="form-control" value="@Model.Key" readonly>
+                                <small class="text-white-50">Key cannot be changed</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Type <span class="text-danger">*</span></label>
+                                <select class="form-select" asp-for="Type" required>
+                                    @foreach (var type in types)
+                                    {
+                                        <option value="@type" selected="@(Model.Type == type)">@type</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Type" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" asp-for="Category" required>
+                                @foreach (var cat in categories)
+                                {
+                                    <option value="@cat" selected="@(Model.Category == cat)">@cat</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Value <span class="text-danger">*</span></label>
+                            <textarea class="form-control" asp-for="Value" rows="4" placeholder="Enter setting value" required></textarea>
+                            <span asp-validation-for="Value" class="text-danger"></span>
+                            <small class="text-white-50">The actual configuration value</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" asp-for="Description" placeholder="Describe this setting">
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="IsEncrypted" id="isEncrypted">
+                                <label class="form-check-label" for="isEncrypted">
+                                    <i class="fas fa-lock me-2"></i>Encrypt this value (for sensitive data like API keys)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Setting
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -2,343 +2,337 @@
 @{
     ViewData["Title"] = "Quản lý Tồn kho";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Quản lý tồn kho</li>";
+    
+    var filter = Model.Filter ?? "all";
+    var searchTerm = Model.SearchTerm ?? "";
 }
 
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-header d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="page-title">Quản lý Tồn kho</h1>
-                    <p class="text-muted">Theo dõi và quản lý số lượng tồn kho của các sản phẩm</p>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <h1 class="admin-page-title">
+            <i data-lucide="package"></i>
+            Quản lý Tồn kho
+        </h1>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng sản phẩm</h3>
+                    <p class="value">@Model.Items.Count()</p>
+                    <p class="change">Trong kho</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="box"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Sắp hết hàng</h3>
+                    <p class="value">@Model.Items.Count(i => i.IsLowStock && !i.IsOutOfStock)</p>
+                    <p class="change">Cần nhập thêm</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Hết hàng</h3>
+                    <p class="value">@Model.Items.Count(i => i.IsOutOfStock)</p>
+                    <p class="change">Cần nhập ngay</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="x-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Còn hàng tốt</h3>
+                    <p class="value">@Model.Items.Count(i => !i.IsLowStock && !i.IsOutOfStock)</p>
+                    <p class="change">Đủ hàng</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title mb-0">@Model.Items.Count()</h4>
-                            <p class="card-text">Tổng sản phẩm</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-boxes fa-2x"></i>
-                        </div>
+    <!-- Filters & Search -->
+    <div class="admin-filters">
+        <form method="get" action="/admin/inventory">
+            <div class="row g-3 align-items-end">
+                <!-- Search Box -->
+                <div class="col-md-6">
+                    <label class="admin-form-label">Tìm kiếm</label>
+                    <div class="admin-search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" name="search" class="admin-form-input" 
+                               placeholder="Tìm theo tên sản phẩm hoặc SKU..." 
+                               value="@searchTerm">
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title mb-0">@Model.Items.Count(i => i.IsLowStock)</h4>
-                            <p class="card-text">Sắp hết hàng</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exclamation-triangle fa-2x"></i>
-                        </div>
-                    </div>
+
+                <!-- Filter -->
+                <div class="col-md-4">
+                    <label class="admin-form-label">Lọc theo trạng thái</label>
+                    <select name="filter" class="admin-form-select">
+                        <option value="all" selected="@(filter == "all")">Tất cả</option>
+                        <option value="in_stock" selected="@(filter == "in_stock")">Còn hàng tốt</option>
+                        <option value="low_stock" selected="@(filter == "low_stock")">Sắp hết hàng</option>
+                        <option value="out_of_stock" selected="@(filter == "out_of_stock")">Hết hàng</option>
+                    </select>
+                </div>
+
+                <!-- Search Button -->
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width: 100%;">
+                        <i data-lucide="search"></i>
+                        Tìm kiếm
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title mb-0">@Model.Items.Count(i => i.IsOutOfStock)</h4>
-                            <p class="card-text">Hết hàng</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-times-circle fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title mb-0">@Model.Items.Count(i => !i.IsLowStock)</h4>
-                            <p class="card-text">Còn hàng tốt</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
 
-    <!-- Filter and Search -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="search" class="form-label">Tìm kiếm</label>
-                            <input type="text" class="form-control" id="search" name="search" 
-                                   value="@Model.SearchTerm" placeholder="Tìm theo tên hoặc SKU...">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="lowStock" name="lowStock" 
-                                       value="true" @(Model.Filter == "low_stock" ? "checked" : "")>
-                                <label class="form-check-label" for="lowStock">
-                                    Chỉ hiển thị sản phẩm sắp hết hàng
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search"></i> Tìm kiếm
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-grid">
-                                <a href="@Url.Action("Inventory")" class="btn btn-secondary">
-                                    <i class="fas fa-refresh"></i> Reset
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs">
+        <a href="/admin/inventory?filter=all&search=@searchTerm" 
+           class="admin-filter-tab @(filter == "all" ? "active" : "")">
+            Tất cả (@Model.Items.Count())
+        </a>
+        <a href="/admin/inventory?filter=in_stock&search=@searchTerm" 
+           class="admin-filter-tab @(filter == "in_stock" ? "active" : "")">
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
+            Còn hàng tốt (@Model.Items.Count(i => !i.IsLowStock && !i.IsOutOfStock))
+        </a>
+        <a href="/admin/inventory?filter=low_stock&search=@searchTerm" 
+           class="admin-filter-tab @(filter == "low_stock" ? "active" : "")">
+            <i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i>
+            Sắp hết (@Model.Items.Count(i => i.IsLowStock && !i.IsOutOfStock))
+        </a>
+        <a href="/admin/inventory?filter=out_of_stock&search=@searchTerm" 
+           class="admin-filter-tab @(filter == "out_of_stock" ? "active" : "")">
+            <i data-lucide="x-circle" style="width: 14px; height: 14px;"></i>
+            Hết hàng (@Model.Items.Count(i => i.IsOutOfStock))
+        </a>
     </div>
 
     <!-- Inventory Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Danh sách Tồn kho</h5>
-                </div>
-                <div class="card-body">
-                    @if (Model.Items.Any())
+    @if (Model.Items.Any())
+    {
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;"></th>
+                        <th>Sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>SKU</th>
+                        <th>Giá bán</th>
+                        <th>Giá vốn</th>
+                        <th style="text-align: center;">Tồn kho</th>
+                        <th style="text-align: center;">Trạng thái</th>
+                        <th>Cập nhật</th>
+                        <th style="width: 150px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
                     {
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>SKU</th>
-                                        <th>Sản phẩm</th>
-                                        <th>Danh mục</th>
-                                        <th>Giá</th>
-                                        <th>Tồn kho</th>
-                                        <th>Trạng thái</th>
-                                        <th>Cập nhật cuối</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model.Items)
-                                    {
-                                        <tr class="@(item.IsOutOfStock ? "table-danger" : item.IsLowStock ? "table-warning" : "")">
-                                            <td>
-                                                <code>@item.SKU</code>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <strong>@item.ProductName</strong>
-                                                </div>
-                                            </td>
-                                            <td>@item.CategoryName</td>
-                                            <td>@item.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
-                                            <td>
-                                                <span class="fw-bold inventory-stock" data-product-id="@item.ProductId">
-                                                    @item.CurrentStock
-                                                </span>
-                                                @if (item.IsOutOfStock)
-                                                {
-                                                    <i class="fas fa-times-circle text-danger ms-1" title="Hết hàng"></i>
-                                                }
-                                                else if (item.IsLowStock)
-                                                {
-                                                    <i class="fas fa-exclamation-triangle text-warning ms-1" title="Sắp hết hàng"></i>
-                                                }
-                                            </td>
-                                            <td>
-                                                <span class="badge @(item.IsOutOfStock ? "bg-danger" : item.IsLowStock ? "bg-warning" : "bg-success")">
-                                                    @(item.IsOutOfStock ? "Hết hàng" : item.IsLowStock ? "Sắp hết" : "Còn hàng")
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    @item.LastUpdated.ToString("dd/MM/yyyy HH:mm")
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                        data-bs-toggle="modal" data-bs-target="#updateStockModal"
-                                                        data-product-id="@item.ProductId" 
-                                                        data-product-name="@item.ProductName"
-                                                        data-current-stock="@item.CurrentStock">
-                                                    <i class="fas fa-edit"></i> Cập nhật
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
-                            <h5>Không có sản phẩm nào</h5>
-                            <p class="text-muted">
-                                @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.Filter == "low_stock")
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
                                 {
-                                    @:Không tìm thấy sản phẩm nào với tiêu chí tìm kiếm hiện tại.
+                                    <img src="@item.ImageUrl" alt="@item.ProductName" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--admin-border);">
                                 }
                                 else
                                 {
-                                    @:Chưa có sản phẩm nào trong hệ thống.
+                                    <div style="width: 50px; height: 50px; background: var(--admin-bg-secondary); border-radius: 4px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--admin-border);">
+                                        <i data-lucide="image" style="width: 24px; height: 24px; color: var(--admin-text-muted);"></i>
+                                    </div>
                                 }
-                            </p>
-                        </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 500; color: var(--admin-text); margin-bottom: 0.25rem;">
+                                    @item.ProductName
+                                </div>
+                                <div style="font-size: 0.8125rem; color: var(--admin-text-light);">
+                                    ID: @item.ProductId.ToString().Substring(0, 8)...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="admin-badge admin-badge-secondary">@item.CategoryName</span>
+                            </td>
+                            <td>
+                                <code style="font-size: 0.875rem; background: var(--admin-bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                    @item.SKU
+                                </code>
+                            </td>
+                            <td>
+                                <div style="font-weight: 500;">@item.Price.ToString("N0") đ</div>
+                            </td>
+                            <td>
+                                <div style="color: var(--admin-text-light);">@item.CostPrice.ToString("N0") đ</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="font-weight: 600; font-size: 1.125rem; color: @(item.IsOutOfStock ? "var(--status-danger)" : item.IsLowStock ? "var(--status-warning)" : "var(--status-success)");">
+                                    @item.CurrentStock
+                                </div>
+                                <div style="font-size: 0.8125rem; color: var(--admin-text-light);">
+                                    Min: @item.MinStock / Max: @item.MaxStock
+                                </div>
+                            </td>
+                            <td style="text-align: center;">
+                                @if (item.IsOutOfStock)
+                                {
+                                    <span class="admin-badge admin-badge-danger">
+                                        <i data-lucide="x-circle" style="width: 12px; height: 12px;"></i>
+                                        Hết hàng
+                                    </span>
+                                }
+                                else if (item.IsLowStock)
+                                {
+                                    <span class="admin-badge admin-badge-warning">
+                                        <i data-lucide="alert-triangle" style="width: 12px; height: 12px;"></i>
+                                        Sắp hết
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                        Còn hàng
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div style="font-size: 0.875rem;">@item.LastUpdated.ToString("dd/MM/yyyy")</div>
+                                <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@item.LastUpdated.ToString("HH:mm")</div>
+                            </td>
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <a href="/admin/products/edit/@item.ProductId" class="admin-btn admin-btn-sm admin-btn-secondary" title="Chỉnh sửa">
+                                        <i data-lucide="edit"></i>
+                                    </a>
+                                    <a href="/products/@item.ProductId" target="_blank" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem sản phẩm">
+                                        <i data-lucide="eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                     }
-                </div>
-            </div>
+                </tbody>
+            </table>
         </div>
-    </div>
-</div>
 
-<!-- Update Stock Modal -->
-<div class="modal fade" id="updateStockModal" tabindex="-1" aria-labelledby="updateStockModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateStockModalLabel">Cập nhật Tồn kho</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="updateStockForm">
-                <div class="modal-body">
-                    <input type="hidden" id="productId" name="productId">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Sản phẩm:</label>
-                        <p class="fw-bold" id="productName"></p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Tồn kho hiện tại:</label>
-                        <p class="text-muted" id="currentStock"></p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="newStock" class="form-label">Số lượng mới <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="newStock" name="newStock" min="0" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Lý do thay đổi</label>
-                        <textarea class="form-control" id="reason" name="reason" rows="3" 
-                                  placeholder="Nhập lý do thay đổi tồn kho (không bắt buộc)"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Cập nhật
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="admin-pagination">
+                @if (Model.CurrentPage > 1)
+                {
+                    <a href="/admin/inventory?page=@(Model.CurrentPage - 1)&filter=@filter&search=@searchTerm" 
+                       class="admin-pagination-btn">
+                        <i data-lucide="chevron-left"></i>
+                        Trước
+                    </a>
+                }
+                else
+                {
+                    <button class="admin-pagination-btn" disabled>
+                        <i data-lucide="chevron-left"></i>
+                        Trước
                     </button>
-                </div>
-            </form>
+                }
+
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <a href="/admin/inventory?page=@i&filter=@filter&search=@searchTerm" 
+                       class="admin-pagination-btn @(i == Model.CurrentPage ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="/admin/inventory?page=@(Model.CurrentPage + 1)&filter=@filter&search=@searchTerm" 
+                       class="admin-pagination-btn">
+                        Sau
+                        <i data-lucide="chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <button class="admin-pagination-btn" disabled>
+                        Sau
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                }
+            </div>
+
+            <div class="admin-text-center" style="margin-top: var(--spacing-md); color: var(--admin-text-light); font-size: 0.875rem;">
+                Trang @Model.CurrentPage / @Model.TotalPages
+            </div>
+        }
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Không tìm thấy sản phẩm</h3>
+                <p style="color: var(--admin-text-light); margin-bottom: 1.5rem;">
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <text>Không có sản phẩm nào phù hợp với từ khóa "<strong>@searchTerm</strong>"</text>
+                    }
+                    else
+                    {
+                        <text>Không có sản phẩm nào trong kho</text>
+                    }
+                </p>
+                @if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    <a href="/admin/inventory" class="admin-btn admin-btn-secondary">
+                        <i data-lucide="x"></i>
+                        Xóa bộ lọc
+                    </a>
+                }
+            </div>
         </div>
-    </div>
+    }
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // Handle update stock modal
-            $('#updateStockModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                var productId = button.data('product-id');
-                var productName = button.data('product-name');
-                var currentStock = button.data('current-stock');
-                
-                var modal = $(this);
-                modal.find('#productId').val(productId);
-                modal.find('#productName').text(productName);
-                modal.find('#currentStock').text(currentStock);
-                modal.find('#newStock').val(currentStock);
-            });
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-            // Handle form submission
-            $('#updateStockForm').on('submit', function(e) {
-                e.preventDefault();
-                
-                var formData = new FormData(this);
-                
-                $.ajax({
-                    url: '@Url.Action("UpdateStock")',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        if (response.success) {
-                            // Update stock display in table
-                            var productId = $('#productId').val();
-                            $('.inventory-stock[data-product-id="' + productId + '"]').text(response.newStock);
-                            
-                            // Show success message
-                            showAlert('success', response.message);
-                            
-                            // Close modal
-                            $('#updateStockModal').modal('hide');
-                            
-                            // Optionally reload page to update status badges
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            showAlert('danger', response.message);
-                        }
-                    },
-                    error: function() {
-                        showAlert('danger', 'Có lỗi xảy ra khi cập nhật tồn kho!');
-                    }
-                });
+        // Highlight low stock items
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.admin-table tbody tr');
+            rows.forEach(function(row) {
+                const stockBadge = row.querySelector('.admin-badge-danger, .admin-badge-warning');
+                if (stockBadge) {
+                    row.style.background = 'var(--admin-bg-secondary)';
+                }
             });
-
-            function showAlert(type, message) {
-                var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-                    '</div>';
-                
-                // Remove existing alerts
-                $('.alert').remove();
-                
-                // Add new alert at top of page
-                $('.container-fluid').prepend(alertHtml);
-                
-                // Auto dismiss after 5 seconds
-                setTimeout(function() {
-                    $('.alert').alert('close');
-                }, 5000);
-            }
         });
     </script>
 }

@@ -1,73 +1,449 @@
 @model JohnHenryFashionWeb.ViewModels.UserManagementViewModel
 @{
-    ViewData["Title"] = "User Management";
+    ViewData["Title"] = "Quản lý người dùng";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Quản lý người dùng</li>";
+    
+    var searchTerm = Model.SearchTerm ?? "";
+    var roleFilter = Model.RoleFilter ?? "";
+    var statusFilter = Model.StatusFilter ?? "";
+    
+    var totalUsers = Model.TotalUsers;
+    var customerCount = Model.Users.Count(u => u.Role == "Customer");
+    var sellerCount = Model.SellersCount;
+    var activeCount = Model.ActiveUsers;
+    var inactiveCount = totalUsers - activeCount;
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-users me-3"></i>User Management</h1>
-        <button class="btn btn-primary">Add User</button>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            @if (Model.Users != null && Model.Users.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var user in Model.Users)
-                            {
-                                <tr>
-                                    <td>@user.FirstName @user.LastName</td>
-                                    <td>@user.Email</td>
-                                    <td>
-                                        @if (user.Roles != null && user.Roles.Any())
-                                        {
-                                            @string.Join(", ", user.Roles)
-                                        }
-                                        else
-                                        {
-                                            <span>User</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (user.IsActive)
-                                        {
-                                            <span class="badge bg-success">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger">Inactive</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No users found</h5>
-                    <p class="text-muted">User list will appear here</p>
-                </div>
-            }
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="users"></i>
+                Quản lý người dùng
+            </h1>
+            <a href="/admin/users/create" class="admin-btn admin-btn-primary">
+                <i data-lucide="user-plus"></i>
+                Thêm người dùng
+            </a>
         </div>
     </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng người dùng</h3>
+                    <p class="value">@totalUsers</p>
+                    <p class="change">Tất cả tài khoản</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="users"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Khách hàng</h3>
+                    <p class="value">@customerCount</p>
+                    <p class="change">@((customerCount > 0 ? (customerCount * 100.0 / totalUsers).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="shopping-bag"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Người bán</h3>
+                    <p class="value">@sellerCount</p>
+                    <p class="change">@((sellerCount > 0 ? (sellerCount * 100.0 / totalUsers).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="store"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang hoạt động</h3>
+                    <p class="value">@activeCount</p>
+                    <p class="change">@inactiveCount bị khóa</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="user-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="admin-filters">
+        <form method="get" action="/admin/users">
+            <div class="row g-3 align-items-end">
+                <!-- Search Box -->
+                <div class="col-md-5">
+                    <label class="admin-form-label">Tìm kiếm</label>
+                    <div class="admin-search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" name="searchTerm" class="admin-form-input" 
+                               placeholder="Tìm theo tên, email, số điện thoại..." 
+                               value="@searchTerm">
+                    </div>
+                </div>
+
+                <!-- Role Filter -->
+                <div class="col-md-3">
+                    <label class="admin-form-label">Vai trò</label>
+                    <select name="role" class="admin-form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(roleFilter))">Tất cả</option>
+                        <option value="Customer" selected="@(roleFilter == "Customer")">Khách hàng</option>
+                        <option value="Seller" selected="@(roleFilter == "Seller")">Người bán</option>
+                        <option value="Admin" selected="@(roleFilter == "Admin")">Quản trị viên</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-md-2">
+                    <label class="admin-form-label">Trạng thái</label>
+                    <select name="isActive" class="admin-form-select">
+                        <option value="">Tất cả</option>
+                        <option value="true" selected="@(statusFilter == "true")">Hoạt động</option>
+                        <option value="false" selected="@(statusFilter == "false")">Khóa</option>
+                    </select>
+                </div>
+
+                <!-- Search Button -->
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width: 100%;">
+                        <i data-lucide="search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs">
+        <a href="/admin/users?searchTerm=@searchTerm" 
+           class="admin-filter-tab @(string.IsNullOrEmpty(roleFilter) ? "active" : "")">
+            Tất cả (@totalUsers)
+        </a>
+        <a href="/admin/users?role=Customer&searchTerm=@searchTerm" 
+           class="admin-filter-tab @(roleFilter == "Customer" ? "active" : "")">
+            <i data-lucide="shopping-bag" style="width: 14px; height: 14px;"></i>
+            Khách hàng (@customerCount)
+        </a>
+        <a href="/admin/users?role=Seller&searchTerm=@searchTerm" 
+           class="admin-filter-tab @(roleFilter == "Seller" ? "active" : "")">
+            <i data-lucide="store" style="width: 14px; height: 14px;"></i>
+            Người bán (@sellerCount)
+        </a>
+        <a href="/admin/users?isActive=true&searchTerm=@searchTerm" 
+           class="admin-filter-tab @(statusFilter == "true" ? "active" : "")">
+            <i data-lucide="user-check" style="width: 14px; height: 14px;"></i>
+            Hoạt động (@activeCount)
+        </a>
+        <a href="/admin/users?isActive=false&searchTerm=@searchTerm" 
+           class="admin-filter-tab @(statusFilter == "false" ? "active" : "")">
+            <i data-lucide="user-x" style="width: 14px; height: 14px;"></i>
+            Khóa (@inactiveCount)
+        </a>
+    </div>
+
+    <!-- Users Table -->
+    @if (Model.Users.Any())
+    {
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;"></th>
+                        <th>Tên người dùng</th>
+                        <th>Vai trò</th>
+                        <th>Số điện thoại</th>
+                        <th>Đơn hàng</th>
+                        <th>Tổng chi</th>
+                        <th>Trạng thái</th>
+                        <th>Đăng nhập lần cuối</th>
+                        <th style="width: 160px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(user.Avatar))
+                                {
+                                    <img src="@user.Avatar" alt="@user.FullName" 
+                                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid var(--admin-border);">
+                                }
+                                else
+                                {
+                                    <div style="width: 40px; height: 40px; background: var(--admin-bg-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--admin-border);">
+                                        <i data-lucide="user" style="width: 18px; height: 18px; color: var(--admin-text-muted);"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div style="font-weight: 500; color: var(--admin-text); margin-bottom: 0.25rem;">
+                                    @user.FullName
+                                </div>
+                                <div style="font-size: 0.8125rem; color: var(--admin-text-light);">
+                                    @user.Email
+                                </div>
+                            </td>
+                            <td>
+                                @switch (user.PrimaryRole)
+                                {
+                                    case "Admin":
+                                        <span class="admin-badge admin-badge-danger">
+                                            <i data-lucide="shield" style="width: 12px; height: 12px;"></i>
+                                            Quản trị viên
+                                        </span>
+                                        break;
+                                    case "Seller":
+                                        <span class="admin-badge admin-badge-warning">
+                                            <i data-lucide="store" style="width: 12px; height: 12px;"></i>
+                                            Người bán
+                                        </span>
+                                        break;
+                                    case "Customer":
+                                    default:
+                                        <span class="admin-badge admin-badge-info">
+                                            <i data-lucide="shopping-bag" style="width: 12px; height: 12px;"></i>
+                                            Khách hàng
+                                        </span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                                {
+                                    <span style="font-size: 0.875rem;">@user.PhoneNumber</span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-secondary">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="font-weight: 500;">
+                                    <i data-lucide="shopping-cart" style="width: 14px; height: 14px; color: var(--admin-text-light);"></i>
+                                    @user.OrderCount đơn
+                                </div>
+                            </td>
+                            <td>
+                                @if (user.TotalSpent > 0)
+                                {
+                                    <span style="font-weight: 500; color: var(--admin-success);">@user.TotalSpent.ToString("N0") ₫</span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--admin-text-light);">0 ₫</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                        Hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-danger">
+                                        <i data-lucide="x-circle" style="width: 12px; height: 12px;"></i>
+                                        Đã khóa
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.LastLoginDate.HasValue)
+                                {
+                                    <div style="font-size: 0.875rem;">@user.LastLoginDate.Value.ToString("dd/MM/yyyy")</div>
+                                    <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@user.LastLoginDate.Value.ToString("HH:mm")</div>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-secondary">Chưa đăng nhập</span>
+                                }
+                            </td>
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: revert;">
+                                    <a href="/admin/users/@user.Id" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem">
+                                        <i data-lucide="eye"></i>
+                                    </a>
+                                    <a href="/admin/users/edit/@user.Id" class="admin-btn admin-btn-sm admin-btn-primary" title="Sửa">
+                                        <i data-lucide="edit"></i>
+                                    </a>
+                                    @if (user.IsActive)
+                                    {
+                                        <button onclick="toggleUserStatus('@user.Id', false)" class="admin-btn admin-btn-sm admin-btn-danger" title="Khóa">
+                                            <i data-lucide="lock"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button onclick="toggleUserStatus('@user.Id', true)" class="admin-btn admin-btn-sm admin-btn-success" title="Mở khóa">
+                                            <i data-lucide="unlock"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="admin-pagination">
+                @if (Model.CurrentPage > 1)
+                {
+                    <a href="/admin/users?page=@(Model.CurrentPage - 1)&searchTerm=@searchTerm&role=@roleFilter&isActive=@statusFilter" 
+                       class="admin-pagination-btn">
+                        <i data-lucide="chevron-left"></i>
+                        Trước
+                    </a>
+                }
+                else
+                {
+                    <button class="admin-pagination-btn" disabled>
+                        <i data-lucide="chevron-left"></i>
+                        Trước
+                    </button>
+                }
+
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <a href="/admin/users?page=@i&searchTerm=@searchTerm&role=@roleFilter&isActive=@statusFilter" 
+                       class="admin-pagination-btn @(i == Model.CurrentPage ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="/admin/users?page=@(Model.CurrentPage + 1)&searchTerm=@searchTerm&role=@roleFilter&isActive=@statusFilter" 
+                       class="admin-pagination-btn">
+                        Sau
+                        <i data-lucide="chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <button class="admin-pagination-btn" disabled>
+                        Sau
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                }
+            </div>
+
+            <div class="admin-text-center" style="margin-top: var(--spacing-md); color: var(--admin-text-light); font-size: 0.875rem;">
+                Trang @Model.CurrentPage / @Model.TotalPages (Tổng @totalUsers người dùng)
+            </div>
+        }
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Không tìm thấy người dùng</h3>
+                <p style="color: var(--admin-text-light); margin-bottom: 1.5rem;">
+                    @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(roleFilter) || !string.IsNullOrEmpty(statusFilter))
+                    {
+                        <text>Không có người dùng nào phù hợp với bộ lọc</text>
+                    }
+                    else
+                    {
+                        <text>Chưa có người dùng nào trong hệ thống</text>
+                    }
+                </p>
+                <div class="admin-flex-center admin-gap-sm">
+                    @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(roleFilter) || !string.IsNullOrEmpty(statusFilter))
+                    {
+                        <a href="/admin/users" class="admin-btn admin-btn-secondary">
+                            <i data-lucide="x"></i>
+                            Xóa bộ lọc
+                        </a>
+                    }
+                    <a href="/admin/users/create" class="admin-btn admin-btn-primary">
+                        <i data-lucide="user-plus"></i>
+                        Thêm người dùng
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Toggle user status
+        function toggleUserStatus(userId, activate) {
+            const action = activate ? 'mở khóa' : 'khóa';
+            if (!confirm(`Xác nhận ${action} tài khoản này?`)) {
+                return;
+            }
+
+            fetch('/admin/users/toggle-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: userId, activate: activate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            });
+        }
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+    </script>
+}

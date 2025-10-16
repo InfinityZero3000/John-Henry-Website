@@ -1,105 +1,416 @@
 @model SystemSettingsViewModel
 @{
-    ViewData["Title"] = "System Settings";
+    ViewData["Title"] = "Cấu hình hệ thống";
+    ViewData["CurrentSection"] = "Settings";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Hệ thống</li>";
+    
 }
 
-<style>
-    .settings-container {
-        padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: calc(100vh - 80px);
-    }
-
-    .page-header-glass {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .settings-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .section-title {
-        color: #1a1a2e;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-control-custom {
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-    }
-
-    .form-control-custom:focus {
-        border-color: var(--jh-red);
-        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
-    }
-
-    .btn-save {
-        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 12px;
-        font-weight: 600;
-    }
-</style>
-
-<div class="settings-container">
-    <div class="page-header-glass">
-        <h1><i class="fas fa-cogs text-danger me-3"></i>System Settings</h1>
-        <p class="text-muted">Manage system configuration and settings</p>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="settings"></i>
+                Cấu hình hệ thống
+            </h1>
+        </div>
     </div>
 
-    <form asp-action="UpdateSettings" method="post">
-        <div class="settings-card">
-            <h5 class="section-title"><i class="fas fa-globe text-danger me-2"></i>General Settings</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="SiteName" class="form-label fw-bold">Site Name</label>
-                    <input asp-for="SiteName" class="form-control-custom">
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="AdminEmail" class="form-label fw-bold">Admin Email</label>
-                    <input asp-for="AdminEmail" class="form-control-custom">
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="admin-alert admin-alert-danger">
+            <i data-lucide="alert-circle"></i>
+            <span>Có lỗi xảy ra, vui lòng kiểm tra lại thông tin!</span>
+        </div>
+    }
+
+    <form method="post" asp-action="UpdateSettings">
+        @Html.AntiForgeryToken()
+
+        <!-- Settings Tabs -->
+        <div class="admin-filter-tabs">
+            <button type="button" class="admin-filter-tab active" data-tab="general">
+                <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+                Chung
+            </button>
+            <button type="button" class="admin-filter-tab" data-tab="ecommerce">
+                <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
+                Thương mại
+            </button>
+            <button type="button" class="admin-filter-tab" data-tab="security">
+                <i data-lucide="shield" style="width: 14px; height: 14px;"></i>
+                Bảo mật
+            </button>
+            <button type="button" class="admin-filter-tab" data-tab="email">
+                <i data-lucide="mail" style="width: 14px; height: 14px;"></i>
+                Email
+            </button>
+            <button type="button" class="admin-filter-tab" data-tab="payment">
+                <i data-lucide="credit-card" style="width: 14px; height: 14px;"></i>
+                Thanh toán
+            </button>
+            <button type="button" class="admin-filter-tab" data-tab="seo">
+                <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+                SEO
+            </button>
+        </div>
+
+        <!-- General Settings Tab -->
+        <div class="admin-card settings-tab-content" id="tab-general">
+            <div class="admin-card-header">
+                <h3>Cài đặt chung</h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="admin-form-group">
+                            <label asp-for="SiteName" class="admin-form-label required">Tên website</label>
+                            <input asp-for="SiteName" class="admin-form-input" placeholder="John Henry Fashion" />
+                            <span asp-validation-for="SiteName" class="admin-form-error"></span>
+                            <small class="admin-form-help">Tên website sẽ hiển thị trên title và header</small>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="admin-form-group">
+                            <label asp-for="SiteDescription" class="admin-form-label">Mô tả website</label>
+                            <textarea asp-for="SiteDescription" class="admin-form-textarea" rows="3" placeholder="Mô tả ngắn về website..."></textarea>
+                            <span asp-validation-for="SiteDescription" class="admin-form-error"></span>
+                            <small class="admin-form-help">Mô tả này sẽ được sử dụng cho SEO meta description</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="AdminEmail" class="admin-form-label required">Email quản trị</label>
+                            <input asp-for="AdminEmail" type="email" class="admin-form-input" placeholder="admin@@..." />
+                            <span asp-validation-for="AdminEmail" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="SupportEmail" class="admin-form-label required">Email hỗ trợ</label>
+                            <input asp-for="SupportEmail" type="email" class="admin-form-input" placeholder="support@@..." />
+                            <span asp-validation-for="SupportEmail" class="admin-form-error"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="settings-card">
-            <h5 class="section-title"><i class="fas fa-shield-alt text-danger me-2"></i>Security Settings</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="MaxLoginAttempts" class="form-label fw-bold">Max Login Attempts</label>
-                    <input asp-for="MaxLoginAttempts" class="form-control-custom" type="number">
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="SessionTimeoutMinutes" class="form-label fw-bold">Session Timeout (minutes)</label>
-                    <input asp-for="SessionTimeoutMinutes" class="form-control-custom" type="number">
+        <!-- E-commerce Settings Tab -->
+        <div class="admin-card settings-tab-content" id="tab-ecommerce" style="display: none;">
+            <div class="admin-card-header">
+                <h3>Cài đặt thương mại</h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="admin-form-group">
+                            <label asp-for="Currency" class="admin-form-label required">Đơn vị tiền tệ</label>
+                            <select asp-for="Currency" class="admin-form-select">
+                                <option value="VND">VND (₫)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                            </select>
+                            <span asp-validation-for="Currency" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-form-group">
+                            <label asp-for="TaxRate" class="admin-form-label">Thuế VAT (%)</label>
+                            <input asp-for="TaxRate" type="number" step="0.01" class="admin-form-input" placeholder="10" />
+                            <span asp-validation-for="TaxRate" class="admin-form-error"></span>
+                            <div class="admin-form-help">Thuế giá trị gia tăng (VAT)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-form-group">
+                            <label asp-for="LowStockThreshold" class="admin-form-label">Ngưỡng hết hàng</label>
+                            <input asp-for="LowStockThreshold" type="number" class="admin-form-input" placeholder="10" />
+                            <span asp-validation-for="LowStockThreshold" class="admin-form-error"></span>
+                            <div class="admin-form-help">Cảnh báo khi tồn kho dưới mức này</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="ShippingFee" class="admin-form-label">Phí vận chuyển (đ)</label>
+                            <input asp-for="ShippingFee" type="number" class="admin-form-input" placeholder="30000" />
+                            <span asp-validation-for="ShippingFee" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="FreeShippingThreshold" class="admin-form-label">Miễn phí ship từ (đ)</label>
+                            <input asp-for="FreeShippingThreshold" type="number" class="admin-form-input" placeholder="500000" />
+                            <span asp-validation-for="FreeShippingThreshold" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input asp-for="AutoReduceStock" type="checkbox" style="width: 18px; height: 18px;" />
+                                <span>Tự động giảm tồn kho khi đặt hàng</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input asp-for="AllowBackorders" type="checkbox" style="width: 18px; height: 18px;" />
+                                <span>Cho phép đặt hàng khi hết hàng</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="settings-card">
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn-save">
-                    <i class="fas fa-save me-2"></i>Save Settings
-                </button>
+        <!-- Security Settings Tab -->
+        <div class="admin-card settings-tab-content" id="tab-security" style="display: none;">
+            <div class="admin-card-header">
+                <h3>Cài đặt bảo mật</h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="admin-form-group">
+                            <label asp-for="MaxLoginAttempts" class="admin-form-label">Số lần đăng nhập tối đa</label>
+                            <input asp-for="MaxLoginAttempts" type="number" class="admin-form-input" placeholder="5" />
+                            <span asp-validation-for="MaxLoginAttempts" class="admin-form-error"></span>
+                            <div class="admin-form-help">Khóa tài khoản sau số lần thử này</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-form-group">
+                            <label asp-for="SessionTimeoutMinutes" class="admin-form-label">Thời gian phiên (phút)</label>
+                            <input asp-for="SessionTimeoutMinutes" type="number" class="admin-form-input" placeholder="30" />
+                            <span asp-validation-for="SessionTimeoutMinutes" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-form-group">
+                            <label asp-for="PasswordExpirationDays" class="admin-form-label">Hết hạn mật khẩu (ngày)</label>
+                            <input asp-for="PasswordExpirationDays" type="number" class="admin-form-input" placeholder="90" />
+                            <span asp-validation-for="PasswordExpirationDays" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                            <input asp-for="EnableTwoFactorAuth" type="checkbox" style="width: 18px; height: 18px;" />
+                            <span>Bật xác thực hai yếu tố (2FA)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Settings Tab -->
+        <div class="admin-card settings-tab-content" id="tab-email" style="display: none;">
+            <div class="admin-card-header">
+                <h3>Cài đặt email</h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="SmtpServer" class="admin-form-label required">SMTP Server</label>
+                            <input asp-for="SmtpServer" class="admin-form-input" placeholder="smtp.gmail.com" />
+                            <span asp-validation-for="SmtpServer" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="SmtpPort" class="admin-form-label required">SMTP Port</label>
+                            <input asp-for="SmtpPort" type="number" class="admin-form-input" placeholder="587" />
+                            <span asp-validation-for="SmtpPort" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="SmtpUsername" class="admin-form-label">SMTP Username</label>
+                            <input asp-for="SmtpUsername" class="admin-form-input" placeholder="email@@example.com" />
+                            <span asp-validation-for="SmtpUsername" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="SmtpPassword" class="admin-form-label">SMTP Password</label>
+                            <input asp-for="SmtpPassword" type="password" class="admin-form-input" placeholder="••••••••" />
+                            <span asp-validation-for="SmtpPassword" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input asp-for="EnableEmailNotifications" type="checkbox" style="width: 18px; height: 18px;" />
+                                <span>Bật thông báo email</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input asp-for="EnableSmsNotifications" type="checkbox" style="width: 18px; height: 18px;" />
+                                <span>Bật thông báo SMS</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input asp-for="EnablePushNotifications" type="checkbox" style="width: 18px; height: 18px;" />
+                                <span>Bật thông báo đẩy</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Settings Tab -->
+        <div class="admin-card settings-tab-content" id="tab-payment" style="display: none;">
+            <div class="admin-card-header">
+                <h3>Cài đặt thanh toán</h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <h4 style="font-size: 1rem; margin-bottom: var(--spacing-md); color: var(--admin-text);">
+                            Phương thức thanh toán
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-md); background: var(--admin-bg-secondary); border-radius: var(--radius-sm);">
+                                <input asp-for="EnableCashOnDelivery" type="checkbox" style="width: 18px; height: 18px;" />
+                                <i data-lucide="banknote" style="width: 18px; height: 18px; color: var(--admin-text-light);"></i>
+                                <span>Thanh toán khi nhận hàng (COD)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-md); background: var(--admin-bg-secondary); border-radius: var(--radius-sm);">
+                                <input asp-for="EnableBankTransfer" type="checkbox" style="width: 18px; height: 18px;" />
+                                <i data-lucide="building" style="width: 18px; height: 18px; color: var(--admin-text-light);"></i>
+                                <span>Chuyển khoản ngân hàng</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-md); background: var(--admin-bg-secondary); border-radius: var(--radius-sm);">
+                                <input asp-for="EnablePayPal" type="checkbox" style="width: 18px; height: 18px;" />
+                                <i data-lucide="credit-card" style="width: 18px; height: 18px; color: var(--admin-text-light);"></i>
+                                <span>PayPal</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-md); background: var(--admin-bg-secondary); border-radius: var(--radius-sm);">
+                                <input asp-for="EnableStripe" type="checkbox" style="width: 18px; height: 18px;" />
+                                <i data-lucide="credit-card" style="width: 18px; height: 18px; color: var(--admin-text-light);"></i>
+                                <span>Stripe</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Settings Tab -->
+        <div class="admin-card settings-tab-content" id="tab-seo" style="display: none;">
+            <div class="admin-card-header">
+                <h3>Cài đặt SEO</h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="admin-form-group">
+                            <label asp-for="DefaultMetaTitle" class="admin-form-label">Tiêu đề mặc định</label>
+                            <input asp-for="DefaultMetaTitle" class="admin-form-input" placeholder="John Henry - Fashion Store" />
+                            <span asp-validation-for="DefaultMetaTitle" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="admin-form-group">
+                            <label asp-for="DefaultMetaDescription" class="admin-form-label">Mô tả mặc định</label>
+                            <textarea asp-for="DefaultMetaDescription" class="admin-form-textarea" rows="3" placeholder="Discover premium fashion..."></textarea>
+                            <span asp-validation-for="DefaultMetaDescription" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="admin-form-group">
+                            <label asp-for="DefaultMetaKeywords" class="admin-form-label">Từ khóa mặc định</label>
+                            <input asp-for="DefaultMetaKeywords" class="admin-form-input" placeholder="fashion, premium, clothing, style" />
+                            <span asp-validation-for="DefaultMetaKeywords" class="admin-form-error"></span>
+                            <div class="admin-form-help">Phân cách bằng dấu phẩy</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="GoogleAnalyticsId" class="admin-form-label">Google Analytics ID</label>
+                            <input asp-for="GoogleAnalyticsId" class="admin-form-input" placeholder="UA-XXXXXXXXX-X" />
+                            <span asp-validation-for="GoogleAnalyticsId" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-form-group">
+                            <label asp-for="FacebookPixelId" class="admin-form-label">Facebook Pixel ID</label>
+                            <input asp-for="FacebookPixelId" class="admin-form-input" placeholder="XXXXXXXXXXXXXXXX" />
+                            <span asp-validation-for="FacebookPixelId" class="admin-form-error"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                            <input asp-for="EnableAnalytics" type="checkbox" style="width: 18px; height: 18px;" />
+                            <span>Bật theo dõi Analytics</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="admin-card">
+            <div class="admin-card-body">
+                <div class="admin-flex-between">
+                    <button type="submit" class="admin-btn admin-btn-primary">
+                        <i data-lucide="save"></i>
+                        Lưu cài đặt
+                    </button>
+                    <a href="/admin" class="admin-btn admin-btn-secondary">
+                        <i data-lucide="x"></i>
+                        Hủy
+                    </a>
+                </div>
             </div>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tab switching
+        document.querySelectorAll('.admin-filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active from all tabs
+                document.querySelectorAll('.admin-filter-tab').forEach(t => t.classList.remove('active'));
+                
+                // Hide all tab contents
+                document.querySelectorAll('.settings-tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Add active to clicked tab
+                this.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById('tab-' + tabId).style.display = 'block';
+                
+                // Re-initialize icons
+                lucide.createIcons();
+            });
+        });
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+    </script>
+}

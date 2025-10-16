@@ -1,0 +1,439 @@
+@model JohnHenryFashionWeb.Models.Dispute
+@{
+    ViewData["Title"] = $"Dispute #{Model.DisputeNumber}";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .dispute-details-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .back-btn-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #667eea;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn-glass:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .dispute-header-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffd32a, #ffb142);
+        color: white;
+    }
+
+    .status-underreview {
+        background: linear-gradient(135deg, #48dbfb, #0abde3);
+        color: white;
+    }
+
+    .status-resolved {
+        background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        color: white;
+    }
+
+    .amount-box {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .amount-box h3 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #667eea;
+        min-width: 150px;
+    }
+
+    .info-value {
+        color: #333;
+        flex: 1;
+    }
+
+    .evidence-image {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .evidence-image:hover {
+        transform: scale(1.05);
+    }
+
+    .order-item {
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .resolve-form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<div class="dispute-details-container">
+    <!-- Back Button -->
+    <a href="@Url.Action("Disputes")" class="back-btn-glass">
+        <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+    </a>
+
+    <!-- Dispute Header -->
+    <div class="dispute-header-card">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h3 class="mb-2" style="color: #667eea; font-weight: 700;">
+                    Dispute #@Model.DisputeNumber
+                </h3>
+                <h5 class="mb-3">
+                    <i class="fas fa-exclamation-circle text-danger me-2"></i>@Model.Reason
+                </h5>
+            </div>
+            <span class="status-badge status-@Model.Status?.ToLower()">
+                @(Model.Status == "Pending" ? "Chờ xử lý" : 
+                  Model.Status == "UnderReview" ? "Đang review" : "Đã giải quyết")
+            </span>
+        </div>
+
+        <div class="alert alert-light mb-3">
+            <strong>Mô tả chi tiết:</strong><br/>
+            @Model.Description
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="amount-box">
+                    <p class="mb-1">Số tiền tranh chấp</p>
+                    <h3>@Model.DisputedAmount.ToString("N0") đ</h3>
+                </div>
+            </div>
+            @if (Model.RefundAmount.HasValue && Model.RefundAmount.Value > 0)
+            {
+                <div class="col-md-6">
+                    <div class="amount-box" style="background: linear-gradient(135deg, #1dd1a1, #10ac84);">
+                        <p class="mb-1">Số tiền refund</p>
+                        <h3>@Model.RefundAmount.Value.ToString("N0") đ</h3>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.EvidenceUrls))
+        {
+            <div class="mt-4">
+                <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                    <i class="fas fa-images me-2"></i>Bằng chứng
+                </h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    @foreach (var url in Model.EvidenceUrls.Split(','))
+                    {
+                        <a href="@url" target="_blank">
+                            <img src="@url" alt="Evidence" class="evidence-image"/>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Information -->
+        <div class="col-md-6">
+            <!-- Order Information -->
+            <div class="info-card">
+                <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                    <i class="fas fa-shopping-cart me-2"></i>Thông tin Đơn hàng
+                </h6>
+                <div class="info-row">
+                    <div class="info-label">Order Number:</div>
+                    <div class="info-value">
+                        <a href="#" style="color: #667eea;">#@Model.Order?.OrderNumber</a>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Tổng tiền:</div>
+                    <div class="info-value fw-bold">@Model.Order?.TotalAmount.ToString("N0") đ</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Ngày đặt:</div>
+                    <div class="info-value">@Model.Order?.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+
+                @if (Model.Order?.OrderItems != null && Model.Order.OrderItems.Any())
+                {
+                    <div class="mt-3">
+                        <strong class="d-block mb-2">Sản phẩm trong đơn:</strong>
+                        @foreach (var item in Model.Order.OrderItems)
+                        {
+                            <div class="order-item">
+                                @if (!string.IsNullOrEmpty(item.Product?.FeaturedImageUrl))
+                                {
+                                    <img src="@item.Product.FeaturedImageUrl" alt="@item.Product?.Name" class="product-image"/>
+                                }
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">@item.Product?.Name</div>
+                                    <div class="text-muted">
+                                        @item.Quantity x @item.Price.ToString("N0") đ = 
+                                        <strong>@((item.Quantity * item.Price).ToString("N0")) đ</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Customer Information -->
+            <div class="info-card">
+                <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                    <i class="fas fa-user me-2"></i>Thông tin Khách hàng
+                </h6>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">@Model.Customer?.Email</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Họ tên:</div>
+                    <div class="info-value">@Model.Customer?.FullName</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">SĐT:</div>
+                    <div class="info-value">@Model.Customer?.PhoneNumber</div>
+                </div>
+            </div>
+
+            <!-- Seller Information -->
+            <div class="info-card">
+                <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                    <i class="fas fa-store me-2"></i>Thông tin Seller
+                </h6>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">@Model.Seller?.Email</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Họ tên:</div>
+                    <div class="info-value">@Model.Seller?.FullName</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">SĐT:</div>
+                    <div class="info-value">@Model.Seller?.PhoneNumber</div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.SellerResponse))
+                {
+                    <div class="mt-3">
+                        <div class="alert alert-warning mb-0">
+                            <strong>
+                                <i class="fas fa-reply me-2"></i>Phản hồi từ Seller:
+                            </strong>
+                            <p class="mb-1 mt-2">@Model.SellerResponse</p>
+                            @if (Model.SellerRespondedAt.HasValue)
+                            {
+                                <small class="text-muted">
+                                    @Model.SellerRespondedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                </small>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right Column: Actions -->
+        <div class="col-md-6">
+            <!-- Timeline -->
+            <div class="info-card">
+                <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                    <i class="fas fa-history me-2"></i>Timeline
+                </h6>
+                <div class="info-row">
+                    <div class="info-label">Tạo lúc:</div>
+                    <div class="info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+                @if (Model.SellerRespondedAt.HasValue)
+                {
+                    <div class="info-row">
+                        <div class="info-label">Seller trả lời:</div>
+                        <div class="info-value">@Model.SellerRespondedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                }
+                @if (Model.ResolvedAt.HasValue)
+                {
+                    <div class="info-row">
+                        <div class="info-label">Giải quyết lúc:</div>
+                        <div class="info-value">@Model.ResolvedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    @if (Model.Resolver != null)
+                    {
+                        <div class="info-row">
+                            <div class="info-label">Người giải quyết:</div>
+                            <div class="info-value">@Model.Resolver.Email</div>
+                        </div>
+                    }
+                }
+            </div>
+
+            @if (Model.Status == "Resolved")
+            {
+                <!-- Resolution Result -->
+                <div class="info-card">
+                    <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                        <i class="fas fa-gavel me-2"></i>Kết quả Giải quyết
+                    </h6>
+                    <div class="alert alert-success">
+                        <strong>Outcome:</strong>
+                        <h5 class="mt-2">
+                            @(Model.ResolutionType == "CustomerFavor" ? "✅ Khách hàng thắng" :
+                              Model.ResolutionType == "SellerFavor" ? "✅ Seller thắng" :
+                              Model.ResolutionType == "Compromise" ? "🤝 Thỏa thuận" : "⚖️ Không lỗi")
+                        </h5>
+                    </div>
+                    <div class="alert alert-light">
+                        <strong>Giải thích:</strong>
+                        <p class="mb-0 mt-2">@Model.Resolution</p>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Pending" && string.IsNullOrEmpty(Model.SellerResponse))
+            {
+                <!-- Add Seller Response Form -->
+                <div class="resolve-form-card">
+                    <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                        <i class="fas fa-reply me-2"></i>Thêm Phản hồi Seller
+                    </h6>
+                    <form method="post" asp-action="AddSellerResponse" asp-route-id="@Model.Id">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phản hồi từ Seller</label>
+                            <textarea name="response" class="form-control" rows="4" 
+                                      placeholder="Nhập phản hồi từ seller..." required></textarea>
+                            <small class="text-muted">
+                                Sau khi thêm phản hồi, dispute sẽ chuyển sang trạng thái "Đang review"
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Thêm Phản hồi
+                        </button>
+                    </form>
+                </div>
+            }
+            else if (Model.Status != "Resolved")
+            {
+                <!-- Resolve Dispute Form -->
+                <div class="resolve-form-card">
+                    <h6 class="mb-3" style="color: #667eea; font-weight: 700;">
+                        <i class="fas fa-gavel me-2"></i>Giải quyết Tranh chấp
+                    </h6>
+                    <form method="post" asp-action="ResolveDispute" asp-route-id="@Model.Id">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kết quả</label>
+                            <select name="outcome" class="form-select" required>
+                                <option value="">-- Chọn kết quả --</option>
+                                <option value="CustomerFavor">Khách hàng thắng (Customer Favor)</option>
+                                <option value="SellerFavor">Seller thắng (Seller Favor)</option>
+                                <option value="Compromise">Thỏa thuận (Compromise)</option>
+                                <option value="NoFault">Không lỗi (No Fault)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Giải thích chi tiết</label>
+                            <textarea name="resolution" class="form-control" rows="4" 
+                                      placeholder="Giải thích lý do và quyết định..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Số tiền Refund (nếu có)</label>
+                            <input type="number" name="refundAmount" class="form-control" 
+                                   placeholder="0" min="0" max="@Model.DisputedAmount" step="1000">
+                            <small class="text-muted">
+                                Để trống hoặc 0 nếu không refund. Tối đa: @Model.DisputedAmount.ToString("N0") đ
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-check me-2"></i>Giải quyết Dispute
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>

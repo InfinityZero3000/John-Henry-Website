@@ -1,10 +1,35 @@
 @model JohnHenryFashionWeb.ViewModels.OrderDetailsViewModel
 
-<div class="order-details">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h6 class="text-muted mb-3">THÔNG TIN ĐỔN HÀNG</h6>
-            <table class="table table-borderless table-sm">
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    ViewData["CurrentSection"] = "Orders";
+    ViewData["PageIcon"] = "file-text";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="file-text"></i>
+                Chi tiết đơn hàng #@Model.OrderNumber
+            </h1>
+        </div>
+        <div class="admin-page-header-actions">
+            <a href="@Url.Action("Orders", "Admin")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Quay lại
+            </a>
+        </div>
+    </div>
+
+<div class="admin-card">
+    <div class="admin-card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6 class="admin-section-title mb-3">THÔNG TIN ĐƠN HÀNG</h6>
+                <table class="admin-info-table">
                 <tr>
                     <td width="120"><strong>Mã đơn hàng:</strong></td>
                     <td>#@Model.OrderNumber</td>
@@ -16,7 +41,7 @@
                 <tr>
                     <td><strong>Trạng thái:</strong></td>
                     <td>
-                        <span class="badge bg-@GetStatusBadgeClass(Model.Status)">
+                        <span class="admin-badge admin-badge-@GetStatusBadgeClass(Model.Status)">
                             @GetStatusText(Model.Status)
                         </span>
                     </td>
@@ -24,7 +49,7 @@
                 <tr>
                     <td><strong>Thanh toán:</strong></td>
                     <td>
-                        <span class="badge bg-@(Model.PaymentStatus == "Paid" ? "success" : "warning")">
+                        <span class="admin-badge admin-badge-@(Model.PaymentStatus == "Paid" ? "success" : "warning")">
                             @(Model.PaymentStatus == "Paid" ? "Đã thanh toán" : "Chưa thanh toán")
                         </span>
                     </td>
@@ -36,8 +61,8 @@
             </table>
         </div>
         <div class="col-md-6">
-            <h6 class="text-muted mb-3">THÔNG TIN KHÁCH HÀNG</h6>
-            <table class="table table-borderless table-sm">
+            <h6 class="admin-section-title mb-3">THÔNG TIN KHÁCH HÀNG</h6>
+            <table class="admin-info-table">
                 <tr>
                     <td width="100"><strong>Họ tên:</strong></td>
                     <td>@Model.CustomerName</td>
@@ -63,12 +88,12 @@
                 }
             </table>
         </div>
-    </div>
+        </div>
 
-    <h6 class="text-muted mb-3">CHI TIẾT SẢN PHẨM</h6>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="table-light">
+        <h6 class="admin-section-title mb-3">CHI TIẾT SẢN PHẨM</h6>
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
                 <tr>
                     <th width="60">Ảnh</th>
                     <th>Sản phẩm</th>
@@ -132,22 +157,22 @@
                     <td colspan="6" class="text-end"><strong>Phí vận chuyển:</strong></td>
                     <td class="text-end"><strong>@Model.ShippingFee.ToString("N0") ₫</strong></td>
                 </tr>
-                <tr class="table-warning">
+                <tr style="background-color: var(--admin-bg-secondary);">
                     <td colspan="6" class="text-end"><strong>TỔNG CỘNG:</strong></td>
-                    <td class="text-end"><strong class="text-primary fs-5">@Model.TotalAmount.ToString("N0") ₫</strong></td>
+                    <td class="text-end"><strong style="color: var(--admin-primary); font-size: 1.125rem;">@Model.TotalAmount.ToString("N0") ₫</strong></td>
                 </tr>
             </tfoot>
         </table>
-    </div>
+        </div>
 
-    @if (Model.OrderHistory.Any())
-    {
-        <h6 class="text-muted mb-3 mt-4">LỊCH SỬ ĐƠN HÀNG</h6>
-        <div class="timeline">
-            @foreach (var history in Model.OrderHistory.OrderByDescending(x => x.CreatedAt))
-            {
-                <div class="timeline-item">
-                    <div class="timeline-marker bg-@GetStatusBadgeClass(history.Status)"></div>
+        @if (Model.OrderHistory.Any())
+        {
+            <h6 class="admin-section-title mb-3 mt-4">LỊCH SỬ ĐƠN HÀNG</h6>
+            <div class="timeline">
+                @foreach (var history in Model.OrderHistory.OrderByDescending(x => x.CreatedAt))
+                {
+                    <div class="timeline-item">
+                        <div class="timeline-marker admin-badge-@GetStatusBadgeClass(history.Status)"></div>
                     <div class="timeline-content">
                         <h6 class="timeline-title">@GetStatusText(history.Status)</h6>
                         <p class="timeline-description">@history.Notes</p>
@@ -155,11 +180,31 @@
                             @history.CreatedAt.ToString("dd/MM/yyyy HH:mm") - @history.CreatedBy
                         </small>
                     </div>
-                </div>
-            }
-        </div>
-    }
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
+
+<style>
+    .admin-info-table {
+        width: 100%;
+    }
+    
+    .admin-info-table td {
+        padding: 0.5rem 0;
+        border: none;
+    }
+    
+    .admin-section-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--admin-text-muted);
+        margin-bottom: 1rem;
+    }
 
 <style>
     .timeline {
@@ -174,7 +219,7 @@
         top: 0;
         bottom: 0;
         width: 2px;
-        background: #dee2e6;
+        background: var(--admin-border);
     }
 
     .timeline-item {
@@ -189,15 +234,31 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        border: 2px solid #fff;
-        box-shadow: 0 0 0 2px #dee2e6;
+        border: 2px solid var(--admin-bg);
+        box-shadow: 0 0 0 2px var(--admin-border);
+    }
+    
+    .timeline-marker.admin-badge-warning {
+        background-color: var(--status-warning);
+    }
+    
+    .timeline-marker.admin-badge-info {
+        background-color: var(--status-info);
+    }
+    
+    .timeline-marker.admin-badge-success {
+        background-color: var(--status-success);
+    }
+    
+    .timeline-marker.admin-badge-danger {
+        background-color: var(--status-danger);
     }
 
     .timeline-content {
-        background: #f8f9fa;
+        background: var(--admin-bg-secondary);
         padding: 15px;
-        border-radius: 8px;
-        border-left: 3px solid #dee2e6;
+        border-radius: var(--radius-md);
+        border-left: 3px solid var(--admin-border);
     }
 
     .timeline-title {
@@ -210,6 +271,16 @@
         font-size: 13px;
     }
 </style>
+
+</div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+}
 
 @functions {
     string GetStatusBadgeClass(string status)

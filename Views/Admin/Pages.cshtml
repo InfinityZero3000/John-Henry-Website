@@ -1,28 +1,28 @@
 @{
     ViewData["Title"] = "Quản lý trang";
+    ViewData["CurrentSection"] = "Content";
+    ViewData["PageIcon"] = "file-text";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="admin-content">
-    <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-file-alt me-2"></i>Quản lý trang
-                </h1>
-                <p class="text-muted mb-0">Quản lý nội dung trang tĩnh và CMS</p>
-            </div>
-            <div class="header-actions">
-                <button class="btn btn-primary" onclick="createPage()">
-                    <i class="fas fa-plus me-1"></i>Tạo trang mới
-                </button>
-            </div>
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="file-text"></i>
+                Quản lý trang
+            </h1>
+        </div>
+        <div class="admin-page-header-actions">
+            <button class="admin-btn admin-btn-primary" onclick="createPage()">
+                <i data-lucide="plus"></i>
+                Tạo trang mới
+            </button>
         </div>
     </div>
 
     <!-- Stats Section -->
-    <div class="content-wrapper">
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="card bg-primary text-white">
@@ -500,3 +500,10 @@
         border: 1px solid rgba(0, 0, 0, 0.125);
     }
 </style>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+}

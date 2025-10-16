@@ -1,0 +1,153 @@
+@model JohnHenryFashionWeb.Models.SystemPromotion
+@{
+    ViewData["Title"] = "Chỉnh sửa Khuyến mãi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .marketing-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid rgba(240, 147, 251, 0.2);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .btn-cancel, .btn-danger {
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="marketing-container">
+    <div class="form-card">
+        <div class="mb-4">
+            <h2>✏️ Chỉnh sửa Khuyến mãi</h2>
+        </div>
+
+        <form method="post" action="/admin/marketing/promotion/@Model.Id">
+            @Html.AntiForgeryToken()
+            
+            <div class="mb-3">
+                <label for="Name" class="form-label">Tên khuyến mãi *</label>
+                <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required />
+            </div>
+
+            <div class="mb-3">
+                <label for="Code" class="form-label">Mã khuyến mãi *</label>
+                <input type="text" class="form-control" id="Code" name="Code" value="@Model.Code" required />
+            </div>
+
+            <div class="mb-3">
+                <label for="Description" class="form-label">Mô tả</label>
+                <textarea class="form-control" id="Description" name="Description" rows="3">@Model.Description</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="Type" class="form-label">Loại giảm giá *</label>
+                    <select class="form-select" id="Type" name="Type" required>
+                        <option value="percentage" selected="@(Model.Type == "percentage")">Phần trăm (%)</option>
+                        <option value="fixed" selected="@(Model.Type == "fixed")">Số tiền cố định</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="Value" class="form-label">Giá trị *</label>
+                    <input type="number" class="form-control" id="Value" name="Value" step="0.01" value="@Model.Value" required />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="MinOrderAmount" class="form-label">Đơn hàng tối thiểu</label>
+                    <input type="number" class="form-control" id="MinOrderAmount" name="MinOrderAmount" step="0.01" value="@Model.MinOrderAmount" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="MaxDiscountAmount" class="form-label">Giảm giá tối đa</label>
+                    <input type="number" class="form-control" id="MaxDiscountAmount" name="MaxDiscountAmount" step="0.01" value="@Model.MaxDiscountAmount" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="UsageLimit" class="form-label">Giới hạn sử dụng</label>
+                    <input type="number" class="form-control" id="UsageLimit" name="UsageLimit" value="@Model.UsageLimit" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="UsageLimitPerUser" class="form-label">Giới hạn mỗi người</label>
+                    <input type="number" class="form-control" id="UsageLimitPerUser" name="UsageLimitPerUser" value="@Model.UsageLimitPerUser" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="StartDate" class="form-label">Ngày bắt đầu *</label>
+                    <input type="datetime-local" class="form-control" id="StartDate" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="EndDate" class="form-label">Ngày kết thúc *</label>
+                    <input type="datetime-local" class="form-control" id="EndDate" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="BannerImageUrl" class="form-label">URL Banner</label>
+                <input type="url" class="form-control" id="BannerImageUrl" name="BannerImageUrl" value="@Model.BannerImageUrl" />
+            </div>
+
+            <div class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="IsActive" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") />
+                <label class="form-check-label" for="IsActive">Kích hoạt</label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i> Cập nhật
+                </button>
+                <a href="/admin/marketing/promotions" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+            </div>
+        </form>
+
+        <hr class="my-4" />
+        
+        <form method="post" action="/admin/marketing/promotion/@Model.Id/delete" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Xóa Khuyến mãi
+            </button>
+        </form>
+    </div>
+</div>

@@ -62,6 +62,40 @@ namespace JohnHenryFashionWeb.Data
         
         // Audit and Security
         public DbSet<AuditLog> AuditLogs { get; set; }
+        
+        // Payment Management (New)
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<SellerSettlement> SellerSettlements { get; set; }
+        public DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
+        public DbSet<PaymentMethodConfig> PaymentMethodConfigs { get; set; }
+        
+        // Support System (New)
+        public DbSet<SupportTicket> SupportTickets { get; set; }
+        public DbSet<TicketReply> TicketReplies { get; set; }
+        public DbSet<Dispute> Disputes { get; set; }
+        public DbSet<FAQ> FAQs { get; set; }
+        
+        // Marketing (New)
+        public DbSet<SystemPromotion> SystemPromotions { get; set; }
+        public DbSet<MarketingBanner> MarketingBanners { get; set; }
+        public DbSet<EmailCampaign> EmailCampaigns { get; set; }
+        public DbSet<PushNotificationCampaign> PushNotificationCampaigns { get; set; }
+        public DbSet<FlashSale> FlashSales { get; set; }
+        
+        // System Configuration (New)
+        public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
+        public DbSet<ShippingConfiguration> ShippingConfigurations { get; set; }
+        public DbSet<TaxConfiguration> TaxConfigurations { get; set; }
+        public DbSet<EmailConfiguration> EmailConfigurations { get; set; }
+        public DbSet<PaymentGatewayConfiguration> PaymentGatewayConfigurations { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<PlatformFeeConfiguration> PlatformFeeConfigurations { get; set; }
+        
+        // Product Approval (New)
+        public DbSet<ProductApproval> ProductApprovals { get; set; }
+        public DbSet<ProductApprovalHistory> ProductApprovalHistories { get; set; }
+        public DbSet<CategoryApprovalRule> CategoryApprovalRules { get; set; }
+        public DbSet<ContentModeration> ContentModerations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -419,6 +453,264 @@ namespace JohnHenryFashionWeb.Data
             
             // Payment entity configurations
             ConfigurePaymentEntities(modelBuilder);
+            
+            // New system configurations
+            ConfigureNewSystemEntities(modelBuilder);
+        }
+        
+        private void ConfigureNewSystemEntities(ModelBuilder modelBuilder)
+        {
+            // Payment Transaction configuration
+            modelBuilder.Entity<PaymentTransaction>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.SellerId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+                
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Customer)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Seller)
+                    .WithMany()
+                    .HasForeignKey(e => e.SellerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Seller Settlement configuration
+            modelBuilder.Entity<SellerSettlement>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.SellerId);
+                entity.HasIndex(e => e.SettlementNumber).IsUnique();
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+                
+                entity.HasOne(e => e.Seller)
+                    .WithMany()
+                    .HasForeignKey(e => e.SellerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.SettlementAdmin)
+                    .WithMany()
+                    .HasForeignKey(e => e.SettledBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Withdrawal Request configuration
+            modelBuilder.Entity<WithdrawalRequest>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.SellerId);
+                entity.HasIndex(e => e.WithdrawalNumber).IsUnique();
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.RequestedAt);
+                
+                entity.HasOne(e => e.Seller)
+                    .WithMany()
+                    .HasForeignKey(e => e.SellerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Processor)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProcessedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Support Ticket configuration
+            modelBuilder.Entity<SupportTicket>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.TicketNumber).IsUnique();
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.Category);
+                entity.HasIndex(e => e.Priority);
+                entity.HasIndex(e => e.CreatedAt);
+                
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.AssignedAdmin)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignedTo)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.RelatedOrder)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedOrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.RelatedProduct)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Ticket Reply configuration
+            modelBuilder.Entity<TicketReply>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.TicketId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.CreatedAt);
+                
+                entity.HasOne(e => e.Ticket)
+                    .WithMany(t => t.Replies)
+                    .HasForeignKey(e => e.TicketId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Dispute configuration
+            modelBuilder.Entity<Dispute>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.DisputeNumber).IsUnique();
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => e.SellerId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+                
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Customer)
+                    .WithMany()
+                    .HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Seller)
+                    .WithMany()
+                    .HasForeignKey(e => e.SellerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Resolver)
+                    .WithMany()
+                    .HasForeignKey(e => e.ResolvedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // System Promotion configuration
+            modelBuilder.Entity<SystemPromotion>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.StartDate);
+                entity.HasIndex(e => e.EndDate);
+                
+                entity.HasOne(e => e.Creator)
+                    .WithMany()
+                    .HasForeignKey(e => e.CreatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Marketing Banner configuration
+            modelBuilder.Entity<MarketingBanner>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Position);
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.StartDate);
+                entity.HasIndex(e => e.EndDate);
+                
+                entity.HasOne(e => e.Creator)
+                    .WithMany()
+                    .HasForeignKey(e => e.CreatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Product Approval configuration
+            modelBuilder.Entity<ProductApproval>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.ProductId);
+                entity.HasIndex(e => e.SellerId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.SubmittedAt);
+                
+                entity.HasOne(e => e.Product)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Seller)
+                    .WithMany()
+                    .HasForeignKey(e => e.SellerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Reviewer)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Product Approval History configuration
+            modelBuilder.Entity<ProductApprovalHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.ProductApprovalId);
+                entity.HasIndex(e => e.CreatedAt);
+                
+                entity.HasOne(e => e.ProductApproval)
+                    .WithMany(pa => pa.History)
+                    .HasForeignKey(e => e.ProductApprovalId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Performer)
+                    .WithMany()
+                    .HasForeignKey(e => e.PerformedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // System Configuration
+            modelBuilder.Entity<SystemConfiguration>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Key).IsUnique();
+                entity.HasIndex(e => e.Category);
+            });
+
+            // Shipping Configuration
+            modelBuilder.Entity<ShippingConfiguration>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.ProviderCode).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+            });
+
+            // Platform Fee Configuration
+            modelBuilder.Entity<PlatformFeeConfiguration>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.SellerTier);
+                entity.HasIndex(e => e.CategoryId);
+                entity.HasIndex(e => e.IsActive);
+                
+                entity.HasOne(e => e.Category)
+                    .WithMany()
+                    .HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
 
         private void ConfigurePaymentEntities(ModelBuilder modelBuilder)

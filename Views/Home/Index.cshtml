@@ -2,45 +2,115 @@
     ViewData["Title"] = "John Henry - Premium Fashion";
 }
 
-<!-- Hero Carousel Section -->
+<!-- Hero Carousel Section - UPGRADED to Dynamic Banners from Database -->
 <section class="hero-carousel">
-    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    @if (ViewBag.HeroCarouselBanners != null && ((List<JohnHenryFashionWeb.Models.MarketingBanner>)ViewBag.HeroCarouselBanners).Any())
+    {
+        var banners = (List<JohnHenryFashionWeb.Models.MarketingBanner>)ViewBag.HeroCarouselBanners;
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+            @if (banners.Count > 1)
+            {
+                <!-- Carousel Indicators - Only show if more than 1 banner -->
+                <div class="carousel-indicators">
+                    @for (int i = 0; i < banners.Count; i++)
+                    {
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")"></button>
+                    }
+                </div>
+            }
+            
+            <div class="carousel-inner">
+                @for (int i = 0; i < banners.Count; i++)
+                {
+                    var banner = banners[i];
+                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                        <div class="hero-slide">
+                            @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                            {
+                                <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")" class="hero-link">
+                                    <div class="hero-background">
+                                        <picture>
+                                            @if (!string.IsNullOrEmpty(banner.MobileImageUrl))
+                                            {
+                                                <source media="(max-width: 768px)" srcset="@banner.MobileImageUrl">
+                                            }
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="hero-bg-img">
+                                        </picture>
+                                    </div>
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="hero-background">
+                                    <picture>
+                                        @if (!string.IsNullOrEmpty(banner.MobileImageUrl))
+                                        {
+                                            <source media="(max-width: 768px)" srcset="@banner.MobileImageUrl">
+                                        }
+                                        <img src="@banner.ImageUrl" alt="@banner.Title" class="hero-bg-img">
+                                    </picture>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            @if (banners.Count > 1)
+            {
+                <!-- Carousel Controls - Only show if more than 1 banner -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            }
         </div>
-        
-        <div class="carousel-inner">
-            <!-- Slide 1: Women Banner -->
-            <div class="carousel-item active">
-                <div class="hero-slide">
-                    <div class="hero-background">
-                        <img src="~/images/Banner/banner-women-main.jpg" alt="Women Fashion" class="hero-bg-img">
+    }
+    else
+    {
+        <!-- FALLBACK: Show default banners if no banners in database -->
+        <!-- This preserves the original layout until admin creates banners -->
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            </div>
+            
+            <div class="carousel-inner">
+                <!-- Slide 1: Women Banner -->
+                <div class="carousel-item active">
+                    <div class="hero-slide">
+                        <div class="hero-background">
+                            <img src="~/images/Banner/banner-women-main.jpg" alt="Women Fashion" class="hero-bg-img">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 2: Men Banner -->
+                <div class="carousel-item">
+                    <div class="hero-slide">
+                        <div class="hero-background">
+                            <img src="~/images/Banner/banner-man-main.jpg" alt="Men Fashion" class="hero-bg-img">
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Slide 2: Men Banner -->
-            <div class="carousel-item">
-                <div class="hero-slide">
-                    <div class="hero-background">
-                        <img src="~/images/Banner/banner-man-main.jpg" alt="Men Fashion" class="hero-bg-img">
-                    </div>
-                </div>
-            </div>
+            <!-- Carousel Controls -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
         </div>
-        
-        <!-- Carousel Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
+    }
 </section>
 
 <!-- Small Banners Section -->
@@ -321,68 +391,123 @@
             </div>
         </div>
 
-        <div class="row g-4">
-            <!-- Blog Post 1 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-card">
-                    <div class="blog-image-container">
-                        <img src="~/images/Banner/banner-women-main.jpg" alt="Xu hướng thời trang" class="blog-image">
-                        <div class="blog-date">
-                            <span class="date-day">15</span>
-                            <span class="date-month">Dec</span>
-                        </div>
-                    </div>
-                    <div class="blog-content">
-                        <span class="blog-category">Xu hướng</span>
-                        <h5 class="blog-title">Xu hướng thời trang Thu Đông 2024</h5>
-                        <p class="blog-excerpt">Khám phá những xu hướng thời trang mới nhất cho mùa Thu Đông năm nay với những màu sắc và phong cách độc đáo...</p>
-                        <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
+        @if (ViewBag.LatestBlogPosts != null && ((List<JohnHenryFashionWeb.Models.BlogPost>)ViewBag.LatestBlogPosts).Any())
+        {
+            <div class="row g-4">
+                @foreach (var post in (List<JohnHenryFashionWeb.Models.BlogPost>)ViewBag.LatestBlogPosts)
+                {
+                    var publishDate = post.PublishedAt ?? post.CreatedAt;
+                    var excerpt = "";
+                    
+                    if (!string.IsNullOrEmpty(post.Excerpt))
+                    {
+                        excerpt = post.Excerpt.Length > 120 ? post.Excerpt.Substring(0, 120) + "..." : post.Excerpt;
+                    }
+                    else if (!string.IsNullOrEmpty(post.Content))
+                    {
+                        var plainContent = System.Text.RegularExpressions.Regex.Replace(post.Content, "<.*?>", "");
+                        excerpt = plainContent.Length > 120 ? plainContent.Substring(0, 120) + "..." : plainContent;
+                    }
 
-            <!-- Blog Post 2 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-card">
-                    <div class="blog-image-container">
-                        <img src="~/images/Banner/banner-man-main.jpg" alt="Phong cách nam" class="blog-image">
-                        <div class="blog-date">
-                            <span class="date-day">12</span>
-                            <span class="date-month">Dec</span>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="blog-card">
+                            <div class="blog-image-container">
+                                @if (!string.IsNullOrEmpty(post.FeaturedImageUrl))
+                                {
+                                    <img src="@post.FeaturedImageUrl" alt="@post.Title" class="blog-image">
+                                }
+                                else
+                                {
+                                    <img src="~/images/Banner/banner-blog.jpg" alt="@post.Title" class="blog-image">
+                                }
+                                <div class="blog-date">
+                                    <span class="date-day">@publishDate.ToString("dd")</span>
+                                    <span class="date-month">@publishDate.ToString("MMM").ToUpper()</span>
+                                </div>
+                            </div>
+                            <div class="blog-content">
+                                @if (post.Category != null)
+                                {
+                                    <span class="blog-category">@post.Category.Name.ToUpper()</span>
+                                }
+                                else
+                                {
+                                    <span class="blog-category">BLOG</span>
+                                }
+                                <h5 class="blog-title">@post.Title</h5>
+                                <p class="blog-excerpt">@excerpt</p>
+                                <a href="@Url.Action("Details", "Blog", new { id = post.Id })" class="blog-read-more">
+                                    Đọc thêm <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <div class="blog-content">
-                        <span class="blog-category">Phong cách</span>
-                        <h5 class="blog-title">Bí quyết phối đồ nam hiện đại</h5>
-                        <p class="blog-excerpt">Hướng dẫn chi tiết cách phối đồ nam tính và lịch lãm cho các chàng trai hiện đại trong mọi hoàn cảnh...</p>
-                        <a href="#" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Fallback: Hiển thị placeholder khi chưa có blog -->
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="blog-card">
+                        <div class="blog-image-container">
+                            <img src="~/images/Banner/banner-women-main.jpg" alt="Xu hướng thời trang" class="blog-image">
+                            <div class="blog-date">
+                                <span class="date-day">15</span>
+                                <span class="date-month">OCT</span>
+                            </div>
+                        </div>
+                        <div class="blog-content">
+                            <span class="blog-category">XU HƯỚNG</span>
+                            <h5 class="blog-title">Xu hướng thời trang Thu Đông 2025</h5>
+                            <p class="blog-excerpt">Khám phá những xu hướng thời trang mới nhất cho mùa Thu Đông năm nay với những màu sắc và phong cách độc đáo...</p>
+                            <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Blog Post 3 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="blog-card">
-                    <div class="blog-image-container">
-                        <img src="~/images/Banner/banner-women-1.jpg" alt="Thời trang công sở" class="blog-image">
-                        <div class="blog-date">
-                            <span class="date-day">10</span>
-                            <span class="date-month">Dec</span>
+                <div class="col-lg-4 col-md-6">
+                    <div class="blog-card">
+                        <div class="blog-image-container">
+                            <img src="~/images/Banner/banner-man-main.jpg" alt="Phong cách nam" class="blog-image">
+                            <div class="blog-date">
+                                <span class="date-day">12</span>
+                                <span class="date-month">OCT</span>
+                            </div>
+                        </div>
+                        <div class="blog-content">
+                            <span class="blog-category">PHONG CÁCH</span>
+                            <h5 class="blog-title">Bí quyết phối đồ nam hiện đại</h5>
+                            <p class="blog-excerpt">Hướng dẫn chi tiết cách phối đồ nam tính và lịch lãm cho các chàng trai hiện đại trong mọi hoàn cảnh...</p>
+                            <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-                    <div class="blog-content">
-                        <span class="blog-category">Công sở</span>
-                        <h5 class="blog-title">Thời trang công sở cho phái đẹp</h5>
-                        <p class="blog-excerpt">Những gợi ý trang phục công sở thanh lịch và chuyên nghiệp dành cho các cô nàng hiện đại...</p>
-                        <a href="#" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="blog-card">
+                        <div class="blog-image-container">
+                            <img src="~/images/Banner/banner-women-1.jpg" alt="Thời trang công sở" class="blog-image">
+                            <div class="blog-date">
+                                <span class="date-day">10</span>
+                                <span class="date-month">OCT</span>
+                            </div>
+                        </div>
+                        <div class="blog-content">
+                            <span class="blog-category">CÔNG SỞ</span>
+                            <h5 class="blog-title">Thời trang công sở cho phái đẹp</h5>
+                            <p class="blog-excerpt">Những gợi ý trang phục công sở thanh lịch và chuyên nghiệp dành cho các cô nàng hiện đại...</p>
+                            <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
 
         <!-- View All Button -->
         <div class="text-center mt-5">
-            <a href="/Blog" class="btn btn-outline-primary view-all-btn px-5">XEM TIN TỨC</a>
+            <a href="/Blog" class="btn btn-outline-primary view-all-btn px-5">XEM TẤT CẢ TIN TỨC</a>
         </div>
     </div>
 </section>

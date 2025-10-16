@@ -1,0 +1,295 @@
+@model List<JohnHenryFashionWeb.Models.PaymentMethodConfig>
+@{
+    ViewData["Title"] = "Cấu hình Phương thức Thanh toán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .payment-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .method-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .method-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .method-card.disabled {
+        opacity: 0.6;
+    }
+
+    .method-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .status-active {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .status-inactive {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: white;
+    }
+
+    .form-switch {
+        padding-left: 3rem;
+    }
+
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        margin-left: -3rem;
+        cursor: pointer;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
+        color: white;
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(206, 25, 58, 0.3);
+        color: white;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .info-value {
+        color: #111827;
+        font-weight: 500;
+    }
+</style>
+
+<div class="payment-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-2">
+                    <i class="fas fa-credit-card me-2" style="color: var(--jh-red);"></i>
+                    Cấu hình Phương thức Thanh toán
+                </h2>
+                <p class="text-muted mb-0">Quản lý các phương thức thanh toán có sẵn trên hệ thống</p>
+            </div>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var method in Model.OrderBy(m => m.SortOrder))
+            {
+                var isActive = method.IsActive;
+                var cardClass = isActive ? "" : "disabled";
+                
+                <div class="col-md-6">
+                    <div class="method-card @cardClass">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="method-icon" style="background: linear-gradient(135deg, @GetMethodColor(method.Code));">
+                                    <i class="@GetMethodIcon(method.Code) text-white"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h4 class="mb-1">@method.Name</h4>
+                                    <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
+                                        <i class="fas fa-circle me-1"></i>
+                                        @(isActive ? "Đang hoạt động" : "Tạm ngừng")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="toggle_@method.Id" 
+                                       @(isActive ? "checked" : "") 
+                                       onchange="toggleMethod('@method.Id', this.checked)">
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Mã phương thức:</span>
+                            <span class="info-value"><code>@method.Code</code></span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(method.Description))
+                        {
+                            <div class="info-row">
+                                <span class="info-label">Mô tả:</span>
+                                <span class="info-value">@method.Description</span>
+                            </div>
+                        }
+
+                        @if (method.TransactionFeePercent > 0 || method.TransactionFeeFixed > 0)
+                        {
+                            <div class="info-row">
+                                <span class="info-label">Phí giao dịch:</span>
+                                <span class="info-value text-danger">
+                                    @if (method.TransactionFeePercent > 0 && method.TransactionFeeFixed > 0)
+                                    {
+                                        <span>@method.TransactionFeePercent% + @method.TransactionFeeFixed.ToString("N0") ₫</span>
+                                    }
+                                    else if (method.TransactionFeePercent > 0)
+                                    {
+                                        <span>@method.TransactionFeePercent%</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@method.TransactionFeeFixed.ToString("N0") ₫</span>
+                                    }
+                                </span>
+                            </div>
+                        }
+
+                        <div class="info-row">
+                            <span class="info-label">Thứ tự hiển thị:</span>
+                            <span class="info-value">@method.SortOrder</span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(method.LogoUrl))
+                        {
+                            <div class="mt-3 text-center">
+                                <img src="@method.LogoUrl" alt="@method.Name" style="max-height: 40px;">
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="method-card text-center py-5">
+            <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">Chưa có phương thức thanh toán nào</h4>
+            <p class="text-muted">Vui lòng thêm phương thức thanh toán trong cấu hình hệ thống</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleMethod(id, isActive) {
+            if (!confirm('Bạn có chắc chắn muốn ' + (isActive ? 'bật' : 'tắt') + ' phương thức thanh toán này?')) {
+                // Revert checkbox state if user cancels
+                $('#toggle_' + id).prop('checked', !isActive);
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("TogglePaymentMethod", "PaymentManagement")',
+                type: 'POST',
+                data: {
+                    id: id,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + (response.message || 'Vui lòng thử lại'));
+                        $('#toggle_' + id).prop('checked', !isActive);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại');
+                    $('#toggle_' + id).prop('checked', !isActive);
+                }
+            });
+        }
+    </script>
+}
+
+@functions {
+    string GetMethodIcon(string methodCode)
+    {
+        return methodCode switch
+        {
+            "COD" => "fas fa-money-bill-wave",
+            "VNPay" => "fas fa-credit-card",
+            "Momo" => "fas fa-mobile-alt",
+            "ZaloPay" => "fas fa-wallet",
+            "BankTransfer" => "fas fa-university",
+            "CreditCard" => "fas fa-credit-card",
+            _ => "fas fa-credit-card"
+        };
+    }
+
+    string GetMethodColor(string methodCode)
+    {
+        return methodCode switch
+        {
+            "COD" => "#10b981, #059669",
+            "VNPay" => "#3b82f6, #2563eb",
+            "Momo" => "#ec4899, #db2777",
+            "ZaloPay" => "#0ea5e9, #0284c7",
+            "BankTransfer" => "#8b5cf6, #7c3aed",
+            "CreditCard" => "#f59e0b, #d97706",
+            _ => "#6b7280, #4b5563"
+        };
+    }
+}

@@ -82,6 +82,43 @@ public class HomeController : Controller
         ViewBag.FreelancerProducts = freelancerProducts;
         ViewBag.BestSellerProducts = bestSellerProducts;
 
+        // Load latest blog posts for homepage
+        var latestBlogPosts = await _context.BlogPosts
+            .Include(b => b.Category)
+            .Include(b => b.Author)
+            .Where(b => b.Status == "published")
+            .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+            .Take(3)
+            .ToListAsync();
+
+        ViewBag.LatestBlogPosts = latestBlogPosts;
+
+        // Load active marketing banners for homepage
+        var now = DateTime.UtcNow;
+        
+        // Hero carousel banners (main full-width banners)
+        var heroCarouselBanners = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "home_main"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .ToListAsync();
+
+        ViewBag.HeroCarouselBanners = heroCarouselBanners;
+
+        // Small banners (3 columns below hero carousel)
+        var smallBanners = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "home_side"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .Take(3)
+            .ToListAsync();
+
+        ViewBag.SmallBanners = smallBanners;
+
         return View();
     }
 

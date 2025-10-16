@@ -1,0 +1,91 @@
+@model JohnHenryFashionWeb.Models.PushNotificationCampaign
+@{
+    ViewData["Title"] = "Create Push Notification";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .marketing-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control, .form-select { border-radius: 10px; padding: 0.75rem; }
+    .btn-submit { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border: none; padding: 0.75rem 2rem; border-radius: 10px; }
+</style>
+
+<div class="marketing-container">
+    <div class="form-card">
+        <h2 class="mb-4">🔔 Create Push Notification</h2>
+        
+        <form method="post" action="/admin/marketing/push/create">
+            @Html.AntiForgeryToken()
+            
+            <div class="mb-3">
+                <label class="form-label">Title *</label>
+                <input type="text" class="form-control" name="Title" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Message *</label>
+                <textarea class="form-control" name="Message" rows="4" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Image URL</label>
+                <input type="url" class="form-control" name="ImageUrl" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Action URL</label>
+                <input type="url" class="form-control" name="ActionUrl" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Target Audience</label>
+                    <select class="form-select" name="TargetAudience">
+                        <option value="all">All Users</option>
+                        <option value="customers">Customers Only</option>
+                        <option value="custom">Custom Segment</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="Status">
+                        <option value="draft">Draft</option>
+                        <option value="scheduled">Scheduled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Scheduled Time</label>
+                <input type="datetime-local" class="form-control" name="ScheduledAt" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Target User IDs (comma-separated)</label>
+                <input type="text" class="form-control" name="TargetUserIds" placeholder="user1,user2,user3" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i> Create
+                </button>
+                <a href="/admin/marketing/pushes" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

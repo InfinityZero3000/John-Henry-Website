@@ -82,9 +82,9 @@ namespace JohnHenryFashionWeb.Helpers
                 logo = seoData.ImageUrl,
                 sameAs = new[]
                 {
-                    "https://www.facebook.com/johnhenryfashion",
-                    "https://www.instagram.com/johnhenryfashion",
-                    "https://www.twitter.com/johnhenryfashion"
+                    "https://www.facebook.com/JOHNHENRYVN",
+                    "https://www.instagram.com/JOHNHENRYVN",
+                    "https://www.twitter.com/JOHNHENRYVN"
                 }
             };
 

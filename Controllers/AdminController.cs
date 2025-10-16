@@ -166,8 +166,8 @@ namespace JohnHenryFashionWeb.Controllers
             return View("Dashboard", viewModel);
         }
 
-        // Products Management
-        [HttpGet("products")]
+        // Products Management (Old route - keeping for backwards compatibility)
+        [HttpGet("product-list")]
         public async Task<IActionResult> Products(string searchTerm = "", Guid? categoryId = null, string status = "", int page = 1, int pageSize = 10)
         {
             ViewData["CurrentSection"] = "products";
@@ -893,92 +893,6 @@ namespace JohnHenryFashionWeb.Controllers
         }
         #endregion
 
-
-        #region Order Management
-        [HttpGet("orders")]
-        public async Task<IActionResult> Orders(int page = 1, int pageSize = 20, string search = "", string status = "", DateTime? fromDate = null, DateTime? toDate = null)
-        {
-            var query = _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                .AsQueryable();
-
-            // Apply filters
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(o => o.OrderNumber.Contains(search) ||
-                                        (o.User.FirstName != null && o.User.FirstName.Contains(search)) ||
-                                        (o.User.LastName != null && o.User.LastName.Contains(search)) ||
-                                        (o.User.Email != null && o.User.Email.Contains(search)));
-            }
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                query = query.Where(o => o.Status == status);
-            }
-
-            if (fromDate.HasValue)
-            {
-                query = query.Where(o => o.CreatedAt >= fromDate.Value);
-            }
-
-            if (toDate.HasValue)
-            {
-                query = query.Where(o => o.CreatedAt <= toDate.Value.Date.AddDays(1).AddTicks(-1));
-            }
-
-            // Get statistics
-            var allOrders = _context.Orders.AsQueryable();
-            var pendingOrders = await allOrders.CountAsync(o => o.Status == "pending");
-            var processingOrders = await allOrders.CountAsync(o => o.Status == "processing");
-            var shippedOrders = await allOrders.CountAsync(o => o.Status == "shipped");
-            var deliveredOrders = await allOrders.CountAsync(o => o.Status == "delivered");
-            var cancelledOrders = await allOrders.CountAsync(o => o.Status == "cancelled");
-
-            var totalRevenue = await allOrders
-                .Where(o => o.Status == "delivered" || o.Status == "completed")
-                .SumAsync(o => o.TotalAmount);
-
-            var totalOrders = await query.CountAsync();
-            var orders = await query
-                .OrderByDescending(o => o.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(o => new OrderSummaryViewModel
-                {
-                    Id = o.Id,
-                    OrderNumber = o.OrderNumber,
-                    CustomerName = o.User.FirstName + " " + o.User.LastName,
-                    CustomerPhone = o.User.PhoneNumber ?? "",
-                    OrderDate = o.CreatedAt,
-                    TotalAmount = o.TotalAmount,
-                    Status = o.Status,
-                    PaymentStatus = o.PaymentStatus
-                })
-                .ToListAsync();
-
-            var viewModel = new OrderManagementViewModel
-            {
-                Orders = orders,
-                CurrentPage = page,
-                TotalPages = (int)Math.Ceiling((double)totalOrders / pageSize),
-                PageSize = pageSize,
-                SearchTerm = search,
-                StatusFilter = status,
-                FromDate = fromDate,
-                ToDate = toDate,
-                PendingOrders = pendingOrders,
-                ProcessingOrdersCount = processingOrders,
-                ShippingOrders = shippedOrders,
-                CompletedOrders = deliveredOrders,
-                CancelledOrders = cancelledOrders,
-                TotalOrders = totalOrders,
-                TotalRevenue = totalRevenue
-            };
-
-            return View(viewModel);
-        }
-        #endregion
 
         #region Helper Methods
         private string GenerateSlug(string text)
@@ -1847,33 +1761,79 @@ namespace JohnHenryFashionWeb.Controllers
         }
         
         [HttpGet("inventory")]
-        public async Task<IActionResult> Inventory()
+        public async Task<IActionResult> Inventory(string filter = "all", string search = "", int page = 1, int pageSize = 50)
         {
-            ViewData["CurrentSection"] = "inventory";
+            ViewData["CurrentSection"] = "Inventory";
             ViewData["Title"] = "Quản lý tồn kho";
             
-            var products = await _context.Products
+            var query = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
-                .OrderBy(p => p.Name)
+                .AsQueryable();
+            
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => 
+                    p.Name.Contains(search) || 
+                    p.SKU.Contains(search));
+            }
+            
+            // Apply stock filter
+            switch (filter.ToLower())
+            {
+                case "low_stock":
+                    query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity < 10);
+                    break;
+                case "out_of_stock":
+                    query = query.Where(p => p.StockQuantity == 0);
+                    break;
+                case "in_stock":
+                    query = query.Where(p => p.StockQuantity >= 10);
+                    break;
+                // "all" - no filter
+            }
+            
+            var totalItems = await query.CountAsync();
+            var products = await query
+                .OrderBy(p => p.StockQuantity)
+                .ThenBy(p => p.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+            
+            // Map to InventoryItemViewModel
+            var inventoryItems = products.Select(p => new ViewModels.InventoryItemViewModel
+            {
+                Id = Guid.NewGuid(), // Or use existing inventory ID if you have one
+                ProductId = p.Id,
+                ProductName = p.Name,
+                SKU = p.SKU,
+                CategoryName = p.Category?.Name ?? "N/A",
+                StockQuantity = p.StockQuantity,
+                CurrentStock = p.StockQuantity,
+                MinStockLevel = 10, // Default minimum stock level
+                MinStock = 10,
+                MaxStock = 1000,
+                Price = p.Price,
+                CostPrice = p.Price * 0.6m, // Estimate 60% of selling price
+                ImageUrl = p.FeaturedImageUrl,
+                LastUpdated = p.UpdatedAt
+            }).ToList();
+            
+            var viewModel = new ViewModels.InventoryListViewModel
+            {
+                Items = inventoryItems,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+                PageSize = pageSize,
+                SearchTerm = search,
+                Filter = filter
+            };
                 
-            return View(products);
+            return View(viewModel);
         }
         
-        [HttpGet("advanced-users")]
-        public async Task<IActionResult> AdvancedUsers()
-        {
-            ViewData["CurrentSection"] = "advanced-users";
-            ViewData["Title"] = "Quản lý người dùng nâng cao";
-            
-            var users = await _context.Users
-                .Include(u => u.Orders)
-                .OrderBy(u => u.UserName)
-                .ToListAsync();
-                
-            return View(users);
-        }
         #endregion
         /// <summary>
         /// Fix sunglasses products category assignment

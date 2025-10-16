@@ -1,0 +1,407 @@
+@model List<JohnHenryFashionWeb.Models.PaymentTransaction>
+@{
+    ViewData["Title"] = "Quản lý Giao dịch Thanh toán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var stats = ViewBag.Statistics;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var statusFilter = ViewBag.StatusFilter as string;
+    var paymentMethodFilter = ViewBag.PaymentMethodFilter as string;
+    var fromDate = ViewBag.FromDate as DateTime?;
+    var toDate = ViewBag.ToDate as DateTime?;
+    var searchTerm = ViewBag.SearchTerm as string;
+}
+
+<style>
+    .payment-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stats-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table-modern {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-modern thead th {
+        background: var(--jh-red);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+
+    .table-modern tbody tr {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: background-color 0.2s ease;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
+        color: white;
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(206, 25, 58, 0.3);
+        color: white;
+    }
+
+    .form-control-modern {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-modern:focus {
+        border-color: var(--jh-red);
+        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
+    }
+
+    .pagination-modern {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .pagination-modern .page-link {
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        padding: 0.5rem 1rem;
+        color: var(--jh-red);
+    }
+
+    .pagination-modern .page-link:hover {
+        background-color: var(--jh-red);
+        color: white;
+        border-color: var(--jh-red);
+    }
+
+    .pagination-modern .active .page-link {
+        background-color: var(--jh-red);
+        border-color: var(--jh-red);
+        color: white;
+    }
+</style>
+
+<div class="payment-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-2">
+                    <i class="fas fa-money-check-alt me-2" style="color: var(--jh-red);"></i>
+                    Quản lý Giao dịch Thanh toán
+                </h2>
+                <p class="text-muted mb-0">Theo dõi và quản lý tất cả giao dịch thanh toán trên hệ thống</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                    <i class="fas fa-dollar-sign text-white"></i>
+                </div>
+                <h6 class="text-muted mb-1">Tổng Doanh Thu</h6>
+                <h3 class="mb-0">@stats.TotalAmount.ToString("N0") ₫</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fas fa-chart-line text-white"></i>
+                </div>
+                <h6 class="text-muted mb-1">Phí Nền Tảng</h6>
+                <h3 class="mb-0">@stats.TotalPlatformFee.ToString("N0") ₫</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="fas fa-users text-white"></i>
+                </div>
+                <h6 class="text-muted mb-1">Cho Seller</h6>
+                <h3 class="mb-0">@stats.TotalSellerAmount.ToString("N0") ₫</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-check-circle text-white"></i>
+                </div>
+                <h6 class="text-muted mb-1">Hoàn Thành</h6>
+                <h3 class="mb-0">@stats.CompletedCount / @(stats.CompletedCount + stats.PendingCount + stats.FailedCount)</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-card">
+        <form method="get" asp-action="Index">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Trạng Thái</label>
+                    <select name="status" class="form-control-modern">
+                        <option value="">Tất cả</option>
+                        <option value="Pending" selected="@(statusFilter == "Pending")">Chờ xử lý</option>
+                        <option value="Completed" selected="@(statusFilter == "Completed")">Hoàn thành</option>
+                        <option value="Failed" selected="@(statusFilter == "Failed")">Thất bại</option>
+                        <option value="Refunded" selected="@(statusFilter == "Refunded")">Hoàn tiền</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Phương Thức</label>
+                    <select name="paymentMethod" class="form-control-modern">
+                        <option value="">Tất cả</option>
+                        <option value="COD" selected="@(paymentMethodFilter == "COD")">COD</option>
+                        <option value="VNPay" selected="@(paymentMethodFilter == "VNPay")">VNPay</option>
+                        <option value="Momo" selected="@(paymentMethodFilter == "Momo")">Momo</option>
+                        <option value="ZaloPay" selected="@(paymentMethodFilter == "ZaloPay")">ZaloPay</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Từ Ngày</label>
+                    <input type="date" name="fromDate" class="form-control-modern" value="@fromDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Đến Ngày</label>
+                    <input type="date" name="toDate" class="form-control-modern" value="@toDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tìm Kiếm</label>
+                    <input type="text" name="search" class="form-control-modern" placeholder="Email, Mã GD..." value="@searchTerm" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary-modern w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="filter-card">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã GD</th>
+                        <th>Ngày</th>
+                        <th>Khách Hàng</th>
+                        <th>Seller</th>
+                        <th>Số Tiền</th>
+                        <th>Phí NTảng</th>
+                        <th>Cho Seller</th>
+                        <th>PT Thanh Toán</th>
+                        <th>Trạng Thái</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var transaction in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@(transaction.TransactionReference ?? transaction.Id.ToString().Substring(0, 8))</strong>
+                                </td>
+                                <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div>
+                                        <strong>@transaction.Customer?.Email</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (transaction.Seller != null)
+                                    {
+                                        <div>
+                                            <strong>@transaction.Seller.Email</strong>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td><strong>@transaction.Amount.ToString("N0") ₫</strong></td>
+                                <td class="text-danger">@transaction.PlatformFee.ToString("N0") ₫</td>
+                                <td class="text-success">@transaction.SellerAmount.ToString("N0") ₫</td>
+                                <td>
+                                    @if (transaction.PaymentMethod == "COD")
+                                    {
+                                        <span class="badge bg-secondary">COD</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">@transaction.PaymentMethod</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (transaction.Status == "Completed")
+                                    {
+                                        <span class="badge-modern badge-success">Hoàn thành</span>
+                                    }
+                                    else if (transaction.Status == "Pending")
+                                    {
+                                        <span class="badge-modern badge-warning">Chờ xử lý</span>
+                                    }
+                                    else if (transaction.Status == "Failed")
+                                    {
+                                        <span class="badge-modern badge-danger">Thất bại</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-modern bg-secondary">@transaction.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="TransactionDetails" asp-route-id="@transaction.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">Không có giao dịch nào</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination pagination-modern justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-status="@statusFilter" asp-route-paymentMethod="@paymentMethodFilter" asp-route-fromDate="@fromDate" asp-route-toDate="@toDate" asp-route-search="@searchTerm">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-status="@statusFilter" asp-route-paymentMethod="@paymentMethodFilter" asp-route-fromDate="@fromDate" asp-route-toDate="@toDate" asp-route-search="@searchTerm">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-status="@statusFilter" asp-route-paymentMethod="@paymentMethodFilter" asp-route-fromDate="@fromDate" asp-route-toDate="@toDate" asp-route-search="@searchTerm">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-submit form on filter change
+        $('select[name="status"], select[name="paymentMethod"]').on('change', function() {
+            $(this).closest('form').submit();
+        });
+    </script>
+}

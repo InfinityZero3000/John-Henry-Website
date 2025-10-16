@@ -71,7 +71,7 @@ namespace JohnHenryFashionWeb.Models
         public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 
-    public class Product
+    public partial class Product
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

@@ -1,0 +1,177 @@
+@model List<JohnHenryFashionWeb.Models.SystemPromotion>
+@{
+    ViewData["Title"] = "Quản lý Khuyến mãi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .marketing-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .promo-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .promo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .badge-active {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .badge-inactive {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .btn-primary-glass {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-glass {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #333;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger-glass {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        color: white;
+        border: none;
+    }
+
+    .promo-code {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #f5576c;
+    }
+</style>
+
+<div class="marketing-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">🎁 Quản lý Khuyến mãi</h2>
+                <p class="text-muted mb-0">Quản lý mã giảm giá và chương trình khuyến mãi</p>
+            </div>
+            <a href="/admin/marketing/promotion/create" class="btn btn-primary-glass">
+                <i class="fas fa-plus"></i> Tạo Khuyến mãi
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Promotions List -->
+    @if (Model == null || !Model.Any())
+    {
+        <div class="promo-card text-center">
+            <p class="text-muted mb-0">Chưa có khuyến mãi nào. Hãy tạo khuyến mãi đầu tiên!</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var promo in Model)
+        {
+            <div class="promo-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <h5 class="mb-0">@promo.Name</h5>
+                            @if (promo.IsActive)
+                            {
+                                <span class="badge-active">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge-inactive">Tạm ngưng</span>
+                            }
+                        </div>
+                        <p class="text-muted mb-2">@promo.Description</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <strong>Mã:</strong> <span class="promo-code">@promo.Code</span>
+                            </div>
+                            <div>
+                                <strong>Loại:</strong> 
+                                @if (promo.Type == "percentage")
+                                {
+                                    <span class="badge bg-success">@promo.Value% Giảm giá</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info">@promo.Value.ToString("N0") VNĐ</span>
+                                }
+                            </div>
+                            <div>
+                                <strong>Sử dụng:</strong> <span class="badge bg-secondary">@promo.UsageCount / @promo.UsageLimit</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> @promo.StartDate.ToString("dd/MM/yyyy HH:mm") - @promo.EndDate.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="/admin/marketing/promotion/@promo.Id" class="btn btn-sm btn-glass">
+                                <i class="fas fa-edit"></i> Sửa
+                            </a>
+                            <form method="post" action="/admin/marketing/promotion/@promo.Id/delete" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa khuyến mãi này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger-glass">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
