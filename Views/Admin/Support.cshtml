@@ -1,0 +1,316 @@
+@{
+    ViewData["Title"] = "Quản lý hỗ trợ khách hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Hỗ trợ khách hàng</li>";
+    
+    var totalTickets = ViewBag.TotalTickets ?? 0;
+    var openTickets = ViewBag.OpenTickets ?? 0;
+    var inProgressTickets = ViewBag.InProgressTickets ?? 0;
+    var resolvedTickets = ViewBag.ResolvedTickets ?? 0;
+    var recentTickets = ViewBag.RecentTickets as List<JohnHenryFashionWeb.Models.SupportTicket> ?? new List<JohnHenryFashionWeb.Models.SupportTicket>();
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <div>
+                <h1 class="admin-page-title">
+                    <i data-lucide="headphones"></i>
+                    Hỗ trợ khách hàng
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Chờ xử lý</h3>
+                    <p class="value">@openTickets</p>
+                    <p class="change">Cần hỗ trợ ngay</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="alert-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang xử lý</h3>
+                    <p class="value">@inProgressTickets</p>
+                    <p class="change">Đang được hỗ trợ</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="clock"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đã giải quyết</h3>
+                    <p class="value">@resolvedTickets</p>
+                    <p class="change">@((resolvedTickets > 0 ? (resolvedTickets * 100.0 / totalTickets).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng yêu cầu</h3>
+                    <p class="value">@totalTickets</p>
+                    <p class="change">Tất cả tickets</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="inbox"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-card admin-mb-lg">
+        <div class="admin-card-header">
+            <h3>Hành động nhanh</h3>
+        </div>
+        <div class="admin-card-body">
+            <div class="admin-flex admin-gap-md" style="flex-wrap: wrap;">
+                <a href="/admin/support/tickets?status=open" class="admin-btn admin-btn-warning">
+                    <i data-lucide="alert-circle"></i>
+                    Tickets chờ xử lý (@openTickets)
+                </a>
+                <a href="/admin/support/tickets?status=in_progress" class="admin-btn admin-btn-info">
+                    <i data-lucide="clock"></i>
+                    Tickets đang xử lý (@inProgressTickets)
+                </a>
+                <a href="/admin/support/tickets?status=resolved" class="admin-btn admin-btn-success">
+                    <i data-lucide="check-circle"></i>
+                    Tickets đã giải quyết (@resolvedTickets)
+                </a>
+                <a href="/admin/support/tickets" class="admin-btn admin-btn-secondary">
+                    <i data-lucide="list"></i>
+                    Tất cả tickets (@totalTickets)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tickets -->
+    @if (recentTickets.Any())
+    {
+        <div class="admin-card">
+            <div class="admin-card-header admin-flex-between">
+                <h3>Yêu cầu hỗ trợ gần đây</h3>
+                <a href="/admin/support/tickets" class="admin-btn admin-btn-sm admin-btn-secondary">
+                    Xem tất cả
+                    <i data-lucide="arrow-right"></i>
+                </a>
+            </div>
+            <div class="admin-card-body" style="padding: 0;">
+                <div class="admin-table-wrapper" style="border: none; border-radius: 0;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Mã ticket</th>
+                                <th>Tiêu đề</th>
+                                <th>Khách hàng</th>
+                                <th>Danh mục</th>
+                                <th>Ưu tiên</th>
+                                <th>Trạng thái</th>
+                                <th>Người phụ trách</th>
+                                <th>Ngày tạo</th>
+                                <th style="width: 120px;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ticket in recentTickets)
+                            {
+                                <tr>
+                                    <td>
+                                        <code style="font-size: 0.875rem; background: var(--admin-bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                                            #@ticket.TicketNumber
+                                        </code>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 500; color: var(--admin-text); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            @ticket.Subject
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (ticket.User != null)
+                                        {
+                                            <div style="font-weight: 500;">@ticket.User.FullName</div>
+                                            <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@ticket.User.Email</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-badge admin-badge-secondary">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (ticket.Category?.ToLower())
+                                        {
+                                            case "order":
+                                                <span class="admin-badge admin-badge-info">
+                                                    <i data-lucide="shopping-bag" style="width: 12px; height: 12px;"></i>
+                                                    Đơn hàng
+                                                </span>
+                                                break;
+                                            case "product":
+                                                <span class="admin-badge admin-badge-primary" style="background: var(--admin-primary); color: white;">
+                                                    <i data-lucide="box" style="width: 12px; height: 12px;"></i>
+                                                    Sản phẩm
+                                                </span>
+                                                break;
+                                            case "payment":
+                                                <span class="admin-badge admin-badge-success">
+                                                    <i data-lucide="credit-card" style="width: 12px; height: 12px;"></i>
+                                                    Thanh toán
+                                                </span>
+                                                break;
+                                            case "technical":
+                                                <span class="admin-badge admin-badge-warning">
+                                                    <i data-lucide="settings" style="width: 12px; height: 12px;"></i>
+                                                    Kỹ thuật
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="admin-badge admin-badge-secondary">@(ticket.Category ?? "Khác")</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (ticket.Priority?.ToLower())
+                                        {
+                                            case "high":
+                                                <span class="admin-badge admin-badge-danger">
+                                                    <i data-lucide="chevrons-up" style="width: 12px; height: 12px;"></i>
+                                                    Cao
+                                                </span>
+                                                break;
+                                            case "medium":
+                                                <span class="admin-badge admin-badge-warning">
+                                                    <i data-lucide="minus" style="width: 12px; height: 12px;"></i>
+                                                    Trung bình
+                                                </span>
+                                                break;
+                                            case "low":
+                                                <span class="admin-badge admin-badge-info">
+                                                    <i data-lucide="chevrons-down" style="width: 12px; height: 12px;"></i>
+                                                    Thấp
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="admin-badge admin-badge-secondary">@(ticket.Priority ?? "N/A")</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (ticket.Status?.ToLower())
+                                        {
+                                            case "open":
+                                                <span class="admin-badge admin-badge-warning">
+                                                    <i data-lucide="alert-circle" style="width: 12px; height: 12px;"></i>
+                                                    Chờ xử lý
+                                                </span>
+                                                break;
+                                            case "in_progress":
+                                                <span class="admin-badge admin-badge-info">
+                                                    <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                                                    Đang xử lý
+                                                </span>
+                                                break;
+                                            case "resolved":
+                                                <span class="admin-badge admin-badge-success">
+                                                    <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                                    Đã giải quyết
+                                                </span>
+                                                break;
+                                            case "closed":
+                                                <span class="admin-badge admin-badge-secondary">
+                                                    <i data-lucide="x-circle" style="width: 12px; height: 12px;"></i>
+                                                    Đã đóng
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="admin-badge admin-badge-secondary">@(ticket.Status ?? "N/A")</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (ticket.AssignedAdmin != null)
+                                        {
+                                            <div style="font-weight: 500; font-size: 0.875rem;">@ticket.AssignedAdmin.FullName</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-badge admin-badge-secondary" style="font-size: 0.75rem;">Chưa phân công</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.875rem;">@ticket.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                        <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@ticket.CreatedAt.ToString("HH:mm")</div>
+                                    </td>
+                                    <td class="actions">
+                                        <a href="/admin/support/ticket/@ticket.Id" class="admin-btn admin-btn-sm admin-btn-primary">
+                                            <i data-lucide="eye"></i>
+                                            Xem
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Chưa có yêu cầu hỗ trợ</h3>
+                <p style="color: var(--admin-text-light); margin: 0;">Chưa có yêu cầu hỗ trợ nào từ khách hàng</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Auto-hide success messages
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+    </script>
+}

@@ -1,0 +1,311 @@
+@model JohnHenryFashionWeb.Models.FAQ
+@{
+    ViewData["Title"] = "Chỉnh sửa FAQ";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .edit-faq-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .back-btn-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #667eea;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn-glass:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: #667eea;
+        padding: 1rem 3rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        color: #667eea;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+    }
+
+    .info-badge {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-right: 1rem;
+    }
+</style>
+
+<div class="edit-faq-container">
+    <!-- Back Button -->
+    <a href="@Url.Action("FAQs")" class="back-btn-glass">
+        <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+    </a>
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <div class="text-center mb-4">
+            <h2 style="color: #667eea; font-weight: 700;">
+                <i class="fas fa-edit me-2"></i>Chỉnh sửa FAQ
+            </h2>
+            <p class="text-muted">Cập nhật thông tin câu hỏi thường gặp</p>
+        </div>
+
+        <!-- FAQ Info -->
+        <div class="mb-4 text-center">
+            <div class="info-badge">
+                <i class="fas fa-eye me-2"></i>
+                <strong>@Model.ViewCount</strong> views
+            </div>
+            <div class="info-badge">
+                <i class="fas fa-thumbs-up me-2"></i>
+                <strong>@Model.HelpfulCount</strong> helpful
+            </div>
+            <div class="info-badge">
+                <i class="fas fa-thumbs-down me-2"></i>
+                <strong>@Model.NotHelpfulCount</strong> not helpful
+            </div>
+            <div class="info-badge">
+                <i class="fas fa-clock me-2"></i>
+                Tạo: <strong>@Model.CreatedAt.ToString("dd/MM/yyyy")</strong>
+            </div>
+            @if (Model.UpdatedAt != Model.CreatedAt)
+            {
+                <div class="info-badge">
+                    <i class="fas fa-edit me-2"></i>
+                    Sửa: <strong>@Model.UpdatedAt.ToString("dd/MM/yyyy")</strong>
+                </div>
+            }
+        </div>
+
+        <form method="post" asp-action="EditFAQ" asp-route-id="@Model.Id">
+            @Html.AntiForgeryToken()
+            
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Có lỗi xảy ra!</strong> Vui lòng kiểm tra lại thông tin.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h5 class="section-title">
+                    <i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
+                </h5>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-tag me-2"></i>Danh mục *
+                    </label>
+                    <select asp-for="Category" class="form-select" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        <option value="Shipping & Delivery">Shipping & Delivery</option>
+                        <option value="Payment">Payment</option>
+                        <option value="Returns & Refunds">Returns & Refunds</option>
+                        <option value="Account">Account</option>
+                        <option value="Orders">Orders</option>
+                        <option value="Products">Products</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span asp-validation-for="Category" class="text-danger"></span>
+                    <div class="help-text">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        Chọn danh mục phù hợp để khách hàng dễ tìm kiếm
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-question-circle me-2"></i>Câu hỏi *
+                    </label>
+                    <input asp-for="Question" class="form-control" 
+                           placeholder="VD: Thời gian giao hàng là bao lâu?"
+                           required maxlength="500">
+                    <span asp-validation-for="Question" class="text-danger"></span>
+                    <div class="help-text">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        Viết câu hỏi ngắn gọn, rõ ràng (tối đa 500 ký tự)
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-comment-dots me-2"></i>Câu trả lời *
+                    </label>
+                    <textarea asp-for="Answer" class="form-control" rows="6"
+                              placeholder="Nhập câu trả lời chi tiết..."
+                              required></textarea>
+                    <span asp-validation-for="Answer" class="text-danger"></span>
+                    <div class="help-text">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        Cung cấp câu trả lời đầy đủ, dễ hiểu. Có thể dùng HTML để format
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Settings -->
+            <div class="form-section">
+                <h5 class="section-title">
+                    <i class="fas fa-cog me-2"></i>Cài đặt hiển thị
+                </h5>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-sort me-2"></i>Thứ tự sắp xếp
+                            </label>
+                            <input asp-for="SortOrder" type="number" class="form-control" 
+                                   min="0" max="1000">
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                            <div class="help-text">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Số nhỏ hiển thị trước. Mặc định: 0
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-eye me-2"></i>Trạng thái
+                            </label>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsActive" class="form-check-input" 
+                                       type="checkbox" id="isActiveSwitch">
+                                <label class="form-check-label" for="isActiveSwitch">
+                                    Active (hiển thị cho khách hàng)
+                                </label>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Tắt nếu muốn tạm ẩn FAQ này
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save me-2"></i>Lưu thay đổi
+                </button>
+                <a href="@Url.Action("FAQs")" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Hủy
+                </a>
+            </div>
+        </form>
+
+        <!-- Delete Button -->
+        <div class="text-center mt-4 pt-4" style="border-top: 2px solid rgba(0,0,0,0.05);">
+            <form method="post" asp-action="DeleteFAQ" asp-route-id="@Model.Id" 
+                  onsubmit="return confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA FAQ này vĩnh viễn?\n\nHành động này KHÔNG THỂ HOÀN TÁC!');"
+                  style="display: inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>Xóa FAQ này
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

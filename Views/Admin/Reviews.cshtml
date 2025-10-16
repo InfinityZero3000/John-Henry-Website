@@ -2,17 +2,17 @@
 @{
     ViewData["Title"] = "Quản lý đánh giá";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["CurrentSection"] = "Reviews";
 }
 
 <div class="admin-content">
     <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
             <div>
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-star me-2"></i>Quản lý đánh giá
+                <h1 class="admin-page-title">
+                    <i data-lucide="star"></i>Quản lý đánh giá
                 </h1>
-                <p class="text-muted mb-0">Quản lý đánh giá sản phẩm của khách hàng</p>
             </div>
         </div>
     </div>
@@ -21,11 +21,11 @@
     <div class="content-wrapper">
         <div class="row">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Danh sách đánh giá</h5>
+                    <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">Danh sách đánh giá</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="admin-card-body">
                         @if (Model.Any())
                         {
                             <div class="table-responsive">
@@ -68,7 +68,7 @@
                                                     <div class="d-flex align-items-center">
                                                         @for (int i = 1; i <= 5; i++)
                                                         {
-                                                            <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                                            <i data-lucide="star" class="@(i <= review.Rating ? "text-warning" : "text-muted")" style="width: 16px; height: 16px; @(i <= review.Rating ? "fill: currentColor;" : "")"></i>
                                                         }
                                                         <span class="ms-1">(@review.Rating)</span>
                                                     </div>
@@ -89,11 +89,11 @@
                                                 <td>
                                                     @if (review.IsApproved)
                                                     {
-                                                        <span class="badge bg-success">Đã duyệt</span>
+                                                        <span class="admin-badge admin-badge-success">Đã duyệt</span>
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-warning">Chờ duyệt</span>
+                                                        <span class="admin-badge admin-badge-warning">Chờ duyệt</span>
                                                     }
                                                 </td>
                                                 <td>
@@ -101,15 +101,15 @@
                                                         @if (!review.IsApproved)
                                                         {
                                                             <form asp-action="ApproveReview" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                                <button type="submit" class="btn btn-sm btn-success" title="Duyệt">
-                                                                    <i class="fas fa-check"></i>
+                                                                <button type="submit" class="admin-btn admin-btn-sm admin-btn-success" title="Duyệt">
+                                                                    <i data-lucide="check"></i>
                                                                 </button>
                                                             </form>
                                                         }
                                                         <form asp-action="DeleteReview" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                            <button type="submit" class="admin-btn admin-btn-sm admin-btn-danger" 
                                                                     onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')" title="Xóa">
-                                                                <i class="fas fa-trash"></i>
+                                                                <i data-lucide="trash-2"></i>
                                                             </button>
                                                         </form>
                                                     </div>
@@ -122,10 +122,10 @@
                         }
                         else
                         {
-                            <div class="text-center py-5">
-                                <i class="fas fa-star fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted">Chưa có đánh giá nào</h5>
-                                <p class="text-muted">Các đánh giá của khách hàng sẽ hiển thị tại đây</p>
+                            <div class="admin-empty-state">
+                                <i data-lucide="star" style="width: 64px; height: 64px;"></i>
+                                <h5>Chưa có đánh giá nào</h5>
+                                <p>Các đánh giá của khách hàng sẽ hiển thị tại đây</p>
                             </div>
                         }
                     </div>
@@ -152,3 +152,12 @@
         white-space: normal;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>

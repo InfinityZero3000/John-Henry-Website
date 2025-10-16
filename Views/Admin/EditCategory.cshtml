@@ -2,17 +2,19 @@
 @{
     ViewData["Title"] = "Chỉnh sửa danh mục";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewData["Breadcrumb"] = $"<li class=\"breadcrumb-item\"><a href=\"{Url.Action("Categories")}\">Quản lý danh mục</a></li><li class=\"breadcrumb-item active\">Chỉnh sửa</li>";
+    ViewData["Breadcrumb"] = $"<li class=\"breadcrumb-item\"><a href=\"{Url.Action("Categories")}\">Danh mục</a></li><li class=\"breadcrumb-item active\">Chỉnh sửa</li>";
 }
 
-<div class="page-header">
-    <h1 class="page-title">
-        <i class="fas fa-edit"></i>
-        Chỉnh sửa danh mục: @Model.Name
-    </h1>
-    <div class="page-actions">
-        <a href="@Url.Action("Categories")" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i>
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">
+            <i data-lucide="edit"></i>
+            Chỉnh sửa danh mục: @Model.Name
+        </h1>
+    </div>
+    <div>
+        <a href="@Url.Action("Categories")" class="admin-btn admin-btn-secondary">
+            <i data-lucide="arrow-left"></i>
             Quay lại
         </a>
     </div>
@@ -99,17 +101,17 @@
                     <small class="form-text text-muted">Danh mục không hoạt động sẽ bị ẩn khỏi website</small>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
+                <div class="form-actions" style="display: flex; gap: 0.75rem; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--admin-border);">
+                    <button type="submit" class="admin-btn admin-btn-primary">
+                        <i data-lucide="save"></i>
                         Cập nhật danh mục
                     </button>
-                    <a href="@Url.Action("Categories")" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
+                    <a href="@Url.Action("Categories")" class="admin-btn admin-btn-secondary">
+                        <i data-lucide="x"></i>
                         Hủy bỏ
                     </a>
-                    <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteCategory()">
-                        <i class="fas fa-trash"></i>
+                    <button type="button" class="admin-btn admin-btn-danger" onclick="confirmDeleteCategory()" style="margin-left: auto;">
+                        <i data-lucide="trash-2"></i>
                         Xóa danh mục
                     </button>
                 </div>
@@ -119,68 +121,89 @@
 
     <div class="col-md-4">
         <!-- Category Info -->
-        <div class="admin-form">
-            <h6 class="mb-3">
-                <i class="fas fa-info-circle text-info"></i>
-                Thông tin danh mục
-            </h6>
-            <ul class="list-unstyled">
-                <li class="mb-2">
-                    <strong>ID:</strong> @Model.Id
-                </li>
-                <li class="mb-2">
-                    <strong>Trạng thái:</strong> 
-                    @if (Model.IsActive)
-                    {
-                        <span class="status-badge status-active">Hoạt động</span>
-                    }
-                    else
-                    {
-                        <span class="status-badge status-inactive">Không hoạt động</span>
-                    }
-                </li>
-                <li class="mb-2">
-                    <strong>Thứ tự:</strong> @Model.SortOrder
-                </li>
-                @if (Model.ParentId.HasValue)
-                {
-                    <li class="mb-2">
-                        <strong>Loại:</strong> Danh mục con
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="info" style="width: 18px; height: 18px;"></i>
+                    Thông tin danh mục
+                </h6>
+            </div>
+            <div class="admin-card-body">
+                <ul class="list-unstyled" style="margin: 0;">
+                    <li class="mb-3">
+                        <strong style="color: var(--admin-text-muted); font-size: 0.875rem;">ID:</strong><br>
+                        <span style="font-family: monospace; font-size: 0.8125rem;">@Model.Id</span>
                     </li>
-                }
-                else
-                {
-                    <li class="mb-2">
-                        <strong>Loại:</strong> Danh mục chính
+                    <li class="mb-3">
+                        <strong style="color: var(--admin-text-muted); font-size: 0.875rem;">Trạng thái:</strong><br>
+                        @if (Model.IsActive)
+                        {
+                            <span class="admin-badge admin-badge-success">
+                                <i data-lucide="check-circle"></i>
+                                Hoạt động
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="admin-badge admin-badge-secondary">
+                                <i data-lucide="x-circle"></i>
+                                Không hoạt động
+                            </span>
+                        }
                     </li>
-                }
-            </ul>
+                    <li class="mb-3">
+                        <strong style="color: var(--admin-text-muted); font-size: 0.875rem;">Thứ tự:</strong><br>
+                        <span>@Model.SortOrder</span>
+                    </li>
+                    <li class="mb-0">
+                        <strong style="color: var(--admin-text-muted); font-size: 0.875rem;">Loại:</strong><br>
+                        @if (Model.ParentId.HasValue)
+                        {
+                            <span class="admin-badge admin-badge-info">
+                                <i data-lucide="folder"></i>
+                                Danh mục con
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="admin-badge admin-badge-primary">
+                                <i data-lucide="folder-tree"></i>
+                                Danh mục chính
+                            </span>
+                        }
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <!-- Quick Tips -->
-        <div class="admin-form mt-4">
-            <h6 class="mb-3">
-                <i class="fas fa-lightbulb text-warning"></i>
-                Gợi ý chỉnh sửa
-            </h6>
-            <ul class="list-unstyled">
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Thay đổi hình ảnh để cập nhật giao diện
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Điều chỉnh thứ tự để sắp xếp danh mục
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Tắt danh mục nếu tạm thời không sử dụng
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-exclamation text-warning me-2"></i>
-                    Chỉ có thể xóa danh mục không có sản phẩm
-                </li>
-            </ul>
+        <div class="admin-card" style="margin-top: 1.5rem;">
+            <div class="admin-card-header">
+                <h6 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="lightbulb" style="width: 18px; height: 18px;"></i>
+                    Gợi ý chỉnh sửa
+                </h6>
+            </div>
+            <div class="admin-card-body">
+                <ul class="list-unstyled" style="margin: 0;">
+                    <li class="mb-2" style="display: flex; gap: 0.5rem; align-items: start;">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--status-success-text); flex-shrink: 0; margin-top: 2px;"></i>
+                        <span style="font-size: 0.875rem;">Thay đổi hình ảnh để cập nhật giao diện</span>
+                    </li>
+                    <li class="mb-2" style="display: flex; gap: 0.5rem; align-items: start;">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--status-success-text); flex-shrink: 0; margin-top: 2px;"></i>
+                        <span style="font-size: 0.875rem;">Điều chỉnh thứ tự để sắp xếp danh mục</span>
+                    </li>
+                    <li class="mb-2" style="display: flex; gap: 0.5rem; align-items: start;">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--status-success-text); flex-shrink: 0; margin-top: 2px;"></i>
+                        <span style="font-size: 0.875rem;">Tắt danh mục nếu tạm thời không sử dụng</span>
+                    </li>
+                    <li class="mb-0" style="display: flex; gap: 0.5rem; align-items: start;">
+                        <i data-lucide="alert-triangle" style="width: 16px; height: 16px; color: var(--status-warning-text); flex-shrink: 0; margin-top: 2px;"></i>
+                        <span style="font-size: 0.875rem;">Chỉ có thể xóa danh mục không có sản phẩm</span>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -188,6 +211,11 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
             // Image preview
             const imageInput = document.getElementById('categoryImage');
             const previewContainer = document.getElementById('categoryImagePreview');
@@ -229,13 +257,21 @@
                 // Show loading state
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...';
+                submitBtn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Đang cập nhật...';
                 submitBtn.disabled = true;
+                
+                // Re-initialize icons for the loading spinner
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
 
                 // Re-enable after 3 seconds (in case of error)
                 setTimeout(() => {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
                 }, 3000);
             });
         });

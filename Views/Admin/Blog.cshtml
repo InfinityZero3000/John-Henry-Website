@@ -2,356 +2,453 @@
 @{
     ViewData["Title"] = "Quản lý Blog";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Blog</li>";
+    
+    var statusFilter = Model.StatusFilter ?? "";
+    var searchTerm = Model.SearchTerm ?? "";
+    
+    var publishedCount = Model.Posts.Count(p => p.Status == "published");
+    var draftCount = Model.Posts.Count(p => p.Status == "draft");
+    var archivedCount = Model.Posts.Count(p => p.Status == "archived");
 }
 
-<style>
-    .blog-container {
-        padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: calc(100vh - 80px);
-    }
-
-    .page-header-glass {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .blog-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-modern {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary-modern {
-        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
-        color: white;
-    }
-
-    .btn-primary-modern:hover {
-        transform: translateY(-2px);
-        color: white;
-    }
-
-    .form-control-modern {
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-    }
-
-    .form-control-modern:focus {
-        border-color: var(--jh-red);
-        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
-    }
-
-    .table-modern {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .table-modern thead th {
-        background: var(--jh-red);
-        color: white;
-        border: none;
-        padding: 1rem;
-        font-weight: 600;
-    }
-
-    .table-modern tbody td {
-        padding: 1rem;
-        border-color: rgba(0, 0, 0, 0.05);
-        vertical-align: middle;
-    }
-
-    .table-modern tbody tr:hover {
-        background: rgba(206, 25, 58, 0.05);
-    }
-
-    .badge-modern {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-</style>
-
-<div class="blog-container">
+<div class="admin-content">
     <!-- Page Header -->
-    <div class="page-header-glass">
-        <div class="d-flex justify-content-between align-items-center">
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
             <div>
-                <h1 class="mb-0" style="color: #1a1a2e; font-size: 2.5rem; font-weight: 700;">
-                    <i class="fas fa-blog text-danger me-3"></i>Quản lý Blog
+                <h1 class="admin-page-title">
+                    <i data-lucide="file-text"></i>
+                    Blog
                 </h1>
-                <p class="text-muted mt-2 mb-0" style="font-size: 1.1rem;">Tạo và quản lý các bài viết blog</p>
             </div>
-            <div>
-                <a href="@Url.Action("CreateBlogPost", "Admin")" class="btn-modern btn-primary-modern">
-                    <i class="fas fa-plus"></i> Tạo bài viết mới
-                </a>
+            <a href="/admin/blog/create" class="admin-btn admin-btn-primary">
+                <i data-lucide="plus"></i>
+                Viết bài mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng bài viết</h3>
+                    <p class="value">@Model.TotalPosts</p>
+                    <p class="change">Tất cả bài</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="file-text"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đã xuất bản</h3>
+                    <p class="value">@publishedCount</p>
+                    <p class="change">@((publishedCount > 0 ? (publishedCount * 100.0 / Model.TotalPosts).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Bản nháp</h3>
+                    <p class="value">@draftCount</p>
+                    <p class="change">Chưa xuất bản</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="edit"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Danh mục</h3>
+                    <p class="value">@Model.Categories.Count</p>
+                    <p class="change">
+                        <a href="/admin/blog/categories" style="color: var(--admin-primary); text-decoration: none;">
+                            Danh mục
+                        </a>
+                    </p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="folder"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="blog-card">
-        <h5 style="color: #1a1a2e; font-weight: 700; margin-bottom: 1.5rem;">
-            <i class="fas fa-filter text-danger me-2"></i>Bộ lọc tìm kiếm
-        </h5>
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Tìm kiếm</label>
-                <input type="text" name="search" value="@Model.SearchTerm" class="form-control-modern" placeholder="Tìm theo tiêu đề, nội dung...">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Trạng thái</label>
-                <select name="status" class="form-control-modern">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="draft" selected="@(Model.StatusFilter == "draft" ? "selected" : null)">Bản nháp</option>
-                    <option value="published" selected="@(Model.StatusFilter == "published" ? "selected" : null)">Đã xuất bản</option>
-                    <option value="archived" selected="@(Model.StatusFilter == "archived" ? "selected" : null)">Lưu trữ</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Danh mục</label>
-                <select name="category" class="form-control-modern">
-                    <option value="">Tất cả danh mục</option>
-                    @foreach (var category in Model.Categories)
-                    {
-                        <option value="@category.Id" selected="@(Model.CategoryFilter == category.Id.ToString() ? "selected" : null)">
-                            @category.Name
-                        </option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn-modern btn-primary-modern me-2">
-                    <i class="fas fa-search"></i> Lọc
-                </button>
-                <a href="@Url.Action("Blog", "Admin")" class="btn-modern" style="background: #6c757d; color: white;">
-                    <i class="fas fa-times"></i> Xóa
-                </a>
+    <!-- Filters & Search -->
+    <div class="admin-filters">
+        <form method="get" action="/admin/blog">
+            <div class="row g-3 align-items-end">
+                <!-- Search Box -->
+                <div class="col-md-5">
+                    <label class="admin-form-label">Tìm kiếm</label>
+                    <div class="admin-search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" name="search" class="admin-form-input" 
+                               placeholder="Tìm theo tiêu đề, nội dung..." 
+                               value="@searchTerm">
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-md-3">
+                    <label class="admin-form-label">Trạng thái</label>
+                    <select name="status" class="admin-form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(statusFilter))">Tất cả</option>
+                        <option value="published" selected="@(statusFilter == "published")">Đã xuất bản</option>
+                        <option value="draft" selected="@(statusFilter == "draft")">Bản nháp</option>
+                        <option value="archived" selected="@(statusFilter == "archived")">Lưu trữ</option>
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="col-md-2">
+                    <label class="admin-form-label">Danh mục</label>
+                    <select name="category" class="admin-form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.Id" selected="@(Model.CategoryFilter == cat.Id.ToString())">@cat.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Search Button -->
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width: 100%;">
+                        <i data-lucide="search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
-    <!-- Results -->
-    <div class="blog-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 style="color: #1a1a2e; font-weight: 700; margin: 0;">
-                <i class="fas fa-list text-danger me-2"></i>Danh sách bài viết (@Model.TotalPosts bài viết)
-            </h5>
-        </div>
-        @if (Model.Posts.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-modern table-hover">
-                    <thead>
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs">
+        <a href="/admin/blog?search=@searchTerm" 
+           class="admin-filter-tab @(string.IsNullOrEmpty(statusFilter) ? "active" : "")">
+            Tất cả (@Model.TotalPosts)
+        </a>
+        <a href="/admin/blog?status=published&search=@searchTerm" 
+           class="admin-filter-tab @(statusFilter == "published" ? "active" : "")">
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
+            Đã xuất bản (@publishedCount)
+        </a>
+        <a href="/admin/blog?status=draft&search=@searchTerm" 
+           class="admin-filter-tab @(statusFilter == "draft" ? "active" : "")">
+            <i data-lucide="edit" style="width: 14px; height: 14px;"></i>
+            Bản nháp (@draftCount)
+        </a>
+        <a href="/admin/blog?status=archived&search=@searchTerm" 
+           class="admin-filter-tab @(statusFilter == "archived" ? "active" : "")">
+            <i data-lucide="archive" style="width: 14px; height: 14px;"></i>
+            Lưu trữ (@archivedCount)
+        </a>
+    </div>
+
+    <!-- Blog Posts Table -->
+    @if (Model.Posts.Any())
+    {
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Hình ảnh</th>
+                        <th>Tiêu đề</th>
+                        <th>Danh mục</th>
+                        <th>Tác giả</th>
+                        <th>Lượt xem</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th style="width: 180px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var post in Model.Posts)
+                    {
                         <tr>
-                            <th>Ảnh</th>
-                            <th>Tiêu đề</th>
-                            <th>Danh mục</th>
-                            <th>Trạng thái</th>
-                            <th>Tác giả</th>
-                            <th>Ngày tạo</th>
-                            <th>Lượt xem</th>
-                            <th>Thao tác</th>
+                            <td>
+                                @if (!string.IsNullOrEmpty(post.FeaturedImageUrl))
+                                {
+                                    <img src="@post.FeaturedImageUrl" alt="@post.Title" 
+                                         style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid var(--admin-border);">
+                                }
+                                else
+                                {
+                                    <div style="width: 80px; height: 60px; background: var(--admin-bg-secondary); border-radius: 4px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--admin-border);">
+                                        <i data-lucide="image" style="width: 24px; height: 24px; color: var(--admin-text-muted);"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div style="font-weight: 500; color: var(--admin-text); margin-bottom: 0.25rem; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    @post.Title
+                                </div>
+                                @if (!string.IsNullOrEmpty(post.Excerpt))
+                                {
+                                    <div style="font-size: 0.8125rem; color: var(--admin-text-light); max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        @post.Excerpt
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                @if (post.Category != null)
+                                {
+                                    <span class="admin-badge admin-badge-info">
+                                        <i data-lucide="folder" style="width: 12px; height: 12px;"></i>
+                                        @post.Category.Name
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-secondary">Không có</span>
+                                }
+                            </td>
+                            <td>
+                                @if (post.Author != null)
+                                {
+                                    <div style="font-weight: 500; font-size: 0.875rem;">@post.Author.FullName</div>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-secondary">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="font-weight: 500;">
+                                    <i data-lucide="eye" style="width: 14px; height: 14px; color: var(--admin-text-light);"></i>
+                                    @post.ViewCount.ToString("N0")
+                                </div>
+                            </td>
+                            <td>
+                                @switch (post.Status?.ToLower())
+                                {
+                                    case "published":
+                                        <span class="admin-badge admin-badge-success">
+                                            <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                            Đã xuất bản
+                                        </span>
+                                        break;
+                                    case "draft":
+                                        <span class="admin-badge admin-badge-warning">
+                                            <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                            Bản nháp
+                                        </span>
+                                        break;
+                                    case "archived":
+                                        <span class="admin-badge admin-badge-secondary">
+                                            <i data-lucide="archive" style="width: 12px; height: 12px;"></i>
+                                            Lưu trữ
+                                        </span>
+                                        break;
+                                    default:
+                                        <span class="admin-badge admin-badge-secondary">@(post.Status ?? "N/A")</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <div style="font-size: 0.875rem;">@post.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@post.CreatedAt.ToString("HH:mm")</div>
+                            </td>
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <a href="/blog/@post.Slug" target="_blank" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem">
+                                        <i data-lucide="eye"></i>
+                                    </a>
+                                    <a href="/admin/blog/edit/@post.Id" class="admin-btn admin-btn-sm admin-btn-primary" title="Sửa">
+                                        <i data-lucide="edit"></i>
+                                    </a>
+                                    @if (post.Status == "draft")
+                                    {
+                                        <button onclick="publishPost('@post.Id')" class="admin-btn admin-btn-sm admin-btn-success" title="Xuất bản">
+                                            <i data-lucide="send"></i>
+                                        </button>
+                                    }
+                                    <button onclick="deletePost('@post.Id')" class="admin-btn admin-btn-sm admin-btn-danger" title="Xóa">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                        <tbody>
-                            @foreach (var post in Model.Posts)
-                            {
-                                <tr>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(post.FeaturedImageUrl))
-                                        {
-                                            <img src="@post.FeaturedImageUrl" alt="@post.Title" class="img-thumbnail" style="width: 60px; height: 40px; object-fit: cover;">
-                                        }
-                                        else
-                                        {
-                                            <div class="bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 40px;">
-                                                <i class="fas fa-image text-muted"></i>
-                                            </div>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <strong>@post.Title</strong>
-                                            @if (post.IsFeatured)
-                                            {
-                                                <span class="badge bg-warning text-dark ms-1">Nổi bật</span>
-                                            }
-                                        </div>
-                                        @if (!string.IsNullOrEmpty(post.Excerpt))
-                                        {
-                                            <small class="text-muted">@(post.Excerpt.Length > 60 ? post.Excerpt.Substring(0, 60) + "..." : post.Excerpt)</small>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (post.Category != null)
-                                        {
-                                            <span class="badge-modern" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white;">@post.Category.Name</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Không có</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @switch (post.Status)
-                                        {
-                                            case "published":
-                                                <span class="badge-modern" style="background: linear-gradient(135deg, #28a745, #1e7e34); color: white;">Đã xuất bản</span>
-                                                break;
-                                            case "draft":
-                                                <span class="badge-modern" style="background: linear-gradient(135deg, #6c757d, #545b62); color: white;">Bản nháp</span>
-                                                break;
-                                            case "archived":
-                                                <span class="badge-modern" style="background: linear-gradient(135deg, #343a40, #23272b); color: white;">Lưu trữ</span>
-                                                break;
-                                            default:
-                                                <span class="badge-modern" style="background: #f8f9fa; color: #212529;">@post.Status</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (post.Author != null)
-                                        {
-                                            @post.Author.FirstName @post.Author.LastName
-                                        }
-                                    </td>
-                                    <td>
-                                        <div>@post.CreatedAt.ToString("dd/MM/yyyy")</div>
-                                        <small class="text-muted">@post.CreatedAt.ToString("HH:mm")</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge-modern" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); color: #495057; border: 1px solid #dee2e6;">@post.ViewCount</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="@Url.Action("Details", "Blog", new { id = post.Id })" class="btn btn-sm" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; border-radius: 8px; margin-right: 0.25rem;" title="Xem bài viết" target="_blank">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="@Url.Action("EditBlogPost", "Admin", new { id = post.Id })" class="btn btn-sm" style="background: linear-gradient(135deg, var(--jh-red), #a01527); color: white; border-radius: 8px; margin-right: 0.25rem;" title="Chỉnh sửa">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border-radius: 8px;" title="Xóa" 
-                                                    onclick="deletePost('@post.Id', '@post.Title')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-                <!-- Pagination -->
-                @if (Model.TotalPages > 1)
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="admin-pagination">
+                @if (Model.CurrentPage > 1)
                 {
-                    <nav aria-label="Blog pagination" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            @if (Model.CurrentPage > 1)
-                            {
-                                <li class="page-item">
-                                    <a class="page-link" href="@Url.Action("Blog", new { 
-                                        page = Model.CurrentPage - 1, 
-                                        status = Model.StatusFilter, 
-                                        category = Model.CategoryFilter, 
-                                        search = Model.SearchTerm 
-                                    })">Trước</a>
-                                </li>
-                            }
-
-                            @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
-                            {
-                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action("Blog", new { 
-                                        page = i, 
-                                        status = Model.StatusFilter, 
-                                        category = Model.CategoryFilter, 
-                                        search = Model.SearchTerm 
-                                    })">@i</a>
-                                </li>
-                            }
-
-                            @if (Model.CurrentPage < Model.TotalPages)
-                            {
-                                <li class="page-item">
-                                    <a class="page-link" href="@Url.Action("Blog", new { 
-                                        page = Model.CurrentPage + 1, 
-                                        status = Model.StatusFilter, 
-                                        category = Model.CategoryFilter, 
-                                        search = Model.SearchTerm 
-                                    })">Tiếp</a>
-                                </li>
-                            }
-                        </ul>
-                    </nav>
+                    <a href="/admin/blog?page=@(Model.CurrentPage - 1)&status=@statusFilter&search=@searchTerm&category=@Model.CategoryFilter" 
+                       class="admin-pagination-btn">
+                        <i data-lucide="chevron-left"></i>
+                        Trước
+                    </a>
                 }
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-blog fa-5x mb-4" style="color: rgba(206, 25, 58, 0.3);"></i>
-                    <h5 class="text-muted mb-3">Không có bài viết nào</h5>
-                    <p class="text-muted mb-4">Hãy tạo bài viết đầu tiên của bạn!</p>
-                    <a href="@Url.Action("CreateBlogPost", "Admin")" class="btn-modern btn-primary-modern">
-                        <i class="fas fa-plus"></i> Tạo bài viết mới
+                else
+                {
+                    <button class="admin-pagination-btn" disabled>
+                        <i data-lucide="chevron-left"></i>
+                        Trước
+                    </button>
+                }
+
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <a href="/admin/blog?page=@i&status=@statusFilter&search=@searchTerm&category=@Model.CategoryFilter" 
+                       class="admin-pagination-btn @(i == Model.CurrentPage ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="/admin/blog?page=@(Model.CurrentPage + 1)&status=@statusFilter&search=@searchTerm&category=@Model.CategoryFilter" 
+                       class="admin-pagination-btn">
+                        Sau
+                        <i data-lucide="chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <button class="admin-pagination-btn" disabled>
+                        Sau
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                }
+            </div>
+
+            <div class="admin-text-center" style="margin-top: var(--spacing-md); color: var(--admin-text-light); font-size: 0.875rem;">
+                Trang @Model.CurrentPage / @Model.TotalPages (Tổng @Model.TotalPosts bài viết)
+            </div>
+        }
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Không tìm thấy bài viết</h3>
+                <p style="color: var(--admin-text-light); margin-bottom: 1.5rem;">
+                    @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(statusFilter))
+                    {
+                        <text>Không có bài viết nào phù hợp với bộ lọc</text>
+                    }
+                    else
+                    {
+                        <text>Chưa có bài viết nào. Hãy tạo bài viết đầu tiên!</text>
+                    }
+                </p>
+                <div class="admin-flex-center admin-gap-sm">
+                    @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(statusFilter))
+                    {
+                        <a href="/admin/blog" class="admin-btn admin-btn-secondary">
+                            <i data-lucide="x"></i>
+                            Xóa bộ lọc
+                        </a>
+                    }
+                    <a href="/admin/blog/create" class="admin-btn admin-btn-primary">
+                        <i data-lucide="plus"></i>
+                        Viết bài mới
                     </a>
                 </div>
-            }
+            </div>
         </div>
-    </div>
+    }
 </div>
 
 @section Scripts {
     <script>
-        function deletePost(postId, postTitle) {
-            if (confirm(`Bạn có chắc chắn muốn xóa bài viết "${postTitle}"?`)) {
-                fetch(`/admin/blog/delete/${postId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.message || 'Có lỗi xảy ra khi xóa bài viết');
-                    }
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra khi xóa bài viết');
-                    console.error('Error:', error);
-                });
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Publish post
+        function publishPost(postId) {
+            if (!confirm('Xác nhận xuất bản bài viết này?')) {
+                return;
             }
+
+            fetch(`/admin/blog/publish/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xuất bản bài viết');
+            });
         }
+
+        // Delete post
+        function deletePost(postId) {
+            if (!confirm('Xác nhận xóa bài viết này? Hành động này không thể hoàn tác!')) {
+                return;
+            }
+
+            fetch(`/admin/blog/delete/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa bài viết');
+            });
+        }
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
     </script>
 }

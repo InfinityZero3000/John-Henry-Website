@@ -1,0 +1,324 @@
+@model List<JohnHenryFashionWeb.Models.FAQ>
+@{
+    ViewData["Title"] = "Quản lý FAQs";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var categories = ViewBag.Categories as List<string>;
+    var selectedCategory = ViewBag.SelectedCategory as string;
+}
+
+<style>
+    .faqs-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .filter-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .faq-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .faq-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .faq-card.inactive {
+        opacity: 0.6;
+    }
+
+    .category-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .active-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-active {
+        background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        color: white;
+    }
+
+    .badge-inactive {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        color: white;
+    }
+
+    .faq-question {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.75rem;
+    }
+
+    .faq-answer {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .faq-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: #999;
+    }
+
+    .faq-meta i {
+        color: #764ba2;
+    }
+
+    .btn-glass {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.4rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .btn-glass:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .sort-order-badge {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="faqs-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-2" style="color: #667eea; font-weight: 700;">
+                    <i class="fas fa-question-circle me-2"></i>Quản lý FAQs
+                </h2>
+                <p class="text-muted mb-0">Quản lý câu hỏi thường gặp để hỗ trợ khách hàng tự giải đáp</p>
+            </div>
+            <a href="@Url.Action("CreateFAQ")" class="btn btn-create">
+                <i class="fas fa-plus me-2"></i>Tạo FAQ mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-card">
+        <form method="get" asp-action="FAQs">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Danh mục</label>
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tất cả danh mục</option>
+                        @if (categories != null)
+                        {
+                            foreach (var cat in categories)
+                            {
+                                <option value="@cat" selected="@(selectedCategory == cat)">@cat</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-7">
+                    <label class="form-label fw-bold">Tìm kiếm</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Tìm trong câu hỏi và câu trả lời..." 
+                           value="@ViewBag.SearchTerm">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Tìm
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- FAQs List -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="mb-3 text-white">
+            <i class="fas fa-info-circle me-2"></i>
+            Tìm thấy <strong>@Model.Count</strong> FAQs
+        </div>
+
+        foreach (var faq in Model)
+        {
+            <div class="faq-card @(!faq.IsActive ? "inactive" : "")">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="category-badge">@faq.Category</span>
+                            <span class="active-badge @(faq.IsActive ? "badge-active" : "badge-inactive")">
+                                @(faq.IsActive ? "Active" : "Inactive")
+                            </span>
+                            <span class="sort-order-badge">
+                                <i class="fas fa-sort me-1"></i>Order: @faq.SortOrder
+                            </span>
+                        </div>
+                        
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle me-2" style="color: #667eea;"></i>
+                            @faq.Question
+                        </div>
+                        
+                        <div class="faq-answer">
+                            <i class="fas fa-arrow-right me-2" style="color: #10ac84;"></i>
+                            @faq.Answer
+                        </div>
+
+                        <div class="faq-meta">
+                            <span>
+                                <i class="fas fa-eye"></i>
+                                @faq.ViewCount views
+                            </span>
+                            <span>
+                                <i class="fas fa-thumbs-up"></i>
+                                @faq.HelpfulCount helpful
+                            </span>
+                            <span>
+                                <i class="fas fa-thumbs-down"></i>
+                                @faq.NotHelpfulCount not helpful
+                            </span>
+                            <span>
+                                <i class="fas fa-clock"></i>
+                                @faq.CreatedAt.ToString("dd/MM/yyyy")
+                            </span>
+                            @if (faq.UpdatedAt != faq.CreatedAt)
+                            {
+                                <span>
+                                    <i class="fas fa-edit"></i>
+                                    Updated: @faq.UpdatedAt.ToString("dd/MM/yyyy")
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2">
+                        <a href="@Url.Action("EditFAQ", new { id = faq.Id })" 
+                           class="btn btn-glass btn-sm text-primary">
+                            <i class="fas fa-edit me-1"></i>Sửa
+                        </a>
+                        
+                        <form method="post" asp-action="ToggleFAQ" asp-route-id="@faq.Id" 
+                              style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-glass btn-sm w-100 text-warning">
+                                <i class="fas @(faq.IsActive ? "fa-eye-slash" : "fa-eye") me-1"></i>
+                                @(faq.IsActive ? "Ẩn" : "Hiện")
+                            </button>
+                        </form>
+
+                        <form method="post" asp-action="DeleteFAQ" asp-route-id="@faq.Id" 
+                              onsubmit="return confirm('Bạn có chắc muốn xóa FAQ này?');"
+                              style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-glass btn-sm w-100 text-danger">
+                                <i class="fas fa-trash me-1"></i>Xóa
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="filter-card text-center py-5">
+            <i class="fas fa-question-circle fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">Không có FAQ nào</h5>
+            <p class="text-muted mb-3">Hãy tạo FAQ đầu tiên để hỗ trợ khách hàng tốt hơn</p>
+            <a href="@Url.Action("CreateFAQ")" class="btn btn-create">
+                <i class="fas fa-plus me-2"></i>Tạo FAQ đầu tiên
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Show success/error messages from TempData
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: '@TempData["SuccessMessage"]',
+                timer: 3000,
+                showConfirmButton: false
+            });
+            </text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: '@TempData["ErrorMessage"]'
+            });
+            </text>
+        }
+    </script>
+}

@@ -1,0 +1,107 @@
+@model JohnHenryFashionWeb.Models.FlashSale
+@{
+    ViewData["Title"] = "Edit Flash Sale";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .marketing-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control, .form-select { border-radius: 10px; padding: 0.75rem; }
+    .btn-submit { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; border: none; padding: 0.75rem 2rem; border-radius: 10px; }
+</style>
+
+<div class="marketing-container">
+    <div class="form-card">
+        <h2 class="mb-4">✏️ Edit Flash Sale</h2>
+        
+        <form method="post" action="/admin/marketing/flashsale/@Model.Id">
+            @Html.AntiForgeryToken()
+            
+            <div class="mb-3">
+                <label class="form-label">Flash Sale Name *</label>
+                <input type="text" class="form-control" name="Name" value="@Model.Name" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="Description" rows="3">@Model.Description</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Banner Image URL</label>
+                <input type="url" class="form-control" name="BannerImageUrl" value="@Model.BannerImageUrl" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Start Date *</label>
+                    <input type="datetime-local" class="form-control" name="StartDate" 
+                           value="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">End Date *</label>
+                    <input type="datetime-local" class="form-control" name="EndDate" 
+                           value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Discount % *</label>
+                    <input type="number" class="form-control" name="DiscountPercentage" min="0" max="100" 
+                           value="@Model.DiscountPercentage" required />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Stock Limit</label>
+                    <input type="number" class="form-control" name="StockLimit" value="@Model.StockLimit" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Sold Count</label>
+                    <input type="number" class="form-control" value="@Model.SoldCount" readonly />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Product IDs (JSON array)</label>
+                <textarea class="form-control" name="ProductIds" rows="3">@Model.ProductIds</textarea>
+                <small class="text-muted">Enter product IDs as JSON array</small>
+            </div>
+
+            <div class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") />
+                <label class="form-check-label">Active</label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i> Update
+                </button>
+                <a href="/admin/marketing/flashsales" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <hr class="my-4" />
+        
+        <form method="post" action="/admin/marketing/flashsale/@Model.Id/delete" onsubmit="return confirm('Delete?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete Flash Sale
+            </button>
+        </form>
+    </div>
+</div>

@@ -7,7 +7,7 @@
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link href="~/css/dashboard.css" rel="stylesheet" />
+    <link href="~/css/admin-unified.css" rel="stylesheet" />
     
     <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
@@ -18,25 +18,41 @@
     <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     
     <style>
-        .menu-item .menu-link:hover {
-            background: rgba(255,255,255,0.15) !important;
-            backdrop-filter: blur(20px) !important;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        .menu-link:hover {
+            background: #f5f5f5 !important;
+            color: #000000 !important;
+        }
+        
+        .menu-link.active {
+            background: linear-gradient(135deg, #333333 0%, #000000 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .sidebar-footer a {
+            background: #fff5f5 !important;
+            color: #dc3545 !important;
+            border: 1px solid #fed7d7 !important;
         }
         
         .sidebar-footer a:hover {
-            background: rgba(255,255,255,0.25) !important;
-            backdrop-filter: blur(15px) !important;
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%) !important;
+            color: #ffffff !important;
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        .sidebar-footer button {
+            background: #fff5f5 !important;
+            color: #dc3545 !important;
+            border: 1px solid #fed7d7 !important;
         }
         
         .sidebar-footer button:hover {
-            background: rgba(220, 53, 69, 0.3) !important;
-            backdrop-filter: blur(15px) !important;
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%) !important;
+            color: #ffffff !important;
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.2);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
     </style>
     @await RenderSectionAsync("Styles", required: false)
@@ -47,7 +63,7 @@
         <nav class="admin-sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand">
-                    <span class="brand-text">Admin Dashboard</span>
+                    <img src="~/images/logo.png" alt="John Henry" />
                 </div>
                 <button class="sidebar-toggle" id="sidebarToggle">
                     <i data-lucide="menu"></i>
@@ -55,118 +71,168 @@
             </div>
 
             <div class="sidebar-content">
-
                 <ul class="sidebar-menu" style="list-style: none; padding: 0;">
+                    
+                    <!-- 1. DASHBOARD -->
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Dashboard", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Dashboard" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Dashboard" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="gauge" style="margin-right: 1rem; width: 20px;"></i>
+                        <a href="@Url.Action("Dashboard", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Dashboard" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="home" style="margin-right: 1rem; width: 20px;"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
 
-                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ SẢN PHẨM</li>
+                    <!-- 2. QUẢN LÝ NGƯỜI DÙNG -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ NGƯỜI DÙNG</li>
                     
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Products", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Products" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Products" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="package" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Sản phẩm của tôi</span>
+                        <a href="@Url.Action("Users", "Admin", new { role = "customer" })" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Customers" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="users" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Khách hàng</span>
                         </a>
                     </li>
 
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("CreateProduct", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "CreateProduct" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "CreateProduct" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="plus" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Thêm sản phẩm</span>
+                        <a href="@Url.Action("Users", "Admin", new { role = "seller" })" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Sellers" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="store" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Người bán</span>
                         </a>
                     </li>
 
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Inventory", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Inventory" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Inventory" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                        <a href="@Url.Action("Permissions", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Permissions" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="shield" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Quyền hạn</span>
+                        </a>
+                    </li>
+
+                    <!-- 3. QUẢN LÝ SẢN PHẨM & DANH MỤC -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">SẢN PHẨM & DANH MỤC</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="/admin/approvals" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Approvals" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="check-circle" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Duyệt sản phẩm</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Categories", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Categories" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="folder" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Danh mục</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Brands", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Brands" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="tag" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Thương hiệu</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Inventory", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Inventory" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="warehouse" style="margin-right: 1rem; width: 20px;"></i>
                             <span>Quản lý kho</span>
                         </a>
                     </li>
 
-                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ ĐƠN HÀNG</li>
+                    <!-- 4. QUẢN LÝ ĐƠN HÀNG -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ ĐƠN HÀNG</li>
                     
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Orders", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Orders" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Orders" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                        <a href="@Url.Action("Orders", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Orders" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="shopping-cart" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Đơn hàng</span>
+                            <span>Tất cả đơn hàng</span>
                         </a>
                     </li>
 
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Reviews", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Reviews" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Reviews" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                        <a href="@Url.Action("Reviews", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Reviews" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="star" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Quản lý đánh giá</span>
+                            <span>Đánh giá</span>
                         </a>
                     </li>
 
+                    <!-- 5. THANH TOÁN & GIAO DỊCH -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">THANH TOÁN & GIAO DỊCH</li>
+                    
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Coupons", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Coupons" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Coupons" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                        <a href="/admin/payments" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Payments" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="credit-card" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Thanh toán</span>
+                        </a>
+                    </li>
+
+                    <!-- 6. KHUYẾN MÃI & VOUCHER -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">KHUYẾN MÃI & VOUCHER</li>
+                    
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("Coupons", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Coupons" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="ticket" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Mã giảm giá</span>
+                            <span>Khuyến mãi</span>
                         </a>
                     </li>
 
-                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ CỬA HÀNG</li>
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="@Url.Action("CreateCoupon", "Admin")" class="menu-link" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="plus-circle" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Tạo khuyến mãi</span>
+                        </a>
+                    </li>
+
+                    <!-- 7. KHIẾU NẠI & HỖ TRỢ -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">KHIẾU NẠI & HỖ TRỢ</li>
                     
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("StoreManagement", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "StoreManagement" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "StoreManagement" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="store" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Cửa hàng của tôi</span>
+                        <a href="/admin/support" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Support" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="headphones" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Hỗ trợ khách hàng</span>
                         </a>
                     </li>
 
-                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("StoreSettings", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "StoreSettings" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "StoreSettings" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="settings-2" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Cài đặt cửa hàng</span>
-                        </a>
-                    </li>
-
-                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">BÁO CÁO & THỐNG KÊ</li>
+                    <!-- 8. NỘI DUNG & MARKETING -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">NỘI DUNG & MARKETING</li>
                     
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Sales", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Sales" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Sales" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="trending-up" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Báo cáo bán hàng</span>
+                        <a href="@Url.Action("Banners", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Banners" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="image" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Quảng cáo</span>
                         </a>
                     </li>
 
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Analytics", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Analytics" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Analytics" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="bar-chart-3" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Phân tích</span>
+                        <a href="@Url.Action("Blog", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Blog" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="file-text" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Blog & Tin tức</span>
                         </a>
                     </li>
 
-                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">CÀI ĐẶT</li>
+                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
+                        <a href="/admin/marketing" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Marketing" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                            <i data-lucide="megaphone" style="margin-right: 1rem; width: 20px;"></i>
+                            <span>Marketing</span>
+                        </a>
+                    </li>
+
+                    <!-- 9. CẤU HÌNH HỆ THỐNG -->
+                    <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">CẤU HÌNH HỆ THỐNG</li>
                     
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Profile", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Profile" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Profile" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
-                            <i data-lucide="user-cog" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Hồ sơ cửa hàng</span>
-                        </a>
-                    </li>
-
-                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Settings", "Admin")" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Settings" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; @(ViewData["CurrentSection"]?.ToString() == "Settings" ? "background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);" : "")">
+                        <a href="/admin/settings" class="menu-link @(ViewData["CurrentSection"]?.ToString() == "Settings" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="settings" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Cài đặt</span>
+                            <span>Cài đặt hệ thống</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <div class="sidebar-footer" style="padding: 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
-                <a href="@Url.Action("Index", "Home")" class="btn btn-sm w-100 mb-3" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <div class="sidebar-footer" style="padding: 1rem; margin-top: auto; border-top: 1px solid #e8ecef; background: #f8f9fa;">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-sm w-100 mb-3" style="background: #fff5f5; border: 1px solid #fed7d7; color: #dc3545; border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 500;">
                     <i data-lucide="home" style="width: 16px;"></i>
-                    <span>Về trang chủ</span>
+                    <span>Trang chủ</span>
                 </a>
                 <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form" style="margin: 0;">
-                    <button type="submit" class="btn btn-sm w-100" style="background: rgba(220, 53, 69, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(220, 53, 69, 0.3); color: #ff6b7a; border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-sm w-100" style="background: #fff5f5; border: 1px solid #fed7d7; color: #dc3545; border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 500;">
                         <i data-lucide="log-out" style="width: 16px;"></i>
                         <span>Đăng xuất</span>
                     </button>

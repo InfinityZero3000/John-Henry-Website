@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = Model.Id.HasValue ? "Chỉnh sửa danh mục" : "Thêm danh mục mới";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewData["Breadcrumb"] = $"<li class=\"breadcrumb-item\"><a href=\"{Url.Action("Categories")}\">Quản lý danh mục</a></li><li class=\"breadcrumb-item active\">{(Model.Id.HasValue ? "Chỉnh sửa" : "Thêm mới")}</li>";
+    ViewData["Breadcrumb"] = $"<li class=\"breadcrumb-item\"><a href=\"{Url.Action("Categories")}\">Danh mục</a></li><li class=\"breadcrumb-item active\">{(Model.Id.HasValue ? "Chỉnh sửa" : "Thêm mới")}</li>";
 }
 
 <div class="page-header">

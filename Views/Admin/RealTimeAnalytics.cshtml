@@ -1,32 +1,35 @@
 @{
     ViewData["Title"] = "Real-time Analytics - Theo dõi thời gian thực";
-    ViewData["CurrentSection"] = "realtime";
+    ViewData["CurrentSection"] = "Analytics";
+    ViewData["PageIcon"] = "activity";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="admin-content-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="admin-page-title">
-                <i class="fas fa-broadcast-tower text-success"></i>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <h1 class="admin-page-title">
+                <i data-lucide="activity"></i>
                 Real-time Analytics
-                <span class="live-indicator"></span>
-            </h2>
-            <p class="admin-page-subtitle">Theo dõi hoạt động kinh doanh thời gian thực</p>
+                <span class="admin-badge admin-badge-success">
+                    <i data-lucide="circle" style="width: 8px; height: 8px;"></i>
+                    Live
+                </span>
+            </h1>
+            <p class="admin-page-description">Theo dõi hoạt động kinh doanh thời gian thực</p>
         </div>
-        <div class="d-flex gap-2">
-            <div class="status-indicator online">
-                <span class="status-dot"></span>
-                <span class="status-text">Đang kết nối</span>
-            </div>
-            <button class="btn btn-outline-danger btn-sm" onclick="pauseRealTime()">
-                <i class="fas fa-pause"></i> Tạm dừng
+        <div class="admin-page-header-actions">
+            <button class="admin-btn admin-btn-danger" onclick="pauseRealTime()">
+                <i data-lucide="pause"></i>
+                <span id="pauseBtn">Tạm dừng</span>
+            </button>
+            <button class="admin-btn admin-btn-primary" onclick="exportRealTimeData()">
+                <i data-lucide="download"></i>
+                Xuất dữ liệu
             </button>
         </div>
     </div>
-</div>
-
-<div class="admin-content-body">
     <!-- Real-time KPIs -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
@@ -504,12 +507,17 @@
     }
 </style>
 
-<script>
-    let realTimeInterval;
-    let isPaused = false;
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-    // Initialize real-time monitoring
-    document.addEventListener('DOMContentLoaded', function() {
+        let realTimeInterval;
+        let isPaused = false;
+
+        // Initialize real-time monitoring
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
         initializeRealTimeCharts();
         startRealTimeUpdates();
         initializeActivityFeed();
@@ -690,4 +698,5 @@
             clearInterval(realTimeInterval);
         }
     });
-</script>
+    </script>
+}

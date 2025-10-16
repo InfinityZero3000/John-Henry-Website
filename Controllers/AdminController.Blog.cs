@@ -94,10 +94,15 @@ namespace JohnHenryFashionWeb.Controllers
                     model.CreatedAt = DateTime.UtcNow;
                     model.UpdatedAt = DateTime.UtcNow;
                     
-                    // Generate slug if not provided
+                    // Generate unique slug
                     if (string.IsNullOrEmpty(model.Slug))
                     {
-                        model.Slug = GenerateSlug(model.Title);
+                        model.Slug = await GenerateUniqueSlugAsync(model.Title);
+                    }
+                    else
+                    {
+                        // Ensure provided slug is unique
+                        model.Slug = await GenerateUniqueSlugAsync(model.Slug);
                     }
 
                     // Handle featured image upload
@@ -176,7 +181,17 @@ namespace JohnHenryFashionWeb.Controllers
 
                     // Update fields
                     existingPost.Title = model.Title;
-                    existingPost.Slug = string.IsNullOrEmpty(model.Slug) ? GenerateSlug(model.Title) : model.Slug;
+                    
+                    // Generate unique slug if changed
+                    if (string.IsNullOrEmpty(model.Slug))
+                    {
+                        existingPost.Slug = await GenerateUniqueSlugAsync(model.Title, existingPost.Id);
+                    }
+                    else if (model.Slug != existingPost.Slug)
+                    {
+                        existingPost.Slug = await GenerateUniqueSlugAsync(model.Slug, existingPost.Id);
+                    }
+                    
                     existingPost.Excerpt = model.Excerpt;
                     existingPost.Content = model.Content;
                     existingPost.CategoryId = model.CategoryId;
@@ -221,6 +236,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("blog/delete/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteBlogPost(Guid id)
         {
             var post = await _context.BlogPosts.FindAsync(id);
@@ -231,6 +247,16 @@ namespace JohnHenryFashionWeb.Controllers
 
             try
             {
+                // Delete featured image if exists
+                if (!string.IsNullOrEmpty(post.FeaturedImageUrl))
+                {
+                    var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, post.FeaturedImageUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
                 _context.BlogPosts.Remove(post);
                 await _context.SaveChangesAsync();
 
@@ -243,6 +269,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("blog/toggle-status/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleBlogStatus(Guid id)
         {
             var post = await _context.BlogPosts.FindAsync(id);
@@ -306,9 +333,14 @@ namespace JohnHenryFashionWeb.Controllers
                     model.CreatedAt = DateTime.UtcNow;
                     model.UpdatedAt = DateTime.UtcNow;
                     
+                    // Generate unique slug
                     if (string.IsNullOrEmpty(model.Slug))
                     {
-                        model.Slug = GenerateSlug(model.Name);
+                        model.Slug = await GenerateUniqueCategorySlugAsync(model.Name);
+                    }
+                    else
+                    {
+                        model.Slug = await GenerateUniqueCategorySlugAsync(model.Slug);
                     }
 
                     _context.BlogCategories.Add(model);
@@ -358,7 +390,17 @@ namespace JohnHenryFashionWeb.Controllers
                     }
 
                     existingCategory.Name = model.Name;
-                    existingCategory.Slug = string.IsNullOrEmpty(model.Slug) ? GenerateSlug(model.Name) : model.Slug;
+                    
+                    // Generate unique slug if changed
+                    if (string.IsNullOrEmpty(model.Slug))
+                    {
+                        existingCategory.Slug = await GenerateUniqueCategorySlugAsync(model.Name, existingCategory.Id);
+                    }
+                    else if (model.Slug != existingCategory.Slug)
+                    {
+                        existingCategory.Slug = await GenerateUniqueCategorySlugAsync(model.Slug, existingCategory.Id);
+                    }
+                    
                     existingCategory.Description = model.Description;
                     existingCategory.IsActive = model.IsActive;
                     existingCategory.SortOrder = model.SortOrder;
@@ -379,6 +421,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpPost("blog/categories/delete/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteBlogCategory(Guid id)
         {
             var category = await _context.BlogCategories
@@ -414,6 +457,21 @@ namespace JohnHenryFashionWeb.Controllers
 
         private async Task<string> SaveBlogImage(IFormFile image)
         {
+            // Validate file
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+            var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(extension))
+            {
+                throw new InvalidOperationException($"Chỉ chấp nhận file ảnh: {string.Join(", ", allowedExtensions)}");
+            }
+
+            // Validate file size (max 5MB)
+            if (image.Length > 5 * 1024 * 1024)
+            {
+                throw new InvalidOperationException("Kích thước file không được vượt quá 5MB");
+            }
+
             var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "blog");
             if (!Directory.Exists(uploadsPath))
             {
@@ -429,6 +487,38 @@ namespace JohnHenryFashionWeb.Controllers
             }
 
             return fileName;
+        }
+
+        private async Task<string> GenerateUniqueSlugAsync(string title, Guid? existingPostId = null)
+        {
+            var baseSlug = GenerateSlug(title);
+            var slug = baseSlug;
+            var counter = 1;
+
+            // Check if slug already exists (excluding current post if editing)
+            while (await _context.BlogPosts.AnyAsync(p => p.Slug == slug && p.Id != existingPostId))
+            {
+                slug = $"{baseSlug}-{counter}";
+                counter++;
+            }
+
+            return slug;
+        }
+
+        private async Task<string> GenerateUniqueCategorySlugAsync(string name, Guid? existingCategoryId = null)
+        {
+            var baseSlug = GenerateSlug(name);
+            var slug = baseSlug;
+            var counter = 1;
+
+            // Check if slug already exists (excluding current category if editing)
+            while (await _context.BlogCategories.AnyAsync(c => c.Slug == slug && c.Id != existingCategoryId))
+            {
+                slug = $"{baseSlug}-{counter}";
+                counter++;
+            }
+
+            return slug;
         }
 
         #endregion

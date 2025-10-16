@@ -1,0 +1,431 @@
+@{
+    ViewData["Title"] = "Thống kê Thanh toán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var startDate = ViewBag.StartDate as DateTime? ?? DateTime.Now.AddMonths(-1);
+    var endDate = ViewBag.EndDate as DateTime? ?? DateTime.Now;
+    var stats = ViewBag.Statistics;
+}
+
+<style>
+    .payment-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header-glass {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stats-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .chart-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .filter-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .form-control-modern {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-modern:focus {
+        border-color: var(--jh-red);
+        box-shadow: 0 0 0 0.2rem rgba(206, 25, 58, 0.25);
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
+        color: white;
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(206, 25, 58, 0.3);
+        color: white;
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .metric-label {
+        color: #6b7280;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .trend-positive {
+        color: #10b981;
+    }
+
+    .trend-negative {
+        color: #ef4444;
+    }
+
+    .table-modern {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table-modern thead th {
+        background: rgba(206, 25, 58, 0.1);
+        color: var(--jh-red);
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+
+    .progress-modern {
+        height: 8px;
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-bar-modern {
+        border-radius: 10px;
+    }
+</style>
+
+<div class="payment-container">
+    <!-- Page Header -->
+    <div class="page-header-glass">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-2">
+                    <i class="fas fa-chart-line me-2" style="color: var(--jh-red);"></i>
+                    Thống kê Thanh toán
+                </h2>
+                <p class="text-muted mb-0">Phân tích doanh thu và xu hướng thanh toán</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="filter-card">
+        <form method="get" asp-action="Statistics">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Từ Ngày</label>
+                    <input type="date" name="startDate" class="form-control-modern" value="@startDate.ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Đến Ngày</label>
+                    <input type="date" name="endDate" class="form-control-modern" value="@endDate.ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary-modern w-100">
+                        <i class="fas fa-search me-2"></i> Xem Thống Kê
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (stats != null)
+    {
+        <!-- Overview Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                        <i class="fas fa-dollar-sign text-white"></i>
+                    </div>
+                    <div class="metric-label">Tổng Doanh Thu</div>
+                    <div class="metric-value" style="color: #3b82f6;">@stats.TotalRevenue.ToString("N0") ₫</div>
+                    <div class="small text-muted">@stats.TotalTransactions giao dịch</div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, var(--jh-red), #ff6b6b);">
+                        <i class="fas fa-percentage text-white"></i>
+                    </div>
+                    <div class="metric-label">Phí Nền Tảng</div>
+                    <div class="metric-value" style="color: var(--jh-red);">@stats.TotalPlatformFee.ToString("N0") ₫</div>
+                    <div class="small text-muted">@stats.AverageFeeRate.ToString("N2")% trung bình</div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-hand-holding-usd text-white"></i>
+                    </div>
+                    <div class="metric-label">Thanh Toán Seller</div>
+                    <div class="metric-value" style="color: #10b981;">@stats.TotalSellerRevenue.ToString("N0") ₫</div>
+                    <div class="small text-muted">@((stats.TotalSellerRevenue / stats.TotalRevenue * 100).ToString("N1"))% tổng DT</div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <i class="fas fa-coins text-white"></i>
+                    </div>
+                    <div class="metric-label">Giá Trị Trung Bình</div>
+                    <div class="metric-value" style="color: #8b5cf6;">@stats.AverageTransactionValue.ToString("N0") ₫</div>
+                    <div class="small text-muted">Mỗi giao dịch</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Breakdown -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5 class="mb-4">
+                        <i class="fas fa-credit-card me-2" style="color: var(--jh-red);"></i>
+                        Phương Thức Thanh Toán
+                    </h5>
+                    
+                    @if (stats.PaymentMethods != null && stats.PaymentMethods.Any())
+                    {
+                        foreach (var method in stats.PaymentMethods)
+                        {
+                            var percentage = (method.Amount / stats.TotalRevenue * 100);
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-bold">
+                                        @if (method.Method == "COD")
+                                        {
+                                            <i class="fas fa-money-bill-wave me-2"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-credit-card me-2"></i>
+                                        }
+                                        @method.Method
+                                    </span>
+                                    <span>
+                                        <strong>@method.Amount.ToString("N0") ₫</strong>
+                                        <small class="text-muted">(@method.Count giao dịch)</small>
+                                    </span>
+                                </div>
+                                <div class="progress-modern">
+                                    <div class="progress-bar-modern bg-primary" style="width: @percentage%; height: 100%;"></div>
+                                </div>
+                                <small class="text-muted">@percentage.ToString("N1")% tổng doanh thu</small>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">Chưa có dữ liệu</p>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5 class="mb-4">
+                        <i class="fas fa-check-circle me-2" style="color: var(--jh-red);"></i>
+                        Trạng Thái Giao Dịch
+                    </h5>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-center p-3" style="background: rgba(16, 185, 129, 0.1); border-radius: 12px;">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <div class="fw-bold text-success" style="font-size: 1.5rem;">@stats.CompletedCount</div>
+                                <div class="small text-muted">Hoàn thành</div>
+                                <div class="small">@stats.CompletedAmount.ToString("N0") ₫</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3" style="background: rgba(245, 158, 11, 0.1); border-radius: 12px;">
+                                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                <div class="fw-bold text-warning" style="font-size: 1.5rem;">@stats.PendingCount</div>
+                                <div class="small text-muted">Chờ xử lý</div>
+                                <div class="small">@stats.PendingAmount.ToString("N0") ₫</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3" style="background: rgba(239, 68, 68, 0.1); border-radius: 12px;">
+                                <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                                <div class="fw-bold text-danger" style="font-size: 1.5rem;">@stats.FailedCount</div>
+                                <div class="small text-muted">Thất bại</div>
+                                <div class="small">@stats.FailedAmount.ToString("N0") ₫</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3" style="background: rgba(139, 92, 246, 0.1); border-radius: 12px;">
+                                <i class="fas fa-undo fa-2x text-purple mb-2" style="color: #8b5cf6;"></i>
+                                <div class="fw-bold" style="font-size: 1.5rem; color: #8b5cf6;">@stats.RefundedCount</div>
+                                <div class="small text-muted">Hoàn tiền</div>
+                                <div class="small">@stats.RefundedAmount.ToString("N0") ₫</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Sellers -->
+        @if (stats.TopSellers != null && stats.TopSellers.Any())
+        {
+            <div class="chart-card">
+                <h5 class="mb-4">
+                    <i class="fas fa-trophy me-2" style="color: var(--jh-red);"></i>
+                    Top 10 Seller Doanh Thu Cao Nhất
+                </h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Seller</th>
+                                <th>Doanh Thu</th>
+                                <th>Phí Nền Tảng</th>
+                                <th>Nhận Được</th>
+                                <th>Giao Dịch</th>
+                                <th>Trung Bình</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{var rank = 1;}
+                            @foreach (var seller in stats.TopSellers.Take(10))
+                            {
+                                <tr>
+                                    <td>
+                                        @if (rank <= 3)
+                                        {
+                                            <i class="fas fa-trophy" style="color: @(rank == 1 ? "#FFD700" : rank == 2 ? "#C0C0C0" : "#CD7F32");"></i>
+                                        }
+                                        <strong>@rank</strong>
+                                    </td>
+                                    <td><strong>@seller.SellerEmail</strong></td>
+                                    <td><strong>@seller.TotalRevenue.ToString("N0") ₫</strong></td>
+                                    <td class="text-danger">@seller.TotalPlatformFee.ToString("N0") ₫</td>
+                                    <td class="text-success">@seller.TotalSellerAmount.ToString("N0") ₫</td>
+                                    <td>@seller.TransactionCount</td>
+                                    <td>@seller.AverageOrderValue.ToString("N0") ₫</td>
+                                </tr>
+                                rank++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Daily Trend (if available) -->
+        @if (stats.DailyTrend != null && stats.DailyTrend.Count > 0)
+        {
+            <div class="chart-card">
+                <h5 class="mb-4">
+                    <i class="fas fa-chart-area me-2" style="color: var(--jh-red);"></i>
+                    Xu Hướng Theo Ngày
+                </h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-modern table-sm">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Giao Dịch</th>
+                                <th>Doanh Thu</th>
+                                <th>Phí Nền Tảng</th>
+                                <th>Cho Seller</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var dailyTrendList = (IEnumerable<dynamic>)stats.DailyTrend;
+                                var sortedDays = dailyTrendList.OrderByDescending(d => (DateTime)d.Date).ToList();
+                            }
+                            @foreach (var day in sortedDays)
+                            {
+                                <tr>
+                                    <td>@((DateTime)day.Date).ToString("dd/MM/yyyy")</td>
+                                    <td>@day.Count</td>
+                                    <td>@day.Revenue.ToString("N0") ₫</td>
+                                    <td class="text-danger">@day.PlatformFee.ToString("N0") ₫</td>
+                                    <td class="text-success">@day.SellerAmount.ToString("N0") ₫</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="chart-card text-center py-5">
+            <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">Chọn khoảng thời gian để xem thống kê</h4>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Future: Add interactive charts here using Chart.js
+    </script>
+}

@@ -1,39 +1,12 @@
 @model JohnHenryFashionWeb.ViewModels.DashboardViewModel
 @{
-    ViewData["Title"] = "Dashboard Quản trị";
-    ViewData["CurrentSection"] = "dashboard";
+    ViewData["Title"] = "Dashboard - John Henry Admin";
+    ViewData["CurrentSection"] = "Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 @section Styles {
     <style>
-        .admin-content {
-            padding: 1.5rem;
-            max-width: 100%;
-            background: #f5f6fa;
-        }
-
-        .admin-header {
-            background: #fff;
-            padding: 1.25rem 1.5rem;
-            border-radius: 6px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
-            border-left: 3px solid #0066cc;
-        }
-
-        .admin-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 0.25rem;
-        }
-
-        .admin-header p {
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-
         .live-indicator {
             width: 8px;
             height: 8px;
@@ -55,7 +28,7 @@
             background: #fff;
             border: 1px solid #e3e6ec;
             border-radius: 8px;
-            padding: 1.25rem;
+            padding: 1rem;
             height: 100%;
             transition: all 0.3s ease;
             position: relative;
@@ -85,35 +58,36 @@
         }
 
         .kpi-card .kpi-icon {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.375rem;
+            font-size: 1.25rem;
             flex-shrink: 0;
         }
 
         .kpi-card .kpi-value {
-            font-size: 1.875rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #1a1a1a;
-            margin: 0.375rem 0 0.25rem;
+            margin: 0.25rem 0 0.125rem;
             line-height: 1.2;
         }
 
         .kpi-card .kpi-label {
             color: #6c757d;
-            font-size: 0.8125rem;
+            font-size: 0.75rem;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            margin-bottom: 0.25rem;
         }
 
         .kpi-card .kpi-growth {
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            margin-top: 0.375rem;
             padding: 0.25rem 0.5rem;
             background: #f0fdf4;
             border-radius: 4px;
@@ -123,15 +97,15 @@
         /* Quick Actions */
         .quick-actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 0.875rem;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
         }
 
         .quick-action-btn {
             background: #fff;
             border: 1px solid #e3e6ec;
             border-radius: 8px;
-            padding: 1.25rem 0.875rem;
+            padding: 1rem 0.75rem;
             text-align: center;
             text-decoration: none;
             color: #495057;
@@ -139,7 +113,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.625rem;
+            gap: 0.5rem;
             position: relative;
         }
 
@@ -168,12 +142,12 @@
         }
 
         .quick-action-btn i {
-            font-size: 1.75rem;
-            margin-bottom: 0.125rem;
+            font-size: 1.5rem;
+            margin-bottom: 0;
         }
 
         .quick-action-btn span {
-            font-size: 0.8125rem;
+            font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 0.2px;
         }
@@ -183,13 +157,13 @@
             background: #fff;
             border: 1px solid #e3e6ec;
             border-radius: 8px;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .section-card-header {
-            padding: 0.875rem 1.25rem;
+            padding: 0.75rem 1rem;
             background: #fafbfc;
             border-bottom: 1px solid #e3e6ec;
             display: flex;
@@ -213,7 +187,7 @@
         }
 
         .section-card-body {
-            padding: 1.25rem;
+            padding: 1rem;
         }
 
         /* System Health */
@@ -398,7 +372,7 @@
         /* Responsive */
         @@media (max-width: 992px) {
             .admin-content {
-                padding: 1rem;
+                padding: 0.875rem;
             }
 
             .admin-header h1 {
@@ -420,30 +394,39 @@
         }
 
         @@media (max-width: 576px) {
+            .admin-content {
+                padding: 0.75rem;
+            }
+
             .admin-header {
-                padding: 1rem;
+                padding: 0.875rem;
+                margin-bottom: 0.875rem;
             }
 
             .kpi-card {
-                padding: 1rem;
+                padding: 0.875rem;
             }
 
             .section-card-body {
-                padding: 1rem;
+                padding: 0.875rem;
+            }
+
+            .section-card {
+                margin-bottom: 0.875rem;
             }
         }
     </style>
 }
 
 <div class="admin-content">
-    <!-- Header Section -->
-    <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
             <div>
-                <h1>
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard Quản trị
+                <h1 class="admin-page-title">
+                    <i data-lucide="layout-dashboard"></i>
+                    Dashboard Quản trị
                 </h1>
-                <p class="mb-0">Tổng quan hệ thống quản trị</p>
             </div>
             <div class="text-end">
                 <div class="d-flex align-items-center justify-content-end text-success mb-1">
@@ -456,18 +439,18 @@
     </div>
 
     <!-- Key Performance Indicators -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-3">
             <div class="col-lg-3 col-md-6">
                 <div class="kpi-card">
                     <div class="d-flex align-items-start">
                         <div class="kpi-icon bg-success bg-opacity-10 text-success">
-                            <i class="fas fa-dollar-sign"></i>
+                            <i data-lucide="dollar-sign"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <div class="kpi-label">Doanh thu hôm nay</div>
                             <div class="kpi-value">@((Model.DashboardSummary?.TodayRevenue ?? 0).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))</div>
                             <div class="kpi-growth text-success">
-                                <i class="fas fa-arrow-up"></i>
+                                <i data-lucide="arrow-up"></i>
                                 +@((Model.DashboardSummary?.RevenueGrowth ?? 0).ToString("F1"))% so với hôm qua
                             </div>
                         </div>
@@ -478,13 +461,13 @@
                 <div class="kpi-card">
                     <div class="d-flex align-items-start">
                         <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
-                            <i class="fas fa-shopping-cart"></i>
+                            <i data-lucide="shopping-cart"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <div class="kpi-label">Đơn hàng hôm nay</div>
                             <div class="kpi-value">@(Model.DashboardSummary?.TodayOrders ?? 0)</div>
                             <div class="kpi-growth text-success">
-                                <i class="fas fa-arrow-up"></i>
+                                <i data-lucide="arrow-up"></i>
                                 +@((Model.DashboardSummary?.OrdersGrowth ?? 0).ToString("F1"))% so với hôm qua
                             </div>
                         </div>
@@ -495,13 +478,13 @@
                 <div class="kpi-card">
                     <div class="d-flex align-items-start">
                         <div class="kpi-icon bg-info bg-opacity-10 text-info">
-                            <i class="fas fa-users"></i>
+                            <i data-lucide="users"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <div class="kpi-label">Khách truy cập</div>
                             <div class="kpi-value">@(Model.DashboardSummary?.TodayVisitors ?? 0)</div>
                             <div class="kpi-growth text-success">
-                                <i class="fas fa-arrow-up"></i>
+                                <i data-lucide="arrow-up"></i>
                                 +@((Model.DashboardSummary?.VisitorsGrowth ?? 0).ToString("F1"))% so với hôm qua
                             </div>
                         </div>
@@ -512,13 +495,13 @@
                 <div class="kpi-card">
                     <div class="d-flex align-items-start">
                         <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
-                            <i class="fas fa-chart-line"></i>
+                            <i data-lucide="trending-up"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <div class="kpi-label">Tỷ lệ chuyển đổi</div>
                             <div class="kpi-value">@((Model.DashboardSummary?.ConversionRate ?? 0).ToString("F1"))%</div>
                             <div class="kpi-growth text-success">
-                                <i class="fas fa-arrow-up"></i>
+                                <i data-lucide="arrow-up"></i>
                                 +@((Model.DashboardSummary?.ConversionGrowth ?? 0).ToString("F1"))% so với hôm qua
                             </div>
                         </div>
@@ -527,56 +510,80 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="section-card">
+    <!-- Quick Actions -->
+    <div class="section-card">
             <div class="section-card-header">
-                <h5><i class="fas fa-bolt me-2"></i>Thao tác nhanh</h5>
+                <h5><i data-lucide="zap" style="width: 16px; height: 16px; margin-right: 8px;"></i>Thao tác nhanh</h5>
             </div>
             <div class="section-card-body">
                 <div class="quick-actions-grid">
                     <a href="@Url.Action("Orders", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-shopping-cart text-primary"></i>
+                        <i data-lucide="shopping-cart" class="text-primary"></i>
                         <span>Đơn hàng</span>
                     </a>
                     <a href="@Url.Action("Products", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-box text-success"></i>
+                        <i data-lucide="package" class="text-success"></i>
                         <span>Sản phẩm</span>
                     </a>
                     <a href="@Url.Action("Categories", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-tags text-info"></i>
+                        <i data-lucide="tags" class="text-info"></i>
                         <span>Danh mục</span>
                     </a>
                     <a href="@Url.Action("Users", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-users text-secondary"></i>
+                        <i data-lucide="users" class="text-secondary"></i>
                         <span>Người dùng</span>
                     </a>
                     <a href="@Url.Action("Blog", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-newspaper text-info"></i>
+                        <i data-lucide="newspaper" class="text-info"></i>
                         <span>Blog</span>
                     </a>
                     <a href="@Url.Action("Reports", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-chart-bar text-warning"></i>
+                        <i data-lucide="bar-chart-2" class="text-warning"></i>
                         <span>Báo cáo</span>
                     </a>
                     <a href="@Url.Action("Analytics", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-chart-line text-danger"></i>
+                        <i data-lucide="trending-up" class="text-danger"></i>
                         <span>Phân tích</span>
                     </a>
                     <a href="@Url.Action("Settings", "Admin")" class="quick-action-btn">
-                        <i class="fas fa-cog text-dark"></i>
+                        <i data-lucide="settings" class="text-dark"></i>
                         <span>Cài đặt</span>
+                    </a>
+                    
+                    <a href="/admin/payments" class="quick-action-btn">
+                        <i data-lucide="credit-card" class="text-success"></i>
+                        <span>Thanh toán</span>
+                    </a>
+                    
+                    <a href="/admin/support" class="quick-action-btn">
+                        <i data-lucide="headphones" class="text-info"></i>
+                        <span>Hỗ trợ</span>
+                    </a>
+                    
+                    <a href="/admin/marketing" class="quick-action-btn">
+                        <i data-lucide="megaphone" class="text-danger"></i>
+                        <span>Marketing</span>
+                    </a>
+                    
+                    <a href="/admin/approvals" class="quick-action-btn">
+                        <i data-lucide="check-circle" class="text-warning"></i>
+                        <span>Duyệt đơn</span>
+                    </a>
+                    
+                    <a href="/admin/settings" class="quick-action-btn">
+                        <i data-lucide="sliders" class="text-primary"></i>
+                        <span>Cấu hình</span>
                     </a>
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- System Alerts -->
     @if (Model.SystemAlerts?.Any() == true)
         {
             <div class="section-card">
                 <div class="section-card-header">
-                    <h5><i class="fas fa-bell me-2"></i>Cảnh báo hệ thống</h5>
+                    <h5><i data-lucide="bell" style="width: 16px; height: 16px; margin-right: 8px;"></i>Cảnh báo hệ thống</h5>
                 </div>
                 <div class="section-card-body">
                     @foreach (var alert in Model.SystemAlerts)
@@ -599,13 +606,13 @@
         }
 
     <!-- Charts Section -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-3">
         <!-- Revenue Chart -->
         <div class="col-lg-8">
                 <div class="section-card">
                     <div class="section-card-header">
                         <div class="d-flex justify-content-between align-items-center w-100">
-                            <h5><i class="fas fa-chart-line me-2"></i>Doanh thu theo thời gian</h5>
+                            <h5><i data-lucide="trending-up" style="width: 16px; height: 16px; margin-right: 8px;"></i>Doanh thu theo thời gian</h5>
                             <div class="period-toggle">
                                 <button class="active" data-period="7">7 ngày</button>
                                 <button data-period="30">30 ngày</button>
@@ -619,14 +626,13 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
         
         <!-- System Health -->
         <div class="col-lg-4">
                 <div class="section-card">
                     <div class="section-card-header">
-                        <h5><i class="fas fa-heartbeat me-2"></i>Sức khỏe hệ thống</h5>
+                        <h5><i data-lucide="activity" style="width: 16px; height: 16px; margin-right: 8px;"></i>Sức khỏe hệ thống</h5>
                     </div>
                     <div class="section-card-body">
                         <div class="text-center mb-3">
@@ -662,14 +668,13 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 
     <!-- Recent Activity -->
     <div class="section-card">
-            <div class="section-card-header">
-                <h5><i class="fas fa-clock me-2"></i>Hoạt động gần đây</h5>
+        <div class="section-card-header">
+                <h5><i data-lucide="clock" style="width: 16px; height: 16px; margin-right: 8px;"></i>Hoạt động gần đây</h5>
             </div>
             <div class="section-card-body">
                 @if (Model.RecentOrders?.Any() == true)
@@ -678,7 +683,7 @@
                     {
                         <div class="activity-item">
                             <div class="activity-icon bg-success bg-opacity-10 text-success">
-                                <i class="fas fa-shopping-cart"></i>
+                                <i data-lucide="shopping-cart"></i>
                             </div>
                             <div class="activity-content">
                                 <div class="activity-title">Đơn hàng mới #@order.OrderNumber</div>
@@ -697,7 +702,7 @@
                     {
                         <div class="activity-item">
                             <div class="activity-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="fas fa-user-plus"></i>
+                                <i data-lucide="user-plus"></i>
                             </div>
                             <div class="activity-content">
                                 <div class="activity-title">Người dùng mới</div>
@@ -712,12 +717,11 @@
                 @if ((Model.RecentOrders?.Any() != true) && (Model.RecentUsers?.Any() != true))
                 {
                     <div class="empty-state">
-                        <i class="fas fa-inbox fa-3x"></i>
+                        <i data-lucide="inbox" style="width: 48px; height: 48px;"></i>
                         <h6>Chưa có hoạt động gần đây</h6>
                         <p>Các hoạt động mới sẽ hiển thị tại đây</p>
                     </div>
                 }
-            </div>
         </div>
     </div>
 </div>

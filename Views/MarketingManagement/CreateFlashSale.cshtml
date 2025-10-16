@@ -1,0 +1,95 @@
+@model JohnHenryFashionWeb.Models.FlashSale
+@{
+    ViewData["Title"] = "Create Flash Sale";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .marketing-container {
+        padding: 2rem;
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        min-height: calc(100vh - 80px);
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control, .form-select { border-radius: 10px; padding: 0.75rem; }
+    .btn-submit { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; border: none; padding: 0.75rem 2rem; border-radius: 10px; }
+</style>
+
+<div class="marketing-container">
+    <div class="form-card">
+        <h2 class="mb-4">⚡ Create Flash Sale</h2>
+        
+        <form method="post" action="/admin/marketing/flashsale/create">
+            @Html.AntiForgeryToken()
+            
+            <div class="mb-3">
+                <label class="form-label">Flash Sale Name *</label>
+                <input type="text" class="form-control" name="Name" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="Description" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Banner Image URL</label>
+                <input type="url" class="form-control" name="BannerImageUrl" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Start Date *</label>
+                    <input type="datetime-local" class="form-control" name="StartDate" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">End Date *</label>
+                    <input type="datetime-local" class="form-control" name="EndDate" required />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Discount % *</label>
+                    <input type="number" class="form-control" name="DiscountPercentage" min="0" max="100" required />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Stock Limit</label>
+                    <input type="number" class="form-control" name="StockLimit" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Sold Count</label>
+                    <input type="number" class="form-control" name="SoldCount" value="0" readonly />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Product IDs (JSON array)</label>
+                <textarea class="form-control" name="ProductIds" rows="3" placeholder='["id1","id2","id3"]'></textarea>
+                <small class="text-muted">Enter product IDs as JSON array</small>
+            </div>
+
+            <div class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" name="IsActive" value="true" checked />
+                <label class="form-check-label">Activate Now</label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i> Create Flash Sale
+                </button>
+                <a href="/admin/marketing/flashsales" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

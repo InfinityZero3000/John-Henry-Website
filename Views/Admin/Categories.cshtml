@@ -1,88 +1,148 @@
 @model JohnHenryFashionWeb.ViewModels.CategoryListViewModel
 @{
-    ViewData["Title"] = "Quản lý danh mục";
+    ViewData["Title"] = "Danh mục";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Quản lý danh mục</li>";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Danh mục</li>";
+    
+    var totalCategories = Model.Categories.Count();
+    var activeCategories = Model.Categories.Count(c => c.IsActive);
+    var parentCategories = Model.Categories.Count(c => !c.ParentId.HasValue);
+    var totalProducts = Model.Categories.Sum(c => c.ProductCount);
 }
 
-<div class="page-header">
-    <h1 class="page-title">
-        <i class="fas fa-layer-group"></i>
-        Quản lý danh mục
-    </h1>
-    <div class="page-actions">
-        <button class="btn btn-info me-2" onclick="location.href='@Url.Action("CreateCategoriesFromImages")'">
-            <i class="fas fa-magic"></i>
-            Tạo từ thư mục ảnh
-        </button>
-        <a href="@Url.Action("CreateCategory")" class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-            Thêm danh mục
-        </a>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="layers"></i>
+                Danh mục
+            </h1>
+            <div class="admin-flex-center admin-gap-sm">
+                <button class="admin-btn admin-btn-secondary" onclick="location.href='@Url.Action("CreateCategoriesFromImages")'">
+                    <i data-lucide="wand-2"></i>
+                    Tạo từ thư mục ảnh
+                </button>
+                <a href="@Url.Action("CreateCategory")" class="admin-btn admin-btn-primary">
+                    <i data-lucide="plus"></i>
+                    Thêm danh mục
+                </a>
+            </div>
+        </div>
     </div>
-</div>
 
-<!-- Search and Filters -->
-<div class="admin-form mb-4">
-    <form method="get" class="row g-3">
-        <div class="col-md-6">
-            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm danh mục..." 
-                   value="@Model.SearchTerm">
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng danh mục</h3>
+                    <p class="value">@totalCategories</p>
+                    <p class="change">Tất cả danh mục</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="layers"></i>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary w-100">
-                <i class="fas fa-search"></i>
-                Tìm kiếm
-            </button>
-        </div>
-        <div class="col-md-2">
-            <a href="@Url.Action("Categories")" class="btn btn-outline-secondary w-100">
-                <i class="fas fa-undo"></i>
-                Đặt lại
-            </a>
-        </div>
-    </form>
-</div>
 
-<!-- Categories Table -->
-<div class="admin-table">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th style="width: 60px;">Hình ảnh</th>
-                    <th>Tên danh mục</th>
-                    <th>Danh mục cha</th>
-                    <th>Mô tả</th>
-                    <th style="width: 100px;">Số sản phẩm</th>
-                    <th style="width: 80px;">Thứ tự</th>
-                    <th style="width: 100px;">Trạng thái</th>
-                    <th style="width: 120px;">Ngày tạo</th>
-                    <th style="width: 150px;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.Categories.Any())
-                {
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang hoạt động</h3>
+                    <p class="value">@activeCategories</p>
+                    <p class="change">@((totalCategories > 0 ? (activeCategories * 100.0 / totalCategories).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Danh mục chính</h3>
+                    <p class="value">@parentCategories</p>
+                    <p class="change">Cấp cao nhất</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="folder-tree"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng sản phẩm</h3>
+                    <p class="value">@totalProducts</p>
+                    <p class="change">Trong tất cả danh mục</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="package"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="admin-filters">
+        <form method="get" action="@Url.Action("Categories")">
+            <div class="row g-3 align-items-end">
+                <!-- Search Box -->
+                <div class="col-md-8">
+                    <label class="admin-form-label">Tìm kiếm</label>
+                    <div class="admin-search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" name="search" class="admin-form-input" 
+                               placeholder="Tìm kiếm danh mục theo tên..." 
+                               value="@Model.SearchTerm">
+                    </div>
+                </div>
+
+                <!-- Search Button -->
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width: 100%;">
+                        <i data-lucide="search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Categories")" class="admin-btn admin-btn-secondary" style="width: 100%;">
+                        <i data-lucide="rotate-ccw"></i>
+                        Đặt lại
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Categories Table -->
+    @if (Model.Categories.Any())
+    {
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Tên danh mục</th>
+                        <th>Danh mục cha</th>
+                        <th>Mô tả</th>
+                        <th style="width: 100px;">Số sản phẩm</th>
+                        <th style="width: 120px;">Trạng thái</th>
+                        <th style="width: 120px;">Ngày tạo</th>
+                        <th style="width: 150px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
                     @foreach (var category in Model.Categories)
                     {
                         <tr>
                             <td>
-                                @if (!string.IsNullOrEmpty(category.ImageUrl))
-                                {
-                                    <img src="@category.ImageUrl" alt="@category.Name" 
-                                         class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="fas fa-image text-muted"></i>
-                                    </div>
-                                }
-                            </td>
-                            <td>
-                                <div class="fw-bold">@category.Name</div>
+                                <strong>@category.Name</strong>
+                                <br>
                                 @if (category.ParentId.HasValue)
                                 {
                                     <small class="text-muted">Danh mục con</small>
@@ -125,113 +185,96 @@
                                 <span class="badge bg-info">@category.ProductCount</span>
                             </td>
                             <td>
-                                <span class="badge bg-secondary">@category.SortOrder</span>
-                            </td>
-                            <td>
                                 @if (category.IsActive)
                                 {
-                                    <span class="status-badge status-active">Hoạt động</span>
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="check-circle"></i>
+                                        Hoạt động
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="status-badge status-inactive">Không hoạt động</span>
+                                    <span class="admin-badge admin-badge-secondary">
+                                        <i data-lucide="x-circle"></i>
+                                        Không hoạt động
+                                    </span>
                                 }
                             </td>
                             <td>
                                 <small>@category.CreatedAt.ToString("dd/MM/yyyy")</small>
                             </td>
-                            <td>
-                                <div class="btn-group" role="group">
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                     <a href="@Url.Action("EditCategory", new { id = category.Id })" 
-                                       class="btn btn-outline-primary btn-sm" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
+                                       class="admin-btn admin-btn-sm admin-btn-primary" title="Chỉnh sửa">
+                                        <i data-lucide="edit"></i>
                                     </a>
                                     
                                     @if (category.ProductCount == 0)
                                     {
                                         <form method="post" action="@Url.Action("DeleteCategory", new { id = category.Id })" 
-                                              class="d-inline" onsubmit="return confirmDelete('Bạn có chắc chắn muốn xóa danh mục này?')">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa">
-                                                <i class="fas fa-trash"></i>
+                                              style="display: inline;" onsubmit="return confirmDelete('Bạn có chắc chắn muốn xóa danh mục này?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="admin-btn admin-btn-sm admin-btn-danger" title="Xóa">
+                                                <i data-lucide="trash-2"></i>
                                             </button>
                                         </form>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-outline-secondary btn-sm" disabled title="Không thể xóa - có sản phẩm">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="admin-btn admin-btn-sm admin-btn-secondary" disabled title="Không thể xóa - có sản phẩm">
+                                            <i data-lucide="trash-2"></i>
                                         </button>
                                     }
                                 </div>
                             </td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="9" class="text-center py-4">
-                            <div class="text-muted">
-                                <i class="fas fa-folder-open fa-3x mb-3"></i>
-                                <p>Không có danh mục nào được tìm thấy.</p>
-                                <a href="@Url.Action("CreateCategory")" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i>
-                                    Tạo danh mục đầu tiên
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Không có danh mục nào</h3>
+                <p style="color: var(--admin-text-light); margin-bottom: 1.5rem;">
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        <text>Không tìm thấy danh mục phù hợp với từ khóa tìm kiếm</text>
+                    }
+                    else
+                    {
+                        <text>Chưa có danh mục nào được tạo. Hãy thêm danh mục đầu tiên!</text>
+                    }
+                </p>
+                <div class="admin-flex-center admin-gap-sm">
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        <a href="@Url.Action("Categories")" class="admin-btn admin-btn-secondary">
+                            <i data-lucide="x"></i>
+                            Xóa bộ lọc
+                        </a>
+                    }
+                    <a href="@Url.Action("CreateCategory")" class="admin-btn admin-btn-primary">
+                        <i data-lucide="plus"></i>
+                        Thêm danh mục
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
 </div>
-
-<!-- Quick Stats -->
-@if (Model.Categories.Any())
-{
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Tổng danh mục</span>
-                    <i class="fas fa-layer-group stat-icon" style="color: #3498db;"></i>
-                </div>
-                <div class="stat-value">@Model.Categories.Count()</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card success">
-                <div class="stat-header">
-                    <span class="stat-title">Đang hoạt động</span>
-                    <i class="fas fa-check-circle stat-icon" style="color: #27ae60;"></i>
-                </div>
-                <div class="stat-value">@Model.Categories.Count(c => c.IsActive)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card warning">
-                <div class="stat-header">
-                    <span class="stat-title">Danh mục chính</span>
-                    <i class="fas fa-sitemap stat-icon" style="color: #f39c12;"></i>
-                </div>
-                <div class="stat-value">@Model.Categories.Count(c => !c.ParentId.HasValue)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Tổng sản phẩm</span>
-                    <i class="fas fa-box stat-icon" style="color: #e74c3c;"></i>
-                </div>
-                <div class="stat-value">@Model.Categories.Sum(c => c.ProductCount)</div>
-            </div>
-        </div>
-    </div>
-}
 
 @section Scripts {
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Confirm delete function
         function confirmDelete(message) {
             return confirm(message);
         }
