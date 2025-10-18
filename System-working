@@ -168,3 +168,39 @@ DATABASE RELATIONSHIPS
 
 thực hiện viết tài liệu SRS cho hệ thống, thực hiện tạo các sơ đồ ERD cho database
 bổ sung các view, Controllers còn thiếu trong admin, kiểm tra và hoàn thiện seller
+
+
+
+URL: http://localhost:5101/blog/{slug}
+
+┌──────────────────────────────────────┐
+│  Preview Banner (if draft)           │
+├──────────────────────────────────────┤
+│  Breadcrumb                           │
+├──────────────────────────────────────┤
+│         TITLE (Centered)              │
+│    Category | Date | Views            │
+│      Tags: #tag1 #tag2                │
+├──────────────────────────────────────┤
+│  ┌────────────────────────────────┐  │
+│  │    FEATURED IMAGE (600px)      │  │
+│  └────────────────────────────────┘  │
+├──────────────────────────────────────┤
+│    Excerpt (Italic, Centered)        │
+├──────────────────────────────────────┤
+│                                      │
+│         BLOG CONTENT                 │
+│       (Wide, Large Fonts)            │
+│                                      │
+├──────────────────────────────────────┤
+│  Tags | Share Buttons                │
+└──────────────────────────────────────┘
+
+         ═══════════════════════════
+
+┌──────────────────────────────────────┐
+│     BÀI VIẾT LIÊN QUAN               │
+│  ┌────┐  ┌────┐  ┌────┐              │
+│  │Card│  │Card│  │Card│              │
+│  └────┘  └────┘  └────┘              │
+└──────────────────────────────────────┘
