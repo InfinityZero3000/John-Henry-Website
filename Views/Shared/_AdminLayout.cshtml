@@ -173,13 +173,6 @@
                         </a>
                     </li>
 
-                    <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("CreateCoupon", "Admin")" class="menu-link" style="display: flex; align-items: center; padding: 1rem; color: #000000; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
-                            <i data-lucide="plus-circle" style="margin-right: 1rem; width: 20px;"></i>
-                            <span>Tạo khuyến mãi</span>
-                        </a>
-                    </li>
-
                     <!-- 7. KHIẾU NẠI & HỖ TRỢ -->
                     <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">KHIẾU NẠI & HỖ TRỢ</li>
                     
@@ -359,6 +352,53 @@
             // Initialize Lucide icons
             lucide.createIcons();
         });
+
+        // ===== SAVE AND RESTORE SIDEBAR SCROLL POSITION - TRIỆT ĐỂ =====
+        // Chạy sau khi DOM đã load hoàn toàn
+        window.addEventListener('load', function() {
+            const sidebarContent = document.querySelector('.sidebar-content');
+            
+            if (sidebarContent) {
+                // Restore scroll position NGAY LẬP TỨC với requestAnimationFrame
+                const savedScrollPosition = localStorage.getItem('adminSidebarScrollPosition');
+                if (savedScrollPosition) {
+                    // Dùng requestAnimationFrame để đảm bảo DOM đã render xong
+                    requestAnimationFrame(() => {
+                        sidebarContent.scrollTop = parseInt(savedScrollPosition);
+                        console.log('Restored sidebar scroll to:', savedScrollPosition);
+                    });
+                }
+
+                // Save scroll position liên tục khi scroll
+                let scrollTimeout;
+                sidebarContent.addEventListener('scroll', function() {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        localStorage.setItem('adminSidebarScrollPosition', sidebarContent.scrollTop);
+                        console.log('Saved scroll position:', sidebarContent.scrollTop);
+                    }, 100);
+                });
+
+                // Save NGAY KHI click vào menu link (trước khi navigate)
+                const menuLinks = document.querySelectorAll('.admin-sidebar .menu-link');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        localStorage.setItem('adminSidebarScrollPosition', sidebarContent.scrollTop);
+                        console.log('Saved on click:', sidebarContent.scrollTop);
+                    });
+                });
+            }
+        });
+
+        // Backup: Restore THÊM 1 LẦN NỮA sau 100ms (phòng trường hợp CSS chậm load)
+        setTimeout(function() {
+            const sidebarContent = document.querySelector('.sidebar-content');
+            const savedScrollPosition = localStorage.getItem('adminSidebarScrollPosition');
+            if (sidebarContent && savedScrollPosition) {
+                sidebarContent.scrollTop = parseInt(savedScrollPosition);
+                console.log('Backup restore:', savedScrollPosition);
+            }
+        }, 100);
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

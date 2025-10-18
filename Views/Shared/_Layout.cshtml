@@ -26,6 +26,9 @@
     <meta property="twitter:description" content="@pageDescription" />
     <meta property="twitter:image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}/images/og-image.jpg")" />
     
+    <!-- Custom Meta Tags Section (for blog posts, etc.) -->
+    @RenderSection("MetaTags", required: false)
+    
     <!-- Canonical URL -->
     <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
     
@@ -1289,19 +1292,20 @@
                     <div class="col-lg-4 col-md-6">
                         <h5 class="footer-title">Kết Nối Với Chúng Tôi</h5>
                         <div class="social-links mb-4">
-                            <a href="#" class="social-link facebook" title="Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="social-link instagram" title="Instagram">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                            <a href="#" class="social-link youtube" title="YouTube">
+                            <a href="https://www.facebook.com/JOHNHENRYVN" class="social-link youtube" title="YouTube">
                                 <i class="fab fa-youtube"></i>
                             </a>
-                            <a href="#" class="social-link tiktok" title="TikTok">
+                            <a href="https://www.facebook.com/freelancerfashion" class="social-link facebook" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://www.instagram.com/johnhenryvietnam/" class="social-link instagram" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+
+                            <a href="https://www.tiktok.com/@@johnhenry.vn" class="social-link tiktok" title="TikTok">
                                 <i class="fab fa-tiktok"></i>
                             </a>
-                            <a href="#" class="social-link zalo" title="Zalo">
+                            <a href="https://zalo.me/1178755503095028791" class="social-link zalo" title="Zalo">
                                 <span class="zalo-icon">Z</span>
                             </a>
                         </div>
