@@ -7,6 +7,7 @@ using JohnHenryFashionWeb.Models;
 using JohnHenryFashionWeb.ViewModels;
 using JohnHenryFashionWeb.Services;
 using System.Security.Claims;
+using Markdig;
 
 namespace JohnHenryFashionWeb.Controllers
 {
@@ -14,11 +15,16 @@ namespace JohnHenryFashionWeb.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<BlogController> _logger;
 
-        public BlogController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public BlogController(
+            ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager,
+            ILogger<BlogController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         // GET: Blog
@@ -100,34 +106,101 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
-        // GET: Blog/Details/5
-        public async Task<IActionResult> Details(Guid id)
+        // GET: Blog/Details/{slug} - SEO-friendly URL
+        [HttpGet("blog/{slug}")]
+        public async Task<IActionResult> Details(string slug)
         {
             try
             {
                 var post = await _context.BlogPosts
                     .Include(b => b.Category)
                     .Include(b => b.Author)
-                    .FirstOrDefaultAsync(b => b.Id == id && b.Status == "published");
+                    .FirstOrDefaultAsync(b => b.Slug == slug && b.Status == "published");
 
                 if (post == null)
                 {
                     return NotFound();
                 }
 
+                // Convert Markdown to HTML
+                var pipeline = new MarkdownPipelineBuilder()
+                    .UseAdvancedExtensions()
+                    .Build();
+                post.Content = Markdown.ToHtml(post.Content ?? "", pipeline);
+
                 // Increment view count
                 post.ViewCount++;
                 await _context.SaveChangesAsync();
 
-                // Get related posts
-                ViewBag.RelatedPosts = await _context.BlogPosts
-                    .Include(b => b.Category)
-                    .Where(b => b.Id != post.Id && 
-                               b.Status == "published" && 
-                               (b.CategoryId == post.CategoryId || b.Tags!.Any(t => post.Tags!.Contains(t))))
-                    .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
-                    .Take(3)
-                    .ToListAsync();
+                // Get related posts - Smart algorithm
+                // Priority 1: Same category AND common tags
+                // Priority 2: Same category
+                // Priority 3: Common tags
+                // Priority 4: Latest posts
+                var relatedPosts = new List<BlogPost>();
+                
+                // Try to get posts with same category AND common tags
+                if (post.CategoryId.HasValue && post.Tags != null && post.Tags.Any())
+                {
+                    relatedPosts = await _context.BlogPosts
+                        .Include(b => b.Category)
+                        .Where(b => b.Id != post.Id && 
+                                   b.Status == "published" && 
+                                   b.CategoryId == post.CategoryId &&
+                                   b.Tags != null && b.Tags.Any(t => post.Tags.Contains(t)))
+                        .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                        .Take(3)
+                        .ToListAsync();
+                }
+                
+                // If not enough, get posts from same category
+                if (relatedPosts.Count < 3 && post.CategoryId.HasValue)
+                {
+                    var additionalPosts = await _context.BlogPosts
+                        .Include(b => b.Category)
+                        .Where(b => b.Id != post.Id && 
+                                   b.Status == "published" && 
+                                   b.CategoryId == post.CategoryId &&
+                                   !relatedPosts.Select(r => r.Id).Contains(b.Id))
+                        .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                        .Take(3 - relatedPosts.Count)
+                        .ToListAsync();
+                    
+                    relatedPosts.AddRange(additionalPosts);
+                }
+                
+                // If still not enough, get posts with common tags
+                if (relatedPosts.Count < 3 && post.Tags != null && post.Tags.Any())
+                {
+                    var tagPosts = await _context.BlogPosts
+                        .Include(b => b.Category)
+                        .Where(b => b.Id != post.Id && 
+                                   b.Status == "published" && 
+                                   b.Tags != null && b.Tags.Any(t => post.Tags.Contains(t)) &&
+                                   !relatedPosts.Select(r => r.Id).Contains(b.Id))
+                        .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                        .Take(3 - relatedPosts.Count)
+                        .ToListAsync();
+                    
+                    relatedPosts.AddRange(tagPosts);
+                }
+                
+                // If still not enough, get latest published posts
+                if (relatedPosts.Count < 3)
+                {
+                    var latestPosts = await _context.BlogPosts
+                        .Include(b => b.Category)
+                        .Where(b => b.Id != post.Id && 
+                                   b.Status == "published" &&
+                                   !relatedPosts.Select(r => r.Id).Contains(b.Id))
+                        .OrderByDescending(b => b.PublishedAt ?? b.CreatedAt)
+                        .Take(3 - relatedPosts.Count)
+                        .ToListAsync();
+                    
+                    relatedPosts.AddRange(latestPosts);
+                }
+                
+                ViewBag.RelatedPosts = relatedPosts;
 
                 // Set up breadcrumbs
                 var breadcrumbs = new List<BreadcrumbItem>
@@ -142,11 +215,26 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
-                // Log error and return error view
-                Console.WriteLine($"Error loading blog post: {ex.Message}");
-                ViewBag.DatabaseError = "Không thể tải bài viết. Vui lòng thử lại sau.";
+                _logger.LogError(ex, "Error loading blog post with slug: {Slug}", slug);
+                ViewBag.Error = "Có lỗi xảy ra khi tải bài viết.";
                 return View("Error");
             }
+        }
+
+        // GET: Blog/Details/ById/{id} - Fallback for direct ID access (redirects to slug)
+        [HttpGet("blog/details/{id}")]
+        public async Task<IActionResult> DetailsById(Guid id)
+        {
+            var post = await _context.BlogPosts
+                .FirstOrDefaultAsync(b => b.Id == id && b.Status == "published");
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            // Redirect to SEO-friendly slug URL
+            return RedirectToAction("Details", new { slug = post.Slug });
         }
 
         // GET: Blog/Category/fashion
