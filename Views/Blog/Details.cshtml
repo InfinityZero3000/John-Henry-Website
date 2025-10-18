@@ -22,44 +22,42 @@
 }
 
 <div class="container my-5">
-    <!-- Back Navigation -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-                    <li class="breadcrumb-item"><a asp-controller="Blog" asp-action="Index">Blog</a></li>
-                    @if (Model.Category != null)
-                    {
-                        <li class="breadcrumb-item"><a asp-controller="Blog" asp-action="Category" asp-route-slug="@Model.Category.Slug">@Model.Category.Name</a></li>
-                    }
-                    <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
-                </ol>
-            </nav>
+    <!-- Preview Banner for Drafts -->
+    @if (ViewBag.IsPreview == true)
+    {
+        <div class="alert alert-info d-flex align-items-center justify-content-between mb-4" role="alert">
+            <div>
+                <i data-lucide="eye" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle;"></i>
+                <strong>Chế độ xem trước:</strong> @ViewBag.PreviewMessage
+            </div>
+            <div>
+                <a asp-controller="Admin" asp-action="EditBlogPost" asp-route-id="@Model.Id" class="btn btn-sm btn-primary me-2">
+                    <i data-lucide="edit" style="width: 16px; height: 16px;"></i> Chỉnh sửa
+                </a>
+                <a asp-controller="Admin" asp-action="Blog" class="btn btn-sm btn-outline-secondary">
+                    <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Quay lại
+                </a>
+            </div>
         </div>
-    </div>
+    }
 
-    <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
+    <div class="row justify-content-center">
+        <!-- Main Content - Centered -->
+        <div class="col-lg-10 col-xl-9">
             <article class="blog-post">
                 <!-- Post Header -->
-                <header class="mb-4">
-                    <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
+                <header class="mb-5 text-center">
+                    <h1 class="display-4 fw-bold mb-4">@Model.Title</h1>
                     
                     <div class="post-meta mb-4">
-                        <div class="d-flex flex-wrap align-items-center text-muted">
+                        <div class="d-flex flex-wrap justify-content-center align-items-center text-muted">
                             @if (Model.Category != null)
                             {
-                                <span class="badge bg-primary me-3">@Model.Category.Name</span>
+                                <span class="badge bg-primary me-3 px-3 py-2">@Model.Category.Name.ToUpper()</span>
                             }
                             <span class="me-3">
                                 <i class="fas fa-calendar-alt me-1"></i>
                                 @((Model.PublishedAt ?? Model.CreatedAt).ToString("dd/MM/yyyy"))
-                            </span>
-                            <span class="me-3">
-                                <i class="fas fa-user me-1"></i>
-                                @($"{Model.Author?.FirstName} {Model.Author?.LastName}".Trim())
                             </span>
                             <span class="me-3">
                                 <i class="fas fa-eye me-1"></i>
@@ -69,10 +67,11 @@
                         
                         @if (Model.Tags != null && Model.Tags.Any())
                         {
-                            <div class="mt-2">
+                            <div class="mt-3">
+                                <span class="text-muted me-2">Tags:</span>
                                 @foreach (var tag in Model.Tags)
                                 {
-                                    <span class="badge bg-light text-dark me-1">#@tag</span>
+                                    <span class="badge bg-light text-dark me-2">#@tag</span>
                                 }
                             </div>
                         }
@@ -82,159 +81,133 @@
                 <!-- Featured Image -->
                 @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
                 {
-                    <div class="featured-image mb-4">
-                        <img src="@Model.FeaturedImageUrl" class="img-fluid rounded shadow" alt="@Model.Title">
+                    <div class="featured-image mb-5">
+                        <img src="@Model.FeaturedImageUrl" class="img-fluid rounded shadow-lg w-100" alt="@Model.Title" style="max-height: 600px; object-fit: cover;">
                     </div>
                 }
 
                 <!-- Post Excerpt -->
                 @if (!string.IsNullOrEmpty(Model.Excerpt))
                 {
-                    <div class="lead text-muted mb-4">
+                    <div class="lead text-muted mb-5 text-center fst-italic px-lg-5">
                         @Model.Excerpt
                     </div>
                 }
 
                 <!-- Post Content -->
-                <div class="post-content">
+                <div class="post-content fs-5 lh-lg">
                     @Html.Raw(Model.Content)
                 </div>
 
                 <!-- Post Footer -->
-                <footer class="post-footer mt-5 pt-4 border-top">
-                    <div class="row">
-                        <div class="col-md-6">
+                <footer class="post-footer mt-5 pt-5 border-top">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 mb-3 mb-md-0">
                             @if (Model.Tags != null && Model.Tags.Any())
                             {
                                 <div class="tags">
-                                    <strong>Tags:</strong>
+                                    <strong class="me-2">Tags:</strong>
                                     @foreach (var tag in Model.Tags)
                                     {
-                                        <a href="#" class="badge bg-light text-dark text-decoration-none me-1">#@tag</a>
+                                        <a href="@Url.Action("Index", "Blog", new { search = tag })" class="badge bg-light text-dark text-decoration-none me-2">#@tag</a>
                                     }
                                 </div>
                             }
                         </div>
                         <div class="col-md-6 text-md-end">
                             <div class="share-buttons">
-                                <span class="me-2">Chia sẻ:</span>
+                                <span class="me-2 fw-bold">Chia sẻ:</span>
                                 <a href="https://www.facebook.com/sharer/sharer.php?u=@Context.Request.Scheme://@Context.Request.Host@Context.Request.Path" 
-                                   target="_blank" class="btn btn-outline-primary btn-sm me-1">
-                                    <i class="fab fa-facebook-f"></i>
+                                   target="_blank" class="btn btn-primary btn-sm me-2" title="Share on Facebook">
+                                    <i class="fab fa-facebook-f"></i> Facebook
                                 </a>
                                 <a href="https://twitter.com/intent/tweet?url=@Context.Request.Scheme://@Context.Request.Host@Context.Request.Path&text=@Model.Title" 
-                                   target="_blank" class="btn btn-outline-info btn-sm me-1">
-                                    <i class="fab fa-twitter"></i>
+                                   target="_blank" class="btn btn-info btn-sm me-2 text-white" title="Share on Twitter">
+                                    <i class="fab fa-twitter"></i> Twitter
                                 </a>
                                 <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Context.Request.Scheme://@Context.Request.Host@Context.Request.Path" 
-                                   target="_blank" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fab fa-linkedin-in"></i>
+                                   target="_blank" class="btn btn-secondary btn-sm" title="Share on LinkedIn">
+                                    <i class="fab fa-linkedin-in"></i> LinkedIn
                                 </a>
                             </div>
                         </div>
                     </div>
                 </footer>
             </article>
+        </div>
+    </div>
 
-            <!-- Related Posts -->
-            @if (ViewBag.RelatedPosts != null && ((List<JohnHenryFashionWeb.Models.BlogPost>)ViewBag.RelatedPosts).Any())
-            {
-                <section class="related-posts mt-5">
-                    <h3 class="mb-4">Bài viết liên quan</h3>
-                    <div class="row">
-                        @foreach (var related in (List<JohnHenryFashionWeb.Models.BlogPost>)ViewBag.RelatedPosts)
-                        {
-                            <div class="col-md-4 mb-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    @if (!string.IsNullOrEmpty(related.FeaturedImageUrl))
-                                    {
-                                        <img src="@related.FeaturedImageUrl" class="card-img-top" alt="@related.Title" style="height: 200px; object-fit: cover;">
-                                    }
-                                    <div class="card-body d-flex flex-column">
-                                        <h6 class="card-title">
-                                            <a asp-action="Details" asp-route-id="@related.Id" class="text-decoration-none text-dark">
-                                                @related.Title
-                                            </a>
-                                        </h6>
-                                        @if (!string.IsNullOrEmpty(related.Excerpt))
-                                        {
-                                            <p class="card-text text-muted small flex-grow-1">
-                                                @(related.Excerpt.Length > 100 ? related.Excerpt.Substring(0, 100) + "..." : related.Excerpt)
-                                            </p>
-                                        }
-                                        <div class="mt-auto">
-                                            <small class="text-muted">
-                                                @((related.PublishedAt ?? related.CreatedAt).ToString("dd/MM/yyyy"))
-                                            </small>
-                                        </div>
+    <!-- Related Posts Section - Full Width -->
+    @if (ViewBag.RelatedPosts != null && ((List<JohnHenryFashionWeb.Models.BlogPost>)ViewBag.RelatedPosts).Any())
+    {
+        <section class="related-posts mt-5 pt-5 border-top">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="text-center mb-5 fw-bold">BÀI VIẾT LIÊN QUAN</h2>
+                </div>
+            </div>
+            <div class="row g-4">
+                @foreach (var related in (List<JohnHenryFashionWeb.Models.BlogPost>)ViewBag.RelatedPosts)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 blog-card-hover">
+                            @if (!string.IsNullOrEmpty(related.FeaturedImageUrl))
+                            {
+                                <a asp-action="Details" asp-route-slug="@related.Slug">
+                                    <img src="@related.FeaturedImageUrl" class="card-img-top" alt="@related.Title" style="height: 250px; object-fit: cover;">
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="Details" asp-route-slug="@related.Slug">
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                </a>
+                            }
+                            <div class="card-body d-flex flex-column">
+                                @if (related.Category != null)
+                                {
+                                    <span class="badge bg-primary mb-2 align-self-start">@related.Category.Name.ToUpper()</span>
+                                }
+                                <h5 class="card-title">
+                                    <a asp-action="Details" asp-route-slug="@related.Slug" class="text-decoration-none text-dark stretched-link">
+                                        @related.Title
+                                    </a>
+                                </h5>
+                                @if (!string.IsNullOrEmpty(related.Excerpt))
+                                {
+                                    <p class="card-text text-muted flex-grow-1">
+                                        @(related.Excerpt.Length > 120 ? related.Excerpt.Substring(0, 120) + "..." : related.Excerpt)
+                                    </p>
+                                }
+                                <div class="mt-auto pt-3 border-top">
+                                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                                        <span>
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            @((related.PublishedAt ?? related.CreatedAt).ToString("dd/MM/yyyy"))
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-eye me-1"></i>
+                                            @related.ViewCount
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-                        }
-                    </div>
-                </section>
-            }
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top: 100px;">
-                <!-- Author Info -->
-                @if (Model.Author != null)
-                {
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-body text-center">
-                            <h6 class="card-title fw-bold">Về tác giả</h6>
-                            <div class="author-avatar mb-3">
-                                @if (!string.IsNullOrEmpty(Model.Author.Avatar))
-                                {
-                                    <img src="@Model.Author.Avatar" class="rounded-circle" width="80" height="80" alt="@($"{Model.Author.FirstName} {Model.Author.LastName}")">
-                                }
-                                else
-                                {
-                                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center text-white" style="width: 80px; height: 80px;">
-                                        <i class="fas fa-user fa-2x"></i>
-                                    </div>
-                                }
-                            </div>
-                            <h6>@($"{Model.Author.FirstName} {Model.Author.LastName}".Trim())</h6>
-                            <p class="text-muted small">Chuyên gia thời trang tại John Henry</p>
                         </div>
                     </div>
                 }
-
-                <!-- Table of Contents (if content has headings) -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h6 class="card-title fw-bold">Mục lục</h6>
-                        <div id="tableOfContents">
-                            <!-- Will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Posts -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title fw-bold">Bài viết mới nhất</h6>
-                        <div id="recentPosts">
-                            <!-- Will be loaded via AJAX -->
-                        </div>
-                    </div>
-                </div>
             </div>
-        </div>
-    </div>
+        </section>
+    }
 </div>
 
 @section Scripts {
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         $(document).ready(function() {
-            // Generate table of contents
-            generateTableOfContents();
-            
-            // Load recent posts
-            loadRecentPosts();
+            // Initialize Lucide icons
+            lucide.createIcons();
             
             // Smooth scroll for anchor links
             $('a[href^="#"]').click(function(e) {
@@ -246,46 +219,177 @@
                     }, 500);
                 }
             });
-        });
 
-        function generateTableOfContents() {
-            var headings = $('.post-content').find('h1, h2, h3, h4, h5, h6');
-            if (headings.length > 0) {
-                var toc = '<ul class="list-unstyled">';
-                headings.each(function(i) {
-                    var heading = $(this);
-                    var anchor = 'heading-' + i;
-                    heading.attr('id', anchor);
-                    var level = parseInt(heading.prop('tagName').charAt(1));
-                    var indent = (level - 1) * 15;
-                    toc += '<li style="margin-left: ' + indent + 'px;"><a href="#' + anchor + '" class="text-decoration-none">' + heading.text() + '</a></li>';
-                });
-                toc += '</ul>';
-                $('#tableOfContents').html(toc);
-            } else {
-                $('#tableOfContents').parent().hide();
+            // Add hover effect to blog cards
+            $('.blog-card-hover').hover(
+                function() {
+                    $(this).addClass('shadow-lg').css('transform', 'translateY(-5px)');
+                },
+                function() {
+                    $(this).removeClass('shadow-lg').css('transform', 'translateY(0)');
+                }
+            );
+        });
+    </script>
+    
+    <style>
+        /* Blog Post Styling */
+        .blog-post header h1 {
+            font-size: 2.5rem;
+            line-height: 1.3;
+            color: #1a1a1a;
+            font-family: 'Lucida Grande', 'Arsenal', sans-serif !important;
+        }
+
+        .post-meta {
+            font-size: 0.95rem;
+        }
+
+        .post-meta .badge {
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .featured-image img {
+            border-radius: 12px;
+        }
+
+        .post-content {
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .post-content h2 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 1.75rem;
+        }
+
+        .post-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+
+        .post-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .post-content ul, .post-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .post-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .post-content blockquote {
+            border-left: 4px solid #0d6efd;
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: #666;
+        }
+
+        .post-content code {
+            background: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .post-content pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+
+        /* Related Posts Section */
+        .related-posts h2 {
+            font-size: 2rem;
+            color: #1a1a1a;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .related-posts h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+        }
+
+        .blog-card-hover {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .blog-card-hover:hover {
+            transform: translateY(-5px);
+        }
+
+        .blog-card-hover .card-img-top {
+            transition: transform 0.3s ease;
+        }
+
+        .blog-card-hover:hover .card-img-top {
+            transform: scale(1.05);
+            overflow: hidden;
+        }
+
+        .blog-card-hover .card-title a {
+            color: #1a1a1a;
+            transition: color 0.3s ease;
+        }
+
+        .blog-card-hover:hover .card-title a {
+            color: #0d6efd;
+        }
+
+        /* Share Buttons */
+        .share-buttons .btn {
+            transition: all 0.3s ease;
+        }
+
+        .share-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .blog-post header h1 {
+                font-size: 1.75rem;
+            }
+
+            .post-content {
+                font-size: 1rem;
+            }
+
+            .related-posts h2 {
+                font-size: 1.5rem;
             }
         }
 
-        function loadRecentPosts() {
-            // Simple static recent posts for now
-            var recentPostsHtml = `
-                <div class="list-group list-group-flush">
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-0">
-                        <h6 class="mb-1">Xu hướng thời trang 2024</h6>
-                        <small class="text-muted">15/01/2024</small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-0">
-                        <h6 class="mb-1">Cách phối đồ công sở</h6>
-                        <small class="text-muted">12/01/2024</small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-0">
-                        <h6 class="mb-1">Bí quyết chọn áo sơ mi</h6>
-                        <small class="text-muted">10/01/2024</small>
-                    </a>
-                </div>
-            `;
-            $('#recentPosts').html(recentPostsHtml);
+        /* Preview Banner */
+        .alert-info {
+            border-left: 4px solid #0dcaf0;
         }
-    </script>
+    </style>
 }

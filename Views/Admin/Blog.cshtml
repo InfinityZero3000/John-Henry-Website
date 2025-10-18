@@ -13,6 +13,11 @@
 }
 
 <div class="admin-content">
+    <!-- Hidden form for antiforgery token -->
+    <form id="antiforgeryForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+    
     <!-- Page Header -->
     <div class="admin-page-header">
         <div class="admin-flex-between">
@@ -393,10 +398,14 @@
                 return;
             }
 
+            // Get antiforgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
             fetch(`/admin/blog/publish/${postId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
                 }
             })
             .then(response => response.json())
@@ -419,10 +428,14 @@
                 return;
             }
 
+            // Get antiforgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
             fetch(`/admin/blog/delete/${postId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
                 }
             })
             .then(response => response.json())
