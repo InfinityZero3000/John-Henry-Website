@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "John Henry - Premium Fashion";
+    ViewData["Title"] = "John Henry - Fashion";
 }
 
 <!-- Hero Carousel Section - UPGRADED to Dynamic Banners from Database -->
@@ -113,49 +113,116 @@
     }
 </section>
 
-<!-- Small Banners Section -->
+<!-- Small Banners Section - UPGRADED to Dynamic Banners from Database -->
 <section class="small-banners-section">
     <div class="container">
-        <div class="row g-3"> <!-- Thêm gap giữa các cột -->
-            <!-- John Henry - New Arrival -->
-            <div class="col-lg-4 col-md-4">
-                <div class="small-banner-card">
-                    <div class="small-banner-image">
-                        <img src="~/images/Banner/banner-man-0.jpg" alt="John Henry New Arrival" class="img-fluid">
+        @if (ViewBag.SmallBanners != null && ((List<JohnHenryFashionWeb.Models.MarketingBanner>)ViewBag.SmallBanners).Any())
+        {
+            var smallBanners = (List<JohnHenryFashionWeb.Models.MarketingBanner>)ViewBag.SmallBanners;
+            <div class="row g-3">
+                @foreach (var banner in smallBanners.Take(3))
+                {
+                    <div class="col-lg-4 col-md-4">
+                        <div class="small-banner-card">
+                            @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                            {
+                                <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")" class="d-block text-decoration-none">
+                                    <div class="small-banner-image">
+                                        <picture>
+                                            @if (!string.IsNullOrEmpty(banner.MobileImageUrl))
+                                            {
+                                                <source media="(max-width: 768px)" srcset="@banner.MobileImageUrl">
+                                            }
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
+                                        </picture>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(banner.Title))
+                                    {
+                                        <div class="small-banner-content">
+                                            <h4>@banner.Title</h4>
+                                            @if (!string.IsNullOrEmpty(banner.Description))
+                                            {
+                                                <p class="banner-link">@banner.Description</p>
+                                            }
+                                            else
+                                            {
+                                                <p class="banner-link">Xem ngay</p>
+                                            }
+                                        </div>
+                                    }
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="small-banner-image">
+                                    <picture>
+                                        @if (!string.IsNullOrEmpty(banner.MobileImageUrl))
+                                        {
+                                            <source media="(max-width: 768px)" srcset="@banner.MobileImageUrl">
+                                        }
+                                        <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
+                                    </picture>
+                                </div>
+                                @if (!string.IsNullOrEmpty(banner.Title))
+                                {
+                                    <div class="small-banner-content">
+                                        <h4>@banner.Title</h4>
+                                        @if (!string.IsNullOrEmpty(banner.Description))
+                                        {
+                                            <p class="banner-link">@banner.Description</p>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
                     </div>
-                    <div class="small-banner-content">
-                        <h4>JOHN HENRY - NEW ARRIVAL</h4>
-                        <p class="banner-link">Xem ngay</p>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- FALLBACK: Show default 3-column banners if no banners in database -->
+            <div class="row g-3">
+                <!-- John Henry - New Arrival -->
+                <div class="col-lg-4 col-md-4">
+                    <div class="small-banner-card">
+                        <div class="small-banner-image">
+                            <img src="~/images/Banner/banner-man-0.jpg" alt="John Henry New Arrival" class="img-fluid">
+                        </div>
+                        <div class="small-banner-content">
+                            <h4>JOHN HENRY - NEW ARRIVAL</h4>
+                            <p class="banner-link">Xem ngay</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Best Seller -->
+                <div class="col-lg-4 col-md-4">
+                    <div class="small-banner-card">
+                        <div class="small-banner-image">
+                            <img src="~/images/Banner/banner-man-bestseller.jpg" alt="Best Seller" class="img-fluid">
+                        </div>
+                        <div class="small-banner-content">
+                            <h4>BEST SELLER</h4>
+                            <p class="banner-link">Xem ngay</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Freelancer - New Arrival -->
+                <div class="col-lg-4 col-md-4">
+                    <div class="small-banner-card">
+                        <div class="small-banner-image">
+                            <img src="~/images/Banner/banner-women-1.jpg" alt="Freelancer New Arrival" class="img-fluid">
+                        </div>
+                        <div class="small-banner-content">
+                            <h4>FREELANCER - NEW ARRIVAL</h4>
+                            <p class="banner-link">Xem ngay</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Best Seller -->
-            <div class="col-lg-4 col-md-4">
-                <div class="small-banner-card">
-                    <div class="small-banner-image">
-                        <img src="~/images/Banner/banner-man-bestseller.jpg" alt="Best Seller" class="img-fluid">
-                    </div>
-                    <div class="small-banner-content">
-                        <h4>BEST SELLER</h4>
-                        <p class="banner-link">Xem ngay</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Freelancer - New Arrival -->
-            <div class="col-lg-4 col-md-4">
-                <div class="small-banner-card">
-                    <div class="small-banner-image">
-                        <img src="~/images/Banner/banner-women-1.jpg" alt="Freelancer New Arrival" class="img-fluid">
-                    </div>
-                    <div class="small-banner-content">
-                        <h4>FREELANCER - NEW ARRIVAL</h4>
-                        <p class="banner-link">Xem ngay</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
 
