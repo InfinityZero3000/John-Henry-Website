@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using JohnHenryFashionWeb.Models;
 using JohnHenryFashionWeb.ViewModels;
+using Markdig;
 
 namespace JohnHenryFashionWeb.Controllers
 {
@@ -67,6 +69,40 @@ namespace JohnHenryFashionWeb.Controllers
             return View(viewModel);
         }
 
+        [HttpGet("blog/preview/{id}")]
+        public async Task<IActionResult> PreviewBlogPost(Guid id)
+        {
+            var post = await _context.BlogPosts
+                .Include(p => p.Category)
+                .Include(p => p.Author)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (post == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài viết";
+                return RedirectToAction("Blog");
+            }
+
+            // Check if user is authorized to preview (must be admin or author)
+            var userId = _userManager.GetUserId(User);
+            if (post.AuthorId != userId && !User.IsInRole(UserRoles.Admin))
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền xem bài viết này";
+                return RedirectToAction("Blog");
+            }
+
+            // Convert Markdown to HTML for preview
+            var pipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .Build();
+            post.Content = Markdown.ToHtml(post.Content ?? "", pipeline);
+
+            ViewBag.IsPreview = true;
+            ViewBag.PreviewMessage = post.Status == "draft" ? "Đây là bản nháp - chưa được công khai" : "Đang xem trước bài viết";
+            
+            return View("~/Views/Blog/Details.cshtml", post);
+        }
+
         [HttpGet("blog/create")]
         public async Task<IActionResult> CreateBlogPost()
         {
@@ -75,24 +111,90 @@ namespace JohnHenryFashionWeb.Controllers
                 .OrderBy(c => c.Name)
                 .ToListAsync();
 
-            ViewBag.Categories = categories;
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View(new BlogPost());
         }
 
         [HttpPost("blog/create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateBlogPost(BlogPost model, IFormFile? featuredImage)
+        public async Task<IActionResult> CreateBlogPost(BlogPost model, IFormFile? featuredImage, string? action, string? TagsString)
         {
             try
             {
+                _logger.LogInformation("=== START CREATE BLOG POST ===");
+                _logger.LogInformation($"Action: {action}");
+                _logger.LogInformation($"Title: {model.Title}");
+                _logger.LogInformation($"Status from model: {model.Status}");
+                _logger.LogInformation($"CategoryId: {model.CategoryId}");
+                _logger.LogInformation($"Content Length: {model.Content?.Length ?? 0}");
+                _logger.LogInformation($"Featured Image: {featuredImage?.FileName ?? "None"}");
+                _logger.LogInformation($"Tags String: {TagsString}");
+                
+                // Remove navigation property validation errors
+                ModelState.Remove("Author");
+                ModelState.Remove("Category");
+                
+                // Validation
+                if (string.IsNullOrWhiteSpace(model.Title))
+                {
+                    ModelState.AddModelError("Title", "Tiêu đề không được để trống");
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Content))
+                {
+                    ModelState.AddModelError("Content", "Nội dung không được để trống");
+                }
+
                 if (ModelState.IsValid)
                 {
                     var userId = _userManager.GetUserId(User);
+                    _logger.LogInformation($"Current User ID: {userId}");
                     
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        throw new InvalidOperationException("Không thể xác định người dùng hiện tại");
+                    }
+
                     model.Id = Guid.NewGuid();
-                    model.AuthorId = userId!;
+                    model.AuthorId = userId;
                     model.CreatedAt = DateTime.UtcNow;
                     model.UpdatedAt = DateTime.UtcNow;
+                    model.ViewCount = 0;
+                    
+                    // Parse tags from string
+                    if (!string.IsNullOrEmpty(TagsString))
+                    {
+                        model.Tags = TagsString.Split(',')
+                                              .Select(t => t.Trim())
+                                              .Where(t => !string.IsNullOrEmpty(t))
+                                              .ToArray();
+                        _logger.LogInformation($"Parsed {model.Tags.Length} tags");
+                    }
+                    
+                    // Set status based on action button clicked
+                    if (!string.IsNullOrEmpty(action))
+                    {
+                        if (action == "publish")
+                        {
+                            model.Status = "published";
+                            _logger.LogInformation("Status set to 'published' from action button");
+                        }
+                        else if (action == "draft")
+                        {
+                            model.Status = "draft";
+                            _logger.LogInformation("Status set to 'draft' from action button");
+                        }
+                    }
+                    
+                    // Fallback: Set default status if not provided
+                    if (string.IsNullOrEmpty(model.Status))
+                    {
+                        model.Status = "draft";
+                        _logger.LogInformation("Status defaulted to 'draft'");
+                    }
+                    
+                    _logger.LogInformation($"Final Status: {model.Status}");
+                    _logger.LogInformation($"Generated Post ID: {model.Id}");
                     
                     // Generate unique slug
                     if (string.IsNullOrEmpty(model.Slug))
@@ -101,41 +203,124 @@ namespace JohnHenryFashionWeb.Controllers
                     }
                     else
                     {
-                        // Ensure provided slug is unique
                         model.Slug = await GenerateUniqueSlugAsync(model.Slug);
                     }
+                    
+                    _logger.LogInformation($"Generated Slug: {model.Slug}");
 
                     // Handle featured image upload
                     if (featuredImage != null && featuredImage.Length > 0)
                     {
-                        var fileName = await SaveBlogImage(featuredImage);
-                        model.FeaturedImageUrl = $"/images/blog/{fileName}";
+                        try
+                        {
+                            var fileName = await SaveBlogImage(featuredImage);
+                            model.FeaturedImageUrl = $"/images/blog/{fileName}";
+                            _logger.LogInformation($"Featured image saved: {model.FeaturedImageUrl}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Error saving image: {ex.Message}");
+                            ModelState.AddModelError("", $"Lỗi khi lưu ảnh: {ex.Message}");
+                            throw;
+                        }
+                    }
+
+                    // Auto-generate excerpt if not provided
+                    if (string.IsNullOrEmpty(model.Excerpt) && !string.IsNullOrEmpty(model.Content))
+                    {
+                        var plainText = System.Text.RegularExpressions.Regex.Replace(model.Content, "<.*?>", string.Empty);
+                        model.Excerpt = plainText.Length > 200 ? plainText.Substring(0, 200) + "..." : plainText;
+                    }
+
+                    // Set SEO fields if not provided
+                    if (string.IsNullOrEmpty(model.MetaTitle))
+                    {
+                        model.MetaTitle = model.Title;
+                    }
+
+                    if (string.IsNullOrEmpty(model.MetaDescription))
+                    {
+                        model.MetaDescription = model.Excerpt;
                     }
 
                     // Set publish date if publishing
                     if (model.Status == "published" && !model.PublishedAt.HasValue)
                     {
                         model.PublishedAt = DateTime.UtcNow;
+                        _logger.LogInformation($"Set PublishedAt to: {model.PublishedAt}");
                     }
 
+                    _logger.LogInformation("Adding post to database...");
                     _context.BlogPosts.Add(model);
-                    await _context.SaveChangesAsync();
+                    
+                    var saved = await _context.SaveChangesAsync();
+                    _logger.LogInformation($"SaveChanges result: {saved} rows affected");
 
-                    TempData["SuccessMessage"] = "Bài viết đã được tạo thành công!";
-                    return RedirectToAction("Blog");
+                    if (saved > 0)
+                    {
+                        _logger.LogInformation("=== BLOG POST CREATED SUCCESSFULLY ===");
+                        _logger.LogInformation($"Blog slug: {model.Slug}");
+                        
+                        // Different redirect based on status
+                        if (model.Status == "published")
+                        {
+                            TempData["SuccessMessage"] = $"Bài viết '{model.Title}' đã được xuất bản thành công!";
+                            // Redirect to public blog details page using slug
+                            return RedirectToAction("Details", "Blog", new { slug = model.Slug });
+                        }
+                        else
+                        {
+                            TempData["SuccessMessage"] = $"Bản nháp '{model.Title}' đã được lưu thành công!";
+                            // Redirect to preview page for draft
+                            return RedirectToAction("PreviewBlogPost", new { id = model.Id });
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("SaveChanges returned 0 rows affected");
+                        ModelState.AddModelError("", "Không thể lưu bài viết. Vui lòng thử lại.");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("ModelState is invalid:");
+                    foreach (var key in ModelState.Keys)
+                    {
+                        var errors = ModelState[key]?.Errors;
+                        if (errors != null && errors.Count > 0)
+                        {
+                            foreach (var error in errors)
+                            {
+                                _logger.LogWarning($"  {key}: {error.ErrorMessage}");
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError($"=== ERROR CREATING BLOG POST ===");
+                _logger.LogError($"Exception Type: {ex.GetType().Name}");
+                _logger.LogError($"Message: {ex.Message}");
+                _logger.LogError($"StackTrace: {ex.StackTrace}");
+                
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError($"Inner Exception: {ex.InnerException.Message}");
+                }
+                
                 ModelState.AddModelError("", $"Có lỗi xảy ra: {ex.Message}");
             }
 
+            // Reload categories for form
             var categories = await _context.BlogCategories
                 .Where(c => c.IsActive)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
 
-            ViewBag.Categories = categories;
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            
+            _logger.LogInformation("Returning to create view with errors");
             return View(model);
         }
 
@@ -156,7 +341,7 @@ namespace JohnHenryFashionWeb.Controllers
                 .OrderBy(c => c.Name)
                 .ToListAsync();
 
-            ViewBag.Categories = categories;
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View(post);
         }
 
@@ -167,6 +352,27 @@ namespace JohnHenryFashionWeb.Controllers
             if (id != model.Id)
             {
                 return BadRequest();
+            }
+
+            // Remove navigation properties from validation
+            ModelState.Remove("Author");
+            ModelState.Remove("Category");
+
+            // Log validation errors if any
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("=== EDIT BLOG POST VALIDATION FAILED ===");
+                foreach (var key in ModelState.Keys)
+                {
+                    var state = ModelState[key];
+                    if (state != null && state.Errors.Count > 0)
+                    {
+                        foreach (var error in state.Errors)
+                        {
+                            _logger.LogWarning($"{key}: {error.ErrorMessage}");
+                        }
+                    }
+                }
             }
 
             try
@@ -231,7 +437,7 @@ namespace JohnHenryFashionWeb.Controllers
                 .OrderBy(c => c.Name)
                 .ToListAsync();
 
-            ViewBag.Categories = categories;
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View(model);
         }
 
@@ -261,6 +467,40 @@ namespace JohnHenryFashionWeb.Controllers
                 await _context.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Xóa bài viết thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Có lỗi xảy ra: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("blog/publish/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PublishBlogPost(Guid id)
+        {
+            var post = await _context.BlogPosts.FindAsync(id);
+            if (post == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy bài viết" });
+            }
+
+            try
+            {
+                post.Status = "published";
+                
+                if (!post.PublishedAt.HasValue)
+                {
+                    post.PublishedAt = DateTime.UtcNow;
+                }
+
+                post.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Bài viết đã được xuất bản thành công!",
+                    newStatus = "published"
+                });
             }
             catch (Exception ex)
             {
