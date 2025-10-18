@@ -23,6 +23,7 @@ namespace JohnHenryFashionWeb.Controllers
         private readonly IAnalyticsService _analyticsService;
         private readonly IReportingService _reportingService;
         private readonly IUserManagementService _userManagementService;
+        private readonly ILogger<AdminController> _logger;
 
         public AdminController(
             ApplicationDbContext context, 
@@ -31,7 +32,8 @@ namespace JohnHenryFashionWeb.Controllers
             IWebHostEnvironment webHostEnvironment,
             IAnalyticsService analyticsService,
             IReportingService reportingService,
-            IUserManagementService userManagementService)
+            IUserManagementService userManagementService,
+            ILogger<AdminController> logger)
         {
             _context = context;
             _userManager = userManager;
@@ -40,6 +42,7 @@ namespace JohnHenryFashionWeb.Controllers
             _analyticsService = analyticsService;
             _reportingService = reportingService;
             _userManagementService = userManagementService;
+            _logger = logger;
         }
 
         [HttpGet("")]
@@ -168,84 +171,10 @@ namespace JohnHenryFashionWeb.Controllers
 
         // Products Management (Old route - keeping for backwards compatibility)
         [HttpGet("product-list")]
-        public async Task<IActionResult> Products(string searchTerm = "", Guid? categoryId = null, string status = "", int page = 1, int pageSize = 10)
+        public IActionResult Products(string searchTerm = "", Guid? categoryId = null, string status = "", int page = 1, int pageSize = 10)
         {
-            ViewData["CurrentSection"] = "products";
-            
-            var query = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .AsQueryable();
-
-            // Apply filters
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(p => p.Name.Contains(searchTerm) || p.SKU.Contains(searchTerm));
-            }
-
-            if (categoryId.HasValue)
-            {
-                query = query.Where(p => p.CategoryId == categoryId.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(status))
-            {
-                if (status.ToLower() == "active")
-                    query = query.Where(p => p.IsActive);
-                else if (status.ToLower() == "inactive")
-                    query = query.Where(p => !p.IsActive);
-                else if (status.ToLower() == "featured")
-                    query = query.Where(p => p.IsFeatured);
-                else if (status.ToLower() == "lowstock")
-                    query = query.Where(p => p.StockQuantity < 10);
-            }
-
-            var totalProducts = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new ProductListItemViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    SKU = p.SKU,
-                    Price = p.Price,
-                    SalePrice = p.SalePrice,
-                    StockQuantity = p.StockQuantity,
-                    Status = p.IsActive ? "Active" : "Inactive",
-                    CategoryName = p.Category != null ? p.Category.Name : "",
-                    BrandName = p.Brand != null ? p.Brand.Name : null,
-                    FeaturedImageUrl = p.FeaturedImageUrl,
-                    CreatedAt = p.CreatedAt,
-                    IsFeatured = p.IsFeatured,
-                    IsActive = p.IsActive,
-                    Description = p.Description,
-                    Category = p.Category
-                })
-                .ToListAsync();
-
-            var categories = await _context.Categories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-
-            var viewModel = new ProductListViewModel
-            {
-                Products = products,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PageSize = pageSize,
-                SearchTerm = searchTerm,
-                CategoryId = categoryId,
-                Status = status,
-                Categories = categories,
-                TotalProducts = totalProducts
-            };
-
-            return View(viewModel);
+            // Redirect to Inventory page which has product management functionality
+            return RedirectToAction("Inventory", "Admin");
         }
 
         [HttpPost("reports/generate")]
