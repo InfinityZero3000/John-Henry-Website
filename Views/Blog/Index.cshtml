@@ -116,7 +116,7 @@
                                 </p>
                                 <div class="blog-post-footer">
                                     <span class="blog-post-date-text">@((post.PublishedAt ?? post.CreatedAt).ToString("dd/MM/yyyy"))</span>
-                                    <a href="@Url.Action("Details", "Blog", new { id = post.Id })" class="blog-read-more">Xem thêm »</a>
+                                    <a href="@Url.Action("Details", "Blog", new { slug = post.Slug })" class="blog-read-more">Xem thêm »</a>
                                 </div>
                             </div>
                         </div>
@@ -262,7 +262,6 @@
 
     .blog-post-card {
         background: white;
-        border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
