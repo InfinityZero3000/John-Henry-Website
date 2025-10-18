@@ -18,10 +18,10 @@ namespace JohnHenryFashionWeb.Controllers
             var viewModel = new SystemSettingsViewModel
             {
                 // General Settings
-                SiteName = "John Henry Fashion",
-                SiteDescription = "Premium Fashion Store",
-                AdminEmail = "admin@johnhenryfashion.com",
-                SupportEmail = "support@johnhenryfashion.com",
+                SiteName = "John Henry",
+                SiteDescription = "Fashion Store",
+                AdminEmail = "admin@johnhenry.com",
+                SupportEmail = "support@johnhenry.com",
                 
                 // E-commerce Settings
                 Currency = "VND",
@@ -67,9 +67,9 @@ namespace JohnHenryFashionWeb.Controllers
                 AllowBackorders = false,
                 
                 // SEO Settings
-                DefaultMetaTitle = "John Henry Fashion - Premium Fashion Store",
-                DefaultMetaDescription = "Discover premium fashion at John Henry Fashion",
-                DefaultMetaKeywords = "fashion, premium, clothing, style"
+                DefaultMetaTitle = "John Henry - Fashion Store",
+                DefaultMetaDescription = "Discover fashion at John Henry Fashion",
+                DefaultMetaKeywords = "fashion, clothing, style"
             };
 
             return View(viewModel);
