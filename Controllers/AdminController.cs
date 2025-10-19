@@ -824,9 +824,13 @@ namespace JohnHenryFashionWeb.Controllers
 
 
         #region Helper Methods
-        private string GenerateSlug(string text)
+        private string GenerateSlug(string text, int maxLength = 80)
         {
-            return text.ToLower()
+            if (string.IsNullOrWhiteSpace(text))
+                return "untitled";
+            
+            // Convert to lowercase and replace Vietnamese characters
+            var slug = text.ToLower()
                       .Replace("á", "a").Replace("à", "a").Replace("ả", "a").Replace("ã", "a").Replace("ạ", "a")
                       .Replace("ă", "a").Replace("ắ", "a").Replace("ằ", "a").Replace("ẳ", "a").Replace("ẵ", "a").Replace("ặ", "a")
                       .Replace("â", "a").Replace("ấ", "a").Replace("ầ", "a").Replace("ẩ", "a").Replace("ẫ", "a").Replace("ậ", "a")
@@ -839,10 +843,35 @@ namespace JohnHenryFashionWeb.Controllers
                       .Replace("ú", "u").Replace("ù", "u").Replace("ủ", "u").Replace("ũ", "u").Replace("ụ", "u")
                       .Replace("ư", "u").Replace("ứ", "u").Replace("ừ", "u").Replace("ử", "u").Replace("ữ", "u").Replace("ự", "u")
                       .Replace("ý", "y").Replace("ỳ", "y").Replace("ỷ", "y").Replace("ỹ", "y").Replace("ỵ", "y")
-                      .Replace("đ", "d")
-                      .Replace(" ", "-")
-                      .Replace("--", "-")
-                      .Trim('-');
+                      .Replace("đ", "d");
+            
+            // Remove special characters (keep only alphanumeric, space, and dash)
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+            
+            // Replace multiple spaces with single space
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"\s+", " ");
+            
+            // Replace spaces with dashes
+            slug = slug.Replace(" ", "-");
+            
+            // Replace multiple dashes with single dash
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-");
+            
+            // Trim dashes from start and end
+            slug = slug.Trim('-');
+            
+            // Limit length
+            if (slug.Length > maxLength)
+            {
+                slug = slug.Substring(0, maxLength);
+                // Remove incomplete word at end
+                var lastDash = slug.LastIndexOf('-');
+                if (lastDash > 0)
+                    slug = slug.Substring(0, lastDash);
+            }
+            
+            // Return untitled if slug becomes empty after processing
+            return string.IsNullOrEmpty(slug) ? "untitled" : slug;
         }
 
         private async Task<string> SaveUploadedFile(IFormFile file, string folder)

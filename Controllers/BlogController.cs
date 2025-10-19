@@ -474,12 +474,54 @@ namespace JohnHenryFashionWeb.Controllers
             return _context.BlogPosts.Any(e => e.Id == id);
         }
 
-        private string GenerateSlug(string title)
+        private string GenerateSlug(string title, int maxLength = 80)
         {
-            return title.ToLower()
-                       .Replace(" ", "-")
-                       .Replace("--", "-")
-                       .Trim('-');
+            if (string.IsNullOrWhiteSpace(title))
+                return "untitled";
+            
+            // Convert to lowercase and replace Vietnamese characters
+            var slug = title.ToLower()
+                      .Replace("á", "a").Replace("à", "a").Replace("ả", "a").Replace("ã", "a").Replace("ạ", "a")
+                      .Replace("ă", "a").Replace("ắ", "a").Replace("ằ", "a").Replace("ẳ", "a").Replace("ẵ", "a").Replace("ặ", "a")
+                      .Replace("â", "a").Replace("ấ", "a").Replace("ầ", "a").Replace("ẩ", "a").Replace("ẫ", "a").Replace("ậ", "a")
+                      .Replace("é", "e").Replace("è", "e").Replace("ẻ", "e").Replace("ẽ", "e").Replace("ẹ", "e")
+                      .Replace("ê", "e").Replace("ế", "e").Replace("ề", "e").Replace("ể", "e").Replace("ễ", "e").Replace("ệ", "e")
+                      .Replace("í", "i").Replace("ì", "i").Replace("ỉ", "i").Replace("ĩ", "i").Replace("ị", "i")
+                      .Replace("ó", "o").Replace("ò", "o").Replace("ỏ", "o").Replace("õ", "o").Replace("ọ", "o")
+                      .Replace("ô", "o").Replace("ố", "o").Replace("ồ", "o").Replace("ổ", "o").Replace("ỗ", "o").Replace("ộ", "o")
+                      .Replace("ơ", "o").Replace("ớ", "o").Replace("ờ", "o").Replace("ở", "o").Replace("ỡ", "o").Replace("ợ", "o")
+                      .Replace("ú", "u").Replace("ù", "u").Replace("ủ", "u").Replace("ũ", "u").Replace("ụ", "u")
+                      .Replace("ư", "u").Replace("ứ", "u").Replace("ừ", "u").Replace("ử", "u").Replace("ữ", "u").Replace("ự", "u")
+                      .Replace("ý", "y").Replace("ỳ", "y").Replace("ỷ", "y").Replace("ỹ", "y").Replace("ỵ", "y")
+                      .Replace("đ", "d");
+            
+            // Remove special characters (keep only alphanumeric, space, and dash)
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+            
+            // Replace multiple spaces with single space
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"\s+", " ");
+            
+            // Replace spaces with dashes
+            slug = slug.Replace(" ", "-");
+            
+            // Replace multiple dashes with single dash
+            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-");
+            
+            // Trim dashes from start and end
+            slug = slug.Trim('-');
+            
+            // Limit length
+            if (slug.Length > maxLength)
+            {
+                slug = slug.Substring(0, maxLength);
+                // Remove incomplete word at end
+                var lastDash = slug.LastIndexOf('-');
+                if (lastDash > 0)
+                    slug = slug.Substring(0, lastDash);
+            }
+            
+            // Return untitled if slug becomes empty after processing
+            return string.IsNullOrEmpty(slug) ? "untitled" : slug;
         }
     }
 }
