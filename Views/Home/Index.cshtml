@@ -519,7 +519,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="blog-card">
                         <div class="blog-image-container">
-                            <img src="~/images/Banner/banner-women-main.jpg" alt="Xu hướng thời trang" class="blog-image">
+                            <img src="~/images/blog/banner_02160e22.jpg" alt="Xu hướng thời trang Thu Đông 2025" class="blog-image">
                             <div class="blog-date">
                                 <span class="date-day">15</span>
                                 <span class="date-month">OCT</span>
@@ -529,7 +529,10 @@
                             <span class="blog-category">XU HƯỚNG</span>
                             <h5 class="blog-title">Xu hướng thời trang Thu Đông 2025</h5>
                             <p class="blog-excerpt">Khám phá những xu hướng thời trang mới nhất cho mùa Thu Đông năm nay với những màu sắc và phong cách độc đáo...</p>
-                            <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                            <div class="blog-footer">
+                                <span class="blog-date-text">15/10/2025</span>
+                                <a href="/Blog/xu-huong-thoi-trang-thu-dong-2025" class="blog-read-more">XEM THÊM »</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -537,7 +540,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="blog-card">
                         <div class="blog-image-container">
-                            <img src="~/images/Banner/banner-man-main.jpg" alt="Phong cách nam" class="blog-image">
+                            <img src="~/images/blog/banner_23da5ec2.jpg" alt="Bí quyết phối đồ nam hiện đại" class="blog-image">
                             <div class="blog-date">
                                 <span class="date-day">12</span>
                                 <span class="date-month">OCT</span>
@@ -547,7 +550,10 @@
                             <span class="blog-category">PHONG CÁCH</span>
                             <h5 class="blog-title">Bí quyết phối đồ nam hiện đại</h5>
                             <p class="blog-excerpt">Hướng dẫn chi tiết cách phối đồ nam tính và lịch lãm cho các chàng trai hiện đại trong mọi hoàn cảnh...</p>
-                            <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                            <div class="blog-footer">
+                                <span class="blog-date-text">12/10/2025</span>
+                                <a href="/Blog/bi-quyet-phoi-do-nam-hien-dai" class="blog-read-more">XEM THÊM »</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -555,7 +561,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="blog-card">
                         <div class="blog-image-container">
-                            <img src="~/images/Banner/banner-women-1.jpg" alt="Thời trang công sở" class="blog-image">
+                            <img src="~/images/blog/banner_ecb4d0c5.jpg" alt="Thời trang công sở cho phái đẹp" class="blog-image">
                             <div class="blog-date">
                                 <span class="date-day">10</span>
                                 <span class="date-month">OCT</span>
@@ -565,7 +571,10 @@
                             <span class="blog-category">CÔNG SỞ</span>
                             <h5 class="blog-title">Thời trang công sở cho phái đẹp</h5>
                             <p class="blog-excerpt">Những gợi ý trang phục công sở thanh lịch và chuyên nghiệp dành cho các cô nàng hiện đại...</p>
-                            <a href="/Blog" class="blog-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                            <div class="blog-footer">
+                                <span class="blog-date-text">10/10/2025</span>
+                                <a href="/Blog/thoi-trang-cong-so-cho-phai-dep" class="blog-read-more">XEM THÊM »</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1454,6 +1463,7 @@
         display: flex;
         flex-direction: column;
         height: calc(100% - 250px);
+        position: relative;
     }
     
     .blog-category {
@@ -1471,18 +1481,35 @@
         color: #333;
         margin: 0 0 15px 0;
         line-height: 1.4;
-        flex-grow: 1;
     }
     
     .blog-excerpt {
         color: #666;
         font-size: 0.95rem;
         line-height: 1.6;
-        margin: 0 0 20px 0;
+        margin: 0 0 80px 0; /* Thêm margin bottom để tránh đè lên footer */
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+    
+    .blog-footer {
+        position: absolute;
+        bottom: 25px;
+        left: 25px;
+        right: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    
+    .blog-date-text {
+        color: #999;
+        font-size: 0.85rem;
+        font-weight: 500;
     }
     
     .blog-read-more {
@@ -1491,8 +1518,6 @@
         font-weight: 600;
         font-size: 0.95rem;
         transition: all 0.3s ease;
-        align-self: flex-start;
-        margin-top: auto;
     }
     
     .blog-read-more:hover {
