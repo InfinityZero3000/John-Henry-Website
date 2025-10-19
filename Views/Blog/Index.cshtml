@@ -48,7 +48,7 @@
                         </a>
                         @foreach (var category in (List<JohnHenryFashionWeb.Models.BlogCategory>)ViewBag.Categories)
                         {
-                            <a asp-action="Category" asp-route-slug="@category.Slug" 
+                            <a href="/blog/category/@category.Slug" 
                                class="btn @(ViewBag.Category as string == category.Slug ? "btn-primary" : "btn-outline-primary") btn-sm">
                                 @category.Name
                             </a>
@@ -326,6 +326,10 @@
 
     .blog-post-content {
         padding: 25px;
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 250px);
+        position: relative;
     }
 
     .blog-post-meta {
@@ -362,7 +366,7 @@
         color: #6c757d;
         font-size: 0.95rem;
         line-height: 1.6;
-        margin-bottom: 20px;
+        margin-bottom: 80px; /* Để tránh đè lên footer */
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -370,6 +374,10 @@
     }
 
     .blog-post-footer {
+        position: absolute;
+        bottom: 25px;
+        left: 25px;
+        right: 25px;
         display: flex;
         justify-content: space-between;
         align-items: center;

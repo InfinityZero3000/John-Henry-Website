@@ -82,7 +82,7 @@
                 @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
                 {
                     <div class="featured-image mb-5">
-                        <img src="@Model.FeaturedImageUrl" class="img-fluid rounded shadow-lg w-100" alt="@Model.Title" style="max-height: 600px; object-fit: cover;">
+                        <img src="@Model.FeaturedImageUrl" class="img-fluid shadow-lg w-100" alt="@Model.Title" style="max-height: 600px; object-fit: cover;">
                     </div>
                 }
 
@@ -118,16 +118,12 @@
                             <div class="share-buttons">
                                 <span class="me-2 fw-bold">Chia sẻ:</span>
                                 <a href="https://www.facebook.com/sharer/sharer.php?u=@Context.Request.Scheme://@Context.Request.Host@Context.Request.Path" 
-                                   target="_blank" class="btn btn-primary btn-sm me-2" title="Share on Facebook">
+                                   target="_blank" class="btn btn-primary btn-sm me-2" title="Chia sẻ trên Facebook">
                                     <i class="fab fa-facebook-f"></i> Facebook
                                 </a>
-                                <a href="https://twitter.com/intent/tweet?url=@Context.Request.Scheme://@Context.Request.Host@Context.Request.Path&text=@Model.Title" 
-                                   target="_blank" class="btn btn-info btn-sm me-2 text-white" title="Share on Twitter">
-                                    <i class="fab fa-twitter"></i> Twitter
-                                </a>
-                                <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Context.Request.Scheme://@Context.Request.Host@Context.Request.Path" 
-                                   target="_blank" class="btn btn-secondary btn-sm" title="Share on LinkedIn">
-                                    <i class="fab fa-linkedin-in"></i> LinkedIn
+                                <a href="https://www.instagram.com/" 
+                                   target="_blank" class="btn btn-sm me-2" style="background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white;" title="Chia sẻ trên Instagram">
+                                    <i class="fab fa-instagram"></i> Instagram
                                 </a>
                             </div>
                         </div>
@@ -248,10 +244,6 @@
         .post-meta .badge {
             font-size: 0.85rem;
             letter-spacing: 0.5px;
-        }
-
-        .featured-image img {
-            border-radius: 12px;
         }
 
         .post-content {
