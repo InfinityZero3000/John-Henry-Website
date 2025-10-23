@@ -7,7 +7,7 @@
 │         Client (UI)         │
 │ - HTML5, CSS3, JS           │
 │ - Bootstrap 5 (layout)      │
-│ - GSAP, Lottie (anim)  │
+│ - GSAP, Lottie (anim)       │
 │ - Video.js (video bg)       │
 └─────────────┬───────────────┘
               │ HTTP/HTTPS
