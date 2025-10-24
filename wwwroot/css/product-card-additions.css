@@ -1,0 +1,231 @@
+/* ========================================
+   Product Card Additional Styles
+   ======================================== */
+
+/* Product SKU */
+.product-sku {
+    margin-bottom: 4px;
+}
+
+.product-sku small {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Product Colors */
+.product-colors {
+    margin-bottom: 8px;
+}
+
+.product-colors small {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.color-swatches-mini {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.color-dot:hover {
+    transform: scale(1.2);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Product Sizes */
+.product-sizes {
+    margin-bottom: 8px;
+}
+
+.product-sizes small {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Product Stock */
+.product-stock {
+    margin-bottom: 8px;
+}
+
+.product-stock small {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.product-stock i {
+    color: #28a745;
+}
+
+/* Sale Badge */
+.sale-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 4px;
+    z-index: 2;
+    text-transform: uppercase;
+}
+
+.new-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ffc107;
+    color: #333;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 4px;
+    z-index: 2;
+    text-transform: uppercase;
+}
+
+/* When both badges exist, position sale badge below */
+.product-image-container .new-badge {
+    top: 10px;
+}
+
+.product-image-container .sale-badge {
+    top: 40px;
+}
+
+/* ========================================
+   Quick Add Modal Styles
+   ======================================== */
+
+.size-btn-quick {
+    min-width: 50px;
+    height: 45px;
+    border: 2px solid #ddd;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.size-btn-quick:hover {
+    border-color: #c21935;
+    color: #c21935;
+}
+
+.size-btn-quick.active {
+    background: #c21935;
+    border-color: #c21935;
+    color: white;
+}
+
+.color-swatch-quick {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    background: none;
+}
+
+.color-swatch-quick:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.color-swatch-quick.active {
+    border: 3px solid #c21935;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #c21935;
+}
+
+.selected-color-quick {
+    color: #c21935;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* ========================================
+   Responsive Styles
+   ======================================== */
+
+@media (max-width: 768px) {
+    .product-sku small,
+    .product-colors small,
+    .product-sizes small,
+    .product-stock small {
+        font-size: 0.7rem;
+    }
+    
+    .color-dot {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .sale-badge,
+    .new-badge {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+    
+    .size-btn-quick {
+        min-width: 45px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+    
+    .color-swatch-quick {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-sku small,
+    .product-colors small,
+    .product-sizes small,
+    .product-stock small {
+        font-size: 0.65rem;
+    }
+    
+    .color-dot {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .sale-badge,
+    .new-badge {
+        font-size: 0.65rem;
+        padding: 2px 5px;
+    }
+    
+    .product-image-container .sale-badge {
+        top: 35px;
+    }
+    
+    .size-btn-quick {
+        min-width: 40px;
+        height: 38px;
+        font-size: 0.85rem;
+    }
+    
+    .color-swatch-quick {
+        width: 32px;
+        height: 32px;
+    }
+}

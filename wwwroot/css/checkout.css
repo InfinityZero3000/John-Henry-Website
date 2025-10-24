@@ -114,22 +114,102 @@
     color: #dc3545;
 }
 
+/* Billing Address Section */
+.billing-address-toggle {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.billing-address-toggle .form-check {
+    padding: 0;
+    margin: 0;
+}
+
+.billing-address-toggle .form-check-input {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+.billing-address-toggle .form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.billing-address-toggle .form-check-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.billing-address-toggle .form-check-label {
+    font-weight: 500;
+    color: #333;
+    margin-left: 12px;
+    cursor: pointer;
+    user-select: none;
+    line-height: 20px;
+}
+
+.billing-address-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    margin-top: 20px;
+    border: 1px solid #e9ecef;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: top;
+}
+
+.billing-address-section.show {
+    max-height: 1000px;
+    opacity: 1;
+    transform: scaleY(1);
+    padding: 25px;
+    margin-top: 20px;
+}
+
+.billing-address-section .section-subtitle {
+    color: #007bff;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.billing-address-section .section-subtitle i {
+    margin-right: 8px;
+}
+
 /* Shipping Methods */
 .shipping-methods {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 15px;
 }
 
 .shipping-method {
+    position: relative;
     border: 2px solid #e9ecef;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.3s ease;
+    overflow: hidden;
+    background: white;
 }
 
 .shipping-method:hover {
     border-color: #007bff;
-    background-color: #f8f9ff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+    transform: translateY(-2px);
 }
 
 .shipping-method-label {
@@ -140,43 +220,95 @@
 }
 
 .shipping-method-radio {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.shipping-method-radio:checked + .shipping-method-content {
+.shipping-method-radio:checked ~ .shipping-method-content {
+    background-color: #f0f7ff;
+    border-left: 4px solid #007bff;
+}
+
+.shipping-method-radio:checked ~ .shipping-method-content::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 28px;
+    height: 28px;
     background-color: #007bff;
     color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 
 .shipping-method-content {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 15px 20px;
-    border-radius: 6px;
+    padding: 20px 25px;
     transition: all 0.3s ease;
 }
 
+.shipping-method-left {
+    flex: 1;
+    padding-right: 50px;
+}
+
 .shipping-method-info h6 {
-    margin: 0 0 5px 0;
+    margin: 0 0 8px 0;
     font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.shipping-method-info h6 i {
+    margin-right: 8px;
+    color: #007bff;
+    font-size: 18px;
 }
 
 .shipping-method-info p {
-    margin: 0 0 5px 0;
+    margin: 0 0 8px 0;
     font-size: 14px;
-    opacity: 0.8;
+    color: #6c757d;
+    line-height: 1.4;
 }
 
 .shipping-method-time {
+    font-size: 13px;
+    color: #28a745;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.shipping-method-time i {
+    margin-right: 5px;
     font-size: 12px;
-    opacity: 0.7;
+}
+
+.shipping-method-right {
+    text-align: right;
 }
 
 .shipping-method-price {
-    font-size: 16px;
-    font-weight: 600;
-    text-align: right;
+    font-size: 18px;
+    font-weight: 700;
+    color: #007bff;
+}
+
+.shipping-method-price.free {
+    color: #28a745;
 }
 
 /* Payment Methods */
@@ -940,8 +1072,38 @@
     
     .shipping-method-content {
         flex-direction: column;
-        text-align: center;
-        gap: 10px;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .shipping-method-left {
+        width: 100%;
+        padding-right: 0;
+    }
+    
+    .shipping-method-right {
+        width: 100%;
+        text-align: left;
+    }
+    
+    .shipping-method-radio:checked ~ .shipping-method-content::before {
+        top: auto;
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .billing-address-toggle .form-check {
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+    }
+    
+    .billing-address-toggle .form-check-input {
+        margin-right: 12px;
+    }
+    
+    .billing-address-toggle .form-check-label {
+        margin-left: 0;
     }
     
     .action-buttons .col-md-3,
