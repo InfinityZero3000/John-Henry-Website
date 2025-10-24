@@ -39,9 +39,44 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? mode)
         {
             var userId = _userManager.GetUserId(User);
+            
+            // Check if this is a Buy Now request
+            if (mode == "buynow" && TempData["IsBuyNow"] is bool isBuyNow && isBuyNow)
+            {
+                var buyNowItemJson = TempData["BuyNowItem"] as string;
+                if (!string.IsNullOrEmpty(buyNowItemJson))
+                {
+                    try
+                    {
+                        using var doc = System.Text.Json.JsonDocument.Parse(buyNowItemJson);
+                        var buyNowItem = doc.RootElement;
+                        
+                        // Create cart item from Buy Now data
+                        var productIdString = buyNowItem.GetProperty("ProductId").GetString();
+                        var cartItemViewModel = new CartItemViewModel
+                        {
+                            ProductId = Guid.Parse(productIdString ?? Guid.Empty.ToString()),
+                            ProductName = buyNowItem.GetProperty("ProductName").GetString() ?? "",
+                            Price = buyNowItem.GetProperty("Price").GetDecimal(),
+                            Quantity = buyNowItem.GetProperty("Quantity").GetInt32(),
+                            Size = buyNowItem.TryGetProperty("Size", out System.Text.Json.JsonElement sizeEl) ? sizeEl.GetString() : null,
+                            Color = buyNowItem.TryGetProperty("Color", out System.Text.Json.JsonElement colorEl) ? colorEl.GetString() : null,
+                            ImageUrl = buyNowItem.TryGetProperty("ProductImage", out System.Text.Json.JsonElement imageEl) ? imageEl.GetString() : null
+                        };
+                        
+                        var buyNowModel = await CreateCheckoutViewModelAsync(userId, new List<CartItemViewModel> { cartItemViewModel });
+                        return View(buyNowModel);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error parsing Buy Now item from TempData");
+                    }
+                }
+            }
+            
             if (string.IsNullOrEmpty(userId))
             {
                 // For anonymous users, get cart from session
@@ -56,16 +91,40 @@ namespace JohnHenryFashionWeb.Controllers
                 return View(model);
             }
 
-            // For authenticated users, get cart from database
+            // For authenticated users, get selected items from session
+            var selectedJson = HttpContext.Session.GetString("SelectedCartItems");
+            List<Guid> selectedIds;
+            
+            if (!string.IsNullOrEmpty(selectedJson))
+            {
+                try
+                {
+                    selectedIds = System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(selectedJson) ?? new List<Guid>();
+                }
+                catch
+                {
+                    selectedIds = new List<Guid>();
+                }
+            }
+            else
+            {
+                // If no selection, take all items
+                selectedIds = await _context.ShoppingCartItems
+                    .Where(c => c.UserId == userId)
+                    .Select(c => c.Id)
+                    .ToListAsync();
+            }
+
+            // Get only selected items from cart
             var cartItems = await _context.ShoppingCartItems
                 .Include(c => c.Product)
                 .ThenInclude(p => p.Category)
-                .Where(c => c.UserId == userId)
+                .Where(c => c.UserId == userId && selectedIds.Contains(c.Id))
                 .ToListAsync();
 
             if (!cartItems.Any())
             {
-                TempData["ErrorMessage"] = "Giỏ hàng của bạn đang trống.";
+                TempData["ErrorMessage"] = "Vui lòng chọn sản phẩm để thanh toán.";
                 return RedirectToAction("Index", "Cart");
             }
 
@@ -296,7 +355,7 @@ namespace JohnHenryFashionWeb.Controllers
                         return Json(new 
                         { 
                             success = true, 
-                            redirectUrl = Url.Action("Success", new { orderId = order.Id }),
+                            redirectUrl = Url.Action("Success", "Checkout", new { orderId = order.Id }),
                             message = paymentResult.Message
                         });
                     }
@@ -334,7 +393,7 @@ namespace JohnHenryFashionWeb.Controllers
                         if (vnp_ResponseCode == "00") // Success
                         {
                             await CompleteOrderAsync(order, vnp_TransactionNo);
-                            return RedirectToAction("Success", new { orderId = order.Id });
+                            return RedirectToAction("Success", "Checkout", new { orderId = order.Id });
                         }
                         else
                         {
@@ -344,7 +403,7 @@ namespace JohnHenryFashionWeb.Controllers
                             await _context.SaveChangesAsync();
 
                             TempData["ErrorMessage"] = "Thanh toán không thành công. Vui lòng thử lại.";
-                            return RedirectToAction("Failed", new { orderId = order.Id });
+                            return RedirectToAction("Failed", "Checkout", new { orderId = order.Id });
                         }
                     }
                 }

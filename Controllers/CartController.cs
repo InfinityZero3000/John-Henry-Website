@@ -44,7 +44,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Cart/UpdateQuantity
         [HttpPost]
-        public async Task<IActionResult> UpdateQuantity(Guid cartItemId, int quantity)
+        public async Task<IActionResult> UpdateQuantity([FromBody] UpdateQuantityRequest request)
         {
             try
             {
@@ -56,20 +56,20 @@ namespace JohnHenryFashionWeb.Controllers
 
                 var cartItem = await _context.ShoppingCartItems
                     .Include(c => c.Product)
-                    .FirstOrDefaultAsync(c => c.Id == cartItemId && c.UserId == userId);
+                    .FirstOrDefaultAsync(c => c.Id == request.CartItemId && c.UserId == userId);
 
                 if (cartItem == null)
                 {
                     return Json(new { success = false, message = "Cart item not found" });
                 }
 
-                if (quantity <= 0)
+                if (request.Quantity <= 0)
                 {
                     return Json(new { success = false, message = "Quantity must be greater than 0" });
                 }
 
                 // Check stock availability
-                if (cartItem.Product.StockQuantity < quantity)
+                if (cartItem.Product.StockQuantity < request.Quantity)
                 {
                     return Json(new { 
                         success = false, 
@@ -77,7 +77,7 @@ namespace JohnHenryFashionWeb.Controllers
                     });
                 }
 
-                cartItem.Quantity = quantity;
+                cartItem.Quantity = request.Quantity;
                 cartItem.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -106,9 +106,16 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
+        // Request model for UpdateQuantity
+        public class UpdateQuantityRequest
+        {
+            public Guid CartItemId { get; set; }
+            public int Quantity { get; set; }
+        }
+
         // POST: Cart/RemoveItem
         [HttpPost]
-        public async Task<IActionResult> RemoveItem(Guid cartItemId)
+        public async Task<IActionResult> RemoveItem([FromBody] RemoveItemRequest request)
         {
             try
             {
@@ -119,7 +126,7 @@ namespace JohnHenryFashionWeb.Controllers
                 }
 
                 var cartItem = await _context.ShoppingCartItems
-                    .FirstOrDefaultAsync(c => c.Id == cartItemId && c.UserId == userId);
+                    .FirstOrDefaultAsync(c => c.Id == request.CartItemId && c.UserId == userId);
 
                 if (cartItem == null)
                 {
@@ -149,6 +156,12 @@ namespace JohnHenryFashionWeb.Controllers
                 Console.WriteLine($"Error removing cart item: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while removing item" });
             }
+        }
+
+        // Request model for RemoveItem
+        public class RemoveItemRequest
+        {
+            public Guid CartItemId { get; set; }
         }
 
         // POST: Cart/ClearCart
@@ -184,32 +197,27 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
-        // GET: Cart/Checkout
-        public async Task<IActionResult> Checkout()
+        // POST: Cart/SaveSelectedItems
+        [HttpPost]
+        public IActionResult SaveSelectedItems([FromBody] List<Guid> selectedItemIds)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return RedirectToAction("Login", "Account");
+                if (selectedItemIds == null || !selectedItemIds.Any())
+                {
+                    return Json(new { success = false, message = "Không có sản phẩm nào được chọn" });
+                }
+
+                HttpContext.Session.SetString("SelectedCartItems", 
+                    System.Text.Json.JsonSerializer.Serialize(selectedItemIds));
+                
+                return Json(new { success = true, message = "Đã lưu danh sách sản phẩm" });
             }
-
-            var cartItems = await _context.ShoppingCartItems
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .ToListAsync();
-
-            if (!cartItems.Any())
+            catch (Exception ex)
             {
-                TempData["Message"] = "Your cart is empty";
-                return RedirectToAction("Index");
+                Console.WriteLine($"Error saving selected items: {ex.Message}");
+                return Json(new { success = false, message = "Lỗi lưu danh sách sản phẩm" });
             }
-
-            ViewBag.CartTotal = cartItems.Sum(c => c.Price * c.Quantity);
-            ViewBag.CartCount = cartItems.Sum(c => c.Quantity);
-            ViewBag.ShippingFee = 30000; // 30k VND shipping fee
-            ViewBag.GrandTotal = ViewBag.CartTotal + ViewBag.ShippingFee;
-
-            return View(cartItems);
         }
 
         // GET: Cart/GetCartCount

@@ -745,13 +745,25 @@ public class HomeController : Controller
             SKU = product.SKU,
             Price = product.Price, // Chỉ dùng giá gốc từ database
             FeaturedImageUrl = product.FeaturedImageUrl ?? "/images/default-product.jpg",
+            Images = product.GalleryImages?.ToList() ?? new List<string>(),
             StockQuantity = product.StockQuantity,
             CategoryName = product.Category?.Name ?? "Chưa phân loại",
             BrandName = product.Brand?.Name,
             Rating = product.Rating,
             ReviewCount = product.ReviewCount,
             IsNew = product.CreatedAt > DateTime.UtcNow.AddDays(-30),
-            IsFeatured = product.IsFeatured
+            IsFeatured = product.IsFeatured,
+            // Parse comma-separated colors and sizes from Product model
+            AvailableColors = !string.IsNullOrEmpty(product.Color) 
+                ? product.Color.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(c => c.Trim())
+                    .ToList()
+                : new List<string>(),
+            AvailableSizes = !string.IsNullOrEmpty(product.Size)
+                ? product.Size.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .ToList()
+                : new List<string>()
         };
     }
 
