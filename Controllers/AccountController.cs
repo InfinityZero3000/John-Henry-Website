@@ -234,139 +234,106 @@ namespace JohnHenryFashionWeb.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
         {
+            _logger.LogInformation("=== GOOGLE LOGIN START ===");
+            
+            // Bước 1: Kiểm tra lỗi từ Google
             if (remoteError != null)
             {
-                ErrorMessage = $"Lỗi từ nhà cung cấp dịch vụ: {remoteError}";
+                _logger.LogError("Google trả về lỗi: {Error}", remoteError);
+                TempData["ErrorMessage"] = $"Lỗi từ Google: {remoteError}";
                 return RedirectToAction(nameof(Login));
             }
 
+            // Bước 2: Lấy thông tin từ Google
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Lỗi tải thông tin đăng nhập từ bên ngoài.";
+                _logger.LogError("Không lấy được thông tin từ Google (info = null)");
+                TempData["ErrorMessage"] = "Không thể lấy thông tin từ Google. Vui lòng thử lại.";
                 return RedirectToAction(nameof(Login));
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
-            
-            if (result.Succeeded)
+            // Bước 3: Lấy email từ Google
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
             {
-                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
-                return await RedirectToLocal(returnUrl);
+                _logger.LogError("Google không trả về email");
+                TempData["ErrorMessage"] = "Không thể lấy email từ tài khoản Google.";
+                return RedirectToAction(nameof(Login));
             }
+
+            _logger.LogInformation("Email từ Google: {Email}", email);
+
+            // Bước 4: Kiểm tra user đã tồn tại chưa
+            var user = await _userManager.FindByEmailAsync(email);
             
-            if (result.IsLockedOut)
+            if (user == null)
             {
-                return RedirectToAction(nameof(Lockout));
-            }
-            else
-            {
-                // If the user does not have an account, then create one automatically.
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
-                var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
-                var fullName = info.Principal.FindFirstValue(ClaimTypes.Name);
-
-                // Parse name if firstName/lastName are null
-                if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
-                {
-                    if (!string.IsNullOrEmpty(fullName))
-                    {
-                        var nameParts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        firstName = nameParts.FirstOrDefault() ?? "";
-                        lastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
-                    }
-                }
-
-                if (string.IsNullOrEmpty(email))
-                {
-                    ErrorMessage = "Không thể lấy thông tin email từ tài khoản Google.";
-                    _logger.LogError("Failed to get email from Google OAuth for provider {Provider}", info.LoginProvider);
-                    return RedirectToAction(nameof(Login));
-                }
-
-                _logger.LogInformation("Google OAuth: Email={Email}, FirstName={FirstName}, LastName={LastName}", email, firstName, lastName);
-
-                // Check if user with this email already exists
-                var existingUser = await _userManager.FindByEmailAsync(email);
-                if (existingUser != null)
-                {
-                    // Link this external login to existing account
-                    var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
-                    if (addLoginResult.Succeeded)
-                    {
-                        await _signInManager.SignInAsync(existingUser, isPersistent: true);
-                        _logger.LogInformation("External login linked to existing user {Email}", email);
-                        return await RedirectToLocal(returnUrl);
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to link external login to existing user {Email}: {Errors}", 
-                            email, string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
-                        ErrorMessage = "Đã có tài khoản tồn tại với email này. Vui lòng đăng nhập bằng email/mật khẩu.";
-                        return RedirectToAction(nameof(Login));
-                    }
-                }
-
-                // Check configuration for Google email confirmation
-                var requireEmailConfirmationForGoogle = bool.Parse(_configuration["REQUIRE_EMAIL_CONFIRMATION_FOR_GOOGLE"] ?? "true");
-                var googleAutoConfirmEmail = bool.Parse(_configuration["GOOGLE_AUTO_CONFIRM_EMAIL"] ?? "false");
+                // Tạo user mới
+                _logger.LogInformation("Tạo user mới cho email: {Email}", email);
                 
-                // Create new user automatically
-                var user = new ApplicationUser
+                var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "";
+                var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? "";
+                
+                user = new ApplicationUser
                 {
                     UserName = email,
                     Email = email,
-                    FirstName = firstName ?? "User",
-                    LastName = lastName ?? "",
+                    FirstName = firstName,
+                    LastName = lastName,
+                    EmailConfirmed = true, // Google đã xác thực email rồi
                     IsActive = true,
-                    EmailConfirmed = googleAutoConfirmEmail || !requireEmailConfirmationForGoogle, // Auto confirm if configured or not required
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                var createUserResult = await _userManager.CreateAsync(user);
-                
-                if (createUserResult.Succeeded)
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
                 {
-                    // Add user to Customer role
-                    await _userManager.AddToRoleAsync(user, "Customer");
-                    
-                    // Add external login
-                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
-                    if (addLoginResult.Succeeded)
-                    {
-                        // Check if email confirmation is required for Google users
-                        if (requireEmailConfirmationForGoogle && !user.EmailConfirmed)
-                        {
-                            // Send email confirmation
-                            await SendEmailConfirmationForGoogleUser(user);
-                            TempData["Message"] = "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác nhận tài khoản.";
-                            return RedirectToAction(nameof(Login));
-                        }
-                        else
-                        {
-                            // Sign in immediately
-                            await _signInManager.SignInAsync(user, isPersistent: true);
-                            _logger.LogInformation("User created and logged in with {Name} provider.", info.LoginProvider);
-                            
-                            // Send welcome email asynchronously
-                            _ = SendWelcomeEmailAsync(user);
-                            
-                            return await RedirectToLocal(returnUrl);
-                        }
-                    }
+                    _logger.LogError("Không tạo được user: {Errors}", string.Join(", ", createResult.Errors.Select(e => e.Description)));
+                    TempData["ErrorMessage"] = "Không thể tạo tài khoản. Vui lòng thử lại.";
+                    return RedirectToAction(nameof(Login));
                 }
-                
-                // If we got this far, something failed
-                ErrorMessage = "Có lỗi xảy ra khi tạo tài khoản từ Google.";
-                foreach (var error in createUserResult.Errors)
-                {
-                    _logger.LogError("Google account creation error: {Error}", error.Description);
-                }
-                return RedirectToAction(nameof(Login));
+
+                // Thêm role Customer
+                await _userManager.AddToRoleAsync(user, "Customer");
+                _logger.LogInformation("Đã tạo user và thêm role Customer");
             }
+            else
+            {
+                _logger.LogInformation("User đã tồn tại: {Email}", email);
+                
+                // Đảm bảo EmailConfirmed = true
+                if (!user.EmailConfirmed)
+                {
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                    _logger.LogInformation("Đã cập nhật EmailConfirmed = true");
+                }
+            }
+
+            // Bước 5: Link Google login với user (nếu chưa link)
+            var existingLogins = await _userManager.GetLoginsAsync(user);
+            if (!existingLogins.Any(l => l.LoginProvider == info.LoginProvider && l.ProviderKey == info.ProviderKey))
+            {
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                if (!addLoginResult.Succeeded)
+                {
+                    _logger.LogError("Không thể link Google login: {Errors}", string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
+                }
+                else
+                {
+                    _logger.LogInformation("Đã link Google login với user");
+                }
+            }
+
+            // Bước 6: Đăng nhập user
+            await _signInManager.SignInAsync(user, isPersistent: true);
+            _logger.LogInformation("Đã đăng nhập user: {Email}", email);
+
+            // Bước 7: Redirect về trang chủ
+            _logger.LogInformation("=== GOOGLE LOGIN SUCCESS ===");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -743,6 +710,137 @@ namespace JohnHenryFashionWeb.Controllers
             }
 
             return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> SaveAddress([FromBody] SaveAddressRequest request)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để lưu địa chỉ" });
+                }
+
+                // Validate request
+                if (string.IsNullOrWhiteSpace(request.FullName) ||
+                    string.IsNullOrWhiteSpace(request.PhoneNumber) ||
+                    string.IsNullOrWhiteSpace(request.Address) ||
+                    string.IsNullOrWhiteSpace(request.City))
+                {
+                    return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin địa chỉ" });
+                }
+
+                // Parse full name into first and last name
+                var nameParts = request.FullName.Trim().Split(' ');
+                var firstName = nameParts.Length > 0 ? nameParts[0] : request.FullName;
+                var lastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
+
+                // Check if address already exists (same details)
+                var existingAddress = await _context.Addresses
+                    .FirstOrDefaultAsync(a => 
+                        a.UserId == userId &&
+                        a.FirstName == firstName &&
+                        a.LastName == lastName &&
+                        a.Phone == request.PhoneNumber &&
+                        a.Address1 == request.Address &&
+                        a.City == request.City &&
+                        a.State == request.District);
+
+                if (existingAddress != null)
+                {
+                    // Update existing address
+                    existingAddress.IsDefault = request.IsDefault;
+                    existingAddress.UpdatedAt = DateTime.UtcNow;
+                    
+                    if (request.IsDefault)
+                    {
+                        // Remove default from other addresses
+                        var otherAddresses = await _context.Addresses
+                            .Where(a => a.UserId == userId && a.Id != existingAddress.Id)
+                            .ToListAsync();
+                        
+                        foreach (var addr in otherAddresses)
+                        {
+                            addr.IsDefault = false;
+                        }
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, message = "Địa chỉ đã tồn tại và được cập nhật" });
+                }
+
+                // Create new address
+                var newAddress = new Address
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    Type = "shipping",
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Phone = request.PhoneNumber,
+                    Address1 = request.Address,
+                    Address2 = !string.IsNullOrWhiteSpace(request.Ward) ? $"{request.Ward}, {request.District}" : request.District,
+                    State = request.District ?? "",
+                    City = request.City,
+                    PostalCode = request.PostalCode ?? "",
+                    Country = "Vietnam",
+                    IsDefault = request.IsDefault,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                // If this is the first address, make it default
+                var existingAddressesCount = await _context.Addresses
+                    .Where(a => a.UserId == userId)
+                    .CountAsync();
+                
+                if (existingAddressesCount == 0)
+                {
+                    newAddress.IsDefault = true;
+                }
+                else if (request.IsDefault)
+                {
+                    // Remove default from other addresses
+                    var otherAddresses = await _context.Addresses
+                        .Where(a => a.UserId == userId)
+                        .ToListAsync();
+                    
+                    foreach (var addr in otherAddresses)
+                    {
+                        addr.IsDefault = false;
+                    }
+                }
+
+                _context.Addresses.Add(newAddress);
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Địa chỉ đã được lưu thành công",
+                    addressId = newAddress.Id
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving address");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lưu địa chỉ" });
+            }
+        }
+
+        // Request model for SaveAddress
+        public class SaveAddressRequest
+        {
+            public string FullName { get; set; } = string.Empty;
+            public string PhoneNumber { get; set; } = string.Empty;
+            public string Address { get; set; } = string.Empty;
+            public string? Ward { get; set; }
+            public string? District { get; set; }
+            public string City { get; set; } = string.Empty;
+            public string? PostalCode { get; set; }
+            public bool IsDefault { get; set; } = false;
         }
 
         [Authorize]
