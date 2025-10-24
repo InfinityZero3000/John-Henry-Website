@@ -1,0 +1,999 @@
+================================================================================
+        JOHN HENRY FASHION E-COMMERCE - DATABASE SCHEMA DOCUMENTATION
+================================================================================
+
+Project: John Henry Fashion E-Commerce Platform
+Technology Stack: ASP.NET Core 9.0 + Entity Framework Core 9.0 + PostgreSQL 15
+Date: 24/10/2025
+Version: 1.0
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+I. ASP.NET IDENTITY TABLES
+II. CORE PRODUCT & CATEGORY TABLES
+III. ORDER & SHOPPING CART TABLES
+IV. PAYMENT TABLES
+V. CHECKOUT TABLES
+VI. COUPON & PROMOTION TABLES
+VII. INVENTORY TABLES
+VIII. BLOG TABLES
+IX. USER INTERACTION TABLES
+X. NOTIFICATION & MESSAGING TABLES
+XI. SECURITY & AUDIT TABLES
+XII. ANALYTICS TABLES
+XIII. SELLER & MARKETPLACE TABLES
+XIV. MARKETING TABLES
+XV. SYSTEM CONFIGURATION TABLES
+
+================================================================================
+DATABASE OVERVIEW
+================================================================================
+
+Database Type: PostgreSQL 15
+Total Tables: 50+
+Primary Key Type: UUID (GUID) for most tables, SERIAL for some system tables
+Timestamp Type: UTC timestamps
+Character Set: UTF-8
+
+Key Design Principles:
+- Clean Architecture with separation of concerns
+- Multi-vendor marketplace support
+- Comprehensive audit logging
+- Performance optimized with strategic indexes
+- Data integrity with foreign key constraints
+- Soft delete capability where appropriate
+
+================================================================================
+I. ASP.NET IDENTITY TABLES
+================================================================================
+
+These tables are generated automatically by ASP.NET Core Identity Framework
+and manage user authentication and authorization.
+
+1. AspNetUsers
+   Purpose: Core user accounts
+   Extended Fields:
+   - FirstName, LastName (VARCHAR)
+   - DateOfBirth (DATE)
+   - Gender (VARCHAR)
+   - Avatar (VARCHAR - image URL)
+   - IsActive (BOOLEAN)
+   - CreatedAt, UpdatedAt, LastLoginDate (TIMESTAMP)
+   
+   Standard Identity Fields:
+   - Id (Primary Key - VARCHAR 450)
+   - UserName, Email (VARCHAR)
+   - PasswordHash (VARCHAR)
+   - PhoneNumber (VARCHAR)
+   - EmailConfirmed, PhoneNumberConfirmed (BOOLEAN)
+   - TwoFactorEnabled, LockoutEnabled (BOOLEAN)
+   - AccessFailedCount (INTEGER)
+
+2. AspNetRoles
+   Purpose: User roles (Admin, Seller, Customer)
+   Fields:
+   - Id (PK)
+   - Name, NormalizedName (VARCHAR)
+
+3. AspNetUserRoles
+   Purpose: Junction table linking users to roles
+   Fields:
+   - UserId (FK to AspNetUsers)
+   - RoleId (FK to AspNetRoles)
+
+4. AspNetUserClaims, AspNetUserLogins, AspNetUserTokens
+   Purpose: Support external authentication and claims
+
+================================================================================
+II. CORE PRODUCT & CATEGORY TABLES
+================================================================================
+
+1. Categories
+   Purpose: Product categorization with hierarchical support
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Name (VARCHAR 100) - Category name
+   - Slug (VARCHAR 150, UNIQUE) - URL-friendly identifier
+   - Description (TEXT) - Detailed description
+   - ImageUrl (VARCHAR 500) - Category image
+   - ParentId (UUID, FK to Categories) - For nested categories
+   - IsActive (BOOLEAN) - Enable/disable category
+   - SortOrder (INTEGER) - Display order
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Slug
+   - Index on ParentId, IsActive
+
+2. Brands
+   Purpose: Product brands/manufacturers
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Name (VARCHAR 100)
+   - Slug (VARCHAR 150, UNIQUE)
+   - Description (TEXT)
+   - LogoUrl (VARCHAR 500)
+   - Website (VARCHAR 255)
+   - IsActive (BOOLEAN)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Slug
+   - Index on IsActive
+
+3. Products
+   Purpose: Main product catalog
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Name (VARCHAR 255) - Product name
+   - Slug (VARCHAR 300, UNIQUE) - SEO-friendly URL
+   - Description (TEXT) - Full description
+   - ShortDescription (VARCHAR 500) - Brief summary
+   - SKU (VARCHAR 100, UNIQUE) - Stock keeping unit
+   - Price (DECIMAL 10,2) - Regular price
+   - SalePrice (DECIMAL 10,2) - Discounted price
+   - StockQuantity (INTEGER) - Available quantity
+   - ManageStock (BOOLEAN) - Enable stock management
+   - InStock (BOOLEAN) - Availability status
+   - FeaturedImageUrl (VARCHAR 500) - Main product image
+   - GalleryImages (TEXT ARRAY) - Additional images
+   - Size (VARCHAR 100) - Size information
+   - Color (VARCHAR 100) - Color options
+   - Material (VARCHAR 200) - Material composition
+   - Weight (DECIMAL 10,2) - Product weight
+   - Dimensions (VARCHAR 100) - Product dimensions
+   - IsFeatured (BOOLEAN) - Feature on homepage
+   - IsActive (BOOLEAN) - Product visibility
+   - Status (VARCHAR 50) - active, inactive, out_of_stock
+   - ViewCount (INTEGER) - Number of views
+   - Rating (DECIMAL 3,2) - Average rating (1-5)
+   - ReviewCount (INTEGER) - Number of reviews
+   - CategoryId (UUID, FK to Categories)
+   - BrandId (UUID, FK to Brands)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Slug, SKU
+   - Index on CategoryId, BrandId, IsFeatured, IsActive, Price
+
+4. ProductImages
+   Purpose: Additional product images
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - ProductId (UUID, FK to Products)
+   - ImageUrl (VARCHAR 500)
+   - AltText (VARCHAR 255) - Image description
+   - IsPrimary (BOOLEAN) - Main image flag
+   - SortOrder (INTEGER) - Display order
+   - CreatedAt (TIMESTAMP)
+
+5. ProductReviews
+   Purpose: Customer product reviews
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - ProductId (UUID, FK to Products)
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - Rating (INTEGER, 1-5)
+   - Title (VARCHAR 255)
+   - Comment (TEXT)
+   - IsApproved (BOOLEAN) - Admin moderation
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on ProductId, UserId, IsApproved
+
+================================================================================
+III. ORDER & SHOPPING CART TABLES
+================================================================================
+
+1. Orders
+   Purpose: Customer orders
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - OrderNumber (VARCHAR 50, UNIQUE) - Human-readable order ID
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - Status (VARCHAR 50) - pending, processing, shipped, delivered, cancelled
+   - TotalAmount (DECIMAL 10,2) - Order total
+   - ShippingFee (DECIMAL 10,2) - Shipping cost
+   - Tax (DECIMAL 10,2) - Tax amount
+   - DiscountAmount (DECIMAL 10,2) - Coupon discount
+   - CouponCode (VARCHAR 50) - Applied coupon
+   - PaymentMethod (VARCHAR 50) - cod, vnpay, momo, stripe
+   - PaymentStatus (VARCHAR 50) - pending, paid, failed, refunded
+   - Notes (TEXT) - Customer notes
+   - ShippingAddress (TEXT) - Delivery address
+   - BillingAddress (TEXT) - Billing address
+   - ShippedAt (TIMESTAMP) - Shipping date
+   - DeliveredAt (TIMESTAMP) - Delivery date
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on OrderNumber
+   - Index on UserId, Status, PaymentStatus, CreatedAt
+
+2. OrderItems
+   Purpose: Individual items in an order
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - OrderId (UUID, FK to Orders)
+   - ProductId (UUID, FK to Products)
+   - Quantity (INTEGER)
+   - UnitPrice (DECIMAL 10,2) - Price at time of order
+   - TotalPrice (DECIMAL 10,2) - Quantity × UnitPrice
+   - ProductName (VARCHAR 255) - Snapshot of product name
+   - ProductSKU (VARCHAR 100) - Snapshot of SKU
+   - ProductImage (VARCHAR 500) - Snapshot of image
+   
+   Indexes:
+   - Index on OrderId, ProductId
+
+3. ShoppingCartItems
+   Purpose: User shopping cart
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - ProductId (UUID, FK to Products)
+   - Quantity (INTEGER)
+   - Size (VARCHAR 50)
+   - Color (VARCHAR 50)
+   - Price (DECIMAL 10,2)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, ProductId
+
+4. OrderStatusHistories
+   Purpose: Track order status changes
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - OrderId (UUID, FK to Orders)
+   - Status (VARCHAR 50)
+   - Notes (TEXT)
+   - ChangedBy (VARCHAR 450, FK to AspNetUsers)
+   - CreatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on OrderId, CreatedAt
+
+================================================================================
+IV. PAYMENT TABLES
+================================================================================
+
+1. Payments
+   Purpose: Payment records for orders
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - OrderId (UUID, FK to Orders)
+   - PaymentMethod (VARCHAR 50)
+   - Status (VARCHAR 50) - pending, completed, failed, refunded
+   - Amount (DECIMAL 10,2)
+   - TransactionId (VARCHAR 255) - Gateway transaction ID
+   - GatewayResponse (TEXT) - Raw gateway response
+   - ProcessedAt (TIMESTAMP)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on OrderId, Status, TransactionId
+
+2. PaymentAttempts
+   Purpose: Track all payment attempts (for debugging)
+   Primary Key: Id (SERIAL)
+   
+   Fields:
+   - PaymentId (VARCHAR 255, UNIQUE)
+   - OrderId (VARCHAR 255)
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - Amount (DECIMAL 18,2)
+   - Currency (VARCHAR 3) - Default VND
+   - PaymentMethod (VARCHAR 50)
+   - Status (VARCHAR 50)
+   - TransactionId (VARCHAR 255)
+   - ErrorMessage (TEXT)
+   - IpAddress (VARCHAR 45)
+   - UserAgent (VARCHAR 500)
+   - CreatedAt, CompletedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on PaymentId
+   - Index on OrderId, UserId, Status
+
+3. PaymentTransactions
+   Purpose: Transaction records for marketplace settlements
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - OrderId (UUID, FK to Orders)
+   - UserId (VARCHAR 450, FK to AspNetUsers) - Customer
+   - SellerId (VARCHAR 450, FK to AspNetUsers) - Seller
+   - Amount (DECIMAL 18,2) - Total amount
+   - PlatformFee (DECIMAL 18,2) - Platform commission
+   - SellerAmount (DECIMAL 18,2) - Amount to seller
+   - PaymentMethod (VARCHAR 50)
+   - Status (VARCHAR 50)
+   - TransactionId (VARCHAR 255)
+   - Description (TEXT)
+   - CreatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on OrderId, UserId, SellerId, Status
+
+================================================================================
+V. CHECKOUT TABLES
+================================================================================
+
+1. CheckoutSessions
+   Purpose: Temporary checkout data
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers) - Nullable for guest checkout
+   - Email (VARCHAR 255)
+   - Status (VARCHAR 50) - active, completed, expired, abandoned
+   - TotalAmount (DECIMAL 18,2)
+   - ShippingFee (DECIMAL 18,2)
+   - Tax (DECIMAL 18,2)
+   - DiscountAmount (DECIMAL 18,2)
+   - CouponCode (VARCHAR 50)
+   - ShippingAddress (TEXT)
+   - BillingAddress (TEXT)
+   - ShippingMethod (VARCHAR 50)
+   - PaymentMethod (VARCHAR 50)
+   - ExpiresAt (TIMESTAMP) - Session expiration
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, Status, ExpiresAt
+
+2. CheckoutSessionItems
+   Purpose: Items in checkout session
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - CheckoutSessionId (UUID, FK to CheckoutSessions)
+   - ProductId (UUID, FK to Products)
+   - Quantity (INTEGER)
+   - UnitPrice (DECIMAL 18,2)
+   - TotalPrice (DECIMAL 18,2)
+   - Size (VARCHAR 20)
+   - Color (VARCHAR 50)
+   - ProductName (VARCHAR 255)
+   - ProductImage (VARCHAR 500)
+   
+   Indexes:
+   - Index on CheckoutSessionId, ProductId
+
+================================================================================
+VI. COUPON & PROMOTION TABLES
+================================================================================
+
+1. Coupons
+   Purpose: Discount coupons
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Code (VARCHAR 50, UNIQUE) - Coupon code
+   - Name (VARCHAR 255) - Display name
+   - Description (TEXT)
+   - Type (VARCHAR 50) - percentage, fixed_amount
+   - Value (DECIMAL 10,2) - Discount value
+   - MinOrderAmount (DECIMAL 10,2) - Minimum order requirement
+   - UsageLimit (INTEGER) - Max total uses
+   - UsageCount (INTEGER) - Current usage count
+   - StartDate (TIMESTAMP) - Valid from
+   - EndDate (TIMESTAMP) - Valid until
+   - IsActive (BOOLEAN)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Code
+   - Index on IsActive, StartDate, EndDate
+
+2. CouponUsages
+   Purpose: Track coupon usage
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - CouponId (UUID, FK to Coupons)
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - OrderId (UUID, FK to Orders)
+   - DiscountAmount (DECIMAL 10,2)
+   - UsedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on CouponId, UserId, OrderId
+
+================================================================================
+VII. INVENTORY TABLES
+================================================================================
+
+1. InventoryItems
+   Purpose: Inventory tracking
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - ProductId (UUID, UNIQUE, FK to Products)
+   - QuantityOnHand (INTEGER) - Physical stock
+   - QuantityReserved (INTEGER) - Pending orders
+   - QuantityAvailable (INTEGER) - Available for sale
+   - ReorderPoint (INTEGER) - Low stock threshold
+   - ReorderQuantity (INTEGER) - Reorder amount
+   - CostPrice (DECIMAL 10,2) - Purchase cost
+   - LastUpdated (TIMESTAMP)
+   
+   Indexes:
+   - Unique on ProductId
+
+2. StockMovements
+   Purpose: Inventory transaction history
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - ProductId (UUID, FK to Products)
+   - MovementType (VARCHAR 50) - purchase, sale, adjustment, return
+   - Quantity (INTEGER) - Positive or negative
+   - Reference (VARCHAR 255) - Order/PO reference
+   - Notes (TEXT)
+   - UserId (VARCHAR 450, FK to AspNetUsers) - Who made the change
+   - CreatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on ProductId, UserId, CreatedAt
+
+================================================================================
+VIII. BLOG TABLES
+================================================================================
+
+1. BlogCategories
+   Purpose: Blog post categories
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Name (VARCHAR 100)
+   - Slug (VARCHAR 150, UNIQUE)
+   - Description (TEXT)
+   - IsActive (BOOLEAN)
+   - SortOrder (INTEGER)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Slug
+   - Index on IsActive
+
+2. BlogPosts
+   Purpose: Blog content
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Title (VARCHAR 255)
+   - Slug (VARCHAR 300, UNIQUE)
+   - Excerpt (TEXT) - Short summary
+   - Content (TEXT) - Full content (Markdown)
+   - FeaturedImageUrl (VARCHAR 500)
+   - Status (VARCHAR 50) - draft, published, archived
+   - IsFeatured (BOOLEAN)
+   - ViewCount (INTEGER)
+   - Tags (TEXT ARRAY) - Blog tags
+   - MetaTitle (VARCHAR 255) - SEO title
+   - MetaDescription (TEXT) - SEO description
+   - CategoryId (UUID, FK to BlogCategories)
+   - AuthorId (VARCHAR 450, FK to AspNetUsers)
+   - PublishedAt (TIMESTAMP)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Slug
+   - Index on CategoryId, AuthorId, Status, PublishedAt
+
+================================================================================
+IX. USER INTERACTION TABLES
+================================================================================
+
+1. Wishlists
+   Purpose: User product wishlists
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - ProductId (UUID, FK to Products)
+   - CreatedAt (TIMESTAMP)
+   
+   Constraints:
+   - Unique combination of UserId and ProductId
+   
+   Indexes:
+   - Index on UserId, ProductId
+
+2. Addresses
+   Purpose: User shipping/billing addresses
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - Type (VARCHAR 50) - shipping, billing
+   - FirstName, LastName (VARCHAR 100)
+   - Company (VARCHAR 255)
+   - Address1 (VARCHAR 500) - Primary address line
+   - Address2 (VARCHAR 500) - Secondary address line
+   - City (VARCHAR 100)
+   - State (VARCHAR 100) - Province/State
+   - PostalCode (VARCHAR 20)
+   - Country (VARCHAR 100) - Default: Vietnam
+   - Phone (VARCHAR 20)
+   - IsDefault (BOOLEAN) - Default address flag
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, IsDefault
+
+================================================================================
+X. NOTIFICATION & MESSAGING TABLES
+================================================================================
+
+1. Notifications
+   Purpose: In-app notifications
+   Primary Key: Id (SERIAL)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - Title (VARCHAR 255)
+   - Message (VARCHAR 1000)
+   - Type (VARCHAR 50) - order, product, system, welcome, admin_order
+   - ActionUrl (VARCHAR 500) - Deep link
+   - IsRead (BOOLEAN)
+   - CreatedAt (TIMESTAMP)
+   - ReadAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, Type, IsRead, CreatedAt
+
+2. ContactMessages
+   Purpose: Contact form submissions
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Name (VARCHAR 100)
+   - Email (VARCHAR 255)
+   - Phone (VARCHAR 20)
+   - Subject (VARCHAR 255)
+   - Message (VARCHAR 5000)
+   - IsRead (BOOLEAN)
+   - IsReplied (BOOLEAN)
+   - AdminNotes (VARCHAR 2000)
+   - RepliedBy (VARCHAR 255)
+   - UserId (VARCHAR 450, FK to AspNetUsers) - Optional, if logged in
+   - CreatedAt (TIMESTAMP)
+   - RepliedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on Email, IsRead, CreatedAt
+
+================================================================================
+XI. SECURITY & AUDIT TABLES
+================================================================================
+
+1. SecurityLogs
+   Purpose: Security event logging
+   Primary Key: Id (SERIAL)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - EventType (VARCHAR 100) - LoginSuccess, LoginFailed, PasswordChange, etc.
+   - Description (VARCHAR 1000)
+   - IpAddress (VARCHAR 45) - IPv4/IPv6 support
+   - UserAgent (VARCHAR 500)
+   - CreatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, EventType, IpAddress, CreatedAt
+
+2. PasswordHistories
+   Purpose: Password change tracking (for reuse prevention)
+   Primary Key: Id (SERIAL)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - PasswordHash (VARCHAR 500)
+   - CreatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, CreatedAt
+
+3. ActiveSessions
+   Purpose: Active user sessions tracking
+   Primary Key: Id (SERIAL)
+   
+   Fields:
+   - SessionId (VARCHAR 255, UNIQUE)
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - IpAddress (VARCHAR 45)
+   - UserAgent (VARCHAR 500)
+   - DeviceType (VARCHAR 100)
+   - Location (VARCHAR 255)
+   - CreatedAt (TIMESTAMP)
+   - LastActivity (TIMESTAMP)
+   - ExpiresAt (TIMESTAMP)
+   - IsActive (BOOLEAN)
+   
+   Indexes:
+   - Unique on SessionId
+   - Index on UserId, ExpiresAt, IsActive
+
+4. AuditLogs
+   Purpose: System-wide audit trail
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers) - Who performed action
+   - TargetUserId (VARCHAR 450, FK to AspNetUsers) - Who was affected
+   - Action (VARCHAR 100) - Action type
+   - Details (VARCHAR 2000) - Action details
+   - IpAddress (VARCHAR 45)
+   - UserAgent (VARCHAR 500)
+   - Timestamp (TIMESTAMP)
+   
+   Indexes:
+   - Index on UserId, TargetUserId, Action, Timestamp
+
+================================================================================
+XII. ANALYTICS TABLES
+================================================================================
+
+1. UserSessions
+   Purpose: User session analytics
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - SessionId (VARCHAR 255)
+   - UserId (VARCHAR 450, FK to AspNetUsers) - Nullable for anonymous
+   - IpAddress (VARCHAR 45)
+   - UserAgent (VARCHAR 1000)
+   - Device (VARCHAR 100) - Desktop, Mobile, Tablet
+   - Browser (VARCHAR 100)
+   - OS (VARCHAR 100)
+   - Country (VARCHAR 100)
+   - City (VARCHAR 100)
+   - StartedAt (TIMESTAMP)
+   - EndedAt (TIMESTAMP)
+   - Duration (INTEGER) - Session duration in seconds
+   - PagesViewed (INTEGER)
+   - ConversionValue (DECIMAL 18,2) - If converted to sale
+   
+   Indexes:
+   - Index on SessionId, UserId, StartedAt
+
+2. PageViews
+   Purpose: Page view analytics
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - SessionId (VARCHAR 255)
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - Page (VARCHAR 500) - Page URL
+   - Referrer (VARCHAR 500) - Referring URL
+   - UserAgent (VARCHAR 1000)
+   - IpAddress (VARCHAR 45)
+   - Duration (INTEGER) - Time on page (seconds)
+   - Source (VARCHAR 100) - Traffic source
+   - Medium (VARCHAR 100) - Traffic medium
+   - Campaign (VARCHAR 100) - Campaign name
+   - ExitPage (VARCHAR 500) - If exit page
+   - ViewedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on SessionId, UserId, ViewedAt
+
+================================================================================
+XIII. SELLER & MARKETPLACE TABLES
+================================================================================
+
+1. Stores
+   Purpose: Seller stores
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Name (VARCHAR 255)
+   - Slug (VARCHAR 300, UNIQUE)
+   - Description (TEXT)
+   - LogoUrl (VARCHAR 500)
+   - BannerUrl (VARCHAR 500)
+   - Phone (VARCHAR 20)
+   - Email (VARCHAR 255)
+   - Address (TEXT)
+   - IsActive (BOOLEAN)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Slug
+   - Index on IsActive
+
+2. SellerStores
+   Purpose: Link users to stores
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - UserId (VARCHAR 450, FK to AspNetUsers)
+   - StoreId (UUID, FK to Stores)
+   - Role (VARCHAR 50) - owner, manager, staff
+   - JoinedAt (TIMESTAMP)
+   
+   Constraints:
+   - Unique combination of UserId and StoreId
+   
+   Indexes:
+   - Index on UserId, StoreId
+
+================================================================================
+XIV. MARKETING TABLES
+================================================================================
+
+1. MarketingBanners
+   Purpose: Homepage/promotional banners
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Title (VARCHAR 255)
+   - Description (TEXT)
+   - ImageUrl (VARCHAR 500)
+   - LinkUrl (VARCHAR 500) - Click destination
+   - Position (VARCHAR 50) - home_main, home_sidebar, category_top
+   - IsActive (BOOLEAN)
+   - StartDate (TIMESTAMP)
+   - EndDate (TIMESTAMP)
+   - SortOrder (INTEGER)
+   - CreatedBy (VARCHAR 450, FK to AspNetUsers)
+   - CreatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Index on Position, IsActive, StartDate, EndDate
+
+================================================================================
+XV. SYSTEM CONFIGURATION TABLES
+================================================================================
+
+1. SystemConfigurations
+   Purpose: System-wide settings
+   Primary Key: Id (UUID)
+   
+   Fields:
+   - Key (VARCHAR 255, UNIQUE) - Setting key
+   - Value (TEXT) - Setting value (JSON if complex)
+   - Category (VARCHAR 100) - general, email, payment, shipping
+   - Description (TEXT) - Setting description
+   - DataType (VARCHAR 50) - string, number, boolean, json
+   - IsEditable (BOOLEAN) - Can admin edit?
+   - UpdatedBy (VARCHAR 450)
+   - UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Key
+   - Index on Category
+
+2. ShippingMethods
+   Purpose: Available shipping options
+   Primary Key: Id (SERIAL)
+   
+   Fields:
+   - Name (VARCHAR 100)
+   - Code (VARCHAR 50, UNIQUE)
+   - Description (VARCHAR 500)
+   - Cost (DECIMAL 18,2)
+   - MinOrderAmount (DECIMAL 18,2) - Free shipping threshold
+   - MaxWeight (DECIMAL 10,2) - Weight limit
+   - EstimatedDays (INTEGER) - Delivery time
+   - AvailableRegions (VARCHAR 1000) - Comma-separated list
+   - IsActive (BOOLEAN)
+   - SortOrder (INTEGER)
+   - CreatedAt, UpdatedAt (TIMESTAMP)
+   
+   Indexes:
+   - Unique on Code
+   - Index on IsActive
+
+================================================================================
+DATABASE RELATIONSHIPS SUMMARY
+================================================================================
+
+Key Relationships:
+
+1. One-to-Many:
+   - AspNetUsers → Orders (1 user has many orders)
+   - Orders → OrderItems (1 order has many items)
+   - Products → ProductImages (1 product has many images)
+   - Products → ProductReviews (1 product has many reviews)
+   - Categories → Products (1 category has many products)
+   - Brands → Products (1 brand has many products)
+   - BlogCategories → BlogPosts (1 category has many posts)
+   - AspNetUsers → BlogPosts (1 author has many posts)
+
+2. Many-to-Many (via Junction Tables):
+   - AspNetUsers ↔ AspNetRoles (via AspNetUserRoles)
+   - AspNetUsers ↔ Stores (via SellerStores)
+
+3. Self-Referencing:
+   - Categories.ParentId → Categories.Id (nested categories)
+
+4. Optional Relationships:
+   - Products.BrandId (nullable) - Products may not have brand
+   - BlogPosts.CategoryId (nullable) - Posts may be uncategorized
+
+================================================================================
+INDEXES STRATEGY
+================================================================================
+
+Primary Indexes:
+- All tables have primary key indexes (automatic)
+- Unique constraints create unique indexes
+
+Performance Indexes:
+- Foreign key columns (for JOIN performance)
+- Frequently queried columns (Status, IsActive, CreatedAt)
+- Slug fields (for SEO URLs)
+- Email fields (for user lookups)
+
+Composite Indexes:
+- (UserId, IsRead) on Notifications
+- (UserId, EventType) on SecurityLogs
+- (StartDate, EndDate) on time-based records
+
+Full-Text Search:
+- Consider adding GIN indexes for text search on:
+  - Products.Name, Products.Description
+  - BlogPosts.Title, BlogPosts.Content
+
+================================================================================
+DATA TYPES USED
+================================================================================
+
+String Types:
+- VARCHAR(n) - Variable length with max n
+- TEXT - Unlimited length text
+
+Numeric Types:
+- INTEGER - Whole numbers
+- DECIMAL(p,s) - Precise decimal (e.g., 10,2 for money)
+- SERIAL - Auto-incrementing integer
+
+Date/Time Types:
+- TIMESTAMP - Date and time with timezone
+- All timestamps stored in UTC
+
+Boolean Type:
+- BOOLEAN - true/false
+
+Special Types:
+- UUID - Universally unique identifier
+- TEXT[] - Array of text values (PostgreSQL specific)
+
+================================================================================
+CONSTRAINTS & CASCADE BEHAVIOR
+================================================================================
+
+Foreign Key Constraints:
+
+1. CASCADE - Delete child records when parent is deleted:
+   - Orders → OrderItems
+   - Products → ProductImages
+   - CheckoutSessions → CheckoutSessionItems
+   - AspNetUsers → ShoppingCartItems, Wishlists, Addresses
+
+2. RESTRICT - Prevent deletion if child records exist:
+   - Categories → Products (can't delete if has products)
+   - Brands → Products
+   - Products → OrderItems (preserve order history)
+
+3. SET NULL - Set to NULL when parent is deleted:
+   - AspNetUsers → ContactMessages (preserve messages)
+   - AuditLogs → AspNetUsers (preserve audit trail)
+
+================================================================================
+PERFORMANCE CONSIDERATIONS
+================================================================================
+
+Query Optimization:
+- Indexes on all foreign keys
+- Covering indexes for common queries
+- Avoid SELECT * queries
+- Use appropriate index types (B-tree, Hash, GIN)
+
+Data Partitioning:
+- Consider partitioning large tables by date:
+  - SecurityLogs
+  - PageViews
+  - AuditLogs
+
+Archiving Strategy:
+- Regular archival of old data:
+  - Orders older than 2 years
+  - SecurityLogs older than 1 year
+  - PageViews older than 6 months
+
+Connection Pooling:
+- Configured in application (not database level)
+- Recommended pool size: 50-100 connections
+
+================================================================================
+BACKUP & MAINTENANCE
+================================================================================
+
+Backup Strategy:
+- Daily full backups
+- Hourly incremental backups
+- Transaction log backups every 15 minutes
+- Off-site backup replication
+
+Maintenance Tasks:
+- Weekly VACUUM ANALYZE
+- Monthly REINDEX on heavily updated tables
+- Regular statistics updates
+- Index fragmentation checks
+
+Monitoring:
+- Query performance tracking
+- Slow query logging
+- Connection count monitoring
+- Table size growth tracking
+
+================================================================================
+SECURITY CONSIDERATIONS
+================================================================================
+
+Database Security:
+- Role-based access control (RBAC)
+- Encrypted connections (SSL/TLS)
+- Parameterized queries (prevent SQL injection)
+- Audit logging enabled
+
+Sensitive Data:
+- Passwords: Hashed with bcrypt/PBKDF2
+- Payment info: Never stored (tokenized)
+- Personal data: Encrypted at rest
+- Audit trails: Immutable logs
+
+Compliance:
+- GDPR-ready (user data export/deletion)
+- PCI DSS Level 1 compatible (no card storage)
+- Data retention policies enforced
+- Privacy by design
+
+================================================================================
+MIGRATION & VERSIONING
+================================================================================
+
+Entity Framework Migrations:
+- All schema changes via EF Core migrations
+- Migration files in Migrations/ folder
+- Reversible migrations (Up/Down methods)
+- Seed data in migrations
+
+Version Control:
+- Schema changes tracked in Git
+- Migration naming: YYYYMMDDHHMMSS_Description
+- Database version stored in __EFMigrationsHistory
+
+Deployment:
+- Automated migration on deploy
+- Rollback capability
+- Database state validation
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+For more information:
+- Technical Report: /docs/reports/Report-1-Technical-Documentation.md
+- System Pipelines: /docs/reports/Report-2-System-Pipelines-and-Flows.md
+- Migration Guide: /database/MIGRATIONS_GUIDE.md
+
+Last Updated: 24/10/2025
