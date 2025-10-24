@@ -613,7 +613,9 @@
     
     .hero-carousel {
         width: 100vw; /* Sử dụng 100vw để chiếm toàn bộ viewport width */
-        height: 100vh; /* Full viewport height */
+        height: auto; /* Thay đổi từ 100vh thành auto để khung hình tự động điều chỉnh */
+        min-height: 60vh; /* Đảm bảo chiều cao tối thiểu */
+        max-height: 85vh; /* Giới hạn chiều cao tối đa */
         overflow: hidden;
         position: relative;
         margin: 0;
@@ -629,7 +631,9 @@
     
     .carousel-item {
         width: 100%;
-        height: 100vh; /* Full viewport height */
+        height: auto; /* Thay đổi từ 100vh thành auto */
+        min-height: 60vh;
+        max-height: 85vh;
     }
     
     .hero-slide {
@@ -642,19 +646,16 @@
     }
     
     .hero-background {
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: relative; /* Thay đổi từ absolute thành relative */
         width: 100%;
         height: 100%;
-        z-index: 1;
         overflow: hidden;
     }
     
     .hero-bg-img {
         width: 100%;
         height: 100%;
-        object-fit: cover; 
+        object-fit: contain; /* Thay đổi từ cover thành contain để hiển thị toàn bộ hình */
         object-position: center;
         background-color: #f8f9fa;
         transition: transform 0.3s ease;
@@ -774,25 +775,29 @@
     /* Responsive Design cho Banner */
     @@media (max-width: 1200px) {
         .hero-carousel {
-            height: 80vh;
+            min-height: 50vh;
+            max-height: 80vh;
             margin-left: calc(-50vw + 50%);
             margin-right: calc(-50vw + 50%);
         }
         
         .carousel-item {
-            height: 80vh;
+            min-height: 50vh;
+            max-height: 80vh;
         }
     }
     
     @@media (max-width: 992px) {
         .hero-carousel {
-            height: 70vh;
+            min-height: 45vh;
+            max-height: 75vh;
             margin-left: calc(-50vw + 50%);
             margin-right: calc(-50vw + 50%);
         }
         
         .carousel-item {
-            height: 70vh;
+            min-height: 45vh;
+            max-height: 75vh;
         }
         
         .carousel-control-prev,
@@ -803,17 +808,19 @@
     
     @@media (max-width: 768px) {
         .hero-carousel {
-            height: 60vh;
+            min-height: 40vh;
+            max-height: 70vh;
             margin-left: calc(-50vw + 50%);
             margin-right: calc(-50vw + 50%);
         }
         
         .carousel-item {
-            height: 60vh;
+            min-height: 40vh;
+            max-height: 70vh;
         }
         
         .hero-bg-img {
-            object-fit: cover;
+            object-fit: contain; /* Giữ contain cho mobile để hiển thị toàn bộ hình */
         }
         
         .carousel-control-prev,
@@ -850,11 +857,13 @@
     
     @@media (max-width: 576px) {
         .hero-carousel {
-            height: 50vh;
+            min-height: 35vh;
+            max-height: 60vh;
         }
         
         .carousel-item {
-            height: 50vh;
+            min-height: 35vh;
+            max-height: 60vh;
         }
         
         .hero-bg-img {
@@ -900,11 +909,13 @@
     
     @@media (max-width: 400px) {
         .hero-carousel {
-            height: 45vh;
+            min-height: 30vh;
+            max-height: 55vh;
         }
         
         .carousel-item {
-            height: 45vh;
+            min-height: 30vh;
+            max-height: 55vh;
         }
         
         .hero-bg-img {

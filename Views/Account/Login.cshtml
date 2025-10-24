@@ -133,6 +133,7 @@
                         </form>
 
                         <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" role="form">
+                            @Html.AntiForgeryToken()
                             <div class="d-grid mb-3">
                                 <button type="submit" name="provider" value="Google" class="btn btn-outline-danger btn-lg">
                                     <i class="fab fa-google me-2"></i>Đăng nhập với Google

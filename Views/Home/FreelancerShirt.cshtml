@@ -338,12 +338,12 @@
                                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                         <div class="product-card-new">
                                             <div class="product-image-container">
-                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })">
+                                                <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })">
                                                     <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
                                                 </a>
                                             </div>
                                             <div class="product-info">
-                                                <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                                <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" style="text-decoration: none; color: inherit;">
                                                     <h6 class="product-name">@product.Name</h6>
                                                 </a>
                                                 <div class="product-price-actions">
@@ -374,7 +374,7 @@
                     </div>
                     
                     @* Pagination *@
-                    @Html.Partial("_Pagination")
+                    @await Html.PartialAsync("_Pagination")
                 </div>
             </div>
         </div>

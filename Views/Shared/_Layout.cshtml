@@ -77,6 +77,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/john-henry-style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/product-card-additions.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JohnHenryFashionWeb.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
     
@@ -1041,7 +1042,7 @@
 
                 <!-- Header Icons -->
                 <div class="header-icons">
-                    <a href="#" class="header-icon" title="Cửa hàng gần bạn">
+                    <a href="store" class="header-icon" title="Cửa hàng gần bạn">
                         <i data-lucide="map-pin"></i>
                     </a>
                     
@@ -1427,15 +1428,15 @@
                     // Load cart count
                     const cartResponse = await fetch('/Cart/GetCartCount');
                     if (cartResponse.ok) {
-                        const cartCount = await cartResponse.json();
-                        updateCartCount(cartCount);
+                        const data = await cartResponse.json();
+                        updateCartCount(data.cartCount || data);
                     }
                     
                     // Load wishlist count
                     const wishlistResponse = await fetch('/Wishlist/GetCount');
                     if (wishlistResponse.ok) {
-                        const wishlistCount = await wishlistResponse.json();
-                        updateWishlistCount(wishlistCount);
+                        const data = await wishlistResponse.json();
+                        updateWishlistCount(data.wishlistCount || data);
                     }
                 } catch (error) {
                     console.error('Error loading counts:', error);
@@ -1445,10 +1446,13 @@
         
         // Update cart count display
         function updateCartCount(count) {
+            // Handle both direct number and object with cartCount property
+            const cartCount = typeof count === 'object' ? (count.cartCount || 0) : (count || 0);
+            
             const cartElements = document.querySelectorAll('.cart-count');
             cartElements.forEach(element => {
-                element.textContent = count;
-                if (count > 0) {
+                element.textContent = cartCount;
+                if (cartCount > 0) {
                     element.classList.add('show');
                 } else {
                     element.classList.remove('show');
@@ -1458,10 +1462,13 @@
         
         // Update wishlist count display
         function updateWishlistCount(count) {
+            // Handle both direct number and object with wishlistCount property
+            const wishlistCount = typeof count === 'object' ? (count.wishlistCount || 0) : (count || 0);
+            
             const wishlistElements = document.querySelectorAll('.wishlist-count');
             wishlistElements.forEach(element => {
-                element.textContent = count;
-                if (count > 0) {
+                element.textContent = wishlistCount;
+                if (wishlistCount > 0) {
                     element.classList.add('show');
                 } else {
                     element.classList.remove('show');
@@ -1471,126 +1478,208 @@
         
         // Cart Sidebar Functions
         function openCartSidebar() {
+            console.log('🛒 openCartSidebar called - loading cart data...');
+            
             fetch('/Cart/GetSidebarData')
-                .then(response => response.text())
+                .then(response => {
+                    console.log('📦 Cart sidebar response status:', response.status);
+                    return response.text();
+                })
                 .then(html => {
-                    document.getElementById('cart-sidebar-container').innerHTML = html;
-                    document.getElementById('cart-sidebar').classList.add('open');
-                    document.getElementById('cart-sidebar-overlay').classList.add('show');
+                    console.log('📄 Cart sidebar HTML loaded, length:', html.length);
+                    
+                    const container = document.getElementById('cart-sidebar-container');
+                    if (!container) {
+                        console.error('❌ cart-sidebar-container not found!');
+                        return;
+                    }
+                    
+                    container.innerHTML = html;
+                    
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const overlay = document.getElementById('cart-sidebar-overlay');
+                    
+                    if (!sidebar) {
+                        console.error('❌ cart-sidebar not found after loading HTML!');
+                        return;
+                    }
+                    
+                    if (!overlay) {
+                        console.error('❌ cart-sidebar-overlay not found!');
+                        return;
+                    }
+                    
+                    console.log('✅ Opening cart sidebar...');
+                    sidebar.classList.add('open');
+                    overlay.classList.add('show');
                     document.body.style.overflow = 'hidden';
                     
                     // Re-initialize lucide icons
                     if (typeof lucide !== 'undefined') {
                         lucide.createIcons();
+                        console.log('✨ Lucide icons initialized');
                     }
                     
                     // Bind cart sidebar events
                     bindCartSidebarEvents();
+                    console.log('✅ Cart sidebar opened successfully');
                 })
                 .catch(error => {
-                    console.error('Error loading cart sidebar:', error);
+                    console.error('💥 Error loading cart sidebar:', error);
                 });
         }
         
         function closeCartSidebar() {
-            document.getElementById('cart-sidebar').classList.remove('open');
-            document.getElementById('cart-sidebar-overlay').classList.remove('show');
+            console.log('❌ Closing cart sidebar...');
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-sidebar-overlay');
+            
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('show');
             document.body.style.overflow = '';
         }
         
         function bindCartSidebarEvents() {
+            console.log('🔗 Binding cart sidebar events...');
+            
             // Close sidebar events
             const closeBtn = document.getElementById('close-cart-sidebar');
             const overlay = document.getElementById('cart-sidebar-overlay');
             
             if (closeBtn) {
                 closeBtn.addEventListener('click', closeCartSidebar);
+                console.log('✅ Close button event bound');
             }
             
             if (overlay) {
                 overlay.addEventListener('click', closeCartSidebar);
+                console.log('✅ Overlay click event bound');
             }
             
             // Quantity controls
-            document.querySelectorAll('.quantity-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+            const quantityButtons = document.querySelectorAll('.quantity-btn');
+            console.log(`🔢 Found ${quantityButtons.length} quantity buttons`);
+            
+            quantityButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
                     const action = this.dataset.action;
                     const cartItemId = this.dataset.cartItemId;
                     const quantityElement = this.parentElement.querySelector('.quantity');
                     let currentQuantity = parseInt(quantityElement.textContent);
                     
+                    console.log(`🔢 Quantity button clicked: ${action}, ItemId: ${cartItemId}, CurrentQty: ${currentQuantity}`);
+                    
                     if (action === 'increase') {
                         updateCartQuantity(cartItemId, currentQuantity + 1);
-                    } else if (action === 'decrease' && currentQuantity > 1) {
-                        updateCartQuantity(cartItemId, currentQuantity - 1);
+                    } else if (action === 'decrease') {
+                        if (currentQuantity === 1) {
+                            // When quantity is 1 and user clicks decrease, remove the item
+                            removeCartItem(cartItemId);
+                        } else {
+                            updateCartQuantity(cartItemId, currentQuantity - 1);
+                        }
                     }
                 });
             });
             
             // Remove item buttons
-            document.querySelectorAll('.remove-item-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+            const removeButtons = document.querySelectorAll('.remove-item-btn');
+            console.log(`🗑️ Found ${removeButtons.length} remove buttons`);
+            
+            removeButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
                     const cartItemId = this.dataset.cartItemId;
+                    console.log(`🗑️ Remove button clicked for ItemId: ${cartItemId}`);
                     removeCartItem(cartItemId);
                 });
             });
+            
+            console.log('✅ All cart sidebar events bound');
         }
         
         function updateCartQuantity(cartItemId, quantity) {
+            console.log(`🔄 Updating cart quantity - ItemId: ${cartItemId}, NewQty: ${quantity}`);
+            
             fetch('/Cart/UpdateQuantity', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: `cartItemId=${cartItemId}&quantity=${quantity}`
+                body: JSON.stringify({
+                    cartItemId: cartItemId,
+                    quantity: quantity
+                })
             })
             .then(response => response.json())
             .then(data => {
+                console.log('✅ UpdateQuantity response:', data);
                 if (data.success) {
                     // Refresh cart sidebar
                     openCartSidebar();
                     // Update header cart count
                     updateCartCount(data.cartCount);
+                    showNotification('Đã cập nhật số lượng', 'success');
                 } else {
-                    alert(data.message || 'Error updating quantity');
+                    console.error('❌ UpdateQuantity failed:', data.message);
+                    showNotification(data.message || 'Lỗi cập nhật số lượng', 'error');
                 }
             })
             .catch(error => {
-                console.error('Error updating quantity:', error);
+                console.error('💥 Error updating quantity:', error);
+                showNotification('Lỗi cập nhật số lượng', 'error');
             });
         }
         
         function removeCartItem(cartItemId) {
+            console.log(`🗑️ Removing cart item - ItemId: ${cartItemId}`);
+            
             if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
                 fetch('/Cart/RemoveItem', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: `cartItemId=${cartItemId}`
+                    body: JSON.stringify({
+                        cartItemId: cartItemId
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('✅ RemoveItem response:', data);
                     if (data.success) {
                         // Refresh cart sidebar
                         openCartSidebar();
                         // Update header cart count
                         updateCartCount(data.cartCount);
+                        showNotification('Đã xóa sản phẩm khỏi giỏ hàng', 'success');
                     } else {
-                        alert(data.message || 'Error removing item');
+                        console.error('❌ RemoveItem failed:', data.message);
+                        showNotification(data.message || 'Lỗi xóa sản phẩm', 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('Error removing item:', error);
+                    console.error('💥 Error removing item:', error);
+                    showNotification('Lỗi xóa sản phẩm', 'error');
                 });
             }
         }
         
         // Real Add to Cart function
         async function addToCart(productId, button, quantity = 1, size = null, color = null) {
+            console.log('🛒 addToCart called:', { productId, quantity, size, color });
+            
             // Check if user is authenticated
             const isAuthenticated = document.querySelector('.user-authenticated');
             if (!isAuthenticated) {
+                console.log('❌ User not authenticated, redirecting to login');
                 // Redirect to login if not authenticated
                 window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
                 return;
@@ -1602,18 +1691,27 @@
             button.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append('productId', productId);
-                formData.append('quantity', quantity.toString());
-                if (size) formData.append('size', size);
-                if (color) formData.append('color', color);
+                const requestData = {
+                    productId: productId,
+                    quantity: quantity
+                };
+                
+                if (size) requestData.size = size;
+                if (color) requestData.color = color;
 
-                const response = await fetch('/products/addtocart', {
+                console.log('📤 Sending request to /Products/AddToCart with data:', requestData);
+
+                const response = await fetch('/Products/AddToCart', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
                 });
 
                 const result = await response.json();
+                console.log('✅ AddToCart result:', result);
 
                 if (result.success) {
                     // Update cart count
@@ -1622,13 +1720,17 @@
                     // Show success message
                     showNotification('Đã thêm sản phẩm vào giỏ hàng!', 'success');
                     
-                    // Optionally open cart sidebar after adding to cart
-                    // openCartSidebar();
+                    // Open cart sidebar after adding to cart to show updated items
+                    console.log('✨ Product added successfully, opening cart sidebar...');
+                    setTimeout(() => {
+                        openCartSidebar();
+                    }, 300); // Small delay to ensure cart is updated
                 } else {
+                    console.log('❌ AddToCart failed:', result.message);
                     showNotification(result.message || 'Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
                 }
             } catch (error) {
-                console.error('Error adding to cart:', error);
+                console.error('💥 Error adding to cart:', error);
                 showNotification('Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
             } finally {
                 // Reset button
@@ -1819,6 +1921,13 @@
             }
         };
     </script>
+    
+    <!-- Buy Now functionality -->
+    <script src="~/js/buy-now.js" asp-append-version="true"></script>
+    
+    <!-- Cart Sidebar functionality -->
+    <script src="~/js/cart-sidebar.js" asp-append-version="true"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
     
     <!-- Cart Sidebar -->

@@ -1,6 +1,15 @@
 @model List<Order>
+@inject UserManager<ApplicationUser> UserManager
+
 @{
     ViewData["Title"] = "Lịch sử mua hàng";
+    var currentUser = await UserManager.GetUserAsync(User);
+    var avatarUrl = !string.IsNullOrEmpty(currentUser?.Avatar) 
+        ? currentUser.Avatar 
+        : "/images/avatars/default-avatar.svg";
+    var userName = currentUser != null && !string.IsNullOrEmpty(currentUser.FirstName) 
+        ? $"{currentUser.FirstName} {currentUser.LastName}".Trim()
+        : (User.Identity?.Name ?? "User");
 }
 
 <div class="container py-4">
@@ -19,8 +28,14 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="text-center mb-3">
-                        <img src="https://via.placeholder.com/80x80" class="rounded-circle mb-2" alt="Avatar" width="80" height="80">
-                        <h6 class="mb-1">@(User.Identity?.Name ?? "User")</h6>
+                        <img src="@avatarUrl" 
+                             class="rounded-circle mb-2" 
+                             alt="Avatar" 
+                             width="80" 
+                             height="80"
+                             onerror="this.src='/images/avatars/default-avatar.svg'"
+                             style="object-fit: cover;">
+                        <h6 class="mb-1">@userName</h6>
                         <small class="text-muted">Thành viên</small>
                     </div>
                     <div class="list-group list-group-flush">
@@ -48,9 +63,23 @@
         <div class="col-lg-9 col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-shopping-bag me-2"></i>Lịch sử mua hàng
-                    </h4>
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="fas fa-shopping-bag me-2"></i>Lịch sử mua hàng
+                            </h4>
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" id="orderFilter">
+                                <option value="">Tất cả đơn hàng</option>
+                                <option value="pending">Chờ xử lý</option>
+                                <option value="processing">Đang xử lý</option>
+                                <option value="shipped">Đã giao hàng</option>
+                                <option value="delivered">Đã nhận hàng</option>
+                                <option value="cancelled">Đã hủy</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (Model != null && Model.Any())
@@ -58,7 +87,7 @@
                         <div class="order-history">
                             @foreach (var order in Model)
                             {
-                                <div class="order-item mb-4">
+                                <div class="order-item mb-4" data-status="@order.Status">
                                     <div class="order-header p-3 bg-light rounded-top">
                                         <div class="row align-items-center">
                                             <div class="col-md-6">
@@ -94,33 +123,72 @@
                                         </div>
                                     </div>
                                     <div class="order-body border border-top-0 rounded-bottom p-3">
-                                        @if (order.OrderItems?.Any() == true)
-                                        {
-                                            @foreach (var item in order.OrderItems.Take(2))
-                                            {
-                                                <div class="product-item d-flex align-items-center mb-3">
-                                                    <img src="@(!string.IsNullOrEmpty(item.ProductImage) ? item.ProductImage : (!string.IsNullOrEmpty(item.Product?.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "/images/placeholder.jpg"))" 
-                                                         alt="@(item.ProductName ?? item.Product?.Name)" 
-                                                         class="product-thumb me-3" 
-                                                         width="60" height="60">
-                                                    <div>
-                                                        <h6 class="mb-1">@(item.ProductName ?? item.Product?.Name)</h6>
-                                                        <small class="text-muted">
-                                                            SKU: @(item.ProductSKU ?? item.Product?.SKU ?? "N/A") | SL: @item.Quantity
-                                                        </small>
-                                                        <div class="price">@item.UnitPrice.ToString("N0")₫</div>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                @if (order.OrderItems?.Any() == true)
+                                                {
+                                                    <div class="order-products">
+                                                        @foreach (var item in order.OrderItems.Take(3))
+                                                        {
+                                                            <div class="product-item d-flex align-items-center mb-3">
+                                                                <img src="@(!string.IsNullOrEmpty(item.ProductImage) ? item.ProductImage : (!string.IsNullOrEmpty(item.Product?.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "/images/placeholder.jpg"))" 
+                                                                     alt="@(item.ProductName ?? item.Product?.Name)" 
+                                                                     class="product-thumb me-3" 
+                                                                     width="60" height="60">
+                                                                <div>
+                                                                    <h6 class="mb-1">@(item.ProductName ?? item.Product?.Name)</h6>
+                                                                    <small class="text-muted">
+                                                                        SKU: @(item.ProductSKU ?? item.Product?.SKU ?? "N/A") | SL: @item.Quantity
+                                                                    </small>
+                                                                    <div class="price">@item.UnitPrice.ToString("N0")₫</div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        @if (order.OrderItems.Count > 3)
+                                                        {
+                                                            <small class="text-muted">Và @(order.OrderItems.Count - 3) sản phẩm khác...</small>
+                                                        }
                                                     </div>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">Không có sản phẩm</small>
+                                                }
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="order-actions text-end">
+                                                    <a href="/Account/OrderDetail/@order.Id" class="btn btn-outline-primary btn-sm me-2">
+                                                        <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                                    </a>
+                                                    @if (order.Status != "cancelled" && order.Status != "delivered")
+                                                    {
+                                                        <button class="btn btn-outline-danger btn-sm" onclick="cancelOrder('@order.Id')">
+                                                            <i class="fas fa-times me-1"></i>Hủy đơn
+                                                        </button>
+                                                    }
                                                 </div>
-                                            }
-                                            @if (order.OrderItems.Count > 2)
-                                            {
-                                                <small class="text-muted">Và @(order.OrderItems.Count - 2) sản phẩm khác...</small>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <small class="text-muted">Không có sản phẩm</small>
-                                        }
+                                                <div class="delivery-info mt-3">
+                                                    @if (order.Status == "delivered" && order.DeliveredAt.HasValue)
+                                                    {
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-truck me-1"></i>Giao ngày: @order.DeliveredAt.Value.ToString("dd/MM/yyyy")
+                                                        </small>
+                                                    }
+                                                    else if (order.Status == "shipped")
+                                                    {
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-truck me-1"></i>Đang giao hàng
+                                                        </small>
+                                                    }
+                                                    else if (order.Status == "cancelled")
+                                                    {
+                                                        <small class="text-muted text-danger">
+                                                            <i class="fas fa-info-circle me-1"></i>Đã hủy
+                                                        </small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             }
@@ -140,256 +208,6 @@
                             </a>
                         </div>
                     }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Styles {
-    <style>
-        .product-thumb {
-            border-radius: 0.25rem;
-            object-fit: cover;
-            border: 1px solid #dee2e6;
-        }
-        
-        .price {
-            font-weight: 600;
-            color: #dc3545;
-            font-size: 0.9rem;
-        }
-        
-        .list-group-item.active {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-    </style>
-}
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h4 class="mb-0">
-                                <i class="fas fa-shopping-bag me-2"></i>Lịch sử mua hàng
-                            </h4>
-                        </div>
-                        <div class="col-auto">
-                            <select class="form-select form-select-sm" id="orderFilter">
-                                <option value="">Tất cả đơn hàng</option>
-                                <option value="pending">Chờ xử lý</option>
-                                <option value="processing">Đang xử lý</option>
-                                <option value="shipped">Đã giao hàng</option>
-                                <option value="delivered">Đã nhận hàng</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Sample Orders - In real implementation, this would come from the database -->
-                    <div class="order-history">
-                        <!-- Order 1 -->
-                        <div class="order-item mb-4">
-                            <div class="order-header p-3 bg-light rounded-top">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h6 class="mb-1">Đơn hàng #JH000001</h6>
-                                        <small class="text-muted">Đặt ngày: 15/01/2024</small>
-                                    </div>
-                                    <div class="col-md-3 text-center">
-                                        <span class="badge bg-success">Đã giao hàng</span>
-                                    </div>
-                                    <div class="col-md-3 text-end">
-                                        <strong class="text-primary">2.850.000₫</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="order-body border border-top-0 rounded-bottom p-3">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="order-products">
-                                            <div class="product-item d-flex align-items-center mb-3">
-                                                <img src="/images/Áo nam/ao-polo-01.jpg" alt="Áo Polo Nam" class="product-thumb me-3" width="60" height="60">
-                                                <div>
-                                                    <h6 class="mb-1">Áo Polo Nam Premium</h6>
-                                                    <small class="text-muted">Màu: Xanh Navy | Size: L | SL: 2</small>
-                                                    <div class="price">850.000₫</div>
-                                                </div>
-                                            </div>
-                                            <div class="product-item d-flex align-items-center mb-3">
-                                                <img src="/images/Quần nam/quan-khaki-01.jpg" alt="Quần Khaki Nam" class="product-thumb me-3" width="60" height="60">
-                                                <div>
-                                                    <h6 class="mb-1">Quần Khaki Slim Fit</h6>
-                                                    <small class="text-muted">Màu: Be | Size: 32 | SL: 1</small>
-                                                    <div class="price">1.200.000₫</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="order-actions text-end">
-                                            <button class="btn btn-outline-primary btn-sm me-2">
-                                                <i class="fas fa-eye me-1"></i>Xem chi tiết
-                                            </button>
-                                            <button class="btn btn-primary btn-sm">
-                                                <i class="fas fa-redo me-1"></i>Mua lại
-                                            </button>
-                                        </div>
-                                        <div class="delivery-info mt-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-truck me-1"></i>Giao ngày: 18/01/2024
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Order 2 -->
-                        <div class="order-item mb-4">
-                            <div class="order-header p-3 bg-light rounded-top">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h6 class="mb-1">Đơn hàng #JH000002</h6>
-                                        <small class="text-muted">Đặt ngày: 08/01/2024</small>
-                                    </div>
-                                    <div class="col-md-3 text-center">
-                                        <span class="badge bg-warning">Đang giao hàng</span>
-                                    </div>
-                                    <div class="col-md-3 text-end">
-                                        <strong class="text-primary">1.450.000₫</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="order-body border border-top-0 rounded-bottom p-3">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="order-products">
-                                            <div class="product-item d-flex align-items-center mb-3">
-                                                <img src="/images/Áo nam/ao-somi-01.jpg" alt="Áo Sơ Mi Nam" class="product-thumb me-3" width="60" height="60">
-                                                <div>
-                                                    <h6 class="mb-1">Áo Sơ Mi Trắng Classic</h6>
-                                                    <small class="text-muted">Màu: Trắng | Size: M | SL: 1</small>
-                                                    <div class="price">750.000₫</div>
-                                                </div>
-                                            </div>
-                                            <div class="product-item d-flex align-items-center mb-3">
-                                                <img src="/images/Quần nam/quan-tay-01.jpg" alt="Quần Tây Nam" class="product-thumb me-3" width="60" height="60">
-                                                <div>
-                                                    <h6 class="mb-1">Quần Tây Đen Formal</h6>
-                                                    <small class="text-muted">Màu: Đen | Size: 30 | SL: 1</small>
-                                                    <div class="price">700.000₫</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="order-actions text-end">
-                                            <button class="btn btn-outline-primary btn-sm me-2">
-                                                <i class="fas fa-truck me-1"></i>Theo dõi
-                                            </button>
-                                            <button class="btn btn-outline-danger btn-sm">
-                                                <i class="fas fa-times me-1"></i>Hủy đơn
-                                            </button>
-                                        </div>
-                                        <div class="delivery-info mt-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock me-1"></i>Dự kiến: 12/01/2024
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Order 3 -->
-                        <div class="order-item mb-4">
-                            <div class="order-header p-3 bg-light rounded-top">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h6 class="mb-1">Đơn hàng #JH000003</h6>
-                                        <small class="text-muted">Đặt ngày: 28/12/2023</small>
-                                    </div>
-                                    <div class="col-md-3 text-center">
-                                        <span class="badge bg-secondary">Đã hủy</span>
-                                    </div>
-                                    <div class="col-md-3 text-end">
-                                        <strong class="text-muted">950.000₫</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="order-body border border-top-0 rounded-bottom p-3">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="order-products">
-                                            <div class="product-item d-flex align-items-center mb-3">
-                                                <img src="/images/Áo nam/ao-thun-01.jpg" alt="Áo Thun Nam" class="product-thumb me-3" width="60" height="60">
-                                                <div>
-                                                    <h6 class="mb-1">Áo Thun Cotton Premium</h6>
-                                                    <small class="text-muted">Màu: Đen | Size: L | SL: 1</small>
-                                                    <div class="price">450.000₫</div>
-                                                </div>
-                                            </div>
-                                            <div class="product-item d-flex align-items-center mb-3">
-                                                <img src="/images/Quần nam/quan-short-01.jpg" alt="Quần Short Nam" class="product-thumb me-3" width="60" height="60">
-                                                <div>
-                                                    <h6 class="mb-1">Quần Short Kaki</h6>
-                                                    <small class="text-muted">Màu: Be | Size: L | SL: 1</small>
-                                                    <div class="price">500.000₫</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="order-actions text-end">
-                                            <button class="btn btn-primary btn-sm">
-                                                <i class="fas fa-redo me-1"></i>Đặt lại
-                                            </button>
-                                        </div>
-                                        <div class="delivery-info mt-3">
-                                            <small class="text-muted text-danger">
-                                                <i class="fas fa-info-circle me-1"></i>Hủy do hết hàng
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Empty State -->
-                    <div class="empty-orders text-center py-5" style="display: none;">
-                        <div class="empty-icon mb-4">
-                            <i class="fas fa-shopping-bag fa-4x text-muted"></i>
-                        </div>
-                        <h5 class="mb-3">Chưa có đơn hàng nào</h5>
-                        <p class="text-muted mb-4">Bạn chưa thực hiện đơn hàng nào. Hãy khám phá sản phẩm và mua sắm ngay!</p>
-                        <a href="/" class="btn btn-primary">
-                            <i class="fas fa-shopping-bag me-2"></i>Mua sắm ngay
-                        </a>
-                    </div>
-
-                    <!-- Pagination -->
-                    <nav aria-label="Order pagination" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">2</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">3</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </div>
         </div>
@@ -426,7 +244,7 @@
         
         .price {
             font-weight: 600;
-            color: var(--jh-red);
+            color: #dc3545;
             font-size: 0.9rem;
         }
         
@@ -456,8 +274,8 @@
         }
         
         .list-group-item.active {
-            background-color: var(--jh-red);
-            border-color: var(--jh-red);
+            background-color: #dc3545;
+            border-color: #dc3545;
         }
         
         .list-group-item:hover:not(.active) {
@@ -492,28 +310,11 @@
             let visibleCount = 0;
             
             orderItems.forEach(item => {
-                const status = item.querySelector('.badge');
+                const status = item.getAttribute('data-status');
                 let shouldShow = true;
                 
                 if (filterValue) {
-                    const statusText = status.textContent.toLowerCase();
-                    switch(filterValue) {
-                        case 'pending':
-                            shouldShow = statusText.includes('chờ');
-                            break;
-                        case 'processing':
-                            shouldShow = statusText.includes('xử lý');
-                            break;
-                        case 'shipped':
-                            shouldShow = statusText.includes('giao');
-                            break;
-                        case 'delivered':
-                            shouldShow = statusText.includes('nhận');
-                            break;
-                        case 'cancelled':
-                            shouldShow = statusText.includes('hủy');
-                            break;
-                    }
+                    shouldShow = status === filterValue;
                 }
                 
                 if (shouldShow) {
@@ -528,12 +329,18 @@
             const emptyState = document.querySelector('.empty-orders');
             const orderHistory = document.querySelector('.order-history');
             
-            if (visibleCount === 0) {
+            if (visibleCount === 0 && orderHistory) {
                 orderHistory.style.display = 'none';
-                emptyState.style.display = 'block';
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                }
             } else {
-                orderHistory.style.display = 'block';
-                emptyState.style.display = 'none';
+                if (orderHistory) {
+                    orderHistory.style.display = 'block';
+                }
+                if (emptyState) {
+                    emptyState.style.display = 'none';
+                }
             }
         });
         
@@ -571,24 +378,33 @@
             });
         }
         
-        // Order action handlers
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn')) {
-                const btn = e.target.closest('.btn');
-                const btnText = btn.textContent.trim();
-                
-                if (btnText.includes('Mua lại') || btnText.includes('Đặt lại')) {
-                    showToast('Chức năng đang được phát triển!', 'info');
-                } else if (btnText.includes('Theo dõi')) {
-                    showToast('Chức năng theo dõi đơn hàng đang được phát triển!', 'info');
-                } else if (btnText.includes('Hủy đơn')) {
-                    if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
-                        showToast('Chức năng hủy đơn hàng đang được phát triển!', 'info');
+        // Cancel order function
+        function cancelOrder(orderId) {
+            if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
+                fetch('/Account/CancelOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ orderId: orderId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Đơn hàng đã được hủy thành công!', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.', 'error');
                     }
-                } else if (btnText.includes('Xem chi tiết')) {
-                    showToast('Chức năng xem chi tiết đơn hàng đang được phát triển!', 'info');
-                }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+                });
             }
-        });
+        }
     </script>
 }
