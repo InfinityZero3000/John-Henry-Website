@@ -156,38 +156,32 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders()
 .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("Custom");
 
-// Configure Cookie settings for enhanced security
+// Cookie settings - Đơn giản cho development
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax; // Changed from Strict to Lax for better OAuth support
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    options.SlidingExpiration = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Cho phép HTTP trong development
+    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    options.Cookie.IsEssential = true;
     options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-    options.ReturnUrlParameter = "returnUrl";
-    
-    // Enhanced cookie security
-    options.Cookie.Name = "JohnHenryAuth";
-    options.Events.OnRedirectToLogin = context =>
-    {
-        if (context.Request.Path.StartsWithSegments("/api"))
-        {
-            context.Response.StatusCode = 401;
-            return Task.CompletedTask;
-        }
-        context.Response.Redirect(context.RedirectUri);
-        return Task.CompletedTask;
-    };
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
+// External Cookie cho Google OAuth
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    options.Cookie.IsEssential = true;
 });
 
 // Add Authentication with Identity as default and JWT for API
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
     options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
 })
 .AddJwtBearer(options =>
@@ -205,14 +199,24 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(googleOptions =>
 {
+    // Cấu hình cơ bản
     googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-    googleOptions.SaveTokens = true;
+    googleOptions.CallbackPath = "/signin-google";
+    
+    // QUAN TRỌNG: Chỉ định SignInScheme để Google sử dụng External cookie thay vì Application cookie
+    googleOptions.SignInScheme = IdentityConstants.ExternalScheme;
+    
+    // Scope cần thiết
     googleOptions.Scope.Add("email");
     googleOptions.Scope.Add("profile");
+    googleOptions.SaveTokens = true;
     
-    // Explicitly set the callback path for current environment
-    googleOptions.CallbackPath = "/signin-google";
+    // Cookie settings đơn giản
+    googleOptions.CorrelationCookie.SecurePolicy = CookieSecurePolicy.None;
+    googleOptions.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    googleOptions.CorrelationCookie.HttpOnly = true;
+    googleOptions.CorrelationCookie.IsEssential = true;
 });
 
 // Add Authorization policies
@@ -246,6 +250,7 @@ builder.Services.AddScoped<JohnHenryFashionWeb.Services.IAuthService, JohnHenryF
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IPaymentService, JohnHenryFashionWeb.Services.PaymentService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IUserManagementService, JohnHenryFashionWeb.Services.UserManagementService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.IAuditLogService, JohnHenryFashionWeb.Services.AuditLogService>();
+builder.Services.AddScoped<JohnHenryFashionWeb.Services.ILogService, JohnHenryFashionWeb.Services.LogService>();
 builder.Services.AddScoped<JohnHenryFashionWeb.Services.SeedDataService>();
 
 // Add Application Insights
@@ -257,6 +262,16 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "JohnHenryFashion";
+});
+
+// Add Session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
 });
 
 // Configure Email Settings
@@ -392,6 +407,9 @@ app.UseStaticFiles(new StaticFileOptions
 // - Database FeaturedImageUrl paths already match actual file cases
 
 app.UseRouting();
+
+// Enable session before authentication
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -772,6 +790,13 @@ static async Task SeedBlogPosts(ApplicationDbContext context, UserManager<Applic
 
     context.BlogPosts.AddRange(blogPosts);
     await context.SaveChangesAsync();
+}
+
+// Seed Shipping Methods
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await JohnHenryFashionWeb.Scripts.SeedShippingMethods.Run(context);
 }
 
 try

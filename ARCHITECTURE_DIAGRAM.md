@@ -129,7 +129,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           PRESENTATION LAYER                                 │
+│                           PRESENTATION LAYER                                │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                     ┌───────────────┴───────────────┐
@@ -148,7 +148,7 @@
 │  Payment     │ │  Support     │ │  Marketing   │ │  Approval    │ │  Settings    │
 │  Views       │ │  Views       │ │  Views       │ │  Views       │ │  Views       │
 ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤
-│ 🟢 Green     │ │ 🟠 Orange    │ │ 💜 Purple    │ │ 🟣 Purple    │ │ 💙 Cyan      │
+│ 🟢 Green      │ │ 🟠 Orange    │ │ 💜 Purple    │ │ 🟣 Purple     │ │ 💙 Cyan      │
 │ Glassmorphic │ │ Glassmorphic │ │ Glassmorphic │ │ Glassmorphic │ │ Glassmorphic │
 └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
         │               │               │               │               │
