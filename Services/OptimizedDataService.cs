@@ -117,20 +117,15 @@ namespace JohnHenryFashionWeb.Services
 
         public async Task<Product?> GetProductWithDetailsAsync(Guid productId)
         {
-            return await _cacheService.GetOrSetAsync(
-                CacheKeys.ProductById(productId),
-                async () =>
-                {
-                    return await _context.Products
-                        .Include(p => p.Category)
-                        .Include(p => p.Brand)
-                        .Include(p => p.ProductImages)
-                        .Include(p => p.ProductReviews.Where(r => r.IsApproved))
-                            .ThenInclude(r => r.User)
-                        .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive);
-                },
-                TimeSpan.FromMinutes(15)
-            );
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductReviews.Where(r => r.IsApproved))
+                    .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(p => p.Id == productId && p.IsActive);
+
+            return product;
         }
 
         public async Task<IEnumerable<Product>> SearchProductsOptimizedAsync(
@@ -237,19 +232,14 @@ namespace JohnHenryFashionWeb.Services
 
         public async Task<ApplicationUser?> GetUserWithDetailsAsync(string userId)
         {
-            return await _cacheService.GetOrSetAsync(
-                $"user_details_{userId}",
-                async () =>
-                {
-                    return await _context.Users
-                        .Include(u => u.Orders.Take(10))
-                            .ThenInclude(o => o.OrderItems)
-                        .Include(u => u.Wishlists.Take(20))
-                            .ThenInclude(w => w.Product)
-                        .FirstOrDefaultAsync(u => u.Id == userId);
-                },
-                TimeSpan.FromMinutes(10)
-            );
+            var user = await _context.Users
+                .Include(u => u.Orders.Take(10))
+                    .ThenInclude(o => o.OrderItems)
+                .Include(u => u.Wishlists.Take(20))
+                    .ThenInclude(w => w.Product)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            return user;
         }
 
         public async Task UpdateProductViewCountAsync(Guid productId)

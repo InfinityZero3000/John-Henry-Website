@@ -90,6 +90,13 @@ namespace JohnHenryFashionWeb.Services
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+                
+                // Get order statistics for this user
+                var orderCount = await _context.Orders.CountAsync(o => o.UserId == user.Id);
+                var totalSpent = await _context.Orders
+                    .Where(o => o.UserId == user.Id && (o.Status == "Completed" || o.Status == "completed" || o.Status == "delivered"))
+                    .SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+                
                 userViewModels.Add(new UserListItemViewModel
                 {
                     Id = user.Id,
@@ -97,10 +104,13 @@ namespace JohnHenryFashionWeb.Services
                     LastName = user.LastName ?? string.Empty,
                     Email = user.Email ?? string.Empty,
                     PhoneNumber = user.PhoneNumber ?? string.Empty,
+                    Avatar = user.Avatar, // Thêm avatar
                     IsActive = user.IsActive,
                     CreatedAt = user.CreatedAt,
-                    LastLoginDate = user.LastLoginDate,
-                    Roles = roles.ToList()
+                    LastLoginDate = user.LastLoginDate, // Đã có
+                    Roles = roles.ToList(),
+                    OrderCount = orderCount, // Thêm số đơn hàng
+                    TotalSpent = totalSpent // Thêm tổng chi tiêu
                 });
             }
 
@@ -109,6 +119,10 @@ namespace JohnHenryFashionWeb.Services
             var activeUsers = await _userManager.Users.CountAsync(u => u.IsActive);
             var newUsersThisMonth = await _userManager.Users
                 .CountAsync(u => u.CreatedAt >= DateTime.UtcNow.AddDays(-30));
+            
+            // Count sellers
+            var sellersInRole = await _userManager.GetUsersInRoleAsync("Seller");
+            var sellersCount = sellersInRole.Count;
 
             return new UserManagementViewModel
             {
@@ -125,7 +139,8 @@ namespace JohnHenryFashionWeb.Services
                 AvailableRoles = _roleManager.Roles.Select(r => r.Name).Where(n => n != null).Cast<string>().ToList(),
                 TotalUsers = totalUsers,
                 ActiveUsers = activeUsers,
-                NewUsersThisMonth = newUsersThisMonth
+                NewUsersThisMonth = newUsersThisMonth,
+                SellersCount = sellersCount // Thêm số sellers
             };
         }
 
