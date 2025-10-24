@@ -1,0 +1,938 @@
+@model ProductViewModel
+@{
+    ViewData["Title"] = Model.Name;
+    var descLength = Model.Description?.Length ?? 0;
+    ViewData["Description"] = descLength > 0 ? Model.Description!.Substring(0, Math.Min(160, descLength)) : Model.Name;
+}
+
+@Html.AntiForgeryToken()
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="bg-light py-3">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            @if (!string.IsNullOrEmpty(Model.CategoryName))
+            {
+                <li class="breadcrumb-item"><a href="/Store?category=@Model.CategoryName">@Model.CategoryName</a></li>
+            }
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </div>
+</nav>
+
+<!-- Product Detail Section -->
+<section class="product-detail-section py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Product Images -->
+            <div class="col-lg-6 mb-4">
+                <div class="product-images-wrapper d-flex gap-3">
+                    <!-- Thumbnails Column -->
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div class="thumbnails-column d-flex flex-column gap-2">
+                            <img src="@Model.FeaturedImageUrl" 
+                                 alt="@Model.Name" 
+                                 class="img-thumbnail thumbnail-img active"
+                                 onclick="changeMainImage(this)"
+                                 style="width: 80px; height: 100px; object-fit: cover; cursor: pointer;">
+                            @foreach (var img in Model.Images)
+                            {
+                                <img src="@img" 
+                                     alt="@Model.Name" 
+                                     class="img-thumbnail thumbnail-img"
+                                     onclick="changeMainImage(this)"
+                                     style="width: 80px; height: 100px; object-fit: cover; cursor: pointer;">
+                            }
+                        </div>
+                    }
+                    
+                    <!-- Main Image -->
+                    <div class="main-image-wrapper flex-grow-1">
+                        <img src="@(Model.FeaturedImageUrl ?? "/images/placeholder.jpg")" 
+                             alt="@Model.Name" 
+                             class="img-fluid"
+                             id="mainProductImage"
+                             style="max-width: 70%; height: auto; object-fit: cover;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <!-- Brand Badge -->
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="/images/logo.png" alt="JOHN HENRY" style="height: 30px;" class="me-3">
+                        <span class="text-danger fw-bold">MIỄN PHÍ VẬN CHUYỂN ĐỜN HÀNG TỪ 299K</span>
+                    </div>
+                    
+                    <!-- Product Name -->
+                    <h1 class="product-name h3 mb-3">@Model.Name</h1>
+
+                    <!-- SKU -->
+                    <p class="text-muted mb-3">
+                        <small>SKU: <strong>@Model.SKU</strong></small>
+                    </p>
+
+                    <!-- Price -->
+                    <div class="product-price mb-4 d-flex align-items-center gap-3">
+                        <h3 class="price mb-0 fw-bold" style="color: #c21935;">@Model.Price.ToString("N0")đ</h3>
+                        <button type="button" class="btn btn-link p-0 text-danger" id="wishlistBtn" data-product-id="@Model.Id" title="Thêm vào yêu thích">
+                            <i class="far fa-heart fa-lg" id="wishlistIcon"></i>
+                        </button>
+                    </div>
+
+                    <!-- Size Selection - Always show default sizes -->
+                    <div class="product-size mb-4">
+                        <label class="form-label fw-bold text-uppercase mb-2">SIZE:</label>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="size-options d-flex gap-2">
+                                @{
+                                    // Use product sizes if available, otherwise use default sizes
+                                    var sizes = (Model.AvailableSizes != null && Model.AvailableSizes.Any()) 
+                                        ? Model.AvailableSizes 
+                                        : new List<string> { "S", "M", "L", "XL", "XXL" };
+                                    var isFirst = true;
+                                }
+                                @foreach (var size in sizes)
+                                {
+                                    <button type="button" class="btn size-btn @(isFirst ? "active" : "")" data-size="@size.Trim()">
+                                        @size.Trim()
+                                    </button>
+                                    isFirst = false;
+                                }
+                            </div>
+                        </div>
+                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">
+                            <i class="fas fa-ruler me-1"></i> Hướng dẫn tính size
+                        </a>
+                    </div>
+
+                    <!-- Quantity and Action Buttons -->
+                    <div class="product-actions-section mb-4">
+                        <!-- Quantity -->
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="input-group" style="max-width: 200px;">
+                                <button class="btn btn-outline-secondary" type="button" id="decreaseQty" style="padding: 12px 20px;">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center fw-bold" id="quantity" value="1" min="1" max="@Model.StockQuantity" style="font-size: 18px;">
+                                <button class="btn btn-outline-secondary" type="button" id="increaseQty" style="padding: 12px 20px;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column gap-3">
+                            <!-- Row 1: Buy Now + Add to Cart -->
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-danger btn-lg w-100 text-uppercase fw-bold py-3" id="buyNowBtn" style="border-radius: 8px;">
+                                        MUA NGAY
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-outline-danger btn-lg w-100 text-uppercase fw-bold py-3" id="addToCartBtn" style="border-radius: 8px; border: 2px solid #dc3545;">
+                                        THÊM VÀO GIỎ
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Row 2: View Store -->
+                            <button type="button" class="btn btn-outline-danger btn-lg w-100 text-uppercase fw-bold py-3" style="border-radius: 8px; border: 2px solid #dc3545;">
+                                XEM CỬA HÀNG CÓ HÀNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Meta -->
+                    <div class="product-meta pt-3 border-top">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-box me-2"></i>
+                                    Còn <strong>@Model.StockQuantity</strong> sản phẩm
+                                </small>
+                            </div>
+                            @if (Model.IsFeatured)
+                            {
+                                <div class="col-12">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-star me-1"></i> Sản phẩm nổi bật
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        @if (ViewBag.RelatedProducts != null && ((List<ProductViewModel>)ViewBag.RelatedProducts).Count > 0)
+        {
+            <div class="related-products mt-5">
+                <div class="collection-header text-center mb-4">
+                    <h2 class="collection-title mb-2">SẢN PHẨM LIÊN QUAN</h2>
+                    <div class="section-divider mx-auto"></div>
+                </div>
+                <div class="row g-4">
+                    @foreach (var product in (List<ProductViewModel>)ViewBag.RelatedProducts)
+                    {
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="product-card-new">
+                                <div class="product-image-container">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })">
+                                        <img src="@(product.FeaturedImageUrl ?? "/images/placeholder.jpg")" 
+                                             alt="@product.Name" 
+                                             class="product-image">
+                                    </a>
+                                </div>
+                                <div class="product-info">
+                                    <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" style="text-decoration: none; color: inherit;">
+                                        <h6 class="product-name">@product.Name</h6>
+                                    </a>
+                                    <div class="product-price-actions">
+                                        <div class="product-price">@product.Price.ToString("N0")₫</div>
+                                        <div class="product-actions">
+                                            <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.SKU">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+                                            <button class="action-btn cart-btn" title="Thêm vào giỏ" onclick="addToCartFromRelated('@product.SKU', this)">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Size Guide Modal -->
+<div class="modal fade" id="sizeGuideModal" tabindex="-1" aria-labelledby="sizeGuideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title text-uppercase fw-bold" id="sizeGuideModalLabel">
+                    <i class="fas fa-ruler me-2"></i>Hướng dẫn tính size
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img src="/images/size-chart.jpg" alt="Hướng dẫn chọn size John Henry" class="img-fluid w-100">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const productId = '@Model.Id';
+        
+        // Check if product is in wishlist on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkWishlistStatus();
+        });
+
+        // Check if product is in wishlist
+        function checkWishlistStatus() {
+            fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateWishlistIcon(data.isInWishlist);
+                })
+                .catch(error => {
+                    console.error('Error checking wishlist status:', error);
+                });
+        }
+
+        // Update wishlist icon
+        function updateWishlistIcon(isInWishlist) {
+            const icon = document.getElementById('wishlistIcon');
+            const btn = document.getElementById('wishlistBtn');
+            
+            if (isInWishlist) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                btn.setAttribute('title', 'Xóa khỏi yêu thích');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                btn.setAttribute('title', 'Thêm vào yêu thích');
+            }
+        }
+
+        // Wishlist button click handler
+        document.getElementById('wishlistBtn').addEventListener('click', function() {
+            const icon = document.getElementById('wishlistIcon');
+            const isInWishlist = icon.classList.contains('fas');
+            
+            if (isInWishlist) {
+                // Remove from wishlist
+                removeFromWishlist();
+            } else {
+                // Add to wishlist
+                addToWishlist();
+            }
+        });
+
+        // Add to wishlist
+        function addToWishlist() {
+            const formData = new FormData();
+            formData.append('productId', productId);
+            
+            fetch('/Wishlist/Add', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateWishlistIcon(true);
+                    showToast('Đã thêm vào danh sách yêu thích', 'success');
+                    
+                    // Update wishlist count if element exists
+                    const wishlistCount = document.querySelector('.wishlist-count');
+                    if (wishlistCount) {
+                        wishlistCount.textContent = data.wishlistCount;
+                    }
+                } else {
+                    if (data.message.includes('not authenticated')) {
+                        showToast('Vui lòng đăng nhập để thêm vào yêu thích', 'warning');
+                        // Redirect to login after 1.5 seconds
+                        setTimeout(() => {
+                            window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Không thể thêm vào yêu thích', 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+            });
+        }
+
+        // Remove from wishlist
+        function removeFromWishlist() {
+            const formData = new FormData();
+            formData.append('productId', productId);
+            
+            fetch('/Wishlist/Remove', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateWishlistIcon(false);
+                    showToast('Đã xóa khỏi danh sách yêu thích', 'success');
+                    
+                    // Update wishlist count if element exists
+                    const wishlistCount = document.querySelector('.wishlist-count');
+                    if (wishlistCount) {
+                        wishlistCount.textContent = data.wishlistCount;
+                    }
+                } else {
+                    showToast(data.message || 'Không thể xóa khỏi yêu thích', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+            });
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            // Create toast element if it doesn't exist
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+                document.body.appendChild(toastContainer);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} alert-dismissible fade show`;
+            toast.style.cssText = 'min-width: 250px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+            toast.innerHTML = `
+                <strong>${type === 'success' ? '<i class="fas fa-check-circle me-2"></i>' : type === 'warning' ? '<i class="fas fa-exclamation-triangle me-2"></i>' : '<i class="fas fa-times-circle me-2"></i>'}</strong>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Change main image on thumbnail click
+        function changeMainImage(thumbnail) {
+            const mainImg = document.getElementById('mainProductImage');
+            mainImg.src = thumbnail.src;
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail-img').forEach(img => {
+                img.classList.remove('active');
+            });
+            thumbnail.classList.add('active');
+        }
+
+        // Quantity controls
+        document.getElementById('decreaseQty').addEventListener('click', function() {
+            const qtyInput = document.getElementById('quantity');
+            if (qtyInput.value > 1) {
+                qtyInput.value = parseInt(qtyInput.value) - 1;
+            }
+        });
+
+        document.getElementById('increaseQty').addEventListener('click', function() {
+            const qtyInput = document.getElementById('quantity');
+            const max = parseInt(qtyInput.max);
+            if (parseInt(qtyInput.value) < max) {
+                qtyInput.value = parseInt(qtyInput.value) + 1;
+            }
+        });
+
+        // Size selection
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Buy now button
+        document.getElementById('buyNowBtn').addEventListener('click', function() {
+            const quantity = document.getElementById('quantity').value;
+            const selectedSize = document.querySelector('.size-btn.active')?.dataset.size || 'M';
+            const productSku = '@Model.SKU';
+
+            const formData = new FormData();
+            formData.append('productId', productSku);
+            formData.append('quantity', quantity);
+            formData.append('size', selectedSize);
+
+            // Show loading state
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>ĐANG XỬ LÝ...';
+            btn.disabled = true;
+
+            fetch('/Products/BuyNow', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to checkout
+                    window.location.href = data.redirectUrl || '/Checkout?mode=buynow';
+                } else {
+                    showToast(data.message || 'Không thể thực hiện mua ngay', 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+
+        // Add to cart
+        document.getElementById('addToCartBtn').addEventListener('click', function() {
+            const quantity = document.getElementById('quantity').value;
+            const selectedSize = document.querySelector('.size-btn.active')?.dataset.size || 'M'; // Default to M
+            const productSku = '@Model.SKU';
+
+            const formData = new FormData();
+            formData.append('productId', productSku);
+            formData.append('quantity', quantity);
+            formData.append('size', selectedSize);
+
+            fetch('/Products/AddToCart', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Đã thêm sản phẩm vào giỏ hàng', 'success');
+                    // Update cart count if you have a cart icon
+                    const cartCount = document.querySelector('.cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = data.cartCount;
+                    }
+                } else {
+                    showToast(data.message || 'Không thể thêm sản phẩm', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng', 'error');
+            });
+        });
+
+        // Add to cart from related products
+        function addToCartFromRelated(productSku, buttonElement) {
+            const formData = new FormData();
+            formData.append('productId', productSku);
+            formData.append('quantity', 1);
+            formData.append('size', 'M'); // Default size
+
+            // Add loading state
+            const originalContent = buttonElement.innerHTML;
+            buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            buttonElement.disabled = true;
+
+            fetch('/Products/AddToCart', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Đã thêm sản phẩm vào giỏ hàng', 'success');
+                    // Update cart count
+                    const cartCount = document.querySelector('.cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = data.cartCount;
+                    }
+                    // Show success animation
+                    buttonElement.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        buttonElement.innerHTML = originalContent;
+                        buttonElement.disabled = false;
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Không thể thêm sản phẩm', 'error');
+                    buttonElement.innerHTML = originalContent;
+                    buttonElement.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng', 'error');
+                buttonElement.innerHTML = originalContent;
+                buttonElement.disabled = false;
+            });
+        }
+
+        // Wishlist functionality for related products
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            const productId = btn.getAttribute('data-wishlist-product-id');
+            
+            // Check if product is in wishlist
+            if (productId) {
+                fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isInWishlist) {
+                            btn.classList.add('active');
+                            btn.querySelector('i').classList.remove('far');
+                            btn.querySelector('i').classList.add('fas');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Click handler
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isActive = this.classList.contains('active');
+                const productSku = this.getAttribute('data-wishlist-product-id');
+                
+                if (isActive) {
+                    // Remove from wishlist
+                    removeFromWishlistRelated(productSku, this);
+                } else {
+                    // Add to wishlist
+                    addToWishlistRelated(productSku, this);
+                }
+            });
+        });
+
+        function addToWishlistRelated(productSku, buttonElement) {
+            const formData = new FormData();
+            formData.append('productId', productSku);
+            
+            fetch('/Wishlist/Add', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    buttonElement.classList.add('active');
+                    buttonElement.querySelector('i').classList.remove('far');
+                    buttonElement.querySelector('i').classList.add('fas');
+                    showToast('Đã thêm vào danh sách yêu thích', 'success');
+                } else {
+                    if (data.message.includes('not authenticated')) {
+                        showToast('Vui lòng đăng nhập để thêm vào yêu thích', 'warning');
+                        setTimeout(() => {
+                            window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Không thể thêm vào yêu thích', 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+            });
+        }
+
+        function removeFromWishlistRelated(productSku, buttonElement) {
+            const formData = new FormData();
+            formData.append('productId', productSku);
+            
+            fetch('/Wishlist/Remove', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    buttonElement.classList.remove('active');
+                    buttonElement.querySelector('i').classList.remove('fas');
+                    buttonElement.querySelector('i').classList.add('far');
+                    showToast('Đã xóa khỏi danh sách yêu thích', 'success');
+                } else {
+                    showToast(data.message || 'Không thể xóa khỏi yêu thích', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        .product-images-wrapper {
+            position: relative;
+        }
+
+        .thumbnails-column {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .thumbnail-img {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail-img:hover {
+            border-color: #dc3545;
+        }
+
+        .thumbnail-img.active {
+            border-color: #dc3545;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+        }
+
+        .size-btn {
+            min-width: 60px;
+            height: 50px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            background-color: white;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .size-btn.active {
+            background-color: #c21935;
+            color: white;
+            border-color: #c21935;
+        }
+
+        .size-btn:hover:not(.active) {
+            background-color: white;
+            border-color: #c21935;
+            color: #c21935;
+        }
+
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .color-swatch.active {
+            border: 3px solid #dc3545;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #dc3545;
+        }
+
+        .product-name {
+            color: #333;
+            font-weight: 500;
+            font-size: 25px;
+            line-height: 1.4;
+        }
+
+        .main-image-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .product-actions .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+
+        .selected-color-text {
+            text-transform: uppercase;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .shipping-banner {
+            background-color: white;
+            border-radius: 4px;
+            border: 2px solid #dc3545 !important;
+        }
+
+        .shipping-banner span {
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        #wishlistBtn {
+            transition: all 0.3s ease;
+        }
+
+        #wishlistBtn:hover {
+            transform: scale(1.2);
+        }
+
+        #wishlistIcon {
+            transition: all 0.3s ease;
+        }
+
+        #wishlistIcon.fas {
+            color: #dc3545;
+        }
+
+        /* Related Products Styles - Match Home Page */
+        .collection-header {
+            margin-bottom: 3rem;
+        }
+
+        .collection-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .section-divider {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #dc3545 0%, #ff6b6b 100%);
+            margin-top: 1rem;
+        }
+
+        .product-card-new {
+            background: #fff;
+            border-radius: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #f0f0f0;
+        }
+
+        .product-card-new:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .product-image-container {
+            position: relative;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            aspect-ratio: 3/4;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card-new:hover .product-image {
+            transform: scale(1.08);
+        }
+
+        .product-info {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-info .product-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.8em;
+        }
+
+        .product-price-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .wishlist-btn.active {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .wishlist-btn.active i {
+            font-weight: 900;
+        }
+
+        @@media (max-width: 768px) {
+            .product-images-wrapper {
+                flex-direction: column;
+            }
+
+            .thumbnails-column {
+                flex-direction: row !important;
+                overflow-x: auto;
+                max-height: none;
+            }
+
+            .main-image-wrapper img {
+                height: 400px !important;
+            }
+
+            .collection-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}

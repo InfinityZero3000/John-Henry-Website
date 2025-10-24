@@ -583,7 +583,7 @@
                             {
                                 @foreach (var product in Model)
                                 {
-                                    @Html.Partial("_ProductCard", product)
+                                    @await Html.PartialAsync("_ProductCard", product)
                                 }
                             }
                             else
@@ -596,7 +596,7 @@
                     </div>
                     
                     @* Pagination - moved outside products-grid *@
-                    @Html.Partial("_Pagination")
+                    @await Html.PartialAsync("_Pagination")
                 </div>
             </div>
         </div>

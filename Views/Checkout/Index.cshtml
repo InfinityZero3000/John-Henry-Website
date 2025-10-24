@@ -1,383 +1,392 @@
-@model CheckoutViewModel
+@model JohnHenryFashionWeb.ViewModels.CheckoutViewModel
 @{
     ViewData["Title"] = "Thanh toán";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cartTotal = Model.Subtotal;
+    var cartCount = Model.CartItems.Count;
+    var shippingFee = Model.ShippingFee;
+    var grandTotal = Model.Total;
+    var shippingMethods = Model.ShippingMethods;
 }
 
-@section Styles {
-    <link href="~/css/checkout.css" rel="stylesheet" />
-}
+@Html.AntiForgeryToken()
 
-<div class="checkout-container">
-    <div class="container py-5">
-        <!-- Progress Steps -->
-        <div class="checkout-steps mb-5">
-            <div class="steps-container">
-                <div class="step active">
-                    <div class="step-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <span class="step-title">Thông tin</span>
+<div class="container py-4">
+    <!-- Progress Steps -->
+    <div class="checkout-steps mb-5">
+        <div class="steps-container">
+            <div class="step active">
+                <div class="step-icon">
+                    <i class="fas fa-shopping-cart"></i>
                 </div>
-                <div class="step-line"></div>
-                <div class="step">
-                    <div class="step-icon">
-                        <i class="fas fa-credit-card"></i>
-                    </div>
-                    <span class="step-title">Thanh toán</span>
+                <span class="step-title">Thông tin</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-credit-card"></i>
                 </div>
-                <div class="step-line"></div>
-                <div class="step">
-                    <div class="step-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <span class="step-title">Hoàn thành</span>
+                <span class="step-title">Thanh toán</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-check-circle"></i>
                 </div>
+                <span class="step-title">Hoàn thành</span>
             </div>
         </div>
+    </div>
 
-        <div class="row">
-            <!-- Checkout Form -->
-            <div class="col-lg-8">
-                <div class="checkout-form">
-                    <form id="checkoutForm" asp-action="CreateSession" method="post">
-                        @Html.AntiForgeryToken()
-                        
-                        <!-- Customer Information -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-user me-2"></i>
-                                Thông tin khách hàng
-                            </h4>
-                            
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/Cart">Giỏ hàng</a></li>
+            <li class="breadcrumb-item active">Thanh toán</li>
+        </ol>
+    </nav>
+
+    <!-- Checkout Header -->
+    <div class="checkout-header mb-4">
+        <h2>Thanh toán đơn hàng</h2>
+        <p class="text-muted">Vui lòng kiểm tra thông tin đơn hàng và điền thông tin giao hàng</p>
+    </div>
+
+    <div class="row">
+        <!-- Checkout Form -->
+        <div class="col-lg-8">
+            <form id="checkoutForm">
+                <!-- Customer Information -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h4><i class="fas fa-user me-2"></i>Thông tin khách hàng</h4>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="Email" class="form-label required">Email</label>
-                                        <input asp-for="Email" class="form-control" placeholder="Nhập địa chỉ email">
-                                        <span asp-validation-for="Email" class="text-danger"></span>
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">Họ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" value="@Model.FirstName" required>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
-                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại">
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" value="@Model.LastName" required>
                                 </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="FirstName" class="form-label">Họ</label>
-                                        <input asp-for="FirstName" class="form-control" placeholder="Nhập họ">
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="LastName" class="form-label">Tên</label>
-                                        <input asp-for="LastName" class="form-control" placeholder="Nhập tên">
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" value="@Model.PhoneNumber" required>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Shipping Address -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-truck me-2"></i>
-                                Địa chỉ giao hàng
-                            </h4>
-                            
-                            @if (Model.SavedAddresses.Any())
-                            {
-                                <div class="saved-addresses mb-3">
-                                    <label class="form-label">Chọn địa chỉ đã lưu</label>
-                                    <select class="form-select" id="savedAddressSelect">
-                                        <option value="">-- Chọn địa chỉ --</option>
-                                        @foreach (var address in Model.SavedAddresses)
+                <!-- Shipping Information -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h4><i class="fas fa-shipping-fast me-2"></i>Thông tin giao hàng</h4>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <!-- Shipping Method Selection -->
+                            <div class="mb-4">
+                                <label class="form-label"><strong>Phương thức vận chuyển <span class="text-danger">*</span></strong></label>
+                                <div class="shipping-methods" id="shippingMethods">
+                                    @if (shippingMethods.Any())
+                                    {
+                                        @foreach (var method in shippingMethods)
                                         {
-                                            <option value="@address.Id" 
-                                                    data-fullname="@address.FullName"
-                                                    data-phone="@address.PhoneNumber"
-                                                    data-address="@address.FullAddress"
-                                                    data-ward="@address.Ward"
-                                                    data-district="@address.District"
-                                                    data-city="@address.City"
-                                                    data-postalcode="@address.PostalCode">
-                                                @address.FullName - @address.FullAddress, @address.Ward, @address.District, @address.City
-                                            </option>
+                                            <div class="shipping-option mb-2">
+                                                <input type="radio" 
+                                                       class="btn-check" 
+                                                       name="shippingMethod" 
+                                                       id="shipping_@method.Code" 
+                                                       value="@method.Code"
+                                                       data-cost="@method.Cost"
+                                                       data-days="@method.EstimatedDays"
+                                                       autocomplete="off"
+                                                       @(method.Code == "STANDARD" ? "checked" : "")>
+                                                <label class="btn btn-outline-primary w-100 text-start" for="shipping_@method.Code">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <div class="fw-bold">@method.Name</div>
+                                                            <small class="text-muted d-block">@method.Description</small>
+                                                            @if (method.EstimatedDays > 0)
+                                                            {
+                                                                <small class="text-success"><i class="fas fa-clock"></i> Giao trong @method.EstimatedDays ngày</small>
+                                                            }
+                                                        </div>
+                                                        <div class="fw-bold">
+                                                            @if (method.Cost > 0)
+                                                            {
+                                                                <span>@method.Cost.ToString("N0")₫</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-success">Miễn phí</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
                                         }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">Không có phương thức vận chuyển khả dụng</p>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="address" name="address" 
+                                           placeholder="Số nhà, tên đường" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="city" class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="city" name="city" required>
+                                        <option value="">Chọn tỉnh/thành</option>
+                                        <option value="Ho Chi Minh">TP. Hồ Chí Minh</option>
+                                        <option value="Ha Noi">Hà Nội</option>
+                                        <option value="Da Nang">Đà Nẵng</option>
+                                        <option value="Can Tho">Cần Thơ</option>
+                                        <option value="Other">Khác</option>
                                     </select>
                                 </div>
-                            }
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="ShippingAddress.FullName" class="form-label required">Họ và tên</label>
-                                        <input asp-for="ShippingAddress.FullName" class="form-control" placeholder="Nhập họ và tên">
-                                        <span asp-validation-for="ShippingAddress.FullName" class="text-danger"></span>
-                                    </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="district" class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="district" name="district" required>
+                                        <option value="">Chọn quận/huyện</option>
+                                    </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="ShippingAddress.PhoneNumber" class="form-label required">Số điện thoại</label>
-                                        <input asp-for="ShippingAddress.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại">
-                                        <span asp-validation-for="ShippingAddress.PhoneNumber" class="text-danger"></span>
-                                    </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="ward" class="form-label">Phường/Xã <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="ward" name="ward" required>
+                                        <option value="">Chọn phường/xã</option>
+                                    </select>
                                 </div>
-                            </div>
-                            
-                            <div class="form-group mb-3">
-                                <label asp-for="ShippingAddress.Address" class="form-label required">Địa chỉ</label>
-                                <input asp-for="ShippingAddress.Address" class="form-control" placeholder="Số nhà, tên đường">
-                                <span asp-validation-for="ShippingAddress.Address" class="text-danger"></span>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="ShippingAddress.Ward" class="form-label required">Phường/Xã</label>
-                                        <input asp-for="ShippingAddress.Ward" class="form-control" placeholder="Phường/Xã">
-                                        <span asp-validation-for="ShippingAddress.Ward" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="ShippingAddress.District" class="form-label required">Quận/Huyện</label>
-                                        <input asp-for="ShippingAddress.District" class="form-control" placeholder="Quận/Huyện">
-                                        <span asp-validation-for="ShippingAddress.District" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="ShippingAddress.City" class="form-label required">Tỉnh/Thành phố</label>
-                                        <input asp-for="ShippingAddress.City" class="form-control" placeholder="Tỉnh/Thành phố">
-                                        <span asp-validation-for="ShippingAddress.City" class="text-danger"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Billing Address -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-file-invoice me-2"></i>
-                                Địa chỉ thanh toán
-                            </h4>
-                            
-                            <div class="form-check mb-3">
-                                <input asp-for="UseSameAddressForBilling" class="form-check-input" type="checkbox" id="useSameAddress">
-                                <label class="form-check-label" for="useSameAddress">
-                                    Sử dụng địa chỉ giao hàng làm địa chỉ thanh toán
-                                </label>
-                            </div>
-                            
-                            <div id="billingAddressSection" style="display: none;">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label asp-for="BillingAddress.FullName" class="form-label">Họ và tên</label>
-                                            <input asp-for="BillingAddress.FullName" class="form-control">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label asp-for="BillingAddress.PhoneNumber" class="form-label">Số điện thoại</label>
-                                            <input asp-for="BillingAddress.PhoneNumber" class="form-control">
-                                        </div>
-                                    </div>
+                                <div class="col-12 mb-3">
+                                    <label for="notes" class="form-label">Ghi chú (tùy chọn)</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                              placeholder="Ghi chú thêm cho đơn hàng (màu sắc, kích thước, yêu cầu giao hàng...)"></textarea>
                                 </div>
                                 
-                                <div class="form-group mb-3">
-                                    <label asp-for="BillingAddress.Address" class="form-label">Địa chỉ</label>
-                                    <input asp-for="BillingAddress.Address" class="form-control">
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group mb-3">
-                                            <label asp-for="BillingAddress.Ward" class="form-label">Phường/Xã</label>
-                                            <input asp-for="BillingAddress.Ward" class="form-control">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group mb-3">
-                                            <label asp-for="BillingAddress.District" class="form-label">Quận/Huyện</label>
-                                            <input asp-for="BillingAddress.District" class="form-control">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group mb-3">
-                                            <label asp-for="BillingAddress.City" class="form-label">Tỉnh/Thành phố</label>
-                                            <input asp-for="BillingAddress.City" class="form-control">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Shipping Method -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-shipping-fast me-2"></i>
-                                Phương thức vận chuyển
-                            </h4>
-                            
-                            <div class="shipping-methods">
-                                @foreach (var method in Model.ShippingMethods)
+                                @if (User.Identity?.IsAuthenticated == true)
                                 {
-                                    <div class="shipping-method">
-                                        <label class="shipping-method-label">
-                                            <input type="radio" asp-for="ShippingMethod" value="@method.Code" 
-                                                   data-cost="@method.Cost" data-delivery-time="@method.DeliveryTime"
-                                                   class="shipping-method-radio">
-                                            <div class="shipping-method-content">
-                                                <div class="shipping-method-info">
-                                                    <h6 class="shipping-method-name">@method.Name</h6>
-                                                    <p class="shipping-method-description">@method.Description</p>
-                                                    <small class="shipping-method-time">@method.DeliveryTime</small>
-                                                </div>
-                                                <div class="shipping-method-price">
-                                                    @if (method.Cost > 0)
-                                                    {
-                                                        <strong>@method.Cost.ToString("N0") ₫</strong>
-                                                    }
-                                                    else
-                                                    {
-                                                        <strong class="text-success">Miễn phí</strong>
-                                                    }
-                                                </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="saveAddress" name="saveAddress">
+                                                <label class="form-check-label" for="saveAddress">
+                                                    Lưu địa chỉ này để sử dụng cho lần sau
+                                                </label>
                                             </div>
-                                        </label>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" id="saveAddressBtn">
+                                                <i class="fas fa-save me-1"></i>
+                                                Lưu địa chỉ ngay
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Địa chỉ sẽ được lưu vào tài khoản của bạn để sử dụng cho các đơn hàng tiếp theo
+                                        </small>
                                     </div>
                                 }
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Coupon Code -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-tag me-2"></i>
-                                Mã giảm giá
-                            </h4>
-                            
-                            <div class="coupon-section">
-                                <div class="input-group">
-                                    <input asp-for="CouponCode" class="form-control" placeholder="Nhập mã giảm giá">
-                                    <button type="button" class="btn btn-outline-primary" id="applyCouponBtn">
-                                        Áp dụng
+                <!-- Payment Method -->
+                <div class="checkout-section">
+                    <div class="section-header">
+                        <h4><i class="fas fa-credit-card me-2"></i>Phương thức thanh toán</h4>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="payment-methods">
+                                <div class="payment-option mb-2">
+                                    <input class="btn-check" type="radio" name="paymentMethod" id="cod" value="cod" checked autocomplete="off">
+                                    <label class="btn btn-outline-success w-100 text-start" for="cod">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-money-bill-wave fs-4 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold">Thanh toán khi nhận hàng (COD)</div>
+                                                <small class="text-muted d-block">Thanh toán bằng tiền mặt khi nhận hàng</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-option mb-2">
+                                    <input class="btn-check" type="radio" name="paymentMethod" id="bank_transfer" value="bank_transfer" autocomplete="off">
+                                    <label class="btn btn-outline-success w-100 text-start" for="bank_transfer">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-university fs-4 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold">Chuyển khoản ngân hàng</div>
+                                                <small class="text-muted d-block">Chuyển khoản trực tiếp vào tài khoản ngân hàng</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-option mb-2">
+                                    <input class="btn-check" type="radio" name="paymentMethod" id="momo" value="momo" autocomplete="off">
+                                    <label class="btn btn-outline-success w-100 text-start" for="momo">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-wallet fs-4 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold">Ví điện tử MoMo</div>
+                                                <small class="text-muted d-block">Thanh toán qua ví điện tử MoMo</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-option">
+                                    <input class="btn-check" type="radio" name="paymentMethod" id="vnpay" value="vnpay" autocomplete="off">
+                                    <label class="btn btn-outline-success w-100 text-start" for="vnpay">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-credit-card fs-4 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold">VNPay</div>
+                                                <small class="text-muted d-block">Thanh toán trực tuyến qua VNPay</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="order-summary">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Đơn hàng của bạn</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Order Items -->
+                        <div class="order-items mb-3">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <div class="order-item mb-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-3">
+                                            <img src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "~/images/placeholder-product.jpg")" 
+                                                 alt="@item.ProductName" 
+                                                 class="img-fluid rounded"
+                                                 onerror="this.src='/images/placeholder-product.jpg'">
+                                        </div>
+                                        <div class="col-9">
+                                            <h6 class="mb-1">@item.ProductName</h6>
+                                            <div class="item-details">
+                                                @if (!string.IsNullOrEmpty(item.Size))
+                                                {
+                                                    <span class="badge bg-light text-dark me-1">@item.Size</span>
+                                                }
+                                                @if (!string.IsNullOrEmpty(item.Color))
+                                                {
+                                                    <span class="badge bg-light text-dark">@item.Color</span>
+                                                }
+                                            </div>
+                                            <div class="item-price">
+                                                <div>
+                                                    <span class="text-muted">Số lượng: </span>
+                                                    <span class="fw-bold">×@item.Quantity</span>
+                                                </div>
+                                                <div class="price fw-bold">@((item.Price * item.Quantity).ToString("N0"))₫</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <hr>
+                        
+                        <!-- Coupon Code Section -->
+                        <div class="coupon-section mb-3">
+                            <label class="form-label fw-bold"><i class="fas fa-tag me-2"></i>Mã giảm giá</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="couponCode" placeholder="Nhập mã giảm giá">
+                                <button class="btn btn-outline-primary" type="button" onclick="applyCoupon()">
+                                    Áp dụng
+                                </button>
+                            </div>
+                            <div id="couponMessage" class="mt-2" style="display: none;"></div>
+                            <div id="appliedCoupon" class="alert alert-success mt-2" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-check-circle me-2"></i><span id="appliedCouponCode"></span></span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeCoupon()">
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 </div>
-                                <div id="couponMessage" class="mt-2"></div>
                             </div>
                         </div>
 
-                        <!-- Notes -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-comment me-2"></i>
-                                Ghi chú đơn hàng
-                            </h4>
-                            
-                            <div class="form-group">
-                                <textarea asp-for="Notes" class="form-control" rows="3" 
-                                         placeholder="Ghi chú đặc biệt cho đơn hàng (tùy chọn)"></textarea>
+                        <hr>
+
+                        <!-- Order Summary -->
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Tạm tính (@cartCount sản phẩm):</span>
+                                <span id="subtotalAmount">@cartTotal.ToString("N0")₫</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span id="shippingAmount">@shippingFee.ToString("N0")₫</span>
+                            </div>
+                            <div class="summary-row" id="discountRow" style="display: none;">
+                                <span class="text-success">Giảm giá:</span>
+                                <span class="text-success" id="discountAmount">-0₫</span>
+                            </div>
+                            <hr>
+                            <div class="summary-row total-row">
+                                <strong>
+                                    <span>Tổng cộng:</span>
+                                    <span id="grandTotalAmount">@grandTotal.ToString("N0")₫</span>
+                                </strong>
                             </div>
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg" id="continueToPaymentBtn">
-                                <i class="fas fa-arrow-right me-2"></i>
-                                Tiếp tục thanh toán
+                        <!-- Place Order Button -->
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-primary btn-lg w-100" onclick="placeOrder()">
+                                <i class="fas fa-check-circle me-2"></i>Đặt hàng
                             </button>
                         </div>
-                    </form>
+
+                        <!-- Security Notice -->
+                        <div class="security-notice mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Thông tin của bạn được bảo mật tuyệt đối
+                            </small>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Order Summary -->
-            <div class="col-lg-4">
-                <div class="order-summary sticky-top">
-                    <h4 class="summary-title">
-                        <i class="fas fa-shopping-bag me-2"></i>
-                        Tóm tắt đơn hàng
-                    </h4>
-                    
-                    <!-- Cart Items -->
-                    <div class="cart-items">
-                        @foreach (var item in Model.CartItems)
-                        {
-                            <div class="cart-item">
-                                <div class="item-image">
-                                    <img src="@(item.ImageUrl ?? "/images/placeholder.jpg")" alt="@item.ProductName">
-                                    <span class="item-quantity">@item.Quantity</span>
-                                </div>
-                                <div class="item-details">
-                                    <h6 class="item-name">@item.ProductName</h6>
-                                    @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
-                                    {
-                                        <p class="item-variants">
-                                            @if (!string.IsNullOrEmpty(item.Size))
-                                            {
-                                                <span>Size: @item.Size</span>
-                                            }
-                                            @if (!string.IsNullOrEmpty(item.Color))
-                                            {
-                                                <span>Màu: @item.Color</span>
-                                            }
-                                        </p>
-                                    }
-                                </div>
-                                <div class="item-price">
-                                    <strong>@item.Total.ToString("N0") ₫</strong>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <!-- Price Breakdown -->
-                    <div class="price-breakdown">
-                        <div class="price-row">
-                            <span>Tạm tính:</span>
-                            <span id="subtotal">@Model.Subtotal.ToString("N0") ₫</span>
-                        </div>
-                        <div class="price-row">
-                            <span>Phí vận chuyển:</span>
-                            <span id="shippingFee">Chọn phương thức vận chuyển</span>
-                        </div>
-                        <div class="price-row discount-row" id="discountRow" style="display: none;">
-                            <span>Giảm giá:</span>
-                            <span id="discountAmount" class="text-success">-0 ₫</span>
-                        </div>
-                        <div class="price-row">
-                            <span>Thuế VAT (10%):</span>
-                            <span id="tax">@Model.Tax.ToString("N0") ₫</span>
-                        </div>
-                        <hr>
-                        <div class="price-row total-row">
-                            <strong>
-                                <span>Tổng cộng:</span>
-                                <span id="total">@Model.Total.ToString("N0") ₫</span>
-                            </strong>
-                        </div>
-                    </div>
-
-                    <!-- Trust Badges -->
-                    <div class="trust-badges mt-4">
-                        <div class="trust-badge">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Thanh toán an toàn</span>
-                        </div>
-                        <div class="trust-badge">
-                            <i class="fas fa-undo-alt"></i>
-                            <span>Đổi trả 30 ngày</span>
-                        </div>
-                        <div class="trust-badge">
-                            <i class="fas fa-truck"></i>
-                            <span>Giao hàng toàn quốc</span>
+                <!-- Return Policy -->
+                <div class="return-policy mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-undo me-2"></i>Chính sách đổi trả</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fas fa-check text-success me-2"></i>Đổi trả trong 7 ngày</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Miễn phí đổi size</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Hoàn tiền 100%</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -386,6 +395,590 @@
     </div>
 </div>
 
+@section Styles {
+    <style>
+        /* Progress Steps */
+        .checkout-steps {
+            margin-bottom: 2rem;
+        }
+
+        .steps-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-icon {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .step.completed .step-icon {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .step.active .step-title,
+        .step.completed .step-title {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background-color: #e9ecef;
+            margin: 0 15px;
+            margin-top: -25px;
+            transition: all 0.3s ease;
+        }
+
+        .step-line.completed {
+            background-color: #28a745;
+        }
+        
+        .checkout-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            margin-bottom: 1rem;
+        }
+        
+        .section-header h4 {
+            color: var(--jh-red);
+            margin-bottom: 0;
+        }
+        
+        /* Shipping Methods Styling */
+        .shipping-methods .shipping-option .btn-outline-primary {
+            text-align: left;
+            padding: 1rem;
+            border: 2px solid #dee2e6;
+        }
+        
+        .shipping-methods .shipping-option .btn-check:checked + .btn-outline-primary {
+            background-color: #e8f4fd;
+            border-color: var(--bs-primary);
+            color: var(--bs-primary);
+        }
+        
+        .shipping-methods .shipping-option .btn-outline-primary:hover {
+            background-color: #f8f9fa;
+            border-color: var(--bs-primary);
+        }
+        
+        /* Payment Methods Styling */
+        .payment-methods .payment-option .btn-outline-success {
+            text-align: left;
+            padding: 1rem;
+            border: 2px solid #dee2e6;
+        }
+        
+        .payment-methods .payment-option .btn-check:checked + .btn-outline-success {
+            background-color: #d1f4e0;
+            border-color: var(--bs-success);
+            color: var(--bs-success);
+        }
+        
+        .payment-methods .payment-option .btn-outline-success:hover {
+            background-color: #f8f9fa;
+            border-color: var(--bs-success);
+        }
+        
+        /* Coupon Section */
+        .coupon-section .input-group {
+            max-width: 100%;
+        }
+        
+        .coupon-section #couponMessage.success {
+            color: #198754;
+        }
+        
+        .coupon-section #couponMessage.error {
+            color: #dc3545;
+        }
+        
+        /* Order Summary */
+        .order-summary {
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .order-item img {
+            max-height: 60px;
+            object-fit: cover;
+        }
+        
+        .item-details {
+            margin-bottom: 0.5rem;
+        }
+        
+        .item-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-row {
+            font-size: 1.1rem;
+        }
+        
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .steps-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .step-line {
+                display: none;
+            }
+            
+            .order-summary {
+                position: static;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+}
+
 @section Scripts {
-    <script src="~/js/checkout.js"></script>
+    <script>
+        // Global variables for order totals
+        let subtotal = @Model.Subtotal;
+        let shippingCost = @Model.ShippingFee;
+        let discountAmount = 0;
+        let appliedCouponData = null;
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listen for shipping method changes
+            document.querySelectorAll('input[name="shippingMethod"]').forEach(radio => {
+                radio.addEventListener('change', handleShippingMethodChange);
+            });
+            
+            // Set initial shipping cost from selected method
+            const selectedShipping = document.querySelector('input[name="shippingMethod"]:checked');
+            if (selectedShipping) {
+                shippingCost = parseFloat(selectedShipping.dataset.cost) || 0;
+                updateOrderTotals();
+            }
+            
+            // Handle save address button
+            const saveAddressBtn = document.getElementById('saveAddressBtn');
+            if (saveAddressBtn) {
+                saveAddressBtn.addEventListener('click', saveShippingAddress);
+            }
+        });
+        
+        // Handle shipping method change
+        function handleShippingMethodChange(event) {
+            const selectedMethod = event.target;
+            shippingCost = parseFloat(selectedMethod.dataset.cost) || 0;
+            const estimatedDays = selectedMethod.dataset.days || '';
+            
+            console.log('Shipping method changed:', {
+                code: selectedMethod.value,
+                cost: shippingCost,
+                days: estimatedDays
+            });
+            
+            updateOrderTotals();
+        }
+        
+        // Apply coupon code
+        async function applyCoupon() {
+            const couponCodeInput = document.getElementById('couponCode');
+            const couponCode = couponCodeInput.value.trim();
+            const messageDiv = document.getElementById('couponMessage');
+            
+            if (!couponCode) {
+                showCouponMessage('Vui lòng nhập mã giảm giá', 'error');
+                return;
+            }
+            
+            try {
+                // Call coupon validation API
+                const response = await fetch(`/Coupon/Apply?code=${encodeURIComponent(couponCode)}&orderTotal=${subtotal}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Apply discount
+                    discountAmount = result.discountAmount || 0;
+                    appliedCouponData = {
+                        code: couponCode,
+                        discountAmount: discountAmount
+                    };
+                    
+                    // Show success message
+                    showCouponMessage(`Áp dụng mã thành công! Giảm ${formatCurrency(discountAmount)}`, 'success');
+                    
+                    // Show applied coupon badge
+                    document.getElementById('appliedCouponCode').textContent = `Mã: ${couponCode}`;
+                    document.getElementById('appliedCoupon').style.display = 'block';
+                    
+                    // Hide input
+                    couponCodeInput.value = '';
+                    couponCodeInput.disabled = true;
+                    document.querySelector('.coupon-section .btn-outline-primary').disabled = true;
+                    
+                    // Update totals
+                    updateOrderTotals();
+                } else {
+                    showCouponMessage(result.message || 'Mã giảm giá không hợp lệ', 'error');
+                }
+            } catch (error) {
+                console.error('Error applying coupon:', error);
+                showCouponMessage('Có lỗi xảy ra khi áp dụng mã giảm giá', 'error');
+            }
+        }
+        
+        // Remove coupon
+        function removeCoupon() {
+            discountAmount = 0;
+            appliedCouponData = null;
+            
+            // Hide applied coupon badge
+            document.getElementById('appliedCoupon').style.display = 'none';
+            
+            // Re-enable input
+            document.getElementById('couponCode').disabled = false;
+            document.querySelector('.coupon-section .btn-outline-primary').disabled = false;
+            
+            // Hide message
+            document.getElementById('couponMessage').style.display = 'none';
+            
+            // Update totals
+            updateOrderTotals();
+        }
+        
+        // Show coupon message
+        function showCouponMessage(message, type) {
+            const messageDiv = document.getElementById('couponMessage');
+            messageDiv.textContent = message;
+            messageDiv.className = type;
+            messageDiv.style.display = 'block';
+            
+            if (type === 'error') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Update order totals display
+        function updateOrderTotals() {
+            // Update shipping fee display
+            document.getElementById('shippingAmount').textContent = formatCurrency(shippingCost);
+            
+            // Show/hide discount row
+            const discountRow = document.getElementById('discountRow');
+            if (discountAmount > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('discountAmount').textContent = '-' + formatCurrency(discountAmount);
+            } else {
+                discountRow.style.display = 'none';
+            }
+            
+            // Calculate and update grand total
+            const grandTotal = subtotal + shippingCost - discountAmount;
+            document.getElementById('grandTotalAmount').textContent = formatCurrency(grandTotal);
+            
+            console.log('Order totals updated:', {
+                subtotal,
+                shipping: shippingCost,
+                discount: discountAmount,
+                total: grandTotal
+            });
+        }
+        
+        // Format currency helper
+        function formatCurrency(amount) {
+            return Math.round(amount).toLocaleString('vi-VN') + '₫';
+        }
+        
+        // Place order function - Calls CheckoutController.CreateSession API
+        async function placeOrder() {
+            const form = document.getElementById('checkoutForm');
+            const formData = new FormData(form);
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Build AddressViewModel for shipping address
+            const fullName = `${formData.get('firstName')} ${formData.get('lastName')}`;
+            const orderData = {
+                email: formData.get('email'),
+                shippingAddress: {
+                    fullName: fullName,
+                    phoneNumber: formData.get('phone'),
+                    address: formData.get('address'),
+                    ward: formData.get('ward'),
+                    district: formData.get('district'),
+                    city: formData.get('city'),
+                    postalCode: null,
+                    addressNote: null,
+                    isDefault: false
+                },
+                billingAddress: {
+                    fullName: fullName,
+                    phoneNumber: formData.get('phone'),
+                    address: formData.get('address'),
+                    ward: formData.get('ward'),
+                    district: formData.get('district'),
+                    city: formData.get('city'),
+                    postalCode: null,
+                    addressNote: null,
+                    isDefault: false
+                },
+                useSameAddressForBilling: true,
+                shippingMethod: formData.get('shippingMethod'),
+                couponCode: appliedCouponData ? appliedCouponData.code : null,
+                notes: formData.get('notes')
+            };
+            
+            console.log('Placing order with data:', orderData);
+            
+            try {
+                // Disable button to prevent double submission
+                const button = event.target;
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+                
+                // Call CreateSession API
+                const response = await fetch('/Checkout/CreateSession', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Redirect to payment page with sessionId
+                    showToast('Đang chuyển đến trang thanh toán...', 'success');
+                    setTimeout(() => {
+                        window.location.href = `/Checkout/Payment?sessionId=${result.sessionId}`;
+                    }, 500);
+                } else {
+                    // Show error message
+                    showToast(result.message || 'Có lỗi xảy ra khi tạo đơn hàng', 'error');
+                    
+                    // Re-enable button
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+                }
+                
+            } catch (error) {
+                console.error('Error placing order:', error);
+                showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'error');
+                
+                // Re-enable button
+                const button = event.target;
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+            }
+        }
+        
+        // Save shipping address to user account
+        async function saveShippingAddress() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value;
+            const district = document.getElementById('district').value;
+            const ward = document.getElementById('ward').value;
+            
+            // Validate all fields are filled
+            if (!firstName || !lastName || !phone || !address || !city || !district || !ward) {
+                showToast('Vui lòng điền đầy đủ thông tin địa chỉ', 'error');
+                return;
+            }
+            
+            const saveAddressBtn = document.getElementById('saveAddressBtn');
+            const originalText = saveAddressBtn.innerHTML;
+            
+            try {
+                // Disable button and show loading
+                saveAddressBtn.disabled = true;
+                saveAddressBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang lưu...';
+                
+                const addressData = {
+                    fullName: `${firstName} ${lastName}`,
+                    phoneNumber: phone,
+                    address: address,
+                    ward: ward,
+                    district: district,
+                    city: city,
+                    isDefault: document.getElementById('saveAddress').checked
+                };
+                
+                const response = await fetch('/Account/SaveAddress', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(addressData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✓ Đã lưu địa chỉ thành công!', 'success');
+                    
+                    // Auto-check the save address checkbox
+                    if (!document.getElementById('saveAddress').checked) {
+                        document.getElementById('saveAddress').checked = true;
+                    }
+                } else {
+                    showToast(result.message || 'Không thể lưu địa chỉ. Vui lòng thử lại.', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving address:', error);
+                showToast('Có lỗi xảy ra khi lưu địa chỉ', 'error');
+            } finally {
+                // Re-enable button
+                saveAddressBtn.disabled = false;
+                saveAddressBtn.innerHTML = originalText;
+            }
+        }
+        
+        // City/District/Ward cascading dropdowns
+        const locationData = {
+            'Ho Chi Minh': {
+                'Quận 1': ['Phường Bến Nghé', 'Phường Bến Thành', 'Phường Cầu Kho'],
+                'Quận 3': ['Phường 1', 'Phường 2', 'Phường 3'],
+                'Quận 7': ['Phường Tân Thuận Đông', 'Phường Tân Thuận Tây', 'Phường Tân Kiểng']
+            },
+            'Ha Noi': {
+                'Hoàn Kiếm': ['Phường Hàng Bạc', 'Phường Hàng Bài', 'Phường Hàng Bồ'],
+                'Ba Đình': ['Phường Cống Vị', 'Phường Điện Biên', 'Phường Đội Cấn'],
+                'Cầu Giấy': ['Phường Dịch Vọng', 'Phường Quan Hoa', 'Phường Yên Hòa']
+            }
+        };
+        
+        document.getElementById('city').addEventListener('change', function() {
+            const city = this.value;
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            
+            // Clear existing options
+            districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+            
+            if (city && locationData[city]) {
+                Object.keys(locationData[city]).forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            }
+        });
+        
+        document.getElementById('district').addEventListener('change', function() {
+            const city = document.getElementById('city').value;
+            const district = this.value;
+            const wardSelect = document.getElementById('ward');
+            
+            // Clear existing options
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+            
+            if (city && district && locationData[city] && locationData[city][district]) {
+                locationData[city][district].forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward;
+                    option.textContent = ward;
+                    wardSelect.appendChild(option);
+                });
+            }
+        });
+        
+        // Utility function for toast notifications
+        function showToast(message, type) {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0`;
+            toast.setAttribute('role', 'alert');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+    </script>
 }

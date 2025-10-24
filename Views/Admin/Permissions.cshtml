@@ -244,78 +244,162 @@
     </div>
 </div>
 
+<!-- Edit User Roles Modal -->
+<div class="modal fade" id="editUserRolesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa quyền người dùng: <span id="editUserName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editUserId">
+                <p class="text-muted mb-3">Chọn vai trò cho người dùng này:</p>
+                <div id="rolesCheckboxes">
+                    <!-- Roles will be loaded here -->
+                    <div style="text-align: center; padding: 2rem;">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                    Hủy
+                </button>
+                <button type="button" class="admin-btn admin-btn-primary" onclick="saveUserRoles()">
+                    <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                    Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    function viewRole(roleName) {
+    // API URLs
+    const API_BASE = '/api/admin/permissions';
+
+    // View role permissions
+    async function viewRole(roleName) {
         document.getElementById('selectedRoleName').textContent = roleName;
         document.getElementById('roleDetailCard').style.display = 'block';
         
-        // Load permissions for the role
-        loadRolePermissions(roleName);
+        await loadRolePermissions(roleName);
     }
 
-    function loadRolePermissions(roleName) {
+    // Load permissions from API
+    async function loadRolePermissions(roleName) {
         const permissionsList = document.getElementById('permissionsList');
         
-        // Sample permissions data - in real app, fetch from server
-        const permissions = {
-            'Admin': [
-                { name: 'Quản lý toàn bộ hệ thống', granted: true },
-                { name: 'Xem tất cả dữ liệu', granted: true },
-                { name: 'Sửa đổi cài đặt hệ thống', granted: true },
-                { name: 'Quản lý người dùng', granted: true },
-                { name: 'Xem báo cáo', granted: true }
-            ],
-            'Seller': [
-                { name: 'Xem đơn hàng liên quan', granted: true },
-                { name: 'Cập nhật trạng thái đơn hàng', granted: true },
-                { name: 'Xem báo cáo bán hàng', granted: true },
-                { name: 'Quản lý người dùng', granted: false }
-            ],
-            'Customer': [
-                { name: 'Tạo đơn hàng', granted: true },
-                { name: 'Xem lịch sử đơn hàng', granted: true },
-                { name: 'Quản lý hồ sơ cá nhân', granted: true }
-            ]
-        };
-
-        const rolePermissions = permissions[roleName] || [];
-        
-        permissionsList.innerHTML = rolePermissions.map(perm => `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <span>${perm.name}</span>
-                <span class="admin-badge ${perm.granted ? 'admin-badge-success' : 'admin-badge-secondary'}">
-                    ${perm.granted ? 'Có quyền' : 'Không có quyền'}
-                </span>
-            </div>
-        `).join('');
-        
-        // Re-initialize Lucide icons after dynamic content
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+        try {
+            permissionsList.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner-border" role="status"></div></div>';
+            
+            const response = await fetch(`${API_BASE}/roles/${roleName}`);
+            
+            if (!response.ok) {
+                throw new Error('Không thể tải quyền hạn');
+            }
+            
+            const permissions = await response.json();
+            
+            if (permissions.length === 0) {
+                permissionsList.innerHTML = `
+                    <div style="text-align: center; color: var(--admin-text-light); padding: 2rem 0;">
+                        <p>Vai trò này chưa có quyền hạn nào</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group permissions by module
+            const groupedPerms = {};
+            permissions.forEach(perm => {
+                const module = perm.module || 'Khác';
+                if (!groupedPerms[module]) {
+                    groupedPerms[module] = [];
+                }
+                groupedPerms[module].push(perm);
+            });
+            
+            // Display permissions grouped by module
+            permissionsList.innerHTML = Object.entries(groupedPerms).map(([module, perms]) => `
+                <div style="margin-bottom: 1.5rem;">
+                    <h6 style="color: var(--admin-text-light); margin-bottom: 0.75rem; font-size: 0.875rem; text-transform: uppercase;">
+                        ${module}
+                    </h6>
+                    ${perms.map(perm => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding: 0.5rem; background-color: var(--admin-bg-light); border-radius: 0.375rem;">
+                            <span>${perm.name}</span>
+                            <span class="admin-badge ${perm.granted ? 'admin-badge-success' : 'admin-badge-secondary'}">
+                                ${perm.granted ? 'Có quyền' : 'Không có quyền'}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading permissions:', error);
+            permissionsList.innerHTML = `
+                <div style="text-align: center; color: var(--status-danger-text); padding: 2rem 0;">
+                    <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 0.5rem;"></i>
+                    <p>Không thể tải quyền hạn. Vui lòng thử lại.</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
     }
 
-    function searchUsers() {
-        const searchTerm = document.getElementById('userSearch').value;
+    // Search users via API
+    async function searchUsers() {
+        const searchTerm = document.getElementById('userSearch').value.trim();
+        const userResults = document.getElementById('userResults');
+        
         if (searchTerm.length < 2) {
+            userResults.innerHTML = `
+                <div style="text-align: center; color: var(--admin-text-light); padding: 2rem 0;">
+                    <i data-lucide="search" style="width: 48px; height: 48px; margin-bottom: 0.5rem;"></i>
+                    <p>Nhập ít nhất 2 ký tự để tìm kiếm</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
             return;
         }
 
-        // Sample user data - in real app, fetch from server
-        const users = [
-            { id: '1', email: 'john@example.com', name: 'John Doe', roles: ['Customer'] },
-            { id: '2', email: 'jane@example.com', name: 'Jane Smith', roles: ['Seller'] },
-            { id: '3', email: 'admin@example.com', name: 'Admin User', roles: ['Admin'] }
-        ];
-
-        const filteredUsers = users.filter(u => 
-            u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            u.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        displayUsers(filteredUsers);
+        try {
+            userResults.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner-border" role="status"></div></div>';
+            
+            const response = await fetch(`${API_BASE}/users/search?term=${encodeURIComponent(searchTerm)}`);
+            
+            if (!response.ok) {
+                throw new Error('Không thể tìm kiếm người dùng');
+            }
+            
+            const users = await response.json();
+            displayUsers(users);
+            
+        } catch (error) {
+            console.error('Error searching users:', error);
+            userResults.innerHTML = `
+                <div style="text-align: center; color: var(--status-danger-text); padding: 2rem 0;">
+                    <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 0.5rem;"></i>
+                    <p>Không thể tìm kiếm. Vui lòng thử lại.</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
     }
 
+    // Display search results
     function displayUsers(users) {
         const userResults = document.getElementById('userResults');
         
@@ -336,15 +420,15 @@
             <div class="admin-card" style="margin-bottom: 0.75rem;">
                 <div class="admin-card-body" style="padding: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h6 style="margin: 0 0 0.25rem 0; font-weight: 600;">${user.name}</h6>
-                            <p style="margin: 0 0 0.5rem 0; color: var(--admin-text-light); font-size: 0.875rem;">${user.email}</p>
+                        <div style="flex: 1;">
+                            <h6 style="margin: 0 0 0.25rem 0; font-weight: 600;">${escapeHtml(user.fullName || user.email)}</h6>
+                            <p style="margin: 0 0 0.5rem 0; color: var(--admin-text-light); font-size: 0.875rem;">${escapeHtml(user.email)}</p>
                             <div style="display: flex; gap: 0.375rem; flex-wrap: wrap;">
-                                ${user.roles.map(role => `<span class="admin-badge admin-badge-primary">${role}</span>`).join('')}
+                                ${user.roles.map(role => `<span class="admin-badge admin-badge-primary">${escapeHtml(role)}</span>`).join('')}
                             </div>
                         </div>
                         <div>
-                            <button class="admin-btn admin-btn-sm admin-btn-primary" onclick="editUserRoles('${user.id}')">
+                            <button class="admin-btn admin-btn-sm admin-btn-primary" onclick="editUserRoles('${user.id}', '${escapeHtml(user.fullName || user.email)}', ${JSON.stringify(user.roles).replace(/"/g, '&quot;')})">
                                 <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
                                 Sửa quyền
                             </button>
@@ -354,16 +438,126 @@
             </div>
         `).join('');
         
-        // Re-initialize Lucide icons after dynamic content
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
     }
 
-    function editUserRoles(userId) {
-        // Implementation for editing user roles
-        alert('Chức năng sửa quyền người dùng sẽ được triển khai');
+    // Edit user roles
+    function editUserRoles(userId, userName, currentRoles) {
+        // Show edit roles modal
+        const modal = new bootstrap.Modal(document.getElementById('editUserRolesModal'));
+        
+        // Set user info
+        document.getElementById('editUserName').textContent = userName;
+        document.getElementById('editUserId').value = userId;
+        
+        // Load all roles and check current ones
+        loadRolesForUser(currentRoles);
+        
+        modal.show();
     }
+
+    // Load roles checkboxes
+    async function loadRolesForUser(currentRoles) {
+        const rolesContainer = document.getElementById('rolesCheckboxes');
+        
+        try {
+            const response = await fetch(`${API_BASE}/roles`);
+            const allRoles = await response.json();
+            
+            rolesContainer.innerHTML = allRoles.map(role => `
+                <div class="form-check" style="margin-bottom: 0.75rem;">
+                    <input class="form-check-input" type="checkbox" value="${role}" id="role_${role}" 
+                           ${currentRoles.includes(role) ? 'checked' : ''}>
+                    <label class="form-check-label" for="role_${role}">
+                        ${role}
+                    </label>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading roles:', error);
+            rolesContainer.innerHTML = '<p class="text-danger">Không thể tải danh sách vai trò</p>';
+        }
+    }
+
+    // Save user roles
+    async function saveUserRoles() {
+        const userId = document.getElementById('editUserId').value;
+        const selectedRoles = [];
+        
+        document.querySelectorAll('#rolesCheckboxes input[type="checkbox"]:checked').forEach(cb => {
+            selectedRoles.push(cb.value);
+        });
+        
+        if (selectedRoles.length === 0) {
+            alert('Vui lòng chọn ít nhất một vai trò');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_BASE}/users/${userId}/roles`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ roles: selectedRoles })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Không thể cập nhật vai trò');
+            }
+            
+            // Close modal and refresh search
+            bootstrap.Modal.getInstance(document.getElementById('editUserRolesModal')).hide();
+            
+            // Show success message
+            showToast('Cập nhật vai trò thành công', 'success');
+            
+            // Refresh search results
+            searchUsers();
+            
+        } catch (error) {
+            console.error('Error saving roles:', error);
+            alert('Lỗi: ' + error.message);
+        }
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'info') {
+        // Simple toast implementation - you can enhance this
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Allow Enter key to trigger search
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('userSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchUsers();
+                }
+            });
+        }
+    });
 
     function createRole() {
         const roleName = document.getElementById('roleName').value;

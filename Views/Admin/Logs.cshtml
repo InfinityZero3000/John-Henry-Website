@@ -464,157 +464,301 @@
 </div>
 
 <script>
+    const API_BASE = '/api/admin/logs';
     let autoRefreshInterval;
+    let currentLogs = [];
 
-    function applyFilters() {
-        const level = document.getElementById('logLevel').value;
-        const source = document.getElementById('logSource').value;
-        const fromDate = document.getElementById('fromDate').value;
-        const toDate = document.getElementById('toDate').value;
-        const search = document.getElementById('searchLogs').value;
-        
-        // Simulate filtering
-        console.log('Applying filters:', { level, source, fromDate, toDate, search });
-        // In real app, make API call to filter logs
-        alert('Đang áp dụng bộ lọc...');
-    }
-
-    function refreshLogs() {
-        // Simulate log refresh
-        alert('Đã làm mới logs');
-        // In real app, reload logs from server
-    }
-
-    function viewLogDetails(logId) {
-        // Sample log detail
-        const logDetail = `
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>ID:</strong></div>
-                <div class="col-sm-9">${logId}</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>Timestamp:</strong></div>
-                <div class="col-sm-9">2024-09-15 14:30:25.123</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>Level:</strong></div>
-                <div class="col-sm-9"><span class="badge bg-danger">ERROR</span></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>Source:</strong></div>
-                <div class="col-sm-9">Database</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>Message:</strong></div>
-                <div class="col-sm-9">Connection timeout while executing query</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>Exception:</strong></div>
-                <div class="col-sm-9">
-                    <pre class="bg-light p-2 rounded">
-System.Data.SqlClient.SqlException: Timeout expired. The timeout period elapsed prior to completion of the operation or the server is not responding.
-   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action\`1 wrapCloseInAction)
-   at System.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action\`1 wrapCloseInAction)
-                    </pre>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>User:</strong></div>
-                <div class="col-sm-9">admin@example.com</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>IP Address:</strong></div>
-                <div class="col-sm-9">192.168.1.100</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-sm-3"><strong>Request URL:</strong></div>
-                <div class="col-sm-9">/admin/products</div>
-            </div>
-        `;
-        
-        document.getElementById('logDetailContent').innerHTML = logDetail;
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('logDetailModal')).show();
-    }
-
-    function copyLogDetails() {
-        const content = document.getElementById('logDetailContent').innerText;
-        navigator.clipboard.writeText(content).then(() => {
-            alert('Đã sao chép chi tiết log!');
-        });
-    }
-
-    function viewLogFile(date) {
-        window.open(`/admin/logs/view/${date}`, '_blank');
-    }
-
-    function downloadLogFile(date) {
-        window.location.href = `/admin/logs/download/${date}`;
-    }
-
-    function downloadLogs() {
-        const fromDate = document.getElementById('fromDate').value;
-        const toDate = document.getElementById('toDate').value;
-        
-        if (!fromDate || !toDate) {
-            alert('Vui lòng chọn khoảng thời gian');
-            return;
-        }
-        
-        window.location.href = `/admin/logs/download?from=${fromDate}&to=${toDate}`;
-    }
-
-    function clearOldLogs() {
-        if (confirm('Bạn có chắc chắn muốn xóa logs cũ? Hành động này không thể hoàn tác.')) {
-            fetch('/admin/api/logs/clear-old', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Đã xóa logs cũ thành công!');
-                    location.reload();
-                } else {
-                    alert('Có lỗi xảy ra: ' + data.message);
-                }
-            });
-        }
-    }
-
-    function loadPage(page) {
-        // Simulate pagination
-        console.log('Loading page:', page);
-        // In real app, load logs for specific page
-    }
-
-    // Auto refresh functionality
-    document.getElementById('autoRefresh').addEventListener('change', function(e) {
-        if (e.target.checked) {
-            autoRefreshInterval = setInterval(refreshLogs, 30000); // 30 seconds
-        } else {
-            clearInterval(autoRefreshInterval);
-        }
-    });
-
-    // Set default date range (last 7 days)
-    document.addEventListener('DOMContentLoaded', function() {
+    // Load logs on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Set default date range (last 7 days)
         const today = new Date();
         const weekAgo = new Date(today);
         weekAgo.setDate(weekAgo.getDate() - 7);
         
         document.getElementById('toDate').value = today.toISOString().split('T')[0];
         document.getElementById('fromDate').value = weekAgo.toISOString().split('T')[0];
+
+        // Load initial logs
+        await loadLogs();
+        
+        // Load statistics
+        await loadStatistics();
     });
 
-    // Search functionality
-    document.getElementById('searchLogs').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            applyFilters();
+    async function loadLogs() {
+        const level = document.getElementById('logLevel').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        
+        try {
+            showLoading();
+            
+            let url = `${API_BASE}?maxCount=500`;
+            if (level && level !== 'all') url += `&level=${level}`;
+            if (fromDate) url += `&fromDate=${fromDate}T00:00:00`;
+            if (toDate) url += `&toDate=${toDate}T23:59:59`;
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to load logs');
+            
+            const data = await response.json();
+            currentLogs = data.logs || [];
+            
+            displayLogs(currentLogs);
+            updateLogCount(data.count || 0);
+            
+        } catch (error) {
+            console.error('Error loading logs:', error);
+            showError('Không thể tải logs. Vui lòng thử lại.');
         }
-    });
+    }
+
+    function displayLogs(logs) {
+        const tbody = document.querySelector('#logsTable tbody');
+        
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 0.5rem;"></i>
+                        <p>Không có log nào trong khoảng thời gian này</p>
+                    </td>
+                </tr>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return;
+        }
+
+        tbody.innerHTML = logs.map(log => {
+            const levelBadge = getLevelBadge(log.level);
+            const timestamp = new Date(log.timestamp).toLocaleString('vi-VN');
+            
+            return `
+                <tr>
+                    <td>${timestamp}</td>
+                    <td>${levelBadge}</td>
+                    <td>${escapeHtml(log.source)}</td>
+                    <td class="log-message">${escapeHtml(log.message)}</td>
+                    <td>
+                        <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="viewLogDetails('${log.id}')">
+                            <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        hideLoading();
+    }
+
+    function getLevelBadge(level) {
+        const badges = {
+            'INF': '<span class="admin-badge admin-badge-info">INFO</span>',
+            'WRN': '<span class="admin-badge admin-badge-warning">WARNING</span>',
+            'ERR': '<span class="admin-badge admin-badge-danger">ERROR</span>',
+            'DBG': '<span class="admin-badge admin-badge-secondary">DEBUG</span>'
+        };
+        return badges[level] || `<span class="admin-badge">${level}</span>`;
+    }
+
+    async function loadStatistics() {
+        try {
+            const response = await fetch(`${API_BASE}/statistics`);
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            const stats = data.statistics || {};
+            
+            // Update stats display if elements exist
+            const totalEl = document.getElementById('totalLogs');
+            const errorsEl = document.getElementById('errorLogs');
+            const warningsEl = document.getElementById('warningLogs');
+            
+            if (totalEl) totalEl.textContent = stats.Total || 0;
+            if (errorsEl) errorsEl.textContent = stats.Error || 0;
+            if (warningsEl) warningsEl.textContent = stats.Warning || 0;
+            
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+        }
+    }
+
+    async function applyFilters() {
+        await loadLogs();
+    }
+
+    async function refreshLogs() {
+        await loadLogs();
+        showToast('Đã làm mới logs', 'success');
+    }
+
+    async function viewLogDetails(logId) {
+        try {
+            showLoading();
+            
+            const response = await fetch(`${API_BASE}/${logId}`);
+            if (!response.ok) throw new Error('Log not found');
+            
+            const data = await response.json();
+            const log = data.log;
+            
+            const logDetail = `
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>ID:</strong></div>
+                    <div class="col-sm-9"><code>${escapeHtml(log.id)}</code></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Timestamp:</strong></div>
+                    <div class="col-sm-9">${new Date(log.timestamp).toLocaleString('vi-VN')}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Level:</strong></div>
+                    <div class="col-sm-9">${getLevelBadge(log.level)}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Source:</strong></div>
+                    <div class="col-sm-9">${escapeHtml(log.source)}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Message:</strong></div>
+                    <div class="col-sm-9"><pre class="bg-light p-2 rounded">${escapeHtml(log.message)}</pre></div>
+                </div>
+                ${log.exception ? `
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Exception:</strong></div>
+                    <div class="col-sm-9"><pre class="bg-light p-2 rounded">${escapeHtml(log.exception)}</pre></div>
+                </div>` : ''}
+                ${log.userEmail ? `
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>User:</strong></div>
+                    <div class="col-sm-9">${escapeHtml(log.userEmail)}</div>
+                </div>` : ''}
+                ${log.ipAddress ? `
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>IP Address:</strong></div>
+                    <div class="col-sm-9">${escapeHtml(log.ipAddress)}</div>
+                </div>` : ''}
+                ${log.requestUrl ? `
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Request URL:</strong></div>
+                    <div class="col-sm-9"><code>${escapeHtml(log.requestUrl)}</code></div>
+                </div>` : ''}
+            `;
+            
+            document.getElementById('logDetailContent').innerHTML = logDetail;
+            const modal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+            modal.show();
+            
+            hideLoading();
+            
+        } catch (error) {
+            console.error('Error loading log details:', error);
+            showError('Không thể tải chi tiết log');
+            hideLoading();
+        }
+    }
+
+    function copyLogDetails() {
+        const content = document.getElementById('logDetailContent').innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            showToast('Đã sao chép chi tiết log!', 'success');
+        }).catch(() => {
+            showToast('Không thể sao chép', 'danger');
+        });
+    }
+
+    function downloadLogFile(fileName) {
+        window.location.href = `${API_BASE}/download/${fileName}`;
+    }
+
+    // Helper functions
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showLoading() {
+        const tbody = document.querySelector('#logsTable tbody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Đang tải logs...</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    function hideLoading() {
+        // Loading will be hidden when displayLogs is called
+    }
+
+    function updateLogCount(count) {
+        const countEl = document.getElementById('logCount');
+        if (countEl) countEl.textContent = `Tổng: ${count} logs`;
+    }
+
+    function showError(message) {
+        const tbody = document.querySelector('#logsTable tbody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger py-4">
+                    <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 0.5rem;"></i>
+                    <p>${message}</p>
+                </td>
+            </tr>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Auto refresh functionality
+    const autoRefreshCheckbox = document.getElementById('autoRefresh');
+    if (autoRefreshCheckbox) {
+        autoRefreshCheckbox.addEventListener('change', function(e) {
+            if (e.target.checked) {
+                autoRefreshInterval = setInterval(refreshLogs, 30000); // 30 seconds
+                showToast('Đã bật tự động làm mới', 'success');
+            } else {
+                clearInterval(autoRefreshInterval);
+                showToast('Đã tắt tự động làm mới', 'info');
+            }
+        });
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('searchLogs');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = currentLogs.filter(log => 
+                    log.message.toLowerCase().includes(searchTerm) ||
+                    (log.userEmail && log.userEmail.toLowerCase().includes(searchTerm)) ||
+                    (log.source && log.source.toLowerCase().includes(searchTerm))
+                );
+                displayLogs(filtered);
+                updateLogCount(filtered.length);
+            }
+        });
+    }
 </script>
 
 <style>

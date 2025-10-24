@@ -20,10 +20,18 @@
         <div class="col-lg-8">
             <!-- Cart Header -->
             <div class="cart-header mb-4">
-                <h2 class="cart-title">Giỏ hàng của bạn</h2>
+                <h2 class="cart-title d-flex align-items-center">
+                    @if (cartCount > 0)
+                    {
+                        <input type="checkbox" id="select-all-items" class="form-check-input me-3" style="transform: scale(1.2);">
+                    }
+                    Giỏ hàng của bạn
+                </h2>
                 @if (cartCount > 0)
                 {
-                    <p class="text-muted">Bạn có @cartCount sản phẩm trong giỏ hàng</p>
+                    <p class="text-muted mb-0">
+                        <span id="selected-count">0</span>/<span>@cartCount</span> sản phẩm được chọn
+                    </p>
                 }
             </div>
 
@@ -35,6 +43,15 @@
                     {
                         <div class="cart-item" data-cart-item-id="@item.Id">
                             <div class="row align-items-center">
+                                <!-- Checkbox column -->
+                                <div class="col-auto ps-0">
+                                    <input type="checkbox" 
+                                           class="form-check-input item-checkbox" 
+                                           data-cart-item-id="@item.Id"
+                                           data-price="@(item.Price * item.Quantity)"
+                                           style="transform: scale(1.2);">
+                                </div>
+                                
                                 <!-- Product Image -->
                                 <div class="col-md-2 col-3">
                                     <div class="product-image">
@@ -74,38 +91,31 @@
                                     </div>
                                 </div>
 
-                                <!-- Quantity -->
-                                <div class="col-md-2 col-6">
-                                    <div class="quantity-controls">
-                                        <button class="btn btn-outline-secondary btn-sm" 
-                                                onclick="updateQuantity('@item.Id', @(item.Quantity - 1))"
-                                                @(item.Quantity <= 1 ? "disabled" : "")>
-                                            <i data-lucide="minus"></i>
-                                        </button>
-                                        <input type="number" 
-                                               class="form-control quantity-input" 
-                                               value="@item.Quantity" 
-                                               min="1" 
-                                               max="99"
-                                               onchange="updateQuantity('@item.Id', this.value)">
-                                        <button class="btn btn-outline-secondary btn-sm" 
-                                                onclick="updateQuantity('@item.Id', @(item.Quantity + 1))">
-                                            <i data-lucide="plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Total & Actions -->
-                                <div class="col-md-2 col-12">
-                                    <div class="item-actions">
-                                        <div class="item-total mb-2">
-                                            <strong class="total-price">@((item.Price * item.Quantity).ToString("N0"))₫</strong>
+                                <!-- Quantity & Delete -->
+                                <div class="col-md-3 col-12">
+                                    <div class="quantity-actions-wrapper">
+                                        <div class="quantity-controls">
+                                            <button class="btn btn-outline-secondary btn-sm" 
+                                                    onclick="updateQuantity('@item.Id', @(item.Quantity - 1))"
+                                                    @(item.Quantity <= 1 ? "disabled" : "")>
+                                                <i data-lucide="minus"></i>
+                                            </button>
+                                            <input type="number" 
+                                                   class="form-control quantity-input" 
+                                                   value="@item.Quantity" 
+                                                   min="1" 
+                                                   max="99"
+                                                   onchange="updateQuantity('@item.Id', this.value)">
+                                            <button class="btn btn-outline-secondary btn-sm" 
+                                                    onclick="updateQuantity('@item.Id', @(item.Quantity + 1))">
+                                                <i data-lucide="plus"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm ms-2" 
+                                                    onclick="removeItem('@item.Id')"
+                                                    title="Xóa sản phẩm">
+                                                <i data-lucide="trash"></i>
+                                            </button>
                                         </div>
-                                        <button class="btn btn-outline-danger btn-sm" 
-                                                onclick="removeItem('@item.Id')"
-                                                title="Xóa sản phẩm">
-                                            <i data-lucide="trash"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -157,8 +167,8 @@
                         </div>
                         <div class="card-body">
                             <div class="summary-row">
-                                <span>Tạm tính (@cartCount sản phẩm):</span>
-                                <span class="cart-subtotal">@cartTotal.ToString("N0")₫</span>
+                                <span>Tạm tính (<span id="summary-count">0</span> sản phẩm):</span>
+                                <span class="cart-subtotal">0₫</span>
                             </div>
                             <div class="summary-row">
                                 <span>Phí vận chuyển:</span>
@@ -195,15 +205,20 @@
                             <div class="summary-row total-row">
                                 <strong>
                                     <span>Tổng cộng:</span>
-                                    <span class="cart-total">@((cartTotal + 30000).ToString("N0"))₫</span>
+                                    <span class="cart-total">30.000₫</span>
                                 </strong>
                             </div>
 
                             <!-- Checkout Button -->
                             <div class="mt-4">
-                                <a href="/Cart/Checkout" class="btn btn-primary btn-lg w-100">
+                                <a href="#" id="checkout-btn" class="btn btn-primary btn-lg w-100 disabled" aria-disabled="true">
                                     <i data-lucide="credit-card" class="me-2"></i>Thanh toán
                                 </a>
+                            </div>
+                            
+                            <div id="checkout-warning" class="alert alert-warning mt-3" style="display: none;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <small>Vui lòng chọn ít nhất 1 sản phẩm để thanh toán</small>
                             </div>
 
                             <!-- Free Shipping Notice -->
@@ -282,13 +297,29 @@
             object-fit: cover;
         }
         
+        .product-name {
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
         .product-name a {
             color: #333;
             font-weight: 500;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
         }
         
         .product-name a:hover {
             color: var(--jh-red);
+        }
+        
+        .quantity-actions-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .quantity-controls {
@@ -366,16 +397,14 @@
         }
         
         @@media (max-width: 768px) {
-            .quantity-controls {
-                justify-content: center;
+            .quantity-actions-wrapper {
+                flex-direction: row;
                 margin-top: 1rem;
             }
             
-            .item-actions {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 1rem;
+            .quantity-controls {
+                justify-content: flex-start;
+                flex-wrap: nowrap;
             }
             
             .cart-summary {
@@ -388,6 +417,150 @@
 
 @section Scripts {
     <script>
+        // ============================================
+        // CHECKBOX SELECTION FUNCTIONALITY
+        // ============================================
+        
+        // Select all checkbox handler
+        document.getElementById('select-all-items')?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateSelectedSummary();
+        });
+        
+        // Individual checkbox handler
+        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedSummary);
+        });
+        
+        // Update selected items summary and totals
+        function updateSelectedSummary() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const selectedCount = checkboxes.length;
+            const totalItems = document.querySelectorAll('.item-checkbox').length;
+            
+            // Update selected count display
+            document.getElementById('selected-count').textContent = selectedCount;
+            document.getElementById('summary-count').textContent = selectedCount;
+            
+            // Calculate selected subtotal
+            let selectedSubtotal = 0;
+            checkboxes.forEach(cb => {
+                selectedSubtotal += parseFloat(cb.dataset.price);
+            });
+            
+            // Update summary
+            document.querySelector('.cart-subtotal').textContent = selectedSubtotal.toLocaleString() + '₫';
+            
+            // Calculate total with shipping
+            const shippingFee = 30000;
+            const selectedTotal = selectedSubtotal + shippingFee;
+            document.querySelector('.cart-total').textContent = selectedTotal.toLocaleString() + '₫';
+            
+            // Update "select all" checkbox state
+            const selectAll = document.getElementById('select-all-items');
+            if (selectAll) {
+                selectAll.checked = selectedCount === totalItems && selectedCount > 0;
+                selectAll.indeterminate = selectedCount > 0 && selectedCount < totalItems;
+            }
+            
+            // Enable/disable checkout button
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const checkoutWarning = document.getElementById('checkout-warning');
+            
+            if (selectedCount === 0) {
+                checkoutBtn.classList.add('disabled');
+                checkoutBtn.setAttribute('aria-disabled', 'true');
+                checkoutWarning.style.display = 'block';
+            } else {
+                checkoutBtn.classList.remove('disabled');
+                checkoutBtn.removeAttribute('aria-disabled');
+                checkoutWarning.style.display = 'none';
+            }
+            
+            // Update free shipping notice
+            updateFreeShippingNotice(selectedSubtotal);
+        }
+        
+        // Update free shipping notice based on selected total
+        function updateFreeShippingNotice(subtotal) {
+            const freeShippingThreshold = 299000;
+            const noticeDiv = document.querySelector('.free-shipping-notice');
+            
+            if (!noticeDiv) return;
+            
+            if (subtotal < freeShippingThreshold && subtotal > 0) {
+                const remaining = freeShippingThreshold - subtotal;
+                noticeDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-truck me-2"></i>
+                        Mua thêm <strong>${remaining.toLocaleString()}₫</strong> để được miễn phí vận chuyển!
+                    </div>
+                `;
+            } else if (subtotal >= freeShippingThreshold) {
+                noticeDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Bạn được miễn phí vận chuyển!
+                    </div>
+                `;
+            } else {
+                noticeDiv.innerHTML = '';
+            }
+        }
+        
+        // Checkout button click handler
+        document.getElementById('checkout-btn')?.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
+                .map(cb => cb.dataset.cartItemId);
+            
+            if (selectedIds.length === 0) {
+                showToast('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán', 'error');
+                return;
+            }
+            
+            try {
+                // Save selected items to session
+                const response = await fetch('/Cart/SaveSelectedItems', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(selectedIds)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Redirect to checkout form directly
+                    window.location.href = '/Checkout';
+                } else {
+                    showToast(result.message || 'Có lỗi xảy ra', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving selected items:', error);
+                showToast('Có lỗi xảy ra khi lưu danh sách sản phẩm', 'error');
+            }
+        });
+        
+        // Auto-select all items on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('select-all-items');
+            if (selectAll) {
+                selectAll.checked = true;
+                selectAll.dispatchEvent(new Event('change'));
+            }
+        });
+        
+        // ============================================
+        // EXISTING CART FUNCTIONS
+        // ============================================
+        
         // Update quantity function
         async function updateQuantity(cartItemId, quantity) {
             if (quantity < 1) return;
@@ -418,6 +591,13 @@
                     
                     // Update cart count in header
                     updateCartCount(result.cartCount);
+                    
+                    // Re-calculate selected items total
+                    const checkbox = document.querySelector(`[data-cart-item-id="${cartItemId}"].item-checkbox`);
+                    if (checkbox) {
+                        checkbox.dataset.price = result.itemTotal;
+                        updateSelectedSummary();
+                    }
                     
                     showToast(result.message, 'success');
                 } else {
@@ -463,6 +643,9 @@
                     
                     // Update cart count in header
                     updateCartCount(result.cartCount);
+                    
+                    // Re-calculate selected items total
+                    updateSelectedSummary();
                     
                     showToast(result.message, 'success');
                 } else {
