@@ -113,37 +113,30 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Wishlist/Remove
         [HttpPost]
-        public async Task<IActionResult> Remove(string productId)
+        public async Task<IActionResult> Remove([FromBody] string productId)
         {
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Json(new { success = false, message = "User not authenticated" });
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
                 }
 
                 if (string.IsNullOrEmpty(productId))
                 {
-                    return Json(new { success = false, message = "Product ID is required" });
+                    return Json(new { success = false, message = "Thiếu thông tin sản phẩm" });
                 }
 
-                // Try to find product by SKU first, then by Guid
-                Product? product = await _context.Products
-                    .FirstOrDefaultAsync(p => p.SKU == productId);
-
-                if (product == null && Guid.TryParse(productId, out var productGuid))
+                // Parse product ID as Guid
+                if (!Guid.TryParse(productId, out var productGuid))
                 {
-                    product = await _context.Products.FindAsync(productGuid);
+                    return Json(new { success = false, message = "ID sản phẩm không hợp lệ" });
                 }
 
-                if (product == null)
-                {
-                    return Json(new { success = false, message = "Product not found" });
-                }
-
+                // Find wishlist item directly by ProductId
                 var wishlistItem = await _context.Wishlists
-                    .FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == product.Id);
+                    .FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == productGuid);
 
                 if (wishlistItem == null)
                 {
@@ -206,32 +199,38 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Wishlist/AddToCart
         [HttpPost]
-        public async Task<IActionResult> AddToCart(Guid productId)
+        public async Task<IActionResult> AddToCart([FromBody] string productId)
         {
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Json(new { success = false, message = "User not authenticated" });
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                // Parse product ID as Guid
+                if (!Guid.TryParse(productId, out var productGuid))
+                {
+                    return Json(new { success = false, message = "ID sản phẩm không hợp lệ" });
                 }
 
                 // Check if product exists and is available
-                var product = await _context.Products.FindAsync(productId);
+                var product = await _context.Products.FindAsync(productGuid);
                 if (product == null || !product.IsActive)
                 {
-                    return Json(new { success = false, message = "Product not available" });
+                    return Json(new { success = false, message = "Sản phẩm không khả dụng" });
                 }
 
                 // Check stock availability
                 if (product.StockQuantity < 1)
                 {
-                    return Json(new { success = false, message = "Product out of stock" });
+                    return Json(new { success = false, message = "Sản phẩm đã hết hàng" });
                 }
 
                 // Check if item already exists in cart
                 var existingCartItem = await _context.ShoppingCartItems
-                    .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == productId);
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == productGuid);
 
                 if (existingCartItem != null)
                 {
@@ -246,7 +245,7 @@ namespace JohnHenryFashionWeb.Controllers
                     {
                         Id = Guid.NewGuid(),
                         UserId = userId,
-                        ProductId = productId,
+                        ProductId = productGuid,
                         Quantity = 1,
                         Price = product.SalePrice ?? product.Price,
                         CreatedAt = DateTime.UtcNow,
@@ -265,7 +264,7 @@ namespace JohnHenryFashionWeb.Controllers
 
                 return Json(new { 
                     success = true, 
-                    message = "Product added to cart",
+                    message = "Đã thêm sản phẩm vào giỏ hàng",
                     cartCount = cartCount
                 });
             }
@@ -273,7 +272,7 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 // Log the error for debugging
                 Console.WriteLine($"Error adding to cart from wishlist: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while adding to cart" });
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm vào giỏ hàng" });
             }
         }
 

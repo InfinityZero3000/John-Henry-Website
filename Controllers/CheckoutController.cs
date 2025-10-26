@@ -190,8 +190,13 @@ namespace JohnHenryFashionWeb.Controllers
                 var subtotal = cartItems.Sum(item => item.Price * item.Quantity);
                 var shippingFee = await CalculateShippingFeeAsync(model.ShippingMethod, subtotal);
                 var discountAmount = await CalculateDiscountAsync(model.CouponCode, subtotal);
+                
+                // Auto discount for orders >= 500k (5% discount)
+                var autoDiscount = CalculateAutoDiscount(subtotal);
+                var totalDiscount = discountAmount + autoDiscount;
+                
                 var tax = CalculateTax(subtotal);
-                var total = subtotal + shippingFee + tax - discountAmount;
+                var total = subtotal + shippingFee + tax - totalDiscount;
 
                 // Create checkout session
                 var session = new CheckoutSession
@@ -203,7 +208,7 @@ namespace JohnHenryFashionWeb.Controllers
                     TotalAmount = total,
                     ShippingFee = shippingFee,
                     Tax = tax,
-                    DiscountAmount = discountAmount,
+                    DiscountAmount = totalDiscount,
                     CouponCode = model.CouponCode,
                     ShippingMethod = model.ShippingMethod,
                     ShippingAddress = JsonSerializer.Serialize(model.ShippingAddress),
@@ -540,7 +545,22 @@ namespace JohnHenryFashionWeb.Controllers
             if (method == null)
                 return 0;
 
-            // Check minimum order amount for free shipping
+            // Giảm giá theo tầng cho Giao hàng hỏa tốc (SUPER_EXPRESS)
+            if (shippingMethod == "SUPER_EXPRESS")
+            {
+                if (subtotal >= 2000000) // >= 2 triệu: Miễn phí 100%
+                    return 0;
+                else if (subtotal >= 1000000) // >= 1 triệu: Giảm 50%
+                    return method.Cost * 0.5m;
+                // < 1 triệu: Giá gốc
+                return method.Cost;
+            }
+
+            // Các phương thức khác: Miễn phí vận chuyển cho đơn hàng >= 500,000đ
+            if (subtotal >= 500000)
+                return 0;
+
+            // Check minimum order amount for free shipping (if specified in shipping method)
             if (method.MinOrderAmount.HasValue && subtotal >= method.MinOrderAmount.Value)
                 return 0;
 
@@ -581,6 +601,18 @@ namespace JohnHenryFashionWeb.Controllers
         {
             // VAT 10% for Vietnam
             return subtotal * 0.1m;
+        }
+
+        private decimal CalculateAutoDiscount(decimal subtotal)
+        {
+            // Auto discount 5% for orders >= 500,000đ
+            if (subtotal >= 500000)
+            {
+                var discount = subtotal * 0.05m; // 5% discount
+                // Cap maximum discount at 200,000đ
+                return Math.Min(discount, 200000);
+            }
+            return 0;
         }
 
         private async Task<List<ShippingMethod>> GetAvailableShippingMethodsAsync()

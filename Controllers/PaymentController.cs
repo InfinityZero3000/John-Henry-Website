@@ -411,7 +411,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         private decimal CalculateShippingFee(decimal subtotal)
         {
-            // Free shipping for orders over 500,000 VND
+            // Tự động miễn phí vận chuyển cho đơn hàng >= 500,000đ
             if (subtotal >= 500000)
                 return 0;
             

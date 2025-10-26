@@ -39,6 +39,16 @@ namespace JohnHenryFashionWeb.Controllers
             ViewBag.CartTotal = cartItems.Sum(c => c.Price * c.Quantity);
             ViewBag.CartCount = cartItems.Sum(c => c.Quantity);
 
+            // Get suggested products (random products, excluding items already in cart)
+            var cartProductIds = cartItems.Select(c => c.ProductId).ToList();
+            var suggestedProducts = await _context.Products
+                .Where(p => p.IsActive && p.StockQuantity > 0 && !cartProductIds.Contains(p.Id))
+                .OrderBy(p => Guid.NewGuid())
+                .Take(4)
+                .ToListAsync();
+            
+            ViewBag.SuggestedProducts = suggestedProducts;
+
             return View(cartItems);
         }
 
