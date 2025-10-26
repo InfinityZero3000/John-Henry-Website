@@ -393,34 +393,7 @@
                             {
                                 @foreach (var product in Model)
                                 {
-                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                        <div class="product-card-new">
-                                            <div class="product-image-container">
-                                                <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })">
-                                                    <img src="@product.FeaturedImageUrl" alt="@product.Name" class="product-image">
-                                                </a>
-                                            </div>
-                                            <div class="product-info">
-                                                <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" style="text-decoration: none; color: inherit;">
-                                                    <h6 class="product-name">@product.Name</h6>
-                                                </a>
-                                                <div class="product-price-actions">
-                                                    <div class="product-price">
-                                                        <span class="current-price">@product.Price.ToString("N0")₫</span>
-                                                    </div>
-                                                    <div class="product-actions">
-                                                        <button class="action-btn wishlist-btn" title="Yêu thích" data-wishlist-product-id="@product.Id">
-                                                            <i class="far fa-heart"></i>
-                                                        </button>
-                                                        <button class="action-btn cart-btn" title="Thêm vào giỏ" 
-                                                                onclick="quickAddToCart('@product.Id', '@Html.Raw(product.Name.Replace("'", "\\'"))', '@product.SKU', @((product.AvailableSizes != null && product.AvailableSizes.Any()) ? "true" : "false"), @((product.AvailableColors != null && product.AvailableColors.Any()) ? "true" : "false"))">
-                                                            <i class="fas fa-shopping-bag"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @await Html.PartialAsync("_ProductCard", product)
                                 }
                             }
                             else
