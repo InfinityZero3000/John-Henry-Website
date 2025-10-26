@@ -41,85 +41,83 @@
                 <div class="cart-items">
                     @foreach (var item in Model)
                     {
-                        <div class="cart-item" data-cart-item-id="@item.Id">
-                            <div class="row align-items-center">
-                                <!-- Checkbox column -->
-                                <div class="col-auto ps-0">
-                                    <input type="checkbox" 
-                                           class="form-check-input item-checkbox" 
-                                           data-cart-item-id="@item.Id"
-                                           data-price="@(item.Price * item.Quantity)"
-                                           style="transform: scale(1.2);">
-                                </div>
-                                
-                                <!-- Product Image -->
-                                <div class="col-md-2 col-3">
-                                    <div class="product-image">
+                        <div class="cart-item-wrapper" data-cart-item-id="@item.Id">
+                            <div class="cart-item-card">
+                                <div class="cart-item-row">
+                                    <!-- Checkbox -->
+                                    <div class="cart-item-checkbox">
+                                        <input type="checkbox" 
+                                               class="form-check-input item-checkbox" 
+                                               data-cart-item-id="@item.Id"
+                                               data-price="@(item.Price * item.Quantity)">
+                                    </div>
+                                    
+                                    <!-- Product Image -->
+                                    <div class="cart-item-image">
                                         <img src="@(!string.IsNullOrEmpty(item.Product.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "~/images/placeholder-product.jpg")" 
-                                             alt="@item.Product.Name" 
-                                             class="img-fluid rounded"
+                                             alt="@item.Product.Name"
                                              onerror="this.src='/images/placeholder-product.jpg'">
                                     </div>
-                                </div>
 
-                                <!-- Product Info -->
-                                <div class="col-md-4 col-9">
-                                    <div class="product-info">
-                                        <h6 class="product-name">
-                                            <a href="/Products/Details/@item.Product.Id" class="text-decoration-none">
+                                    <!-- Product Info -->
+                                    <div class="cart-item-info">
+                                        <h6 class="cart-item-name">
+                                            <a href="/Products/Details/@item.Product.Id">
                                                 @item.Product.Name
                                             </a>
                                         </h6>
-                                        <div class="product-details">
+                                        <div class="cart-item-details">
                                             @if (!string.IsNullOrEmpty(item.Size))
                                             {
                                                 <span class="badge bg-light text-dark me-1">Size: @item.Size</span>
                                             }
                                             @if (!string.IsNullOrEmpty(item.Color))
                                             {
-                                                <span class="badge bg-light text-dark">Color: @item.Color</span>
+                                                <span class="badge bg-light text-dark">Màu: @item.Color</span>
                                             }
                                         </div>
-                                        <small class="text-muted">SKU: @item.Product.SKU</small>
+                                        <small class="text-muted d-block">SKU: @item.Product.SKU</small>
                                     </div>
-                                </div>
 
-                                <!-- Price -->
-                                <div class="col-md-2 col-6">
-                                    <div class="item-price">
-                                        <span class="price">@item.Price.ToString("N0")₫</span>
+                                    <!-- Price -->
+                                    <div class="cart-item-price">
+                                        <strong>@item.Price.ToString("N0")₫</strong>
                                     </div>
-                                </div>
 
-                                <!-- Quantity & Delete -->
-                                <div class="col-md-3 col-12">
-                                    <div class="quantity-actions-wrapper">
+                                    <!-- Quantity Controls -->
+                                    <div class="cart-item-quantity">
                                         <div class="quantity-controls">
-                                            <button class="btn btn-outline-secondary btn-sm" 
+                                            <button type="button" 
+                                                    class="qty-btn" 
                                                     onclick="updateQuantity('@item.Id', @(item.Quantity - 1))"
                                                     @(item.Quantity <= 1 ? "disabled" : "")>
                                                 <i data-lucide="minus"></i>
                                             </button>
                                             <input type="number" 
-                                                   class="form-control quantity-input" 
+                                                   class="qty-input" 
                                                    value="@item.Quantity" 
                                                    min="1" 
                                                    max="99"
                                                    onchange="updateQuantity('@item.Id', this.value)">
-                                            <button class="btn btn-outline-secondary btn-sm" 
+                                            <button type="button" 
+                                                    class="qty-btn" 
                                                     onclick="updateQuantity('@item.Id', @(item.Quantity + 1))">
                                                 <i data-lucide="plus"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger btn-sm ms-2" 
-                                                    onclick="removeItem('@item.Id')"
-                                                    title="Xóa sản phẩm">
-                                                <i data-lucide="trash"></i>
-                                            </button>
                                         </div>
+                                    </div>
+
+                                    <!-- Delete Button -->
+                                    <div class="cart-item-delete">
+                                        <button type="button" 
+                                                class="delete-btn" 
+                                                onclick="removeItem('@item.Id')"
+                                                title="Xóa sản phẩm">
+                                            <i data-lucide="trash-2"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <hr class="cart-divider">
                         </div>
                     }
                 </div>
@@ -252,34 +250,45 @@
                     </div>
 
                     <!-- Suggested Products -->
-                    <div class="suggested-products mt-4">
-                        <h6 class="mb-3">Có thể bạn quan tâm</h6>
-                        <div class="row g-2">
-                            <!-- Placeholder for suggested products -->
-                            <div class="col-6">
-                                <div class="card h-100">
-                                    <img src="~/images/placeholder-product.jpg" class="card-img-top" alt="Sản phẩm đề xuất">
-                                    <div class="card-body p-2">
-                                        <small class="card-title">Áo thun basic</small>
-                                        <div class="text-primary">
-                                            <small><strong>299.000₫</strong></small>
+                    @{
+                        var suggestedProducts = ViewBag.SuggestedProducts as List<JohnHenryFashionWeb.Models.Product>;
+                    }
+                    @if (suggestedProducts != null && suggestedProducts.Any())
+                    {
+                        <div class="suggested-products mt-4">
+                            <h6 class="mb-3">Có thể bạn quan tâm</h6>
+                            <div class="row g-3">
+                                @foreach (var product in suggestedProducts)
+                                {
+                                    <div class="col-12">
+                                        <div class="product-card-mini">
+                                            <a href="@Url.Action("ProductDetail", "Products", new { id = product.Id })" class="product-link">
+                                                <div class="product-image-mini">
+                                                    <img src="@(!string.IsNullOrEmpty(product.FeaturedImageUrl) ? product.FeaturedImageUrl : "/images/default-product.jpg")" 
+                                                         alt="@product.Name"
+                                                         onerror="this.src='/images/default-product.jpg'">
+                                                </div>
+                                                <div class="product-info-mini">
+                                                    <h6 class="product-name-mini">@product.Name</h6>
+                                                    <div class="product-price-mini">
+                                                        @if (product.SalePrice.HasValue && product.SalePrice < product.Price)
+                                                        {
+                                                            <span class="price-sale">@product.SalePrice.Value.ToString("N0")₫</span>
+                                                            <span class="price-original">@product.Price.ToString("N0")₫</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="price-current">@product.Price.ToString("N0")₫</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </a>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="card h-100">
-                                    <img src="~/images/placeholder-product.jpg" class="card-img-top" alt="Sản phẩm đề xuất">
-                                    <div class="card-body p-2">
-                                        <small class="card-title">Quần jeans</small>
-                                        <div class="text-primary">
-                                            <small><strong>599.000₫</strong></small>
-                                        </div>
-                                    </div>
-                                </div>
+                                }
                             </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         }
@@ -288,50 +297,261 @@
 
 @section Styles {
     <style>
-        .cart-item {
-            padding: 1rem 0;
+        /* Cart Item Layout với Grid */
+        .cart-item-wrapper {
+            margin-bottom: 1rem;
         }
         
-        .product-image img {
-            max-height: 80px;
+        .cart-item-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            transition: box-shadow 0.2s;
+        }
+        
+        .cart-item-card:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .cart-item-row {
+            display: grid;
+            grid-template-columns: 40px 100px 1fr 120px 170px 50px;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        /* Checkbox */
+        .cart-item-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-item-checkbox .form-check-input {
+            transform: scale(1.3);
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        /* Product Image */
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .cart-item-image img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            border-radius: 6px;
         }
         
-        .product-name {
-            max-width: 100%;
-            overflow: hidden;
+        /* Product Info */
+        .cart-item-info {
+            min-width: 0; /* Allow text truncation */
         }
         
-        .product-name a {
-            color: #333;
+        .cart-item-name {
+            font-size: 15px;
             font-weight: 500;
-            display: block;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            
+            /* Giới hạn 2 dòng */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 100%;
+            max-height: 2.8em;
         }
         
-        .product-name a:hover {
+        .cart-item-name a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .cart-item-name a:hover {
             color: var(--jh-red);
         }
         
-        .quantity-actions-wrapper {
+        .cart-item-details {
+            margin-bottom: 4px;
+        }
+        
+        /* Price */
+        .cart-item-price {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* Quantity Controls */
+        .cart-item-quantity {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
         }
         
         .quantity-controls {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 2px;
+            gap: 2px;
         }
         
-        .quantity-input {
-            width: 60px;
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        
+        .qty-btn:hover:not(:disabled) {
+            background: var(--jh-red);
+            border-color: var(--jh-red);
+            color: white;
+        }
+        
+        .qty-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .qty-btn i[data-lucide] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .qty-input {
+            width: 50px;
+            height: 32px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
             text-align: center;
-            padding: 0.25rem;
+            font-weight: 600;
+            padding: 0;
+        }
+        
+        .qty-input:focus {
+            outline: none;
+            border-color: var(--jh-red);
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+        }
+        
+        /* Remove number input arrows */
+        .qty-input::-webkit-inner-spin-button,
+        .qty-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .qty-input {
+            -moz-appearance: textfield;
+        }
+        
+        /* Delete Button */
+        .cart-item-delete {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .delete-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #dc3545;
+            background: white;
+            color: #dc3545;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        
+        .delete-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .delete-btn i[data-lucide] {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Responsive */
+        @@media (max-width: 992px) {
+            .cart-item-row {
+                grid-template-columns: 40px 80px 1fr 100px 160px 45px;
+                gap: 12px;
+            }
+            
+            .cart-item-name {
+                font-size: 14px;
+            }
+            
+            .cart-item-price {
+                font-size: 16px;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .cart-item-row {
+                grid-template-columns: 30px 70px 1fr;
+                gap: 10px;
+            }
+            
+            .cart-item-checkbox,
+            .cart-item-image,
+            .cart-item-info {
+                grid-column: span 1;
+            }
+            
+            .cart-item-price {
+                grid-column: 1 / -1;
+                text-align: left;
+                padding-left: 40px;
+                margin-top: -8px;
+            }
+            
+            .cart-item-quantity {
+                grid-column: 1 / 3;
+                justify-content: flex-start;
+                padding-left: 40px;
+            }
+            
+            .cart-item-delete {
+                grid-column: 3 / -1;
+                justify-content: flex-end;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .cart-item-card {
+                padding: 12px;
+            }
+            
+            .cart-item-row {
+                gap: 8px;
+            }
+            
+            .cart-item-image {
+                width: 60px;
+                height: 60px;
+            }
         }
         
         .cart-summary {
@@ -396,20 +616,123 @@
             opacity: 0.3;
         }
         
+        /* Suggested Products Styles */
+        .suggested-products h6 {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .product-card-mini {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .product-card-mini:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .product-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            padding: 12px;
+        }
+        
+        .product-image-mini {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .product-image-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card-mini:hover .product-image-mini img {
+            transform: scale(1.1);
+        }
+        
+        .product-info-mini {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .product-name-mini {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        
+        .product-price-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .product-price-mini .price-current,
+        .product-price-mini .price-sale {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--jh-red);
+        }
+        
+        .product-price-mini .price-original {
+            font-size: 13px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        
         @@media (max-width: 768px) {
-            .quantity-actions-wrapper {
-                flex-direction: row;
-                margin-top: 1rem;
+            .cart-item .row {
+                flex-direction: column;
+                align-items: flex-start !important;
             }
             
-            .quantity-controls {
-                justify-content: flex-start;
-                flex-wrap: nowrap;
+            .cart-item .col-auto,
+            .cart-item .col {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .cart-item .product-image img {
+                width: 100%;
+                height: auto;
+                max-width: 120px;
+            }
+            
+            .item-price {
+                margin-top: 0.5rem;
             }
             
             .cart-summary {
                 position: static;
                 margin-top: 2rem;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .quantity-controls {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>

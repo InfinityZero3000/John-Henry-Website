@@ -11,6 +11,15 @@
 @Html.AntiForgeryToken()
 
 <div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/Cart">Giỏ hàng</a></li>
+            <li class="breadcrumb-item active">Thanh toán</li>
+        </ol>
+    </nav>
+
     <!-- Progress Steps -->
     <div class="checkout-steps mb-5">
         <div class="steps-container">
@@ -37,18 +46,8 @@
         </div>
     </div>
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a href="/Cart">Giỏ hàng</a></li>
-            <li class="breadcrumb-item active">Thanh toán</li>
-        </ol>
-    </nav>
-
     <!-- Checkout Header -->
     <div class="checkout-header mb-4">
-        <h2>Thanh toán đơn hàng</h2>
         <p class="text-muted">Vui lòng kiểm tra thông tin đơn hàng và điền thông tin giao hàng</p>
     </div>
 
@@ -95,18 +94,65 @@
                             <!-- Shipping Method Selection -->
                             <div class="mb-4">
                                 <label class="form-label"><strong>Phương thức vận chuyển <span class="text-danger">*</span></strong></label>
+                                
+                                <!-- Free Shipping Notice -->
+                                @if (Model.Subtotal >= 500000)
+                                {
+                                    <div class="alert alert-success mb-3">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Miễn phí vận chuyển!</strong> Đơn hàng của bạn đủ điều kiện được giao hàng miễn phí.
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Mua thêm <strong>@((500000 - Model.Subtotal).ToString("N0"))₫</strong> để được miễn phí vận chuyển!
+                                    </div>
+                                }
+                                
                                 <div class="shipping-methods" id="shippingMethods">
                                     @if (shippingMethods.Any())
                                     {
                                         @foreach (var method in shippingMethods)
                                         {
+                                            // Logic giảm giá shipping
+                                            decimal displayCost = method.Cost;
+                                            bool isFreeShipping = false;
+                                            bool isDiscounted = false;
+                                            
+                                            if (method.Code == "SUPER_EXPRESS")
+                                            {
+                                                // Giao hàng hỏa tốc: Giảm giá theo tầng
+                                                if (Model.Subtotal >= 2000000)
+                                                {
+                                                    displayCost = 0;
+                                                    isFreeShipping = true;
+                                                }
+                                                else if (Model.Subtotal >= 1000000)
+                                                {
+                                                    displayCost = method.Cost * 0.5m;
+                                                    isDiscounted = true;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // Các phương thức khác: Miễn phí khi >= 500k
+                                                if (Model.Subtotal >= 500000)
+                                                {
+                                                    displayCost = 0;
+                                                    isFreeShipping = true;
+                                                }
+                                            }
+                                            
                                             <div class="shipping-option mb-2">
                                                 <input type="radio" 
                                                        class="btn-check" 
                                                        name="shippingMethod" 
                                                        id="shipping_@method.Code" 
                                                        value="@method.Code"
-                                                       data-cost="@method.Cost"
+                                                       data-cost="@displayCost"
+                                                       data-original-cost="@method.Cost"
                                                        data-days="@method.EstimatedDays"
                                                        autocomplete="off"
                                                        @(method.Code == "STANDARD" ? "checked" : "")>
@@ -119,9 +165,40 @@
                                                             {
                                                                 <small class="text-success"><i class="fas fa-clock"></i> Giao trong @method.EstimatedDays ngày</small>
                                                             }
+                                                            @if (method.Code == "SUPER_EXPRESS")
+                                                            {
+                                                                <small class="text-info d-block mt-1">
+                                                                    <i class="fas fa-gift"></i> 
+                                                                    @if (Model.Subtotal >= 2000000)
+                                                                    {
+                                                                        <span>Miễn phí cho đơn >= 2 triệu</span>
+                                                                    }
+                                                                    else if (Model.Subtotal >= 1000000)
+                                                                    {
+                                                                        <span>Giảm 50% cho đơn >= 1 triệu</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>Giảm 50% từ 1tr, miễn phí từ 2tr</span>
+                                                                    }
+                                                                </small>
+                                                            }
                                                         </div>
                                                         <div class="fw-bold">
-                                                            @if (method.Cost > 0)
+                                                            @if (isFreeShipping)
+                                                            {
+                                                                <span class="text-success">Miễn phí</span>
+                                                                @if (method.Cost > 0)
+                                                                {
+                                                                    <br><small class="text-muted text-decoration-line-through">@method.Cost.ToString("N0")₫</small>
+                                                                }
+                                                            }
+                                                            else if (isDiscounted)
+                                                            {
+                                                                <span class="text-warning">@displayCost.ToString("N0")₫</span>
+                                                                <br><small class="text-muted text-decoration-line-through">@method.Cost.ToString("N0")₫</small>
+                                                            }
+                                                            else if (method.Cost > 0)
                                                             {
                                                                 <span>@method.Cost.ToString("N0")₫</span>
                                                             }
@@ -347,8 +424,22 @@
                                 <span>Phí vận chuyển:</span>
                                 <span id="shippingAmount">@shippingFee.ToString("N0")₫</span>
                             </div>
+                            @if (Model.Subtotal < 500000 && shippingFee > 0)
+                            {
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <em>Miễn phí ship cho đơn từ 500,000₫</em>
+                                </div>
+                            }
+                            @if (Model.Subtotal >= 500000)
+                            {
+                                <div class="summary-row text-success">
+                                    <span><i class="fas fa-gift me-1"></i>Giảm giá tự động (5%):</span>
+                                    <span id="autoDiscountAmount">-@Math.Min(Model.Subtotal * 0.05m, 200000).ToString("N0")₫</span>
+                                </div>
+                            }
                             <div class="summary-row" id="discountRow" style="display: none;">
-                                <span class="text-success">Giảm giá:</span>
+                                <span class="text-success"><i class="fas fa-tag me-1"></i>Mã giảm giá:</span>
                                 <span class="text-success" id="discountAmount">-0₫</span>
                             </div>
                             <hr>
@@ -362,7 +453,7 @@
 
                         <!-- Place Order Button -->
                         <div class="mt-4">
-                            <button type="button" class="btn btn-primary btn-lg w-100" onclick="placeOrder()">
+                            <button type="button" class="btn btn-primary btn-lg w-100" onclick="placeOrder(event)">
                                 <i class="fas fa-check-circle me-2"></i>Đặt hàng
                             </button>
                         </div>
@@ -714,10 +805,22 @@
         
         // Update order totals display
         function updateOrderTotals() {
+            // Calculate auto discount (5% for orders >= 500k, max 200k)
+            let autoDiscount = 0;
+            if (subtotal >= 500000) {
+                autoDiscount = Math.min(subtotal * 0.05, 200000);
+            }
+            
+            // Update auto discount display
+            const autoDiscountEl = document.getElementById('autoDiscountAmount');
+            if (autoDiscountEl) {
+                autoDiscountEl.textContent = '-' + formatCurrency(autoDiscount);
+            }
+            
             // Update shipping fee display
             document.getElementById('shippingAmount').textContent = formatCurrency(shippingCost);
             
-            // Show/hide discount row
+            // Show/hide discount row (for coupon)
             const discountRow = document.getElementById('discountRow');
             if (discountAmount > 0) {
                 discountRow.style.display = 'flex';
@@ -726,14 +829,17 @@
                 discountRow.style.display = 'none';
             }
             
-            // Calculate and update grand total
-            const grandTotal = subtotal + shippingCost - discountAmount;
+            // Calculate and update grand total (include auto discount)
+            const totalDiscount = autoDiscount + discountAmount;
+            const grandTotal = subtotal + shippingCost - totalDiscount;
             document.getElementById('grandTotalAmount').textContent = formatCurrency(grandTotal);
             
             console.log('Order totals updated:', {
                 subtotal,
                 shipping: shippingCost,
-                discount: discountAmount,
+                autoDiscount: autoDiscount,
+                couponDiscount: discountAmount,
+                totalDiscount: totalDiscount,
                 total: grandTotal
             });
         }
@@ -744,7 +850,12 @@
         }
         
         // Place order function - Calls CheckoutController.CreateSession API
-        async function placeOrder() {
+        async function placeOrder(event) {
+            // Prevent default if called from event
+            if (event) {
+                event.preventDefault();
+            }
+            
             const form = document.getElementById('checkoutForm');
             const formData = new FormData(form);
             
@@ -753,6 +864,9 @@
                 form.reportValidity();
                 return;
             }
+            
+            // Get the button element
+            const button = event ? event.target : document.querySelector('button[onclick*="placeOrder"]');
             
             // Build AddressViewModel for shipping address
             const fullName = `${formData.get('firstName')} ${formData.get('lastName')}`;
@@ -790,9 +904,10 @@
             
             try {
                 // Disable button to prevent double submission
-                const button = event.target;
-                button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+                if (button) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+                }
                 
                 // Call CreateSession API
                 const response = await fetch('/Checkout/CreateSession', {
@@ -817,8 +932,10 @@
                     showToast(result.message || 'Có lỗi xảy ra khi tạo đơn hàng', 'error');
                     
                     // Re-enable button
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+                    }
                 }
                 
             } catch (error) {
@@ -826,9 +943,10 @@
                 showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'error');
                 
                 // Re-enable button
-                const button = event.target;
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+                }
             }
         }
         
