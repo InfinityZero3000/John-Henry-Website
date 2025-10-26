@@ -35,7 +35,7 @@ function initializeStripe() {
     // Initialize Stripe if available
     if (typeof Stripe !== 'undefined') {
         // Replace with your publishable key
-        stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY');
+        stripe = Stripe('pk_test_51SMLP3KDeUHV329keOxjGoZw3WCiC1Th0Qw6ppGktAcPm7MQhUe2rCq6Gcq3pykoIFTmuVWA4KdL1AkuvEekeVlK00axb4qUUb');
         elements = stripe.elements();
 
         // Create card elements

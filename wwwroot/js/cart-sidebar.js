@@ -95,7 +95,7 @@
                     const result = await response.json();
                     
                     if (result.success) {
-                        console.log('✅ Item removed successfully');
+                        console.log('Item removed successfully');
                         
                         // Remove from DOM with animation
                         const cartItem = this.closest('.cart-item');
@@ -125,11 +125,11 @@
                         // Show success toast
                         showToast('Đã xóa sản phẩm khỏi giỏ hàng', 'success');
                     } else {
-                        console.error('❌ Remove failed:', result.message);
+                        console.error('Remove failed:', result.message);
                         showToast(result.message || 'Không thể xóa sản phẩm', 'error');
                     }
                 } catch (error) {
-                    console.error('❌ Remove error:', error);
+                    console.error('Remove error:', error);
                     showToast('Có lỗi xảy ra khi xóa sản phẩm', 'error');
                 }
             });
@@ -152,7 +152,7 @@
                     return;
                 }
                 
-                console.log('🔢 Updating quantity:', cartItemId, 'from', currentQty, 'to', newQty);
+                console.log('Updating quantity:', cartItemId, 'from', currentQty, 'to', newQty);
                 
                 // Disable buttons during update
                 const buttons = this.closest('.quantity-controls').querySelectorAll('.quantity-btn');
@@ -171,7 +171,7 @@
                     const result = await response.json();
                     
                     if (result.success) {
-                        console.log('✅ Quantity updated successfully');
+                        console.log('Quantity updated successfully');
                         
                         // Update quantity display
                         quantitySpan.textContent = newQty;
@@ -193,11 +193,11 @@
                             }
                         }));
                     } else {
-                        console.error('❌ Update failed:', result.message);
+                        console.error('Update failed:', result.message);
                         showToast(result.message || 'Không thể cập nhật số lượng', 'error');
                     }
                 } catch (error) {
-                    console.error('❌ Update error:', error);
+                    console.error('Update error:', error);
                     showToast('Có lỗi xảy ra khi cập nhật số lượng', 'error');
                 } finally {
                     // Re-enable buttons
@@ -233,7 +233,7 @@
             }
         });
         
-        console.log('📊 Cart counts updated - Count:', cartCount, 'Total:', cartTotal);
+        console.log('Cart counts updated - Count:', cartCount, 'Total:', cartTotal);
     }
 
     // Show empty cart state
@@ -262,7 +262,7 @@
 
     // Reload cart sidebar from server
     async function reloadCartSidebar() {
-        console.log('🔄 Reloading cart sidebar...');
+        console.log('Reloading cart sidebar...');
         
         try {
             const response = await fetch('/Cart/GetSidebarData');
@@ -295,11 +295,11 @@
                         lucide.createIcons();
                     }
                     
-                    console.log('✅ Cart sidebar reloaded');
+                    console.log('Cart sidebar reloaded');
                 }
             }
         } catch (error) {
-            console.error('❌ Failed to reload cart sidebar:', error);
+            console.error('Failed to reload cart sidebar:', error);
         }
     }
 
@@ -369,13 +369,13 @@
             initCartSidebarControls();
             initRemoveButtons();
             initQuantityControls();
-            console.log('✅ Cart sidebar initialized');
+            console.log('Cart sidebar initialized');
         });
     } else {
         initCartSidebarControls();
         initRemoveButtons();
         initQuantityControls();
-        console.log('✅ Cart sidebar initialized');
+        console.log('Cart sidebar initialized');
     }
 
     // Export functions for external use
@@ -385,7 +385,7 @@
         reload: reloadCartSidebar
     };
 
-    console.log('✅ Cart sidebar module loaded');
+    console.log('Cart sidebar module loaded');
 })();
 
 // Add CSS animations

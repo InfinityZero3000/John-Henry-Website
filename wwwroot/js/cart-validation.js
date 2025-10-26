@@ -65,7 +65,7 @@ async function addToCartWithValidation(productId, quantity = 1, size = null, col
     const validation = validateProductData(productId, productName, quantity);
     
     if (!validation.isValid) {
-        console.error('❌ Validation failed:', validation.errors);
+        console.error('Validation failed:', validation.errors);
         console.groupEnd();
         
         alert('Lỗi: ' + validation.errors.join(', ') + '\nVui lòng thử lại hoặc liên hệ hỗ trợ.');
@@ -82,7 +82,7 @@ async function addToCartWithValidation(productId, quantity = 1, size = null, col
     if (size) formData.append('size', size);
     if (color) formData.append('color', color);
     
-    console.log('📤 Sending request to /Products/AddToCart');
+    console.log('Sending request to /Products/AddToCart');
     
     try {
         const response = await fetch('/Products/AddToCart', {
@@ -96,7 +96,7 @@ async function addToCartWithValidation(productId, quantity = 1, size = null, col
         console.log('📥 Response data:', result);
         
         if (result.success) {
-            console.log('✅ Add to cart successful');
+            console.log('Add to cart successful');
             
             // Update cart count in header
             updateCartCount(result.cartCount);
@@ -123,7 +123,7 @@ async function addToCartWithValidation(productId, quantity = 1, size = null, col
                 }
             }));
         } else {
-            console.error('❌ Add to cart failed:', result.message);
+            console.error('Add to cart failed:', result.message);
             showToast(result.message || 'Không thể thêm vào giỏ hàng', 'error');
         }
         
@@ -131,7 +131,7 @@ async function addToCartWithValidation(productId, quantity = 1, size = null, col
         return result;
         
     } catch (error) {
-        console.error('❌ Network error:', error);
+        console.error('Network error:', error);
         console.groupEnd();
         
         showToast('Lỗi kết nối. Vui lòng thử lại.', 'error');
@@ -216,7 +216,7 @@ if (!document.getElementById('cart-validation-styles')) {
 
 // Auto-attach to all add-to-cart buttons
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 Cart validation script initialized');
+    console.log('Cart validation script initialized');
     
     // Find and attach to all add-to-cart buttons
     const addToCartButtons = document.querySelectorAll('.btn-add-to-cart, .btn-add-cart, [data-action="add-to-cart"]');
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const productName = card.dataset.productName;
             
             if (!productId || productId === 'null' || productId === 'undefined') {
-                console.warn(`⚠️ Product card ${index} has invalid SKU:`, {
+                console.warn(`Product card ${index} has invalid SKU:`, {
                     element: card,
                     productId: productId,
                     productName: productName,
@@ -270,4 +270,4 @@ if (typeof window !== 'undefined') {
     window.validateProductData = validateProductData;
 }
 
-console.log('✅ Cart validation script loaded');
+console.log('Cart validation script loaded');

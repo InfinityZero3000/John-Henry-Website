@@ -14,7 +14,7 @@ function buyNowQuick(productSku, productName, buttonElement) {
     
     // Validate product SKU
     if (!productSku || productSku === '' || productSku === 'undefined') {
-        console.error('❌ Invalid product SKU:', productSku);
+        console.error('Invalid product SKU:', productSku);
         showToastNotification('Sản phẩm không hợp lệ', 'error');
         return;
     }
@@ -31,7 +31,7 @@ function buyNowQuick(productSku, productName, buttonElement) {
     formData.append('size', 'M'); // Default size
     formData.append('color', ''); // No color selection
 
-    console.log('📤 Sending BuyNow request...');
+    console.log('Sending BuyNow request...');
 
     // Send buy now request
     fetch('/Products/BuyNow', {
@@ -46,7 +46,7 @@ function buyNowQuick(productSku, productName, buttonElement) {
         console.log('📥 Response data:', data);
         
         if (data.success) {
-            console.log('✅ Buy Now successful, redirecting...');
+            console.log('Buy Now successful, redirecting...');
             showToastNotification('Chuyển đến trang thanh toán...', 'success');
             
             // Redirect to checkout after short delay
@@ -54,7 +54,7 @@ function buyNowQuick(productSku, productName, buttonElement) {
                 window.location.href = data.redirectUrl || '/Cart/Checkout';
             }, 500);
         } else {
-            console.error('❌ Buy Now failed:', data.message);
+            console.error('Buy Now failed:', data.message);
             showToastNotification(data.message || 'Không thể mua ngay. Vui lòng thử lại.', 'error');
             
             // Restore button
@@ -63,7 +63,7 @@ function buyNowQuick(productSku, productName, buttonElement) {
         }
     })
     .catch(error => {
-        console.error('❌ Buy Now error:', error);
+        console.error('Buy Now error:', error);
         showToastNotification('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
         
         // Restore button
@@ -84,13 +84,13 @@ function buyNowWithOptions(productSku, quantity, size, color) {
     
     // Validate inputs
     if (!productSku || productSku === '' || productSku === 'undefined') {
-        console.error('❌ Invalid product SKU:', productSku);
+        console.error('Invalid product SKU:', productSku);
         showToastNotification('Sản phẩm không hợp lệ', 'error');
         return;
     }
 
     if (!quantity || quantity <= 0) {
-        console.error('❌ Invalid quantity:', quantity);
+        console.error('Invalid quantity:', quantity);
         showToastNotification('Số lượng không hợp lệ', 'error');
         return;
     }
@@ -102,7 +102,7 @@ function buyNowWithOptions(productSku, quantity, size, color) {
     formData.append('size', size || 'M');
     formData.append('color', color || '');
 
-    console.log('📤 Sending BuyNow request with options...');
+    console.log('Sending BuyNow request with options...');
 
     // Send buy now request
     return fetch('/Products/BuyNow', {
@@ -117,10 +117,10 @@ function buyNowWithOptions(productSku, quantity, size, color) {
         console.log('📥 Response data:', data);
         
         if (data.success) {
-            console.log('✅ Buy Now successful');
+            console.log('Buy Now successful');
             return { success: true, redirectUrl: data.redirectUrl };
         } else {
-            console.error('❌ Buy Now failed:', data.message);
+            console.error('Buy Now failed:', data.message);
             throw new Error(data.message || 'Không thể mua ngay');
         }
     });
@@ -249,4 +249,4 @@ if (!document.getElementById('buyNowStyles')) {
     document.head.appendChild(style);
 }
 
-console.log('✅ Buy Now functionality loaded');
+console.log('Buy Now functionality loaded');
