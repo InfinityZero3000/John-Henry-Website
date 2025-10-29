@@ -1,8 +1,8 @@
 # Use the official .NET runtime as a parent image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
 
 # Use the official .NET SDK as a build image
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
