@@ -38,6 +38,16 @@
     }
 
     function openCartSidebar() {
+        console.log('🛒 cart-sidebar.js: openCartSidebar called');
+        
+        // Use the global loadAndOpenCartSidebar function if available
+        if (typeof window.loadAndOpenCartSidebar === 'function') {
+            console.log('Using global loadAndOpenCartSidebar function');
+            window.loadAndOpenCartSidebar();
+            return;
+        }
+        
+        // Fallback to basic open (without reload)
         const cartSidebar = document.getElementById('cart-sidebar');
         const cartOverlay = document.getElementById('cart-sidebar-overlay');
         
@@ -51,7 +61,7 @@
         // Prevent body scroll
         document.body.style.overflow = 'hidden';
         
-        console.log('🛒 Cart sidebar opened');
+        console.log('🛒 Cart sidebar opened (basic mode)');
     }
 
     function closeCartSidebar() {
@@ -357,10 +367,17 @@
     // Listen for "Add to Cart" success to open sidebar
     document.addEventListener('productAddedToCart', function(e) {
         console.log('🔔 Product added to cart event received:', e.detail);
-        // Reload and open sidebar
-        reloadCartSidebar().then(() => {
-            setTimeout(() => openCartSidebar(), 100);
-        });
+        // Use the global loadAndOpenCartSidebar to reload with fresh data
+        if (typeof window.loadAndOpenCartSidebar === 'function') {
+            console.log('Calling loadAndOpenCartSidebar from event listener');
+            window.loadAndOpenCartSidebar();
+        } else {
+            // Fallback: reload then open
+            console.log('Fallback: reloading cart sidebar then opening');
+            reloadCartSidebar().then(() => {
+                setTimeout(() => openCartSidebar(), 100);
+            });
+        }
     });
 
     // Initialize on DOM ready
