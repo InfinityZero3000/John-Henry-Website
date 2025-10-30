@@ -4,201 +4,206 @@
     Layout = "~/Views/Shared/_SellerLayout.cshtml";
 }
 
-@section Styles {
-    <!-- Dashboard now uses the clean dashboard.css file instead of inline purple styles -->
-}
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <div>
+                <div class="d-flex align-items-center mb-2">
+                    <div class="live-indicator"></div>
+                    <span class="fw-medium ms-2">Live Dashboard</span>
+                </div>
+                <h1 class="admin-page-title">
+                    <i data-lucide="gauge"></i>
+                    Dashboard Người bán
+                </h1>
+                <p class="admin-page-description">Tổng quan về hoạt động bán hàng của bạn</p>
+            </div>
+            <div>
+                <a href="@Url.Action("CreateProduct", "Seller")" class="admin-btn admin-btn-primary admin-btn-lg">
+                    <i data-lucide="plus"></i>Thêm sản phẩm mới
+                </a>
+            </div>
+        </div>
+    </div>
 
-<div class="dashboard-modern">
-    <div class="container-fluid">
-        <!-- Header -->
-        <div class="dashboard-header">
-            <div class="content">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="live-indicator"></div>
-                            <span class="fw-medium">Live Dashboard</span>
-                        </div>
-                        <h1 class="h2 mb-2">Dashboard Người bán</h1>
-                        <p class="mb-0 opacity-75">Tổng quan về hoạt động bán hàng của bạn</p>
-                    </div>
-                    <div>
-                        <a href="@Url.Action("CreateProduct", "Seller")" class="btn btn-primary btn-lg">
-                            <i data-lucide="plus" class="me-2"></i>Thêm sản phẩm mới
-                        </a>
-                    </div>
+    <!-- Stats Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Sản phẩm của tôi</h3>
+                    <p class="value">@Model.MyProductsCount</p>
+                    <p class="change positive">
+                        <i data-lucide="trending-up"></i>
+                        Tăng 12% so với tháng trước
+                    </p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="package"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i data-lucide="package"></i>
-                    </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đơn hàng</h3>
+                    <p class="value">@Model.MyOrdersCount</p>
+                    <p class="change positive">
+                        <i data-lucide="trending-up"></i>
+                        Tăng 8% so với tháng trước
+                    </p>
                 </div>
-                <div class="stat-value">@Model.MyProductsCount</div>
-                <div class="stat-label">Sản phẩm của tôi</div>
-                <div class="stat-trend trend-positive">
-                    <i data-lucide="trending-up" class="me-1"></i>
-                    Tăng 12% so với tháng trước
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i data-lucide="shopping-cart"></i>
-                    </div>
-                </div>
-                <div class="stat-value">@Model.MyOrdersCount</div>
-                <div class="stat-label">Đơn hàng</div>
-                <div class="stat-trend trend-positive">
-                    <i data-lucide="trending-up" class="me-1"></i>
-                    Tăng 8% so với tháng trước
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i data-lucide="dollar-sign"></i>
-                    </div>
-                </div>
-                <div class="stat-value">@Model.MyRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
-                <div class="stat-label">Doanh thu tổng</div>
-                <div class="stat-trend trend-positive">
-                    <i data-lucide="trending-up" class="me-1"></i>
-                    Tăng 15% so với tháng trước
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i data-lucide="calendar"></i>
-                    </div>
-                </div>
-                <div class="stat-value">@Model.MonthlyRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
-                <div class="stat-label">Doanh thu tháng</div>
-                <div class="stat-trend trend-positive">
-                    <i data-lucide="trending-up" class="me-1"></i>
-                    Tăng 22% so với tháng trước
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="shopping-cart"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Management Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon status-active">
-                        <i data-lucide="star"></i>
-                    </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Doanh thu tổng</h3>
+                    <p class="value">@Model.MyRevenue.ToString("N0") ₫</p>
+                    <p class="change positive">
+                        <i data-lucide="trending-up"></i>
+                        Tăng 15% so với tháng trước
+                    </p>
                 </div>
-                <div class="stat-value">@Model.PendingReviewsCount</div>
-                <div class="stat-label">Đánh giá chưa phản hồi</div>
-                <div class="mt-3">
-                    <a href="@Url.Action("Reviews", "Seller")" class="btn btn-outline-danger btn-sm">
-                        <i data-lucide="reply" class="me-1"></i>Quản lý đánh giá
-                    </a>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon status-processing">
-                        <i data-lucide="ticket"></i>
-                    </div>
-                </div>
-                <div class="stat-value">@Model.ActiveCouponsCount</div>
-                <div class="stat-label">Mã giảm giá đang hoạt động</div>
-                <div class="mt-3">
-                    <a href="@Url.Action("Coupons", "Seller")" class="btn btn-outline-primary btn-sm">
-                        <i data-lucide="settings" class="me-1"></i>Quản lý mã giảm giá
-                    </a>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon status-cancelled">
-                        <i data-lucide="alert-triangle"></i>
-                    </div>
-                </div>
-                <div class="stat-value">@Model.LowInventoryProductsCount</div>
-                <div class="stat-label">Sản phẩm sắp hết hàng</div>
-                <div class="mt-3">
-                    <a href="@Url.Action("StoreManagement", "Seller")" class="btn btn-outline-warning btn-sm">
-                        <i data-lucide="warehouse" class="me-1"></i>Quản lý kho
-                    </a>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon status-draft">
-                        <i data-lucide="store"></i>
-                    </div>
-                </div>
-                <div class="stat-value">Cửa hàng</div>
-                <div class="stat-label">Quản lý cửa hàng</div>
-                <div class="mt-3">
-                    <a href="@Url.Action("StoreManagement", "Seller")" class="btn btn-outline-secondary btn-sm">
-                        <i data-lucide="settings" class="me-1"></i>Cài đặt cửa hàng
-                    </a>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="dollar-sign"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions-card">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0 fw-bold text-dark">Thao tác nhanh</h5>
-            </div>
-            <div class="row">
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <a href="@Url.Action("CreateProduct", "Seller")" class="action-btn">
-                        <i data-lucide="plus"></i>
-                        <div class="fw-medium">Thêm sản phẩm</div>
-                    </a>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Doanh thu tháng</h3>
+                    <p class="value">@Model.MonthlyRevenue.ToString("N0") ₫</p>
+                    <p class="change positive">
+                        <i data-lucide="trending-up"></i>
+                        Tăng 22% so với tháng trước
+                    </p>
                 </div>
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <a href="@Url.Action("Products", "Seller")" class="action-btn">
-                        <i data-lucide="package"></i>
-                        <div class="fw-medium">Quản lý sản phẩm</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <a href="@Url.Action("Orders", "Seller")" class="action-btn">
-                        <i data-lucide="shopping-cart"></i>
-                        <div class="fw-medium">Đơn hàng</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <a href="@Url.Action("Analytics", "Seller")" class="action-btn">
-                        <i data-lucide="bar-chart-3"></i>
-                        <div class="fw-medium">Thống kê</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <a href="@Url.Action("Coupons", "Seller")" class="action-btn">
-                        <i data-lucide="ticket"></i>
-                        <div class="fw-medium">Mã giảm giá</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-sm-4 mb-3">
-                    <a href="@Url.Action("Settings", "Seller")" class="action-btn">
-                        <i data-lucide="settings"></i>
-                        <div class="fw-medium">Cài đặt</div>
-                    </a>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="calendar"></i>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Management Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đánh giá chưa phản hồi</h3>
+                    <p class="value">@Model.PendingReviewsCount</p>
+                    <div class="mt-3">
+                        <a href="@Url.Action("Reviews", "Seller")" class="admin-btn admin-btn-danger admin-btn-sm">
+                            <i data-lucide="reply"></i>Quản lý đánh giá
+                        </a>
+                    </div>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="star"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Mã giảm giá hoạt động</h3>
+                    <p class="value">@Model.ActiveCouponsCount</p>
+                    <div class="mt-3">
+                        <a href="@Url.Action("Coupons", "Seller")" class="admin-btn admin-btn-primary admin-btn-sm">
+                            <i data-lucide="settings"></i>Quản lý mã giảm giá
+                        </a>
+                    </div>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="ticket"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Sản phẩm sắp hết hàng</h3>
+                    <p class="value">@Model.LowInventoryProductsCount</p>
+                    <div class="mt-3">
+                        <a href="@Url.Action("StoreManagement", "Seller")" class="admin-btn admin-btn-warning admin-btn-sm">
+                            <i data-lucide="warehouse"></i>Quản lý kho
+                        </a>
+                    </div>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Cửa hàng</h3>
+                    <p class="value" style="font-size: 1.5rem;">Quản lý</p>
+                    <div class="mt-3">
+                        <a href="@Url.Action("StoreManagement", "Seller")" class="admin-btn admin-btn-secondary admin-btn-sm">
+                            <i data-lucide="settings"></i>Cài đặt cửa hàng
+                        </a>
+                    </div>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="store"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <h3>
+                <i data-lucide="zap"></i>
+                Thao tác nhanh
+            </h3>
+        </div>
+        <div class="section-card-body">
+            <div class="quick-actions-grid">
+                <a href="@Url.Action("CreateProduct", "Seller")" class="quick-action-btn">
+                    <i data-lucide="plus"></i>
+                    <span>Thêm sản phẩm</span>
+                </a>
+                <a href="@Url.Action("Products", "Seller")" class="quick-action-btn">
+                    <i data-lucide="package"></i>
+                    <span>Quản lý sản phẩm</span>
+                </a>
+                <a href="@Url.Action("Orders", "Seller")" class="quick-action-btn">
+                    <i data-lucide="shopping-cart"></i>
+                    <span>Đơn hàng</span>
+                </a>
+                <a href="@Url.Action("Analytics", "Seller")" class="quick-action-btn">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Thống kê</span>
+                </a>
+                <a href="@Url.Action("Coupons", "Seller")" class="quick-action-btn">
+                    <i data-lucide="ticket"></i>
+                    <span>Mã giảm giá</span>
+                </a>
+                <a href="@Url.Action("Settings", "Seller")" class="quick-action-btn">
+                    <i data-lucide="settings"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 @section Scripts {
     <script>

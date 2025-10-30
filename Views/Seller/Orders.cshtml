@@ -4,294 +4,298 @@
     Layout = "~/Views/Shared/_SellerLayout.cshtml";
 }
 
-@section Styles {
-    <style>
-        .orders-modern {
-            padding: 2rem 0;
-        }
-
-        .page-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .orders-table {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: none;
-        }
-
-        .status-pending {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
-            color: white;
-        }
-
-        .status-processing {
-            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
-            color: white;
-        }
-
-        .status-shipped {
-            background: linear-gradient(45deg, #10b981, #059669);
-            color: white;
-        }
-
-        .status-delivered {
-            background: linear-gradient(45deg, #06b6d4, #0891b2);
-            color: white;
-        }
-
-        .status-cancelled {
-            background: linear-gradient(45deg, #ef4444, #dc2626);
-            color: white;
-        }
-
-        .filter-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 2rem;
-        }
-    </style>
-}
-
-<div class="orders-modern">
-    <div class="container-fluid">
-        <!-- Header -->
-        <div class="page-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h2 fw-bold mb-2">
-                        <i class="fas fa-shopping-cart me-3"></i>
-                        Quản lý đơn hàng
-                    </h1>
-                    <p class="mb-0 opacity-75">Theo dõi và xử lý các đơn hàng của bạn</p>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-light btn-lg">
-                        <i class="fas fa-download me-2"></i>Xuất báo cáo
-                    </button>
-                </div>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <div>
+                <h1 class="admin-page-title">
+                    <i data-lucide="shopping-cart" class="me-2"></i>
+                    Quản lý đơn hàng
+                </h1>
+                <p class="admin-page-description">Theo dõi và xử lý các đơn hàng của bạn</p>
+            </div>
+            <div class="admin-page-actions">
+                <button type="button" class="admin-btn admin-btn-outline">
+                    <i data-lucide="download" class="me-2"></i>
+                    Xuất báo cáo
+                </button>
             </div>
         </div>
-
-        <!-- Filter and Search -->
-        <div class="filter-card">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label for="searchTerm" class="form-label fw-medium text-dark">Tìm kiếm</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" id="searchTerm" name="search" 
-                               placeholder="Mã đơn, tên khách hàng..." value="@Model.SearchTerm">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label for="status" class="form-label fw-medium text-dark">Trạng thái</label>
-                    <select class="form-select" id="status" name="status">
-                        <option value="">Tất cả trạng thái</option>
-                        @{
-                            var statusOptions = new[] {
-                                new { Value = "pending", Text = "Chờ xử lý" },
-                                new { Value = "processing", Text = "Đang xử lý" },
-                                new { Value = "shipped", Text = "Đã gửi" },
-                                new { Value = "delivered", Text = "Đã giao" },
-                                new { Value = "cancelled", Text = "Đã hủy" }
-                            };
-                        }
-                        @foreach (var option in statusOptions)
-                        {
-                            if (Model.Status == option.Value)
-                            {
-                                <option value="@option.Value" selected>@option.Text</option>
-                            }
-                            else
-                            {
-                                <option value="@option.Value">@option.Text</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="dateFrom" class="form-label fw-medium text-dark">Từ ngày</label>
-                    <input type="date" class="form-control" id="dateFrom" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")">
-                </div>
-                <div class="col-md-2">
-                    <label for="dateTo" class="form-label fw-medium text-dark">Đến ngày</label>
-                    <input type="date" class="form-control" id="dateTo" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label text-transparent">.</label>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search me-1"></i>Tìm
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Orders Table -->
-        <div class="orders-table">
-            @if (Model.Orders.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="fw-bold">Mã đơn hàng</th>
-                                <th class="fw-bold">Khách hàng</th>
-                                <th class="fw-bold">Tổng tiền</th>
-                                <th class="fw-bold">Trạng thái</th>
-                                <th class="fw-bold">Thanh toán</th>
-                                <th class="fw-bold">Ngày đặt</th>
-                                <th class="fw-bold">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in Model.Orders)
-                            {
-                                <tr>
-                                    <td>
-                                        <strong class="text-primary">@order.OrderNumber</strong>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <strong>@order.CustomerName</strong>
-                                            <br><small class="text-muted">@order.CustomerEmail</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <strong class="text-success">@order.Total.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</strong>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge status-@order.Status.ToLower()">
-                                            @GetStatusText(order.Status)
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @GetPaymentStatusBadgeClass(order.PaymentStatus)">
-                                            @GetPaymentStatusText(order.PaymentStatus)
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="@Url.Action("OrderDetail", "Seller", new { id = order.Id })" 
-                                               class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye me-1"></i>Chi tiết
-                                            </a>
-                                            @if (order.Status == "pending")
-                                            {
-                                                <button class="btn btn-outline-success btn-sm" 
-                                                        onclick="updateOrderStatus('@order.Id', 'processing')">
-                                                    <i class="fas fa-check me-1"></i>Duyệt
-                                                </button>
-                                            }
-                                            else if (order.Status == "processing")
-                                            {
-                                                <button class="btn btn-outline-info btn-sm" 
-                                                        onclick="updateOrderStatus('@order.Id', 'shipped')">
-                                                    <i class="fas fa-truck me-1"></i>Gửi hàng
-                                                </button>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-inbox text-muted" style="font-size: 4rem;"></i>
-                    <h4 class="text-muted mt-3">Chưa có đơn hàng nào</h4>
-                    <p class="text-muted">Các đơn hàng sẽ hiển thị tại đây khi có khách đặt mua.</p>
-                </div>
-            }
-        </div>
     </div>
-}
 
-@functions {
-    string GetStatusText(string status)
-    {
-        return status?.ToLower() switch
-        {
-            "pending" => "Chờ xử lý",
-            "processing" => "Đang xử lý", 
-            "shipped" => "Đã gửi",
-            "delivered" => "Đã giao",
-            "cancelled" => "Đã hủy",
-            _ => "Không xác định"
-        };
-    }
+    <!-- Filters Section -->
+    <div class="admin-filters">
+        <form method="get" class="admin-filters-form">
+            <div class="admin-search-box">
+                <i data-lucide="search"></i>
+                <input type="text" name="search" value="@Model.SearchTerm" 
+                       placeholder="Mã đơn hàng, tên khách hàng..." class="admin-search-input">
+            </div>
+            
+            <select name="status" class="admin-form-select" onchange="this.form.submit()">
+                <option value="">Tất cả trạng thái</option>
+                @{
+                    var statusOptions = new[] {
+                        new { Value = "pending", Text = "Chờ xử lý" },
+                        new { Value = "processing", Text = "Đang xử lý" },
+                        new { Value = "shipped", Text = "Đã gửi" },
+                        new { Value = "delivered", Text = "Đã giao" },
+                        new { Value = "cancelled", Text = "Đã hủy" }
+                    };
+                }
+                @foreach (var option in statusOptions)
+                {
+                    <option value="@option.Value" selected="@(Model.Status == option.Value)">@option.Text</option>
+                }
+            </select>
+            
+            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" 
+                   class="admin-form-input" placeholder="Từ ngày">
+            
+            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" 
+                   class="admin-form-input" placeholder="Đến ngày">
+            
+            <button type="submit" class="admin-btn admin-btn-primary">
+                <i data-lucide="filter" class="me-1"></i>
+                Lọc
+            </button>
+        </form>
+    </div>
 
-    string GetPaymentStatusText(string paymentStatus)
-    {
-        return paymentStatus?.ToLower() switch
-        {
-            "pending" => "Chờ thanh toán",
-            "paid" => "Đã thanh toán",
-            "failed" => "Thất bại",
-            "refunded" => "Đã hoàn tiền",
-            _ => "Không xác định"
-        };
-    }
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs mb-4">
+        <a href="@Url.Action("Orders", new { status = "", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+           class="admin-filter-tab @(string.IsNullOrEmpty(Model.Status) ? "active" : "")">
+            Tất cả
+        </a>
+        <a href="@Url.Action("Orders", new { status = "pending", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+           class="admin-filter-tab @(Model.Status == "pending" ? "active" : "")">
+            Chờ xử lý
+        </a>
+        <a href="@Url.Action("Orders", new { status = "processing", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+           class="admin-filter-tab @(Model.Status == "processing" ? "active" : "")">
+            Đang xử lý
+        </a>
+        <a href="@Url.Action("Orders", new { status = "shipped", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+           class="admin-filter-tab @(Model.Status == "shipped" ? "active" : "")">
+            Đã gửi
+        </a>
+        <a href="@Url.Action("Orders", new { status = "delivered", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+           class="admin-filter-tab @(Model.Status == "delivered" ? "active" : "")">
+            Đã giao
+        </a>
+    </div>
 
-    string GetPaymentStatusBadgeClass(string paymentStatus)
+    <!-- Orders Table -->
+    @if (Model.Orders.Any())
     {
-        return paymentStatus?.ToLower() switch
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 130px;">Mã đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th style="width: 80px;">Số lượng</th>
+                        <th style="width: 120px;">Tổng tiền</th>
+                        <th style="width: 120px;">Trạng thái</th>
+                        <th style="width: 120px;">Thanh toán</th>
+                        <th style="width: 140px;">Ngày đặt</th>
+                        <th style="width: 180px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td>
+                                <code class="text-primary fw-semibold">@order.OrderNumber</code>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="fw-semibold">@order.CustomerName</div>
+                                    <small class="text-muted">@order.CustomerEmail</small>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="admin-badge admin-badge-secondary">@order.ItemCount</span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-success">@order.Total.ToString("N0") ₫</span>
+                            </td>
+                            <td>
+                                @switch (order.Status.ToLower())
+                                {
+                                    case "pending":
+                                        <span class="admin-badge admin-badge-warning">Chờ xử lý</span>
+                                        break;
+                                    case "processing":
+                                        <span class="admin-badge admin-badge-info">Đang xử lý</span>
+                                        break;
+                                    case "shipped":
+                                        <span class="admin-badge admin-badge-primary">Đã gửi</span>
+                                        break;
+                                    case "delivered":
+                                        <span class="admin-badge admin-badge-success">Đã giao</span>
+                                        break;
+                                    case "cancelled":
+                                        <span class="admin-badge admin-badge-danger">Đã hủy</span>
+                                        break;
+                                    default:
+                                        <span class="admin-badge admin-badge-secondary">@order.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @switch (order.PaymentStatus.ToLower())
+                                {
+                                    case "paid":
+                                        <span class="admin-badge admin-badge-success">Đã thanh toán</span>
+                                        break;
+                                    case "pending":
+                                        <span class="admin-badge admin-badge-warning">Chờ thanh toán</span>
+                                        break;
+                                    case "failed":
+                                        <span class="admin-badge admin-badge-danger">Thất bại</span>
+                                        break;
+                                    case "refunded":
+                                        <span class="admin-badge admin-badge-info">Đã hoàn tiền</span>
+                                        break;
+                                    default:
+                                        <span class="admin-badge admin-badge-secondary">@order.PaymentStatus</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <small class="text-muted">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                            </td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <a href="@Url.Action("OrderDetail", "Seller", new { id = order.Id })" 
+                                       class="admin-btn admin-btn-sm admin-btn-outline" title="Chi tiết">
+                                        <i data-lucide="eye"></i>
+                                    </a>
+                                    @if (order.Status == "pending")
+                                    {
+                                        <button class="admin-btn admin-btn-sm admin-btn-success" 
+                                                onclick="updateOrderStatus('@order.Id', 'processing')" title="Duyệt đơn">
+                                            <i data-lucide="check"></i>
+                                        </button>
+                                    }
+                                    else if (order.Status == "processing")
+                                    {
+                                        <button class="admin-btn admin-btn-sm admin-btn-primary" 
+                                                onclick="updateOrderStatus('@order.Id', 'shipped')" title="Gửi hàng">
+                                            <i data-lucide="truck"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
         {
-            "pending" => "bg-warning",
-            "paid" => "bg-success",
-            "failed" => "bg-danger",
-            "refunded" => "bg-info",
-            _ => "bg-secondary"
-        };
+            <div class="admin-pagination">
+                <div class="admin-pagination-info">
+                    Hiển thị trang @Model.CurrentPage / @Model.TotalPages
+                </div>
+                <div class="admin-pagination-buttons">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <a href="@Url.Action("Orders", new { page = 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                           class="admin-pagination-btn" title="Trang đầu">
+                            <i data-lucide="chevrons-left"></i>
+                        </a>
+                        <a href="@Url.Action("Orders", new { page = Model.CurrentPage - 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                           class="admin-pagination-btn" title="Trang trước">
+                            <i data-lucide="chevron-left"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="admin-pagination-btn disabled">
+                            <i data-lucide="chevrons-left"></i>
+                        </span>
+                        <span class="admin-pagination-btn disabled">
+                            <i data-lucide="chevron-left"></i>
+                        </span>
+                    }
+
+                    @{
+                        var startPage = Math.Max(1, Model.CurrentPage - 2);
+                        var endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        if (i == Model.CurrentPage)
+                        {
+                            <span class="admin-pagination-btn active">@i</span>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Orders", new { page = i, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                               class="admin-pagination-btn">@i</a>
+                        }
+                    }
+
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <a href="@Url.Action("Orders", new { page = Model.CurrentPage + 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                           class="admin-pagination-btn" title="Trang tiếp">
+                            <i data-lucide="chevron-right"></i>
+                        </a>
+                        <a href="@Url.Action("Orders", new { page = Model.TotalPages, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                           class="admin-pagination-btn" title="Trang cuối">
+                            <i data-lucide="chevrons-right"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="admin-pagination-btn disabled">
+                            <i data-lucide="chevron-right"></i>
+                        </span>
+                        <span class="admin-pagination-btn disabled">
+                            <i data-lucide="chevrons-right"></i>
+                        </span>
+                    }
+                </div>
+            </div>
+        }
     }
-}
+    else
+    {
+        <div class="empty-state">
+            <i data-lucide="inbox" style="width: 64px; height: 64px;"></i>
+            <h4 class="mt-3 mb-2">Chưa có đơn hàng nào</h4>
+            <p class="text-muted mb-4">Các đơn hàng sẽ hiển thị tại đây khi có khách đặt mua</p>
+        </div>
+    }
+</div>
 
 @section Scripts {
     <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+
         function updateOrderStatus(orderId, newStatus) {
-            if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này?')) {
-                // Here you would make an AJAX call to update the order status
+            const statusText = {
+                'processing': 'duyệt đơn hàng',
+                'shipped': 'đánh dấu đã gửi hàng'
+            };
+            
+            if (confirm(`Bạn có chắc chắn muốn ${statusText[newStatus] || 'cập nhật trạng thái'}?`)) {
+                // TODO: Implement AJAX call to update order status
                 // For now, we'll just reload the page
                 window.location.reload();
             }
         }
-
-        // Auto-submit form when filter changes
-        document.querySelectorAll('select[name="status"]').forEach(select => {
-            select.addEventListener('change', function() {
-                this.form.submit();
-            });
-        });
     </script>
 }

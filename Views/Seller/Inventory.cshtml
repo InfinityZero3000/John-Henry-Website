@@ -332,25 +332,33 @@
             });
 
             function showToast(type, message) {
-                var toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
-                var toast = `
-                    <div class="toast ${toastClass} text-white" role="alert">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
+                // Create toast container if it doesn't exist
+                let toastContainer = document.querySelector('.toast-container');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.className = 'toast-container position-fixed p-3';
+                    toastContainer.style.cssText = 'top: 10px; right: 20px; z-index: 99999; max-width: 450px;';
+                    document.body.appendChild(toastContainer);
+                }
+                
+                const toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
+                const toastEl = document.createElement('div');
+                toastEl.className = `toast ${toastClass} text-white`;
+                toastEl.setAttribute('role', 'alert');
+                toastEl.style.cssText = 'word-wrap: break-word; white-space: normal; max-width: 100%;';
+                toastEl.innerHTML = `
+                    <div class="toast-body" style="word-wrap: break-word; white-space: normal; overflow-wrap: break-word;">
+                        ${message}
                     </div>
                 `;
                 
-                if (!$('.toast-container').length) {
-                    $('body').append('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
-                }
+                toastContainer.appendChild(toastEl);
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
                 
-                $('.toast-container').append(toast);
-                $('.toast').last().toast('show');
-                
-                setTimeout(function() {
-                    $('.toast').last().remove();
-                }, 3000);
+                toastEl.addEventListener('hidden.bs.toast', () => {
+                    toastEl.remove();
+                });
             }
         });
     </script>
