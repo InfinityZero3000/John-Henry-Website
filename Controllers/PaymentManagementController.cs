@@ -463,6 +463,113 @@ namespace JohnHenryFashionWeb.Controllers
             }
         }
 
+        [HttpPost("methods/toggle")]
+        public async Task<IActionResult> TogglePaymentMethodV2([FromBody] ToggleMethodRequest request)
+        {
+            var method = await _context.PaymentMethodConfigs.FindAsync(Guid.Parse(request.Id));
+            if (method == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy phương thức thanh toán" });
+            }
+
+            try
+            {
+                method.IsActive = !method.IsActive;
+                method.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Phương thức thanh toán đã được {(method.IsActive ? "kích hoạt" : "tạm ngừng")}",
+                    isActive = method.IsActive
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Có lỗi xảy ra: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("methods/add-or-update")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddOrUpdatePaymentMethod(PaymentMethodConfig model)
+        {
+            try
+            {
+                if (model.Id == Guid.Empty)
+                {
+                    // Add new method
+                    model.Id = Guid.NewGuid();
+                    model.CreatedAt = DateTime.UtcNow;
+                    model.UpdatedAt = DateTime.UtcNow;
+                    _context.PaymentMethodConfigs.Add(model);
+                    TempData["SuccessMessage"] = $"Phương thức thanh toán '{model.Name}' đã được thêm thành công!";
+                }
+                else
+                {
+                    // Update existing method
+                    var existing = await _context.PaymentMethodConfigs.FindAsync(model.Id);
+                    if (existing == null)
+                    {
+                        TempData["ErrorMessage"] = "Không tìm thấy phương thức thanh toán";
+                        return RedirectToAction(nameof(PaymentMethods));
+                    }
+
+                    existing.Name = model.Name;
+                    existing.Code = model.Code;
+                    existing.Description = model.Description;
+                    existing.TransactionFeePercent = model.TransactionFeePercent;
+                    existing.TransactionFeeFixed = model.TransactionFeeFixed;
+                    existing.SortOrder = model.SortOrder;
+                    existing.LogoUrl = model.LogoUrl;
+                    existing.IsActive = model.IsActive;
+                    existing.ApiConfiguration = model.ApiConfiguration;
+                    existing.UpdatedAt = DateTime.UtcNow;
+
+                    TempData["SuccessMessage"] = $"Phương thức thanh toán '{model.Name}' đã được cập nhật thành công!";
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(PaymentMethods));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra: {ex.Message}";
+                return RedirectToAction(nameof(PaymentMethods));
+            }
+        }
+
+        [HttpPost("methods/delete/{id}")]
+        public async Task<IActionResult> DeletePaymentMethod(Guid id)
+        {
+            var method = await _context.PaymentMethodConfigs.FindAsync(id);
+            if (method == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy phương thức thanh toán" });
+            }
+
+            try
+            {
+                _context.PaymentMethodConfigs.Remove(method);
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Phương thức thanh toán '{method.Name}' đã được xóa thành công!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Có lỗi xảy ra: {ex.Message}" });
+            }
+        }
+
+        public class ToggleMethodRequest
+        {
+            public string Id { get; set; } = string.Empty;
+        }
+
         #endregion
 
         #region Statistics & Reports

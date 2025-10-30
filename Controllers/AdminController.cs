@@ -1338,7 +1338,43 @@ namespace JohnHenryFashionWeb.Controllers
             return View(reviews);
         }
 
-        [HttpPost("reviews/{id}/approve")]
+        [HttpGet("reviews/details/{id}")]
+        public async Task<IActionResult> GetReviewDetailsJson(Guid id)
+        {
+            var review = await _context.ProductReviews
+                .Include(r => r.Product)
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (review == null)
+                return NotFound();
+
+            var result = new
+            {
+                id = review.Id,
+                rating = review.Rating,
+                comment = review.Comment,
+                isApproved = review.IsApproved,
+                createdAt = review.CreatedAt,
+                images = Array.Empty<string>(), // ProductReview model doesn't have Images property yet
+                product = new
+                {
+                    name = review.Product?.Name,
+                    sku = review.Product?.SKU,
+                    image = review.Product?.FeaturedImageUrl
+                },
+                user = new
+                {
+                    name = $"{review.User?.FirstName} {review.User?.LastName}",
+                    email = review.User?.Email,
+                    phone = review.User?.Phone
+                }
+            };
+
+            return Json(result);
+        }
+
+        [HttpPost("reviews/approve/{id}")]
         public async Task<IActionResult> ApproveReview(Guid id)
         {
             var review = await _context.ProductReviews.FindAsync(id);
@@ -1347,11 +1383,13 @@ namespace JohnHenryFashionWeb.Controllers
                 review.IsApproved = true;
                 review.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Review {ReviewId} approved by admin", id);
             }
-            return RedirectToAction("Reviews");
+            return Ok(new { success = true });
         }
 
-        [HttpPost("reviews/{id}/delete")]
+        [HttpPost("reviews/delete/{id}")]
         public async Task<IActionResult> DeleteReview(Guid id)
         {
             var review = await _context.ProductReviews.FindAsync(id);
@@ -1359,8 +1397,10 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 _context.ProductReviews.Remove(review);
                 await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Review {ReviewId} deleted by admin", id);
             }
-            return RedirectToAction("Reviews");
+            return Ok(new { success = true });
         }
         #endregion
 
@@ -1381,26 +1421,19 @@ namespace JohnHenryFashionWeb.Controllers
         [HttpGet("coupons/create")]
         public IActionResult CreateCoupon()
         {
-            ViewData["CurrentSection"] = "coupons";
-            ViewData["Title"] = "Tạo mã giảm giá";
-            return View();
+            // Redirect to main Coupons page - now using modal form
+            return RedirectToAction("Coupons");
         }
 
         [HttpPost("coupons/create")]
         public async Task<IActionResult> CreateCoupon(Coupon coupon)
         {
+            // Legacy endpoint - redirect to use new API
             if (ModelState.IsValid)
             {
-                coupon.Id = Guid.NewGuid();
-                coupon.CreatedAt = DateTime.UtcNow;
-                coupon.IsActive = true;
-                
-                _context.Coupons.Add(coupon);
-                await _context.SaveChangesAsync();
-                
-                return RedirectToAction("Coupons");
+                return await SaveCoupon(coupon);
             }
-            return View(coupon);
+            return RedirectToAction("Coupons");
         }
 
         [HttpPost("coupons/{id}/toggle")]
@@ -1414,6 +1447,148 @@ namespace JohnHenryFashionWeb.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Coupons");
+        }
+
+        [HttpGet("coupons/get/{id}")]
+        public async Task<IActionResult> GetCoupon(Guid id)
+        {
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy mã giảm giá" });
+            }
+
+            return Json(new
+            {
+                success = true,
+                id = coupon.Id,
+                code = coupon.Code,
+                name = coupon.Name,
+                description = coupon.Description,
+                type = coupon.Type,
+                value = coupon.Value,
+                minOrderAmount = coupon.MinOrderAmount,
+                usageLimit = coupon.UsageLimit,
+                startDate = coupon.StartDate,
+                endDate = coupon.EndDate,
+                isActive = coupon.IsActive
+            });
+        }
+
+        [HttpPost("coupons/save")]
+        public async Task<IActionResult> SaveCoupon([FromBody] Coupon model)
+        {
+            try
+            {
+                if (model.Id == Guid.Empty)
+                {
+                    // Create new coupon
+                    // Check if code already exists
+                    var existingCoupon = await _context.Coupons
+                        .FirstOrDefaultAsync(c => c.Code == model.Code);
+                    
+                    if (existingCoupon != null)
+                    {
+                        return Json(new { success = false, message = "Mã giảm giá đã tồn tại" });
+                    }
+
+                    model.Id = Guid.NewGuid();
+                    model.CreatedAt = DateTime.UtcNow;
+                    model.UsageCount = 0;
+                    
+                    _context.Coupons.Add(model);
+                }
+                else
+                {
+                    // Update existing coupon
+                    var coupon = await _context.Coupons.FindAsync(model.Id);
+                    if (coupon == null)
+                    {
+                        return Json(new { success = false, message = "Không tìm thấy mã giảm giá" });
+                    }
+
+                    coupon.Name = model.Name;
+                    coupon.Description = model.Description;
+                    coupon.Type = model.Type;
+                    coupon.Value = model.Value;
+                    coupon.MinOrderAmount = model.MinOrderAmount;
+                    coupon.UsageLimit = model.UsageLimit;
+                    coupon.StartDate = model.StartDate;
+                    coupon.EndDate = model.EndDate;
+                    coupon.IsActive = model.IsActive;
+                    coupon.UpdatedAt = DateTime.UtcNow;
+                }
+
+                await _context.SaveChangesAsync();
+                
+                return Json(new
+                {
+                    success = true,
+                    message = model.Id == Guid.Empty ? "Tạo mã giảm giá thành công" : "Cập nhật mã giảm giá thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving coupon");
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost("coupons/toggle/{id}")]
+        public async Task<IActionResult> ToggleCouponStatus(Guid id)
+        {
+            try
+            {
+                var coupon = await _context.Coupons.FindAsync(id);
+                if (coupon == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy mã giảm giá" });
+                }
+
+                coupon.IsActive = !coupon.IsActive;
+                coupon.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = coupon.IsActive ? "Đã kích hoạt mã giảm giá" : "Đã tạm dừng mã giảm giá"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling coupon");
+                return Json(new { success = false, message = "Có lỗi xảy ra" });
+            }
+        }
+
+        [HttpPost("coupons/delete/{id}")]
+        public async Task<IActionResult> DeleteCoupon(Guid id)
+        {
+            try
+            {
+                var coupon = await _context.Coupons.FindAsync(id);
+                if (coupon == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy mã giảm giá" });
+                }
+
+                // Check if coupon has been used
+                if (coupon.UsageCount > 0)
+                {
+                    return Json(new { success = false, message = "Không thể xóa mã đã được sử dụng. Vui lòng tạm dừng thay vì xóa." });
+                }
+
+                _context.Coupons.Remove(coupon);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã xóa mã giảm giá thành công" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting coupon");
+                return Json(new { success = false, message = "Có lỗi xảy ra" });
+            }
         }
         #endregion
 

@@ -185,5 +185,89 @@ namespace JohnHenryFashionWeb.Controllers
 
             return View(order);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Notifications(int page = 1)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            const int pageSize = 20;
+            var totalNotifications = await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .CountAsync();
+
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var viewModel = new UserNotificationsViewModel
+            {
+                Notifications = notifications,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalNotifications = totalNotifications,
+                TotalPages = (int)Math.Ceiling(totalNotifications / (double)pageSize)
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkNotificationAsRead([FromBody] int notificationId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var notification = await _context.Notifications
+                .Where(n => n.Id == notificationId && n.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            if (notification == null)
+            {
+                return Json(new { success = false, message = "Notification not found" });
+            }
+
+            notification.IsRead = true;
+            notification.ReadAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAllNotificationsAsRead()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var unreadNotifications = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+                notification.ReadAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
     }
 }

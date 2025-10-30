@@ -100,19 +100,34 @@ namespace JohnHenryFashionWeb.Controllers
                 try
                 {
                     selectedIds = System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(selectedJson) ?? new List<Guid>();
+                    _logger.LogInformation("Checkout Index: Found {Count} selected items in session", selectedIds.Count);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Error deserializing SelectedCartItems in Index");
                     selectedIds = new List<Guid>();
                 }
             }
             else
             {
-                // If no selection, take all items
+                // If no selection in session, take all cart items as fallback
                 selectedIds = await _context.ShoppingCartItems
                     .Where(c => c.UserId == userId)
                     .Select(c => c.Id)
                     .ToListAsync();
+                
+                if (selectedIds.Any())
+                {
+                    _logger.LogInformation("Checkout Index: No selection in session, using all {Count} cart items", selectedIds.Count);
+                    
+                    // Save to session for consistency
+                    HttpContext.Session.SetString("SelectedCartItems", 
+                        System.Text.Json.JsonSerializer.Serialize(selectedIds));
+                }
+                else
+                {
+                    _logger.LogWarning("Checkout Index: No cart items found for user {UserId}", userId);
+                }
             }
 
             // Get only selected items from cart
@@ -124,9 +139,12 @@ namespace JohnHenryFashionWeb.Controllers
 
             if (!cartItems.Any())
             {
-                TempData["ErrorMessage"] = "Vui lòng chọn sản phẩm để thanh toán.";
+                _logger.LogWarning("Checkout Index: No cart items to display for user {UserId}", userId);
+                TempData["ErrorMessage"] = "Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng.";
                 return RedirectToAction("Index", "Cart");
             }
+
+            _logger.LogInformation("Checkout Index: Displaying {Count} cart items for user {UserId}", cartItems.Count, userId);
 
             var checkoutModel = await CreateCheckoutViewModelAsync(userId, cartItems.Select(c => new CartItemViewModel
             {
@@ -153,21 +171,116 @@ namespace JohnHenryFashionWeb.Controllers
                 // Validate model
                 if (!ModelState.IsValid)
                 {
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                    var errors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .Select(x => new 
+                        { 
+                            Field = x.Key, 
+                            Errors = x.Value?.Errors.Select(e => e.ErrorMessage ?? "").Where(m => !string.IsNullOrEmpty(m)).ToList() ?? new List<string>()
+                        })
+                        .Where(x => x.Errors.Any())
+                        .ToList();
+                    
+                    _logger.LogWarning("CreateSession ModelState invalid for user {UserId}. Errors: {Errors}", 
+                        userId ?? "anonymous", 
+                        System.Text.Json.JsonSerializer.Serialize(errors));
+                    
+                    // Get unique error messages
+                    var uniqueErrors = errors
+                        .SelectMany(e => e.Errors)
+                        .Distinct()
+                        .Take(5) // Limit to first 5 unique errors
+                        .ToList();
+                    
+                    var errorMessage = uniqueErrors.Any() 
+                        ? string.Join("; ", uniqueErrors)
+                        : "Vui lòng điền đầy đủ thông tin bắt buộc";
+                    
+                    // Log detailed field errors for debugging
+                    foreach (var error in errors)
+                    {
+                        _logger.LogWarning("Field '{Field}' has errors: {Errors}", error.Field, string.Join(", ", error.Errors));
+                    }
+                    
+                    return Json(new { success = false, message = errorMessage, fieldErrors = errors });
+                }
+                
+                // Validate shipping address
+                if (model.ShippingAddress == null)
+                {
+                    _logger.LogWarning("CreateSession: ShippingAddress is null for user {UserId}", userId ?? "anonymous");
+                    return Json(new { success = false, message = "Thông tin địa chỉ giao hàng không hợp lệ" });
+                }
+                
+                // Check required fields in shipping address
+                if (string.IsNullOrWhiteSpace(model.ShippingAddress.FullName) ||
+                    string.IsNullOrWhiteSpace(model.ShippingAddress.PhoneNumber) ||
+                    string.IsNullOrWhiteSpace(model.ShippingAddress.Address) ||
+                    string.IsNullOrWhiteSpace(model.ShippingAddress.Ward) ||
+                    string.IsNullOrWhiteSpace(model.ShippingAddress.District) ||
+                    string.IsNullOrWhiteSpace(model.ShippingAddress.City))
+                {
+                    _logger.LogWarning("CreateSession: Missing required shipping address fields for user {UserId}", userId ?? "anonymous");
+                    return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin địa chỉ giao hàng (Họ tên, Số điện thoại, Địa chỉ, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố)" });
                 }
 
-                // Get cart items
+                // Get cart items (consistent with Index action)
                 List<CartItemViewModel> cartItems;
                 if (string.IsNullOrEmpty(userId))
                 {
+                    // Anonymous user - get from session
                     cartItems = GetCartFromSession() ?? new List<CartItemViewModel>();
+                    _logger.LogInformation("Anonymous user - Cart from session: {Count} items", cartItems.Count);
                 }
                 else
                 {
+                    // Authenticated user - get selected items from database
+                    var selectedJson = HttpContext.Session.GetString("SelectedCartItems");
+                    List<Guid> selectedIds;
+                    
+                    if (!string.IsNullOrEmpty(selectedJson))
+                    {
+                        try
+                        {
+                            selectedIds = System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(selectedJson) ?? new List<Guid>();
+                            _logger.LogInformation("Found SelectedCartItems in session: {Count} items", selectedIds.Count);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error deserializing SelectedCartItems");
+                            selectedIds = new List<Guid>();
+                        }
+                    }
+                    else
+                    {
+                        // If no selection in session, take all cart items as fallback
+                        selectedIds = await _context.ShoppingCartItems
+                            .Where(c => c.UserId == userId)
+                            .Select(c => c.Id)
+                            .ToListAsync();
+                        
+                        if (selectedIds.Any())
+                        {
+                            _logger.LogInformation("No SelectedCartItems in session, using all cart items as fallback: {Count}", selectedIds.Count);
+                            
+                            // Save to session for consistency
+                            HttpContext.Session.SetString("SelectedCartItems", 
+                                System.Text.Json.JsonSerializer.Serialize(selectedIds));
+                        }
+                    }
+
+                    if (!selectedIds.Any())
+                    {
+                        _logger.LogWarning("No cart items found in database for user {UserId}", userId);
+                        return Json(new { success = false, message = "Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng." });
+                    }
+
                     var dbCartItems = await _context.ShoppingCartItems
                         .Include(c => c.Product)
-                        .Where(c => c.UserId == userId)
+                        .Where(c => c.UserId == userId && selectedIds.Contains(c.Id))
                         .ToListAsync();
+
+                    _logger.LogInformation("Retrieved cart items from DB: {Count} items for user {UserId}", dbCartItems.Count, userId);
 
                     cartItems = dbCartItems.Select(c => new CartItemViewModel
                     {
@@ -183,7 +296,8 @@ namespace JohnHenryFashionWeb.Controllers
 
                 if (!cartItems.Any())
                 {
-                    return Json(new { success = false, message = "Giỏ hàng trống" });
+                    _logger.LogWarning("CreateSession called with empty cart for user {UserId}", userId ?? "anonymous");
+                    return Json(new { success = false, message = "Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng." });
                 }
 
                 // Calculate totals
@@ -572,27 +686,27 @@ namespace JohnHenryFashionWeb.Controllers
             if (string.IsNullOrEmpty(couponCode))
                 return 0;
 
-            var promotion = await _context.Promotions
-                .FirstOrDefaultAsync(p => p.Code == couponCode && 
-                                        p.IsActive && 
-                                        (p.StartDate == null || p.StartDate <= DateTime.UtcNow) &&
-                                        (p.EndDate == null || p.EndDate >= DateTime.UtcNow) &&
-                                        (p.UsageLimit == null || p.UsageCount < p.UsageLimit) &&
-                                        (p.MinOrderAmount == null || subtotal >= p.MinOrderAmount));
+            // Sử dụng bảng Coupons thay vì Promotions để tích hợp với trang Admin/Coupons
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Code.ToUpper() == couponCode.ToUpper() && 
+                                        c.IsActive && 
+                                        (c.StartDate == null || c.StartDate <= DateTime.UtcNow) &&
+                                        (c.EndDate == null || c.EndDate >= DateTime.UtcNow) &&
+                                        (c.UsageLimit == null || c.UsageCount < c.UsageLimit) &&
+                                        (c.MinOrderAmount == null || subtotal >= c.MinOrderAmount));
 
-            if (promotion == null)
+            if (coupon == null)
                 return 0;
 
-            var discount = promotion.Type switch
+            var discount = coupon.Type switch
             {
-                "percentage" => subtotal * (promotion.Value / 100),
-                "fixed_amount" => promotion.Value,
+                "percentage" => subtotal * (coupon.Value / 100),
+                "fixed_amount" => coupon.Value,
                 _ => 0
             };
 
-            // Apply maximum discount limit
-            if (promotion.MaxDiscountAmount.HasValue && discount > promotion.MaxDiscountAmount.Value)
-                discount = promotion.MaxDiscountAmount.Value;
+            // Note: Coupon model có MaxDiscountAmount nhưng là NotMapped, nên không áp dụng limit
+            // Nếu cần giới hạn giảm giá tối đa, có thể thêm vào database schema sau
 
             return discount;
         }
@@ -683,6 +797,37 @@ namespace JohnHenryFashionWeb.Controllers
             };
 
             _context.OrderStatusHistories.Add(statusHistory);
+
+            // Tăng UsageCount của coupon nếu có sử dụng
+            if (!string.IsNullOrEmpty(order.CouponCode))
+            {
+                var coupon = await _context.Coupons
+                    .FirstOrDefaultAsync(c => c.Code.ToUpper() == order.CouponCode.ToUpper());
+                
+                if (coupon != null)
+                {
+                    coupon.UsageCount++;
+                    coupon.UpdatedAt = DateTime.UtcNow;
+                    
+                    // Tạo bản ghi lịch sử sử dụng coupon
+                    if (!string.IsNullOrEmpty(order.UserId))
+                    {
+                        var couponUsage = new CouponUsage
+                        {
+                            Id = Guid.NewGuid(),
+                            CouponId = coupon.Id,
+                            UserId = order.UserId,
+                            OrderId = order.Id,
+                            DiscountAmount = order.DiscountAmount,
+                            UsedAt = DateTime.UtcNow
+                        };
+                        _context.CouponUsages.Add(couponUsage);
+                    }
+                    
+                    _logger.LogInformation($"Coupon {order.CouponCode} used. Count: {coupon.UsageCount}");
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             // Send confirmation email
