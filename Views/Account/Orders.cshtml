@@ -351,8 +351,8 @@
             if (!toastContainer) {
                 toastContainer = document.createElement('div');
                 toastContainer.id = 'toast-container';
-                toastContainer.className = 'position-fixed top-0 end-0 p-3';
-                toastContainer.style.zIndex = '1055';
+                toastContainer.className = 'position-fixed p-3';
+                toastContainer.style.cssText = 'top: 10px; right: 20px; z-index: 99999; max-width: 450px;';
                 document.body.appendChild(toastContainer);
             }
             
@@ -361,10 +361,11 @@
             toast.id = toastId;
             toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} border-0`;
             toast.setAttribute('role', 'alert');
+            toast.style.cssText = 'word-wrap: break-word; white-space: normal; max-width: 100%;';
             
             toast.innerHTML = `
                 <div class="d-flex">
-                    <div class="toast-body">${message}</div>
+                    <div class="toast-body" style="word-wrap: break-word; white-space: normal; overflow-wrap: break-word;">${message}</div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             `;

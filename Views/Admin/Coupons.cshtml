@@ -4,6 +4,16 @@
     ViewData["CurrentSection"] = "Coupons";
     ViewData["PageIcon"] = "ticket";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item\"><a href=\"/admin\">Trang chủ</a></li><li class=\"breadcrumb-item\">Marketing</li><li class=\"breadcrumb-item active\">Mã giảm giá</li>";
+    
+    var totalCount = Model.Count();
+    var activeCount = Model.Count(c => c.IsActive && (!c.EndDate.HasValue || c.EndDate >= DateTime.Now) && (!c.UsageLimit.HasValue || c.UsageCount < c.UsageLimit));
+    var expiredCount = Model.Count(c => c.EndDate.HasValue && c.EndDate < DateTime.Now);
+    var inactiveCount = Model.Count(c => !c.IsActive);
+    var usedUpCount = Model.Count(c => c.UsageLimit.HasValue && c.UsageCount >= c.UsageLimit);
+    
+    var activePercentage = totalCount > 0 ? (activeCount * 100.0 / totalCount) : 0;
+    var expiredPercentage = totalCount > 0 ? (expiredCount * 100.0 / totalCount) : 0;
 }
 
 <div class="admin-content">
@@ -16,153 +26,550 @@
             </h1>
         
             <div class="admin-page-header-actions">
-                <a href="@Url.Action("CreateCoupon", "Admin")" class="admin-btn admin-btn-primary">
+                <button type="button" class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#couponModal" onclick="openCouponModal()">
                     <i data-lucide="plus"></i>
                     Tạo mã mới
-                </a>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Content -->
-    <div class="admin-card">
-        <div class="admin-card-header">
-            <h5 class="admin-card-title">Danh sách mã giảm giá</h5>
-        </div>
-        <div class="admin-card-body">
-            @if (Model.Any())
-            {
-                <div class="admin-table-responsive">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Mã</th>
-                                <th>Tên</th>
-                                <th>Loại</th>
-                                <th>Giá trị</th>
-                                <th>Ngày bắt đầu</th>
-                                <th>Ngày kết thúc</th>
-                                <th>Số lần sử dụng</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var coupon in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        <code class="admin-code">@coupon.Code</code>
-                                    </td>
-                                    <td>@coupon.Name</td>
-                                    <td>
-                                        @if (coupon.Type == "percentage")
-                                        {
-                                            <span class="admin-badge admin-badge-info">Phần trăm</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="admin-badge admin-badge-success">Số tiền</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (coupon.Type == "percentage")
-                                        {
-                                            <strong>@coupon.Value%</strong>
-                                        }
-                                        else
-                                        {
-                                            <strong>@coupon.Value.ToString("N0") VNĐ</strong>
-                                        }
-                                    </td>
-                                    <td>@coupon.StartDate?.ToString("dd/MM/yyyy")</td>
-                                    <td>@coupon.EndDate?.ToString("dd/MM/yyyy")</td>
-                                    <td>
-                                        <span>@coupon.UsageCount/@(coupon.UsageLimit?.ToString() ?? "∞")</span>
-                                    </td>
-                                    <td>
-                                        @if (coupon.IsActive)
-                                        {
-                                            @if (coupon.EndDate.HasValue && coupon.EndDate < DateTime.Now)
-                                            {
-                                                <span class="admin-badge admin-badge-secondary">Hết hạn</span>
-                                            }
-                                            else if (coupon.UsageLimit.HasValue && coupon.UsageCount >= coupon.UsageLimit)
-                                            {
-                                                <span class="admin-badge admin-badge-warning">Hết lượt</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="admin-badge admin-badge-success">Hoạt động</span>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="admin-badge admin-badge-danger">Tạm dừng</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div class="admin-action-buttons">
-                                            <form asp-action="ToggleCoupon" asp-route-id="@coupon.Id" method="post" class="d-inline">
-                                                <button type="submit" class="admin-btn admin-btn-sm @(coupon.IsActive ? "admin-btn-warning" : "admin-btn-success")" 
-                                                        title="@(coupon.IsActive ? "Tạm dừng" : "Kích hoạt")">
-                                                    <i data-lucide="@(coupon.IsActive ? "pause" : "play")"></i>
-                                                </button>
-                                            </form>
-                                            <button type="button" class="admin-btn admin-btn-sm admin-btn-secondary" 
-                                                    onclick="copyToClipboard('@coupon.Code')" title="Copy mã">
-                                                <i data-lucide="copy"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng số mã</h3>
+                    <p class="value">@totalCount</p>
+                    <p class="change">Tất cả mã giảm giá</p>
                 </div>
-            }
-            else
-            {
-                <div class="admin-empty-state">
-                    <i data-lucide="ticket" style="width: 64px; height: 64px;"></i>
-                    <h5>Chưa có mã giảm giá nào</h5>
-                    <p>Tạo mã giảm giá đầu tiên để khuyến khích khách hàng mua sắm</p>
-                    <a href="@Url.Action("CreateCoupon", "Admin")" class="admin-btn admin-btn-primary">
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="ticket"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang hoạt động</h3>
+                    <p class="value">@activeCount</p>
+                    <p class="change">@activePercentage.ToString("F1")% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đã hết hạn</h3>
+                    <p class="value">@expiredCount</p>
+                    <p class="change">@expiredPercentage.ToString("F1")% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="calendar-x"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tạm dừng</h3>
+                    <p class="value">@inactiveCount</p>
+                    <p class="change">Không hoạt động</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="pause-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="admin-filters">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-10">
+                <label class="admin-form-label">Tìm kiếm</label>
+                <div class="admin-search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" class="admin-form-input" placeholder="Tìm kiếm mã giảm giá..." onkeyup="searchCoupons()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs">
+        <button class="admin-filter-tab active" onclick="filterByStatus('all')">
+            <i data-lucide="ticket" style="width: 16px; height: 16px;"></i>
+            Tất cả (@totalCount)
+        </button>
+        <button class="admin-filter-tab" onclick="filterByStatus('active')">
+            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+            Hoạt động (@activeCount)
+        </button>
+        <button class="admin-filter-tab" onclick="filterByStatus('expired')">
+            <i data-lucide="calendar-x" style="width: 16px; height: 16px;"></i>
+            Hết hạn (@expiredCount)
+        </button>
+        <button class="admin-filter-tab" onclick="filterByStatus('inactive')">
+            <i data-lucide="pause-circle" style="width: 16px; height: 16px;"></i>
+            Tạm dừng (@inactiveCount)
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="admin-table-wrapper">
+
+        @if (Model.Any())
+        {
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;"></th>
+                        <th>Mã & Tên</th>
+                        <th>Loại</th>
+                        <th>Giá trị</th>
+                        <th>Đơn tối thiểu</th>
+                        <th>Thời hạn</th>
+                        <th>Lượt dùng</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 160px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="couponTableBody">
+                    @foreach (var coupon in Model)
+                    {
+                        var isExpired = coupon.EndDate.HasValue && coupon.EndDate < DateTime.Now;
+                        var isUsedUp = coupon.UsageLimit.HasValue && coupon.UsageCount >= coupon.UsageLimit;
+                        var isActive = coupon.IsActive && !isExpired && !isUsedUp;
+                        
+                        <tr data-coupon-name="@coupon.Name.ToLower()" data-coupon-code="@coupon.Code.ToLower()">
+                            <td>
+                                <div style="width: 40px; height: 40px; background: @GetCouponColor(coupon.Type); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--admin-border);">
+                                    <i data-lucide="@GetCouponIcon(coupon.Type)" style="width: 18px; height: 18px; color: white;"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="margin-bottom: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                        <code style="background: var(--admin-bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; font-weight: 600; color: var(--admin-primary);">@coupon.Code</code>
+                                        <button type="button" class="admin-btn admin-btn-sm admin-btn-secondary" 
+                                                onclick="copyToClipboard('@coupon.Code')" title="Copy mã" style="padding: 0.25rem 0.5rem;">
+                                            <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
+                                        </button>
+                                    </div>
+                                    <div style="font-weight: 500; color: var(--admin-text);">@coupon.Name</div>
+                                    @if (!string.IsNullOrEmpty(coupon.Description))
+                                    {
+                                        <div style="font-size: 0.8125rem; color: var(--admin-text-light);" title="@coupon.Description">
+                                            @(coupon.Description.Length > 40 ? coupon.Description.Substring(0, 40) + "..." : coupon.Description)
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                @if (coupon.Type == "percentage")
+                                {
+                                    <span class="admin-badge admin-badge-info">
+                                        <i data-lucide="percent" style="width: 12px; height: 12px;"></i>
+                                        Phần trăm
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="banknote" style="width: 12px; height: 12px;"></i>
+                                        Số tiền
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <strong style="color: var(--admin-text);">
+                                    @if (coupon.Type == "percentage")
+                                    {
+                                        @coupon.Value<text>%</text>
+                                    }
+                                    else
+                                    {
+                                        @coupon.Value.ToString("N0")<text> ₫</text>
+                                    }
+                                </strong>
+                            </td>
+                            <td>
+                                @if (coupon.MinOrderAmount.HasValue && coupon.MinOrderAmount > 0)
+                                {
+                                    <span style="font-size: 0.875rem;">@coupon.MinOrderAmount.Value.ToString("N0") ₫</span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--admin-text-light); font-size: 0.875rem;">Không</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                    @if (coupon.StartDate.HasValue)
+                                    {
+                                        <div style="font-size: 0.8125rem; display: flex; align-items: center; gap: 0.25rem;">
+                                            <i data-lucide="calendar" style="width: 12px; height: 12px;"></i>
+                                            @coupon.StartDate.Value.ToString("dd/MM/yyyy")
+                                        </div>
+                                    }
+                                    @if (coupon.EndDate.HasValue)
+                                    {
+                                        <div style="font-size: 0.8125rem; display: flex; align-items: center; gap: 0.25rem; color: @(isExpired ? "var(--admin-danger)" : "var(--admin-text)");">
+                                            <i data-lucide="calendar-x" style="width: 12px; height: 12px;"></i>
+                                            @coupon.EndDate.Value.ToString("dd/MM/yyyy")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <small style="color: var(--admin-text-light);">Không giới hạn</small>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 0.875rem;">@coupon.UsageCount/@(coupon.UsageLimit?.ToString() ?? "∞")</span>
+                                    @if (coupon.UsageLimit.HasValue)
+                                    {
+                                        var usagePercent = (coupon.UsageCount * 100.0 / coupon.UsageLimit.Value);
+                                        <div style="width: 60px; height: 6px; background: var(--admin-bg-secondary); border-radius: 3px; overflow: hidden;">
+                                            <div style="width: @usagePercent%; height: 100%; background: @(usagePercent >= 90 ? "var(--admin-danger)" : usagePercent >= 70 ? "var(--admin-warning)" : "var(--admin-success)"); transition: width 0.3s ease;"></div>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                @if (isActive)
+                                {
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                        Hoạt động
+                                    </span>
+                                }
+                                else if (isExpired)
+                                {
+                                    <span class="admin-badge admin-badge-secondary">
+                                        <i data-lucide="calendar-x" style="width: 12px; height: 12px;"></i>
+                                        Hết hạn
+                                    </span>
+                                }
+                                else if (isUsedUp)
+                                {
+                                    <span class="admin-badge admin-badge-warning">
+                                        <i data-lucide="users" style="width: 12px; height: 12px;"></i>
+                                        Hết lượt
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-danger">
+                                        <i data-lucide="pause-circle" style="width: 12px; height: 12px;"></i>
+                                        Tạm dừng
+                                    </span>
+                                }
+                            </td>
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button type="button" class="admin-btn admin-btn-sm admin-btn-secondary" 
+                                            onclick="editCoupon('@coupon.Id')" title="Chỉnh sửa">
+                                        <i data-lucide="edit"></i>
+                                    </button>
+                                    <button type="button" class="admin-btn admin-btn-sm @(coupon.IsActive ? "admin-btn-warning" : "admin-btn-success")" 
+                                            onclick="toggleCoupon('@coupon.Id', @coupon.IsActive.ToString().ToLower())"
+                                            title="@(coupon.IsActive ? "Tạm dừng" : "Kích hoạt")">
+                                        <i data-lucide="@(coupon.IsActive ? "pause" : "play")"></i>
+                                    </button>
+                                    <button type="button" class="admin-btn admin-btn-sm admin-btn-danger" 
+                                            onclick="deleteCoupon('@coupon.Id', '@coupon.Code')" title="Xóa">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="admin-card">
+                <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                    <i data-lucide="ticket" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                    <h3 style="margin-bottom: 0.5rem;">Chưa có mã giảm giá nào</h3>
+                    <p style="color: var(--admin-text-light); margin-bottom: 1.5rem;">Tạo mã giảm giá đầu tiên để khuyến khích khách hàng mua sắm</p>
+                    <button type="button" class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#couponModal" onclick="openCouponModal()">
                         <i data-lucide="plus"></i>
                         Tạo mã giảm giá
-                    </a>
+                    </button>
                 </div>
-            }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Coupon Modal -->
+<div class="modal fade" id="couponModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i data-lucide="ticket" style="width: 20px; height: 20px;"></i>
+                    <span id="modalTitle">Tạo mã giảm giá mới</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="couponForm">
+                    <input type="hidden" id="couponId" name="Id" value="">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="couponCode" class="admin-form-label">
+                                    Mã giảm giá <span style="color: var(--status-danger);">*</span>
+                                </label>
+                                <input type="text" class="admin-form-input" id="couponCode" name="Code" 
+                                       placeholder="VD: SUMMER2024" required pattern="[A-Z0-9]+" 
+                                       style="text-transform: uppercase;">
+                                <small class="admin-form-help">Chỉ chữ HOA và số, không có khoảng trắng</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="couponName" class="admin-form-label">
+                                    Tên mã <span style="color: var(--status-danger);">*</span>
+                                </label>
+                                <input type="text" class="admin-form-input" id="couponName" name="Name" 
+                                       placeholder="VD: Giảm giá mùa hè" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="couponDescription" class="admin-form-label">Mô tả</label>
+                        <textarea class="admin-form-textarea" id="couponDescription" name="Description" 
+                                  rows="2" placeholder="Mô tả chi tiết về mã giảm giá..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="couponType" class="admin-form-label">
+                                    Loại giảm giá <span style="color: var(--status-danger);">*</span>
+                                </label>
+                                <select class="admin-form-select" id="couponType" name="Type" required onchange="updateValueLabel()">
+                                    <option value="percentage">Phần trăm (%)</option>
+                                    <option value="fixed_amount">Số tiền cố định (₫)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="couponValue" class="admin-form-label">
+                                    <span id="valueLabel">Giá trị (%)</span> <span style="color: var(--status-danger);">*</span>
+                                </label>
+                                <input type="number" class="admin-form-input" id="couponValue" name="Value" 
+                                       min="0" step="0.01" required placeholder="VD: 10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="minOrderAmount" class="admin-form-label">Đơn hàng tối thiểu (₫)</label>
+                                <input type="number" class="admin-form-input" id="minOrderAmount" name="MinOrderAmount" 
+                                       min="0" step="1000" placeholder="VD: 100000">
+                                <small class="admin-form-help">Để trống nếu không giới hạn</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="usageLimit" class="admin-form-label">Giới hạn số lần dùng</label>
+                                <input type="number" class="admin-form-input" id="usageLimit" name="UsageLimit" 
+                                       min="1" placeholder="VD: 100">
+                                <small class="admin-form-help">Để trống nếu không giới hạn</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="startDate" class="admin-form-label">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="admin-form-input" id="startDate" name="StartDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="endDate" class="admin-form-label">Ngày kết thúc</label>
+                                <input type="datetime-local" class="admin-form-input" id="endDate" name="EndDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" checked>
+                            <label class="form-check-label" for="isActive">
+                                Kích hoạt ngay
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                    Hủy
+                </button>
+                <button type="submit" form="couponForm" class="admin-btn admin-btn-primary">
+                    <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                    <span id="submitBtnText">Tạo mã giảm giá</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        // Initialize Lucide icons
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Status Filter
+    function filterByStatus(status) {
+        const tabs = document.querySelectorAll('.admin-filter-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.target.closest('.admin-filter-tab').classList.add('active');
+
+        const rows = document.querySelectorAll('#couponTableBody tr');
+        rows.forEach(row => {
+            const badge = row.querySelector('.admin-badge');
+            const badgeText = badge ? badge.textContent.trim() : '';
+            
+            if (status === 'all') {
+                row.style.display = '';
+            } else if (status === 'active' && badgeText.includes('Hoạt động')) {
+                row.style.display = '';
+            } else if (status === 'expired' && badgeText.includes('Hết hạn')) {
+                row.style.display = '';
+            } else if (status === 'inactive' && (badgeText.includes('Tạm dừng') || badgeText.includes('Hết lượt'))) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
             }
         });
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(function() {
-                // Show success message
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Đã copy!',
-                        text: `Mã "${text}" đã được copy vào clipboard`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                } else {
-                    alert(`Mã "${text}" đã được copy!`);
-                }
-            }, function(err) {
-                console.error('Could not copy text: ', err);
-            });
+        // Reinitialize icons after filter
+        lucide.createIcons();
+    }
+
+    // Search Coupons
+    function searchCoupons() {
+        const filter = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#couponTableBody tr');
+        
+        for (let i = 0; i < rows.length; i++) {
+            const name = rows[i].getAttribute('data-coupon-name') || '';
+            const code = rows[i].getAttribute('data-coupon-code') || '';
+            
+            if (name.includes(filter) || code.includes(filter)) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
         }
-    </script>
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã copy!',
+                    text: `Mã "${text}" đã được copy vào clipboard`,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                alert(`Mã "${text}" đã được copy!`);
+            }
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    // Open modal for new coupon
+    function openCouponModal() {
+        document.getElementById('modalTitle').textContent = 'Tạo mã giảm giá mới';
+        document.getElementById('couponForm').reset();
+        document.getElementById('couponId').value = '';
+        updateValueLabel();
+        lucide.createIcons();
+    }
+
+    // Edit coupon
+    function editCoupon(id) {
+        // TODO: Load coupon data and show modal
+        console.log('Edit coupon:', id);
+    }
+
+    // Toggle coupon status
+    function toggleCoupon(id, isActive) {
+        // TODO: Toggle coupon active status
+        console.log('Toggle coupon:', id, isActive);
+    }
+
+    // Delete coupon
+    function deleteCoupon(id, code) {
+        if (confirm(`Bạn có chắc chắn muốn xóa mã "${code}"?`)) {
+            // TODO: Delete coupon
+            console.log('Delete coupon:', id);
+        }
+    }
+
+    // Update value label based on type
+    function updateValueLabel() {
+        const type = document.getElementById('couponType').value;
+        const labelElement = document.getElementById('valueLabel');
+        const valueInput = document.getElementById('couponValue');
+        
+        if (type === 'percentage') {
+            labelElement.textContent = 'Giá trị (%)';
+            valueInput.placeholder = 'VD: 10';
+            valueInput.max = '100';
+        } else {
+            labelElement.textContent = 'Giá trị (₫)';
+            valueInput.placeholder = 'VD: 50000';
+            valueInput.max = '';
+        }
+    }
+
+    // Auto uppercase coupon code
+    document.getElementById('couponCode')?.addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+</script>
+}
+
+@functions {
+    string GetCouponColor(string type)
+    {
+        return type == "percentage" 
+            ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
+            : "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
+    }
+    
+    string GetCouponIcon(string type)
+    {
+        return type == "percentage" ? "percent" : "banknote";
+    }
 }

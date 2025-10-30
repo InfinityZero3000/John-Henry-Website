@@ -6,14 +6,6 @@
             <a href="@Url.Action("ProductDetail", "Products", new { id = Model.Id })">
                 <img src="@Model.FeaturedImageUrl" alt="@Model.Name" class="product-image">
             </a>
-            <!-- Buy Now Badge -->
-            <div class="buy-now-overlay">
-                <button class="btn btn-danger btn-sm buy-now-btn" 
-                        onclick="buyNowQuick('@Model.SKU', '@Model.Name', this)"
-                        title="Mua ngay">
-                    <i class="fas fa-bolt me-1"></i> MUA NGAY
-                </button>
-            </div>
         </div>
         <div class="product-info">
             <a href="@Url.Action("ProductDetail", "Products", new { id = Model.Id })" style="text-decoration: none; color: inherit;">

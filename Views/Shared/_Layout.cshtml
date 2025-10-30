@@ -78,6 +78,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/john-henry-style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-card-additions.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/z-index-hierarchy.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JohnHenryFashionWeb.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
     
@@ -157,10 +158,19 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 1;
         }
         
         main {
             flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        main * {
+            position: relative;
+            z-index: auto;
         }
         
         /* Top Red Line */
@@ -171,18 +181,21 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1100;
+            z-index: 9995;
         }
         
         /* Main Header */
         .main-header {
-            background: var(--jh-white);
+            background: #FFFFFF;
+            background-color: #FFFFFF !important;
             position: fixed !important;
             top: 40px !important;
             left: 0;
             right: 0;
-            z-index: 1090;
+            z-index: 9995;
             transform: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e9ecef;
         }
         
         .header-content {
@@ -190,6 +203,15 @@
             align-items: center;
             justify-content: space-between;
             height: auto;
+            background: #FFFFFF;
+            position: relative;
+            z-index: inherit;
+        }
+        
+        .main-header .container {
+            background: #FFFFFF;
+            position: relative;
+            z-index: inherit;
         }
         
         .logo-section {
@@ -315,7 +337,7 @@
             border: none;
             padding: 0;
             display: none;
-            z-index: 1200;
+            z-index: 9999;
             opacity: 0;
             transform: translateY(-10px);
             transition: all 0.3s ease;
@@ -408,7 +430,9 @@
         /* Navigation Section trong header */
         .nav-section {
             padding: 2px 0;
-            margin-top: 1px;
+            @* margin-top: 1px; *@
+            position: relative;
+            z-index: inherit;
         }
         
         .nav-menu {
@@ -417,6 +441,8 @@
             margin: 0;
             padding: 0;
             list-style: none;
+            position: relative;
+            z-index: inherit;
         }
         
         .nav-item {
@@ -472,7 +498,7 @@
             border-radius: 0;
             padding: 35px !important;
             display: none !important;
-            z-index: 1000;
+            z-index: 9999;
             opacity: 0;
             transform: translateY(-10px);
             transition: all 0.3s ease;
@@ -555,7 +581,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             padding: 15px;
             display: none !important;
-            z-index: 1001;
+            z-index: 10000;
             opacity: 0;
             transform: translateX(-10px);
             transition: all 0.3s ease;
@@ -956,33 +982,57 @@
         
         /* Footer Bottom */
         .footer-bottom {
-            background: rgba(0,0,0,0.3);
+            background-image: url('/images/footage_line.jpg');
+            background-repeat: repeat-x;
+            background-position: center center;
+            background-size: contain;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 0;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .footer-bottom .container {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
         }
         
         .copyright {
-            color: #cccccc;
-            font-size: 0.9rem;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
         }
         
         .footer-legal {
             display: flex;
             align-items: center;
             gap: 10px;
+            justify-content: flex-end;
         }
         
         .legal-link {
-            color: #cccccc;
+            color: #ffffff;
             text-decoration: none;
             font-size: 0.9rem;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
         
         .legal-link:hover {
             color: var(--jh-red);
+            transform: translateY(-2px);
         }
         
         .separator {
-            color: #666666;
+            color: rgba(255, 255, 255, 0.5);
         }
         
         /* Footer Responsive */
@@ -1007,9 +1057,14 @@
                 justify-content: center;
             }
             
-            .footer-legal {
-                justify-content: center;
-                flex-wrap: wrap;
+            .footer-bottom {
+                min-height: 50px;
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+            
+            .copyright {
+                font-size: 0.8rem;
             }
         }
         
@@ -1042,7 +1097,7 @@
 
                 <!-- Header Icons -->
                 <div class="header-icons">
-                    <a href="store" class="header-icon" title="Cửa hàng gần bạn">
+                    <a href="/Store" class="header-icon" title="Cửa hàng gần bạn">
                         <i data-lucide="map-pin"></i>
                     </a>
                     
@@ -1345,21 +1400,16 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Footer Bottom -->
-            <div class="footer-bottom py-3 border-top border-secondary">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
+        </div>
+        
+        <!-- Footer Bottom with Background Image - Outside Container -->
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-auto text-center">
                         <p class="copyright mb-0">
-                            &copy; 2025 JOHN HENRY - Infinity Zero 3000.
+                            &copy; 2025 JOHN HENRY - Infinity Zero 3000
                         </p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <div class="footer-legal">
-                            <a href="#" class="legal-link">Điều Khoản Sử Dụng</a>
-                            <span class="separator">|</span>
-                            <a href="#" class="legal-link">Chính Sách Bảo Mật</a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1482,15 +1532,15 @@
             
             fetch('/Cart/GetSidebarData')
                 .then(response => {
-                    console.log('📦 Cart sidebar response status:', response.status);
+                    console.log('Cart sidebar response status:', response.status);
                     return response.text();
                 })
                 .then(html => {
-                    console.log('📄 Cart sidebar HTML loaded, length:', html.length);
+                    console.log('Cart sidebar HTML loaded, length:', html.length);
                     
                     const container = document.getElementById('cart-sidebar-container');
                     if (!container) {
-                        console.error('❌ cart-sidebar-container not found!');
+                        console.error('cart-sidebar-container not found!');
                         return;
                     }
                     
@@ -1500,7 +1550,62 @@
                     const overlay = document.getElementById('cart-sidebar-overlay');
                     
                     if (!sidebar) {
-                        console.error('❌ cart-sidebar not found after loading HTML!');
+                        console.error('cart-sidebar not found after loading HTML!');
+                        return;
+                    }
+                    
+                    if (!overlay) {
+                        console.error('cart-sidebar-overlay not found!');
+                        return;
+                    }
+                    
+                    console.log('Opening cart sidebar...');
+                    sidebar.classList.add('open');
+                    overlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Re-initialize lucide icons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                        console.log('Lucide icons initialized');
+                    }
+                    
+                    // Bind cart sidebar events
+                    bindCartSidebarEvents();
+                    console.log('Cart sidebar opened successfully');
+                })
+                .catch(error => {
+                    console.error('Error loading cart sidebar:', error);
+                });
+        }
+        
+        // New function to reload cart sidebar data and then open it
+        function loadAndOpenCartSidebar() {
+            console.log('🛒 loadAndOpenCartSidebar called - fetching latest cart data...');
+            
+            fetch('/Cart/GetSidebarData')
+                .then(response => {
+                    console.log('📦 Cart sidebar response status:', response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('📦 Cart sidebar HTML loaded, length:', html.length);
+                    
+                    const container = document.getElementById('cart-sidebar-container');
+                    if (!container) {
+                        console.error('❌ cart-sidebar-container not found!');
+                        return;
+                    }
+                    
+                    // Replace the entire cart sidebar HTML with fresh data
+                    container.innerHTML = html;
+                    console.log('✅ Cart sidebar HTML replaced with fresh data');
+                    
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const overlay = document.getElementById('cart-sidebar-overlay');
+                    
+                    if (!sidebar) {
+                        console.error('❌ cart-sidebar element not found after loading HTML!');
                         return;
                     }
                     
@@ -1509,28 +1614,31 @@
                         return;
                     }
                     
-                    console.log('✅ Opening cart sidebar...');
+                    // Open the sidebar
+                    console.log('🎉 Opening cart sidebar with fresh data...');
                     sidebar.classList.add('open');
                     overlay.classList.add('show');
                     document.body.style.overflow = 'hidden';
                     
-                    // Re-initialize lucide icons
+                    // Re-initialize lucide icons for the new content
                     if (typeof lucide !== 'undefined') {
                         lucide.createIcons();
-                        console.log('✨ Lucide icons initialized');
+                        console.log('✅ Lucide icons re-initialized');
                     }
                     
-                    // Bind cart sidebar events
+                    // Bind cart sidebar events (quantity controls, remove buttons, etc.)
                     bindCartSidebarEvents();
-                    console.log('✅ Cart sidebar opened successfully');
+                    console.log('✅ Cart sidebar events bound');
+                    console.log('🎊 Cart sidebar successfully opened with latest data!');
                 })
                 .catch(error => {
-                    console.error('💥 Error loading cart sidebar:', error);
+                    console.error('❌ Error loading cart sidebar:', error);
+                    showNotification('Không thể tải giỏ hàng. Vui lòng thử lại.', 'error');
                 });
         }
         
         function closeCartSidebar() {
-            console.log('❌ Closing cart sidebar...');
+            console.log('Closing cart sidebar...');
             const sidebar = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-sidebar-overlay');
             
@@ -1540,7 +1648,7 @@
         }
         
         function bindCartSidebarEvents() {
-            console.log('🔗 Binding cart sidebar events...');
+            console.log('Binding cart sidebar events...');
             
             // Close sidebar events
             const closeBtn = document.getElementById('close-cart-sidebar');
@@ -1548,17 +1656,17 @@
             
             if (closeBtn) {
                 closeBtn.addEventListener('click', closeCartSidebar);
-                console.log('✅ Close button event bound');
+                console.log('Close button event bound');
             }
             
             if (overlay) {
                 overlay.addEventListener('click', closeCartSidebar);
-                console.log('✅ Overlay click event bound');
+                console.log('Overlay click event bound');
             }
             
             // Quantity controls
             const quantityButtons = document.querySelectorAll('.quantity-btn');
-            console.log(`🔢 Found ${quantityButtons.length} quantity buttons`);
+            console.log(`Found ${quantityButtons.length} quantity buttons`);
             
             quantityButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -1570,7 +1678,7 @@
                     const quantityElement = this.parentElement.querySelector('.quantity');
                     let currentQuantity = parseInt(quantityElement.textContent);
                     
-                    console.log(`🔢 Quantity button clicked: ${action}, ItemId: ${cartItemId}, CurrentQty: ${currentQuantity}`);
+                    console.log(`Quantity button clicked: ${action}, ItemId: ${cartItemId}, CurrentQty: ${currentQuantity}`);
                     
                     if (action === 'increase') {
                         updateCartQuantity(cartItemId, currentQuantity + 1);
@@ -1600,11 +1708,11 @@
                 });
             });
             
-            console.log('✅ All cart sidebar events bound');
+            console.log('All cart sidebar events bound');
         }
         
         function updateCartQuantity(cartItemId, quantity) {
-            console.log(`🔄 Updating cart quantity - ItemId: ${cartItemId}, NewQty: ${quantity}`);
+            console.log(`Updating cart quantity - ItemId: ${cartItemId}, NewQty: ${quantity}`);
             
             fetch('/Cart/UpdateQuantity', {
                 method: 'POST',
@@ -1619,20 +1727,20 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('✅ UpdateQuantity response:', data);
+                console.log('UpdateQuantity response:', data);
                 if (data.success) {
-                    // Refresh cart sidebar
-                    openCartSidebar();
+                    // Refresh cart sidebar with latest data
+                    loadAndOpenCartSidebar();
                     // Update header cart count
                     updateCartCount(data.cartCount);
                     showNotification('Đã cập nhật số lượng', 'success');
                 } else {
-                    console.error('❌ UpdateQuantity failed:', data.message);
+                    console.error('UpdateQuantity failed:', data.message);
                     showNotification(data.message || 'Lỗi cập nhật số lượng', 'error');
                 }
             })
             .catch(error => {
-                console.error('💥 Error updating quantity:', error);
+                console.error('Error updating quantity:', error);
                 showNotification('Lỗi cập nhật số lượng', 'error');
             });
         }
@@ -1653,20 +1761,21 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('✅ RemoveItem response:', data);
+                    console.log('RemoveItem response:', data);
                     if (data.success) {
-                        // Refresh cart sidebar
-                        openCartSidebar();
+
+                        // Refresh cart sidebar with latest data
+                        loadAndOpenCartSidebar();
                         // Update header cart count
                         updateCartCount(data.cartCount);
                         showNotification('Đã xóa sản phẩm khỏi giỏ hàng', 'success');
                     } else {
-                        console.error('❌ RemoveItem failed:', data.message);
+                        console.error('RemoveItem failed:', data.message);
                         showNotification(data.message || 'Lỗi xóa sản phẩm', 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('💥 Error removing item:', error);
+                    console.error('Error removing item:', error);
                     showNotification('Lỗi xóa sản phẩm', 'error');
                 });
             }
@@ -1679,7 +1788,7 @@
             // Check if user is authenticated
             const isAuthenticated = document.querySelector('.user-authenticated');
             if (!isAuthenticated) {
-                console.log('❌ User not authenticated, redirecting to login');
+                console.log('User not authenticated, redirecting to login');
                 // Redirect to login if not authenticated
                 window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
                 return;
@@ -1699,7 +1808,7 @@
                 if (size) requestData.size = size;
                 if (color) requestData.color = color;
 
-                console.log('📤 Sending request to /Products/AddToCart with data:', requestData);
+                console.log('Sending request to /Products/AddToCart with data:', requestData);
 
                 const response = await fetch('/Products/AddToCart', {
                     method: 'POST',
@@ -1711,7 +1820,7 @@
                 });
 
                 const result = await response.json();
-                console.log('✅ AddToCart result:', result);
+                console.log('AddToCart result:', result);
 
                 if (result.success) {
                     // Update cart count
@@ -1721,16 +1830,16 @@
                     showNotification('Đã thêm sản phẩm vào giỏ hàng!', 'success');
                     
                     // Open cart sidebar after adding to cart to show updated items
-                    console.log('✨ Product added successfully, opening cart sidebar...');
-                    setTimeout(() => {
-                        openCartSidebar();
-                    }, 300); // Small delay to ensure cart is updated
+                    console.log('Product added successfully, reloading and opening cart sidebar...');
+                    
+                    // Force reload cart sidebar data before opening
+                    loadAndOpenCartSidebar();
                 } else {
-                    console.log('❌ AddToCart failed:', result.message);
+                    console.log('AddToCart failed:', result.message);
                     showNotification(result.message || 'Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
                 }
             } catch (error) {
-                console.error('💥 Error adding to cart:', error);
+                console.error('Error adding to cart:', error);
                 showNotification('Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
             } finally {
                 // Reset button
@@ -1746,16 +1855,24 @@
             notification.className = `notification notification-${type}`;
             notification.style.cssText = `
                 position: fixed;
-                top: 20px;
+                top: 10px;
                 right: 20px;
                 background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
                 color: white;
-                padding: 12px 20px;
-                border-radius: 4px;
-                z-index: 10000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
+                padding: 16px 24px;
+                border-radius: 8px;
+                z-index: 99999;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                transform: translateX(500px);
+                transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                font-size: 14px;
+                font-weight: 500;
+                max-width: 450px;
+                min-width: 320px;
+                word-wrap: break-word;
+                white-space: normal;
+                overflow-wrap: break-word;
+                line-height: 1.5;
             `;
             notification.textContent = message;
             
@@ -1766,19 +1883,22 @@
                 notification.style.transform = 'translateX(0)';
             }, 100);
             
-            // Auto remove after 3 seconds
+            // Auto remove after 5 seconds (increased for error messages)
             setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
+                notification.style.transform = 'translateX(500px)';
                 setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 400);
+            }, 5000);
         }
         
         // Make functions globally available
         window.updateCartCount = updateCartCount;
         window.updateWishlistCount = updateWishlistCount;
         window.openCartSidebar = openCartSidebar;
+        window.loadAndOpenCartSidebar = loadAndOpenCartSidebar;
         window.closeCartSidebar = closeCartSidebar;
         window.addToCart = addToCart;
         
@@ -1791,7 +1911,7 @@
             if (cartIcon) {
                 cartIcon.addEventListener('click', function(e) {
                     e.preventDefault();
-                    openCartSidebar();
+                    loadAndOpenCartSidebar(); // Always reload fresh data when opening cart
                 });
             }
             

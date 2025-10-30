@@ -1,0 +1,374 @@
+@model JohnHenryFashionWeb.Models.Order
+@{
+    Layout = null;
+    var subtotal = Model.TotalAmount - Model.ShippingFee - Model.Tax + Model.DiscountAmount;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn #@Model.OrderNumber - John Henry Fashion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .company-info h1 {
+            font-size: 28px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .company-info p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .invoice-info {
+            text-align: right;
+        }
+        
+        .invoice-info h2 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-info p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .invoice-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .detail-box h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .detail-box p {
+            margin: 8px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .detail-box strong {
+            color: #333;
+        }
+        
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .invoice-table thead {
+            background: #f8f9fa;
+        }
+        
+        .invoice-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .invoice-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .invoice-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .invoice-summary {
+            margin-left: auto;
+            width: 300px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            border-top: 3px solid #667eea;
+            border-bottom: none;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        .invoice-footer {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+            color: #666;
+        }
+        
+        .invoice-footer p {
+            margin: 10px 0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #cfe2ff; color: #084298; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-delivered { background: #d1e7dd; color: #0f5132; }
+        .status-cancelled { background: #f8d7da; color: #842029; }
+        
+        @@media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .invoice-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            @@page {
+                margin: 2cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Invoice Header -->
+        <div class="invoice-header">
+            <div class="company-info">
+                <h1>JOHN HENRY FASHION</h1>
+                <p>
+                    Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM<br>
+                    Điện thoại: (028) 1234 5678<br>
+                    Email: info@johnhenryfashion.com<br>
+                    Website: www.johnhenryfashion.com
+                </p>
+            </div>
+            <div class="invoice-info">
+                <h2>HÓA ĐƠN</h2>
+                <p><strong>Mã đơn:</strong> #@Model.OrderNumber</p>
+                <p><strong>Ngày:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+                <p>
+                    <span class="status-badge status-@Model.Status?.ToLower()">
+                        @(Model.Status?.ToUpper() ?? "N/A")
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Customer & Order Details -->
+        <div class="invoice-details">
+            <div class="detail-box">
+                <h3>Thông tin khách hàng</h3>
+                @if (Model.User != null)
+                {
+                    <p><strong>Họ tên:</strong> @Model.User.FullName</p>
+                    <p><strong>Email:</strong> @Model.User.Email</p>
+                    <p><strong>Số điện thoại:</strong> @(Model.User.Phone ?? "N/A")</p>
+                }
+                else
+                {
+                    <p>N/A</p>
+                }
+            </div>
+            <div class="detail-box">
+                <h3>Địa chỉ giao hàng</h3>
+                <p>@(Model.ShippingAddress ?? "N/A")</p>
+                @if (Model.ShippedAt.HasValue)
+                {
+                    <p style="margin-top: 15px;"><strong>Ngày gửi hàng:</strong> @Model.ShippedAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                }
+                @if (Model.DeliveredAt.HasValue)
+                {
+                    <p><strong>Ngày giao hàng:</strong> @Model.DeliveredAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                }
+            </div>
+        </div>
+
+        <!-- Order Items Table -->
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Sản phẩm</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index = 1;
+                }
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td class="text-center">@index</td>
+                        <td>
+                            <strong>@item.ProductName</strong><br>
+                            @if (!string.IsNullOrEmpty(item.ProductSKU))
+                            {
+                                <small style="color: #999;">SKU: @item.ProductSKU</small>
+                            }
+                        </td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-right">@item.UnitPrice.ToString("N0") đ</td>
+                        <td class="text-right"><strong>@item.TotalPrice.ToString("N0") đ</strong></td>
+                    </tr>
+                    index++;
+                }
+            </tbody>
+        </table>
+
+        <!-- Invoice Summary -->
+        <div class="invoice-summary">
+            <div class="summary-row">
+                <span>Tạm tính:</span>
+                <span>@subtotal.ToString("N0") đ</span>
+            </div>
+            
+            @if (Model.DiscountAmount > 0)
+            {
+                <div class="summary-row">
+                    <span>Giảm giá:</span>
+                    <span style="color: #28a745;">-@Model.DiscountAmount.ToString("N0") đ</span>
+                </div>
+            }
+            
+            @if (Model.ShippingFee > 0)
+            {
+                <div class="summary-row">
+                    <span>Phí vận chuyển:</span>
+                    <span>@Model.ShippingFee.ToString("N0") đ</span>
+                </div>
+            }
+            
+            @if (Model.Tax > 0)
+            {
+                <div class="summary-row">
+                    <span>Thuế:</span>
+                    <span>@Model.Tax.ToString("N0") đ</span>
+                </div>
+            }
+            
+            <div class="summary-row total">
+                <span>TỔNG CỘNG:</span>
+                <span>@Model.TotalAmount.ToString("N0") đ</span>
+            </div>
+        </div>
+
+        <!-- Payment Info -->
+        @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+        {
+            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-left: 4px solid #667eea;">
+                <strong>Phương thức thanh toán:</strong> @Model.PaymentMethod<br>
+                <strong>Trạng thái thanh toán:</strong> 
+                @switch (Model.PaymentStatus?.ToLower())
+                {
+                    case "paid":
+                        <span style="color: #28a745;">✓ Đã thanh toán</span>
+                        break;
+                    case "pending":
+                        <span style="color: #ffc107;">⏱ Chờ thanh toán</span>
+                        break;
+                    case "failed":
+                        <span style="color: #dc3545;">✗ Thất bại</span>
+                        break;
+                    case "refunded":
+                        <span style="color: #17a2b8;">↻ Đã hoàn tiền</span>
+                        break;
+                    default:
+                        <span>@(Model.PaymentStatus ?? "N/A")</span>
+                        break;
+                }
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <div style="margin-top: 20px; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                <strong>Ghi chú:</strong><br>
+                <div style="white-space: pre-line; margin-top: 10px;">@Model.Notes</div>
+            </div>
+        }
+
+        <!-- Invoice Footer -->
+        <div class="invoice-footer">
+            <p><strong>Cảm ơn quý khách đã mua hàng!</strong></p>
+            <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua email hoặc số điện thoại trên.</p>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                Hóa đơn được in tự động bởi hệ thống John Henry Fashion<br>
+                In lúc: @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto print when page loads
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

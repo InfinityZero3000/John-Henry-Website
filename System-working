@@ -1,40 +1,3 @@
-## Sơ đồ kiến trúc chi tiết và lộ trình phát triển web luxury (.NET MVC)
-
-### 1. Sơ đồ kiến trúc hệ thống
-
-```
-┌─────────────────────────────┐
-│         Client (UI)         │
-│ - HTML5, CSS3, JS           │
-│ - Bootstrap 5 (layout)      │
-│ - GSAP, Lottie (anim)       │
-│ - Video.js (video bg)       │
-└─────────────┬───────────────┘
-              │ HTTP/HTTPS
-┌─────────────▼──────────────┐
-│       ASP.NET MVC          │
-│ - Controllers (C#)         │
-│ - Views (.cshtml Razor)    │
-│ - Models (EF Core/ORM)     │
-│ - Bundling & Minification  │
-└─────────────┬──────────────┘
-              │ Entity Framework
-┌─────────────▼──────────────┐
-│        Database            │
-│ - SQL Server/PostgreSQL    │
-│ - Tables: Products, Users, │
-│   Orders, Carts            │
-└─────────────┬──────────────┘
-              │ CDN/Cloud Storage
-┌─────────────▼──────────────┐
-│     Media & Assets         │
-│ - Videos (WebM/MP4)        │
-│ - Images (Lazy load)       │
-│ - JSON Lottie files        │
-└────────────────────────────┘
-```
-
----
 
 ### 2. Công nghệ sử dụng
 
@@ -80,24 +43,6 @@
 * Nén video (WebM + MP4 fallback).
 * Cache + nén dữ liệu.
 
-**Giai đoạn 6: Triển khai & Mở rộng**
-
-* Deploy: Azure App Service, Vercel, hoặc IIS.
-* Tích hợp thanh toán online.
-* AI product recommendation.
-* Chuyển hướng SPA (React/Vue).
-
----
-
-### 4. Animation đề xuất cho giao diện luxury
-
-* Hero intro: GSAP fade-in + slide.
-* Navbar: shrink on scroll.
-* Product cards: hover 3D tilt + shadow.
-* Add to cart: icon bounce & fly.
-* Footer: fade-in từ dưới lên.
-* Video overlay: gradient animate.
-
 ---
 
 ### 5. Hướng phát triển nâng cao
@@ -119,88 +64,6 @@ brew services start postgresql@14 -- khởi động postgresql
 
 dotnet ef database update -- tạo database theo code
 
-DATABASE RELATIONSHIPS
-
-┌─────────────┐         ┌──────────────┐
-│ SupportTicket│────────▶│ ApplicationUser │
-│             │ UserId  │ (Customer)    │
-└─────────────┘         └──────────────┘
-      │
-      │ AssignedTo
-      ▼
-┌──────────────┐
-│ ApplicationUser │
-│ (Admin)      │
-└──────────────┘
-      │
-      │ TicketId
-      ▼
-┌──────────────┐
-│ TicketReply  │
-└──────────────┘
-
-┌─────────────┐         ┌──────────────┐
-│   Dispute   │────────▶│    Order     │
-│             │ OrderId │              │
-└─────────────┘         └──────────────┘
-      │
-      │ CustomerId
-      ▼
-┌──────────────┐
-│ ApplicationUser │
-│ (Customer)   │
-└──────────────┘
-      │
-      │ SellerId
-      ▼
-┌──────────────┐
-│ ApplicationUser │
-│ (Seller)     │
-└──────────────┘
-      │
-      │ ResolvedBy
-      ▼
-┌──────────────┐
-│ ApplicationUser │
-│ (Admin)      │
-└──────────────┘
-
-
 thực hiện viết tài liệu SRS cho hệ thống, thực hiện tạo các sơ đồ ERD cho database
-bổ sung các view, Controllers còn thiếu trong admin, kiểm tra và hoàn thiện seller
 
-
-
-URL: http://localhost:5101/blog/{slug}
-
-┌──────────────────────────────────────┐
-│  Preview Banner (if draft)           │
-├──────────────────────────────────────┤
-│  Breadcrumb                           │
-├──────────────────────────────────────┤
-│         TITLE (Centered)              │
-│    Category | Date | Views            │
-│      Tags: #tag1 #tag2                │
-├──────────────────────────────────────┤
-│  ┌────────────────────────────────┐  │
-│  │    FEATURED IMAGE (600px)      │  │
-│  └────────────────────────────────┘  │
-├──────────────────────────────────────┤
-│    Excerpt (Italic, Centered)        │
-├──────────────────────────────────────┤
-│                                      │
-│         BLOG CONTENT                 │
-│       (Wide, Large Fonts)            │
-│                                      │
-├──────────────────────────────────────┤
-│  Tags | Share Buttons                │
-└──────────────────────────────────────┘
-
-         ═══════════════════════════
-
-┌──────────────────────────────────────┐
-│     BÀI VIẾT LIÊN QUAN               │
-│  ┌────┐  ┌────┐  ┌────┐              │
-│  │Card│  │Card│  │Card│              │
-│  └────┘  └────┘  └────┘              │
-└──────────────────────────────────────┘
+dotnet run --launch-profile https

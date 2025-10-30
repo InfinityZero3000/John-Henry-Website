@@ -1,6 +1,9 @@
 @model IEnumerable<JohnHenryFashionWeb.Models.ProductReview>
 @{
     ViewData["Title"] = "Review Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Đánh giá (Reviews)</li>";
+
     var totalReviews = ViewBag.TotalReviews ?? 0;
     var pendingReviews = ViewBag.PendingReviews ?? 0;
     var approvedReviews = ViewBag.ApprovedReviews ?? 0;
@@ -9,289 +12,258 @@
     var status = ViewBag.Status as string;
 }
 
-<style>
-    .glassmorphism {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="star"></i>
+                Đánh giá (Reviews)
+            </h1>
+            <a href="/admin" class="admin-btn admin-btn-secondary">
+                <i data-lucide="chevrons-left"></i>
+                Quay lại Admin
+            </a>
+        </div>
+        <p class="admin-page-subtitle">Approve or reject product reviews</p>
+    </div>
 
-    .review-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .stat-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .review-card {
-        transition: all 0.3s ease;
-    }
-
-    .review-card:hover {
-        transform: translateX(5px);
-        background: rgba(255, 255, 255, 0.15);
-    }
-
-    .rating-stars {
-        color: #ffc107;
-    }
-
-    .status-badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-
-    .status-pending {
-        background: rgba(255, 193, 7, 0.2);
-        color: #ffa000;
-        border: 1px solid rgba(255, 193, 7, 0.3);
-    }
-
-    .status-approved {
-        background: rgba(76, 175, 80, 0.2);
-        color: #4caf50;
-        border: 1px solid rgba(76, 175, 80, 0.3);
-    }
-</style>
-
-<div class="review-gradient min-vh-100 py-5">
-    <div class="container">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="glassmorphism p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="text-white mb-1">
-                                <i class="fas fa-star me-2"></i>Review Management
-                            </h2>
-                            <p class="text-white-50 mb-0">Approve or reject product reviews</p>
-                        </div>
-                        <a href="/admin" class="btn btn-outline-light">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Admin
-                        </a>
-                    </div>
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng đánh giá</h3>
+                    <p class="value">@totalReviews</p>
+                    <p class="change">Tổng số đánh giá</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="message-circle"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="glassmorphism p-4 stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-white-50 mb-1">Total Reviews</p>
-                            <h3 class="text-white mb-0">@totalReviews</h3>
-                        </div>
-                        <div class="bg-white bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-comments fa-2x text-white"></i>
-                        </div>
-                    </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang chờ</h3>
+                    <p class="value">@pendingReviews</p>
+                    <p class="change">Đang chờ duyệt</p>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="glassmorphism p-4 stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-white-50 mb-1">Pending</p>
-                            <h3 class="text-white mb-0">@pendingReviews</h3>
-                        </div>
-                        <div class="bg-warning bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-clock fa-2x text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="glassmorphism p-4 stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-white-50 mb-1">Approved</p>
-                            <h3 class="text-white mb-0">@approvedReviews</h3>
-                        </div>
-                        <div class="bg-success bg-opacity-25 p-3 rounded-circle">
-                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                        </div>
-                    </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="clock"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="glassmorphism p-3">
-                    <form method="get" class="row g-3 align-items-end">
-                        <div class="col-md-3">
-                            <label class="text-white mb-2">Filter by Status</label>
-                            <select name="status" class="form-select">
-                                <option value="">All Reviews</option>
-                                <option value="pending" selected="@(status == "pending")">Pending</option>
-                                <option value="approved" selected="@(status == "approved")">Approved</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-light w-100">
-                                <i class="fas fa-filter me-2"></i>Apply Filter
-                            </button>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <button type="button" class="btn btn-success me-2" onclick="bulkApprove()">
-                                <i class="fas fa-check me-2"></i>Bulk Approve
-                            </button>
-                            <button type="button" class="btn btn-danger" onclick="bulkReject()">
-                                <i class="fas fa-times me-2"></i>Bulk Reject
-                            </button>
-                        </div>
-                    </form>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đã duyệt</h3>
+                    <p class="value">@approvedReviews</p>
+                    <p class="change">Đã phê duyệt</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Reviews List -->
-        <div class="row">
-            <div class="col-12">
-                <div class="glassmorphism p-4">
-                    @if (Model != null && Model.Any())
-                    {
-                        <form id="bulkForm">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th width="50">
-                                                <input type="checkbox" id="selectAll" class="form-check-input">
-                                            </th>
-                                            <th>Product</th>
-                                            <th>User</th>
-                                            <th>Rating</th>
-                                            <th>Review</th>
-                                            <th>Date</th>
-                                            <th>Status</th>
-                                            <th width="150">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var review in Model)
-                                        {
-                                            <tr class="review-card">
-                                                <td>
-                                                    <input type="checkbox" name="reviewIds" value="@review.Id" class="form-check-input review-checkbox">
-                                                </td>
-                                                <td>
-                                                    <div class="text-white">@review.Product?.Name</div>
-                                                </td>
-                                                <td>
-                                                    <div class="text-white">@review.User?.UserName</div>
-                                                    <small class="text-white-50">@review.User?.Email</small>
-                                                </td>
-                                                <td>
-                                                    <div class="rating-stars">
-                                                        @for (int i = 0; i < review.Rating; i++)
-                                                        {
-                                                            <i class="fas fa-star"></i>
-                                                        }
-                                                        @for (int i = review.Rating; i < 5; i++)
-                                                        {
-                                                            <i class="far fa-star"></i>
-                                                        }
-                                                    </div>
-                                                    <small class="text-white-50">@review.Rating/5</small>
-                                                </td>
-                                                <td>
-                                                    @if (!string.IsNullOrEmpty(review.Title))
-                                                    {
-                                                        <div class="text-white fw-bold">@review.Title</div>
-                                                    }
-                                                    <div class="text-white-50" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                        @review.Comment
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <small class="text-white-50">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
-                                                </td>
-                                                <td>
-                                                    @if (review.IsApproved)
-                                                    {
-                                                        <span class="status-badge status-approved">
-                                                            <i class="fas fa-check-circle me-1"></i>Approved
-                                                        </span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="status-badge status-pending">
-                                                            <i class="fas fa-clock me-1"></i>Pending
-                                                        </span>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <a href="/admin/approvals/reviews/@review.Id" class="btn btn-sm btn-info me-1" title="View Details">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    @if (!review.IsApproved)
-                                                    {
-                                                        <button type="button" class="btn btn-sm btn-success" onclick="approveReview(@review.Id)" title="Approve">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                    }
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectReview(@review.Id)" title="Reject">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </form>
-
-                        <!-- Pagination -->
-                        @if (totalPages > 1)
-                        {
-                            <nav class="mt-4">
-                                <ul class="pagination justify-content-center mb-0">
-                                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                        <a class="page-link" href="?page=@(currentPage - 1)@(string.IsNullOrEmpty(status) ? "" : "&status=" + status)">Previous</a>
-                                    </li>
-                                    @for (int i = 1; i <= totalPages; i++)
-                                    {
-                                        <li class="page-item @(i == currentPage ? "active" : "")">
-                                            <a class="page-link" href="?page=@i@(string.IsNullOrEmpty(status) ? "" : "&status=" + status)">@i</a>
-                                        </li>
-                                    }
-                                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                        <a class="page-link" href="?page=@(currentPage + 1)@(string.IsNullOrEmpty(status) ? "" : "&status=" + status)">Next</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        }
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="fas fa-inbox fa-3x text-white-50 mb-3"></i>
-                            <p class="text-white-50">No reviews found</p>
-                        </div>
-                    }
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Filters & Actions -->
+    <div class="admin-filters">
+        <form method="get" action="/admin/approvals/reviews">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="admin-form-label">Trạng thái</label>
+                    <select name="status" class="admin-form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(status))">Tất cả</option>
+                        <option value="pending" selected="@(status == "pending")">Đang chờ</option>
+                        <option value="approved" selected="@(status == "approved")">Đã duyệt</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width:100%">
+                        <i data-lucide="filter"></i>
+                        Lọc
+                    </button>
+                </div>
+                <div class="col-md-7 text-end">
+                    <button type="button" class="admin-btn admin-btn-success" onclick="bulkApprove()">
+                        <i data-lucide="check"></i>
+                        Bulk Approve
+                    </button>
+                    <button type="button" class="admin-btn admin-btn-danger" onclick="bulkReject()">
+                        <i data-lucide="x"></i>
+                        Bulk Reject
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tab Links -->
+    <div class="admin-filter-tabs">
+        <a href="/admin/approvals/reviews?status=pending" class="admin-filter-tab @(status == "pending" ? "active" : "")">
+            <i data-lucide="clock" style="width:14px;height:14px"></i>
+            Đánh giá chờ duyệt (@pendingReviews)
+        </a>
+        <a href="/admin/approvals/reviews?status=approved" class="admin-filter-tab @(status == "approved" ? "active" : "")">
+            <i data-lucide="check-circle" style="width:14px;height:14px"></i>
+            Đã duyệt (@approvedReviews)
+        </a>
+        <a href="/admin/approvals/reviews" class="admin-filter-tab @(string.IsNullOrEmpty(status) ? "active" : "")">
+            <i data-lucide="list" style="width:14px;height:14px"></i>
+            Tất cả (@totalReviews)
+        </a>
+    </div>
+
+    <!-- Reviews Table -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="admin-table-wrapper">
+            <form id="bulkForm">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;"><input type="checkbox" id="selectAll" class="form-check-input"></th>
+                            <th>Sản phẩm</th>
+                            <th>Người đánh giá</th>
+                            <th>Đánh giá</th>
+                            <th>Nội dung</th>
+                            <th>Ngày</th>
+                            <th>Trạng thái</th>
+                            <th style="width:160px;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var review in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="reviewIds" value="@review.Id" class="form-check-input review-checkbox">
+                                </td>
+                                <td>
+                                    <div style="font-weight:500;">@review.Product?.Name</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight:500;">@review.User?.UserName</div>
+                                    <div style="font-size:0.8125rem;color:var(--admin-text-light);">@review.User?.Email</div>
+                                </td>
+                                <td>
+                                    <div>
+                                        @for (int i = 0; i < review.Rating; i++)
+                                        {
+                                            <i data-lucide="star" style="width:14px;height:14px;color:#ffc107"></i>
+                                        }
+                                        @for (int i = review.Rating; i < 5; i++)
+                                        {
+                                            <i data-lucide="star" style="width:14px;height:14px;color:#6c757d;opacity:0.4"></i>
+                                        }
+                                    </div>
+                                    <div style="font-size:0.8125rem;color:var(--admin-text-light);">@review.Rating/5</div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(review.Title))
+                                    {
+                                        <div style="font-weight:500;">@review.Title</div>
+                                    }
+                                    <div style="color:var(--admin-text-light);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@review.Comment</div>
+                                </td>
+                                <td>
+                                    <div style="font-size:0.875rem;">@review.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                </td>
+                                <td>
+                                    @if (review.IsApproved)
+                                    {
+                                        <span class="admin-badge admin-badge-success"><i data-lucide="check-circle" style="width:12px;height:12px"></i> Đã duyệt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-badge admin-badge-warning"><i data-lucide="clock" style="width:12px;height:12px"></i> Đang chờ</span>
+                                    }
+                                </td>
+                                <td class="actions">
+                                    <div style="display:flex;gap:0.5rem;flex-wrap:revert;">
+                                        <a href="/admin/approvals/reviews/@review.Id" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem">
+                                            <i data-lucide="eye"></i>
+                                        </a>
+                                        @if (!review.IsApproved)
+                                        {
+                                            <button type="button" class="admin-btn admin-btn-sm admin-btn-success" onclick="approveReview(@review.Id)" title="Duyệt">
+                                                <i data-lucide="check"></i>
+                                            </button>
+                                        }
+                                        <button type="button" class="admin-btn admin-btn-sm admin-btn-danger" onclick="rejectReview(@review.Id)" title="Từ chối">
+                                            <i data-lucide="x"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </form>
+
+            <!-- Pagination -->
+            @if (totalPages > 1)
+            {
+                <div class="admin-pagination">
+                    @if (currentPage > 1)
+                    {
+                        <a href="?page=@(currentPage - 1)@(string.IsNullOrEmpty(status) ? "" : "&status=" + status)" class="admin-pagination-btn">
+                            <i data-lucide="chevron-left"></i> Trước
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="admin-pagination-btn" disabled><i data-lucide="chevron-left"></i> Trước</button>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <a href="?page=@i@(string.IsNullOrEmpty(status) ? "" : "&status=" + status)" class="admin-pagination-btn @(i == currentPage ? "active" : "")">@i</a>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <a href="?page=@(currentPage + 1)@(string.IsNullOrEmpty(status) ? "" : "&status=" + status)" class="admin-pagination-btn">Sau <i data-lucide="chevron-right"></i></a>
+                    }
+                    else
+                    {
+                        <button class="admin-pagination-btn" disabled>Sau <i data-lucide="chevron-right"></i></button>
+                    }
+                </div>
+
+                <div class="admin-text-center" style="margin-top:var(--spacing-md);color:var(--admin-text-light);font-size:0.875rem;">
+                    Trang @currentPage / @totalPages (Tổng @totalReviews đánh giá)
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding:3rem;">
+                <i data-lucide="inbox" style="width:64px;height:64px;color:var(--admin-text-muted);margin-bottom:1rem"></i>
+                <h3 style="margin-bottom:0.5rem;">Không tìm thấy đánh giá</h3>
+                <p style="color:var(--admin-text-light);margin-bottom:1.5rem;">@if (!string.IsNullOrEmpty(status)) { <text>Không có đánh giá phù hợp với bộ lọc</text> } else { <text>Chưa có đánh giá nào trong hệ thống</text> }</p>
+                <div class="admin-flex-center admin-gap-sm">
+                    @if (!string.IsNullOrEmpty(status))
+                    {
+                        <a href="/admin/approvals/reviews" class="admin-btn admin-btn-secondary"><i data-lucide="x"></i> Xóa bộ lọc</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @section Scripts {
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
         // Select all checkbox
         document.getElementById('selectAll')?.addEventListener('change', function() {
             const checkboxes = document.querySelectorAll('.review-checkbox');
@@ -357,7 +329,6 @@
             }
 
             const ids = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-            
             if (confirm(`Are you sure you want to approve ${ids.length} review(s)?`)) {
                 fetch('/admin/approvals/reviews/bulk-approve', {
                     method: 'POST',
@@ -390,7 +361,6 @@
             }
 
             const ids = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-            
             if (confirm(`Are you sure you want to reject ${ids.length} review(s)?`)) {
                 fetch('/admin/approvals/reviews/bulk-reject', {
                     method: 'POST',

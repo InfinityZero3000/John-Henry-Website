@@ -36,44 +36,44 @@
                     <form asp-action="CreateBrand" method="post">
                         <div asp-validation-summary="All" class="alert alert-danger" style="display: none;"></div>
                         
-                        <div class="form-group">
-                            <label asp-for="Name" class="form-label required">Tên thương hiệu</label>
-                            <input asp-for="Name" class="form-control" placeholder="Nhập tên thương hiệu...">
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                        <div class="admin-form-group">
+                            <label asp-for="Name" class="admin-form-label required">Tên thương hiệu</label>
+                            <input asp-for="Name" class="admin-form-input" placeholder="Nhập tên thương hiệu...">
+                            <span asp-validation-for="Name" style="color: var(--status-danger); font-size: 0.875rem;"></span>
                         </div>
 
-                        <div class="form-group">
-                            <label asp-for="Description" class="form-label">Mô tả</label>
-                            <textarea asp-for="Description" class="form-control" rows="4" 
+                        <div class="admin-form-group">
+                            <label asp-for="Description" class="admin-form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="admin-form-textarea" rows="4" 
                                       placeholder="Nhập mô tả về thương hiệu..."></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                            <small class="form-text text-muted">Mô tả ngắn gọn về thương hiệu</small>
+                            <span asp-validation-for="Description" style="color: var(--status-danger); font-size: 0.875rem;"></span>
+                            <small class="admin-form-help">Mô tả ngắn gọn về thương hiệu</small>
                         </div>
 
-                        <div class="form-group">
-                            <label asp-for="LogoUrl" class="form-label">URL Logo</label>
-                            <input asp-for="LogoUrl" class="form-control" type="url" 
+                        <div class="admin-form-group">
+                            <label asp-for="LogoUrl" class="admin-form-label">URL Logo</label>
+                            <input asp-for="LogoUrl" class="admin-form-input" type="url" 
                                    placeholder="https://example.com/logo.png">
-                            <span asp-validation-for="LogoUrl" class="text-danger"></span>
-                            <small class="form-text text-muted">Đường dẫn đến logo của thương hiệu</small>
+                            <span asp-validation-for="LogoUrl" style="color: var(--status-danger); font-size: 0.875rem;"></span>
+                            <small class="admin-form-help">Đường dẫn đến logo của thương hiệu</small>
                         </div>
 
-                        <div class="form-group">
-                            <label asp-for="Website" class="form-label">Website</label>
-                            <input asp-for="Website" class="form-control" type="url" 
+                        <div class="admin-form-group">
+                            <label asp-for="Website" class="admin-form-label">Website</label>
+                            <input asp-for="Website" class="admin-form-input" type="url" 
                                    placeholder="https://www.example.com">
-                            <span asp-validation-for="Website" class="text-danger"></span>
-                            <small class="form-text text-muted">Website chính thức của thương hiệu</small>
+                            <span asp-validation-for="Website" style="color: var(--status-danger); font-size: 0.875rem;"></span>
+                            <small class="admin-form-help">Website chính thức của thương hiệu</small>
                         </div>
 
-                        <div class="form-group">
-                            <div class="form-check">
+                        <div class="admin-form-group">
+                            <div class="form-check form-switch">
                                 <input asp-for="IsActive" class="form-check-input" type="checkbox" checked>
                                 <label asp-for="IsActive" class="form-check-label">
                                     Kích hoạt thương hiệu
                                 </label>
                             </div>
-                            <small class="form-text text-muted">Thương hiệu được kích hoạt sẽ hiển thị trong danh sách lựa chọn</small>
+                            <small class="admin-form-help">Thương hiệu được kích hoạt sẽ hiển thị trong danh sách lựa chọn</small>
                         </div>
 
                         <div class="form-actions">

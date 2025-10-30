@@ -295,7 +295,7 @@
         <!-- Delete Button -->
         <div class="text-center mt-4 pt-4" style="border-top: 2px solid rgba(0,0,0,0.05);">
             <form method="post" asp-action="DeleteFAQ" asp-route-id="@Model.Id" 
-                  onsubmit="return confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA FAQ này vĩnh viễn?\n\nHành động này KHÔNG THỂ HOÀN TÁC!');"
+                  onsubmit="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn XÓA FAQ này vĩnh viễn?\n\nHành động này KHÔNG THỂ HOÀN TÁC!');"
                   style="display: inline;">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-danger">

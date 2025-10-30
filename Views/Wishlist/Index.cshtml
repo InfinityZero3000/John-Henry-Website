@@ -19,10 +19,6 @@
     <div class="wishlist-header mb-4">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2 class="wishlist-title">
-                    <i class="fas fa-heart text-danger me-2"></i>
-                    Danh sách yêu thích
-                </h2>
                 @if (wishlistCount > 0)
                 {
                     <p class="text-muted">Bạn có @wishlistCount sản phẩm yêu thích</p>
@@ -46,27 +42,26 @@
             <div class="row g-4">
                 @foreach (var item in Model)
                 {
-                    <div class="col-lg-3 col-md-4 col-sm-6 col-12" data-wishlist-item-id="@item.Id">
-                        <div class="wishlist-item-card h-100">
-                            <!-- Product Image -->
-                            <div class="product-image-wrapper position-relative">
-                                <a href="/Products/Details/@item.Product.Id">
-                                    <img src="@(!string.IsNullOrEmpty(item.Product.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "~/images/placeholder-product.jpg")" 
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6" data-wishlist-item-id="@item.Id">
+                        <div class="product-card-new wishlist-card">
+                            <div class="product-image-container">
+                                <a href="@Url.Action("ProductDetail", "Products", new { id = item.Product.Id })">
+                                    <img src="@(!string.IsNullOrEmpty(item.Product.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "/images/default-product.jpg")" 
                                          alt="@item.Product.Name" 
-                                         class="product-img w-100"
-                                         onerror="this.src='/images/placeholder-product.jpg'">
+                                         class="product-image"
+                                         onerror="this.src='/images/default-product.jpg'">
                                 </a>
                                 
-                                <!-- Action Buttons -->
-                                <div class="product-actions">
-                                    <button class="btn-action remove-btn" 
+                                <!-- Wishlist Action Buttons -->
+                                <div class="wishlist-actions">
+                                    <button class="wishlist-action-btn remove-btn" 
                                             onclick="removeFromWishlist('@item.Product.Id', this)"
                                             title="Xóa khỏi danh sách yêu thích">
                                         <i class="fas fa-times"></i>
                                     </button>
                                     @if (item.Product.StockQuantity > 0)
                                     {
-                                        <button class="btn-action cart-btn" 
+                                        <button class="wishlist-action-btn cart-btn" 
                                                 onclick="addToCartFromWishlist('@item.Product.Id', this)"
                                                 title="Thêm vào giỏ hàng">
                                             <i class="fas fa-shopping-cart"></i>
@@ -74,7 +69,7 @@
                                     }
                                     else
                                     {
-                                        <button class="btn-action cart-btn disabled" 
+                                        <button class="wishlist-action-btn disabled" 
                                                 disabled
                                                 title="Hết hàng">
                                             <i class="fas fa-ban"></i>
@@ -82,7 +77,7 @@
                                     }
                                 </div>
 
-                                <!-- Stock Status -->
+                                <!-- Stock Status Badge -->
                                 @if (item.Product.StockQuantity <= 0)
                                 {
                                     <div class="stock-badge out-of-stock">
@@ -97,33 +92,16 @@
                                 }
                             </div>
 
-                            <!-- Product Details -->
-                            <div class="product-details p-3">
-                                <div class="product-category mb-1">
-                                    <small class="text-muted">@item.Product.Category?.Name</small>
+                            <div class="product-info">
+                                <a href="@Url.Action("ProductDetail", "Products", new { id = item.Product.Id })" style="text-decoration: none; color: inherit;">
+                                    <h6 class="product-name">@item.Product.Name</h6>
+                                </a>
+                                <div class="product-price-section">
+                                    <div class="product-price">@item.Product.Price.ToString("N0")₫</div>
                                 </div>
-                                
-                                <h6 class="product-title mb-2">
-                                    <a href="/Products/Details/@item.Product.Id" class="text-decoration-none">
-                                        @item.Product.Name
-                                    </a>
-                                </h6>
-                                
-                                <div class="product-price mb-2">
-                                    @if (item.Product.SalePrice.HasValue && item.Product.SalePrice > 0)
-                                    {
-                                        <span class="sale-price">@item.Product.SalePrice?.ToString("N0")₫</span>
-                                        <span class="original-price ms-2">@item.Product.Price.ToString("N0")₫</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="current-price">@item.Product.Price.ToString("N0")₫</span>
-                                    }
-                                </div>
-
-                                <div class="product-meta">
+                                <div class="wishlist-date">
                                     <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>
+                                        <i class="far fa-clock me-1"></i>
                                         Thêm vào @item.CreatedAt.ToString("dd/MM/yyyy")
                                     </small>
                                 </div>
@@ -168,76 +146,127 @@
 
 @section Styles {
     <style>
-        .wishlist-item-card {
-            border: 1px solid #e9ecef;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
+        /* Sử dụng card styles từ hệ thống chính */
+        .product-card-new {
             background: white;
-        }
-        
-        .wishlist-item-card:hover {
-            border-color: var(--jh-red);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        
-        .product-image-wrapper {
+            border-radius: 0;
             overflow: hidden;
-            border-radius: 0.5rem 0.5rem 0 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            height: 100%;
         }
         
-        .product-img {
-            height: 250px;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+        .product-card-new:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
         }
         
-        .wishlist-item-card:hover .product-img {
-            transform: scale(1.05);
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 133.33%; /* 3:4 aspect ratio */
+            overflow: hidden;
+            background: #f8f9fa;
         }
         
-        .product-actions {
+        .product-image {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .product-card-new:hover .product-image {
+            transform: scale(1.08);
+        }
+        
+        .product-info {
+            padding: 16px;
+        }
+        
+        .product-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 42px;
+        }
+        
+        .product-price-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--jh-red);
+        }
+        
+        .product-price.sale {
+            color: #dc3545;
+        }
+        
+        .product-price-original {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        
+        /* Wishlist specific styles */
+        .wishlist-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 8px;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
         
-        .wishlist-item-card:hover .product-actions {
+        .product-card-new:hover .wishlist-actions {
             opacity: 1;
         }
         
-        .btn-action {
+        .wishlist-action-btn {
             width: 40px;
             height: 40px;
             border: none;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             color: #333;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
             cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         
-        .btn-action:hover {
+        .wishlist-action-btn:hover {
             background: var(--jh-red);
             color: white;
             transform: scale(1.1);
         }
         
-        .btn-action.disabled {
+        .wishlist-action-btn.disabled {
             background: rgba(255, 255, 255, 0.5);
             color: #999;
             cursor: not-allowed;
         }
         
-        .btn-action.disabled:hover {
+        .wishlist-action-btn.disabled:hover {
             background: rgba(255, 255, 255, 0.5);
             color: #999;
             transform: none;
@@ -245,13 +274,14 @@
         
         .stock-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
+            top: 12px;
+            left: 12px;
+            padding: 6px 12px;
+            border-radius: 0;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .out-of-stock {
@@ -264,33 +294,44 @@
             color: #000;
         }
         
-        .product-title a {
-            color: #333;
-            font-weight: 500;
+        .wishlist-date {
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
         }
         
-        .product-title a:hover {
-            color: var(--jh-red);
-        }
-        
-        .original-price {
-            text-decoration: line-through;
-            color: #999;
-            font-size: 0.9rem;
+        .wishlist-date small {
+            font-size: 13px;
+            color: #6c757d;
         }
         
         .empty-wishlist-icon i {
             opacity: 0.3;
         }
         
+        /* Mobile responsive */
         @@media (max-width: 768px) {
-            .product-actions {
-                opacity: 1;
+            .wishlist-actions {
+                opacity: 1; /* Always show on mobile */
+            }
+            
+            .wishlist-action-btn {
+                width: 36px;
+                height: 36px;
             }
             
             .wishlist-actions .col-md-6:not(:first-child) {
                 margin-top: 1rem;
                 text-align: left !important;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .product-name {
+                font-size: 14px;
+            }
+            
+            .product-price {
+                font-size: 16px;
             }
         }
     </style>
@@ -478,8 +519,8 @@
             if (!toastContainer) {
                 toastContainer = document.createElement('div');
                 toastContainer.id = 'toast-container';
-                toastContainer.className = 'position-fixed top-0 end-0 p-3';
-                toastContainer.style.zIndex = '1055';
+                toastContainer.className = 'position-fixed p-3';
+                toastContainer.style.cssText = 'top: 10px; right: 20px; z-index: 99999; max-width: 450px;';
                 document.body.appendChild(toastContainer);
             }
             
@@ -488,10 +529,11 @@
             toast.id = toastId;
             toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} border-0`;
             toast.setAttribute('role', 'alert');
+            toast.style.cssText = 'word-wrap: break-word; white-space: normal; max-width: 100%;';
             
             toast.innerHTML = `
                 <div class="d-flex">
-                    <div class="toast-body">${message}</div>
+                    <div class="toast-body" style="word-wrap: break-word; white-space: normal; overflow-wrap: break-word;">${message}</div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             `;

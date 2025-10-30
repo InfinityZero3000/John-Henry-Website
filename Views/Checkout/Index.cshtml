@@ -8,8 +8,6 @@
     var shippingMethods = Model.ShippingMethods;
 }
 
-@Html.AntiForgeryToken()
-
 <div class="container py-4">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-3">
@@ -55,6 +53,7 @@
         <!-- Checkout Form -->
         <div class="col-lg-8">
             <form id="checkoutForm">
+                @Html.AntiForgeryToken()
                 <!-- Customer Information -->
                 <div class="checkout-section">
                     <div class="section-header">
@@ -230,25 +229,23 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="city" class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
                                     <select class="form-select" id="city" name="city" required>
-                                        <option value="">Chọn tỉnh/thành</option>
-                                        <option value="Ho Chi Minh">TP. Hồ Chí Minh</option>
-                                        <option value="Ha Noi">Hà Nội</option>
-                                        <option value="Da Nang">Đà Nẵng</option>
-                                        <option value="Can Tho">Cần Thơ</option>
-                                        <option value="Other">Khác</option>
+                                        <option value="">-- Chọn tỉnh/thành --</option>
+                                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                        <option value="Hà Nội">Hà Nội</option>
+                                        <option value="Đà Nẵng">Đà Nẵng</option>
+                                        <option value="Cần Thơ">Cần Thơ</option>
+                                        <option value="Khác">Khác</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="district" class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="district" name="district" required>
-                                        <option value="">Chọn quận/huyện</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="district" name="district" 
+                                           placeholder="Nhập quận/huyện" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="ward" class="form-label">Phường/Xã <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="ward" name="ward" required>
-                                        <option value="">Chọn phường/xã</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="ward" name="ward" 
+                                           placeholder="Nhập phường/xã" required>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label for="notes" class="form-label">Ghi chú (tùy chọn)</label>
@@ -862,6 +859,80 @@
             // Validate form
             if (!form.checkValidity()) {
                 form.reportValidity();
+                showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
+                return;
+            }
+            
+            // Additional validation for address fields
+            const address = formData.get('address')?.trim();
+            const ward = formData.get('ward')?.trim();
+            const district = formData.get('district')?.trim();
+            const city = formData.get('city')?.trim();
+            const phone = formData.get('phone')?.trim();
+            const email = formData.get('email')?.trim();
+            const firstName = formData.get('firstName')?.trim();
+            const lastName = formData.get('lastName')?.trim();
+            
+            console.log('=== FORM VALIDATION DEBUG ===');
+            console.log('Email:', email);
+            console.log('FirstName:', firstName);
+            console.log('LastName:', lastName);
+            console.log('Phone:', phone);
+            console.log('Address:', address);
+            console.log('Ward:', ward);
+            console.log('District:', district);
+            console.log('City:', city);
+            console.log('============================');
+            
+            // Validate email
+            const emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!email || !emailPattern.test(email)) {
+                showToast('Vui lòng nhập địa chỉ email hợp lệ', 'error');
+                console.error('Email validation failed:', email);
+                return;
+            }
+            
+            // Validate name
+            if (!firstName || !lastName) {
+                showToast('Vui lòng nhập đầy đủ họ và tên', 'error');
+                console.error('Name validation failed. FirstName:', firstName, 'LastName:', lastName);
+                return;
+            }
+            
+            if (!address) {
+                showToast('Vui lòng nhập địa chỉ', 'error');
+                console.error('Address validation failed');
+                return;
+            }
+            
+            if (!ward) {
+                showToast('Vui lòng nhập Phường/Xã', 'error');
+                console.error('Ward validation failed');
+                return;
+            }
+            
+            if (!district) {
+                showToast('Vui lòng nhập Quận/Huyện', 'error');
+                console.error('District validation failed');
+                return;
+            }
+            
+            if (!city || city === '') {
+                showToast('Vui lòng chọn Tỉnh/Thành phố', 'error');
+                console.error('City validation failed:', city);
+                return;
+            }
+            
+            if (!phone) {
+                showToast('Vui lòng nhập số điện thoại', 'error');
+                console.error('Phone validation failed');
+                return;
+            }
+            
+            // Validate shipping method is selected
+            const shippingMethod = formData.get('shippingMethod');
+            if (!shippingMethod) {
+                showToast('Vui lòng chọn phương thức vận chuyển', 'error');
                 return;
             }
             
@@ -869,38 +940,48 @@
             const button = event ? event.target : document.querySelector('button[onclick*="placeOrder"]');
             
             // Build AddressViewModel for shipping address
-            const fullName = `${formData.get('firstName')} ${formData.get('lastName')}`;
+            const fullName = `${firstName} ${lastName}`;
             const orderData = {
-                email: formData.get('email'),
+                email: email,
                 shippingAddress: {
                     fullName: fullName,
-                    phoneNumber: formData.get('phone'),
-                    address: formData.get('address'),
-                    ward: formData.get('ward'),
-                    district: formData.get('district'),
-                    city: formData.get('city'),
-                    postalCode: null,
-                    addressNote: null,
+                    phoneNumber: phone,
+                    address: address,
+                    ward: ward,
+                    district: district,
+                    city: city,
+                    postalCode: formData.get('postalCode')?.trim() || null,
+                    addressNote: formData.get('addressNote')?.trim() || null,
                     isDefault: false
                 },
                 billingAddress: {
                     fullName: fullName,
-                    phoneNumber: formData.get('phone'),
-                    address: formData.get('address'),
-                    ward: formData.get('ward'),
-                    district: formData.get('district'),
-                    city: formData.get('city'),
-                    postalCode: null,
-                    addressNote: null,
+                    phoneNumber: phone,
+                    address: address,
+                    ward: ward,
+                    district: district,
+                    city: city,
+                    postalCode: formData.get('postalCode')?.trim() || null,
+                    addressNote: formData.get('addressNote')?.trim() || null,
                     isDefault: false
                 },
                 useSameAddressForBilling: true,
-                shippingMethod: formData.get('shippingMethod'),
+                shippingMethod: shippingMethod,
                 couponCode: appliedCouponData ? appliedCouponData.code : null,
-                notes: formData.get('notes')
+                notes: formData.get('notes')?.trim() || null
             };
             
-            console.log('Placing order with data:', orderData);
+            console.log('=== ORDER DATA DEBUG ===');
+            console.log('Email:', orderData.email);
+            console.log('FullName:', orderData.shippingAddress.fullName);
+            console.log('Phone:', orderData.shippingAddress.phoneNumber);
+            console.log('Address:', orderData.shippingAddress.address);
+            console.log('Ward:', orderData.shippingAddress.ward);
+            console.log('District:', orderData.shippingAddress.district);
+            console.log('City:', orderData.shippingAddress.city);
+            console.log('Shipping Method:', orderData.shippingMethod);
+            console.log('Full Order Data:', JSON.stringify(orderData, null, 2));
+            console.log('======================');
             
             try {
                 // Disable button to prevent double submission
@@ -909,17 +990,41 @@
                     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
                 }
                 
-                // Call CreateSession API
+                // Get CSRF token
+                const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (!tokenInput) {
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Đặt hàng';
+                    }
+                    throw new Error('CSRF token not found. Vui lòng tải lại trang và thử lại.');
+                }
+                
+                console.log('Calling CreateSession API...');
+                
+                // Get CSRF token value
+                const csrfToken = tokenInput.value;
+                
+                // Call CreateSession API with CSRF token in header
                 const response = await fetch('/Checkout/CreateSession', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        'RequestVerificationToken': csrfToken
                     },
                     body: JSON.stringify(orderData)
                 });
                 
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    throw new Error(`Lỗi từ máy chủ (${response.status}). Vui lòng thử lại sau.`);
+                }
+                
                 const result = await response.json();
+                console.log('CreateSession result:', result);
                 
                 if (result.success) {
                     // Redirect to payment page with sessionId
@@ -928,8 +1033,14 @@
                         window.location.href = `/Checkout/Payment?sessionId=${result.sessionId}`;
                     }, 500);
                 } else {
-                    // Show error message
-                    showToast(result.message || 'Có lỗi xảy ra khi tạo đơn hàng', 'error');
+                    // Log field errors for debugging
+                    if (result.fieldErrors) {
+                        console.error('Validation errors by field:', result.fieldErrors);
+                    }
+                    
+                    // Show error message with full details
+                    const errorMsg = result.message || 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng kiểm tra lại thông tin.';
+                    showToast(errorMsg, 'error');
                     
                     // Re-enable button
                     if (button) {
@@ -940,7 +1051,8 @@
                 
             } catch (error) {
                 console.error('Error placing order:', error);
-                showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.', 'error');
+                const errorMessage = error.message || 'Có lỗi xảy ra khi đặt hàng. Vui lòng kiểm tra lại thông tin và thử lại.';
+                showToast(errorMessage, 'error');
                 
                 // Re-enable button
                 if (button) {
@@ -1072,8 +1184,8 @@
             if (!toastContainer) {
                 toastContainer = document.createElement('div');
                 toastContainer.id = 'toast-container';
-                toastContainer.className = 'position-fixed top-0 end-0 p-3';
-                toastContainer.style.zIndex = '1055';
+                toastContainer.className = 'position-fixed p-3';
+                toastContainer.style.cssText = 'top: 10px; right: 20px; z-index: 99999; max-width: 450px;';
                 document.body.appendChild(toastContainer);
             }
             
@@ -1082,10 +1194,11 @@
             toast.id = toastId;
             toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0`;
             toast.setAttribute('role', 'alert');
+            toast.style.cssText = 'word-wrap: break-word; white-space: normal; max-width: 100%;';
             
             toast.innerHTML = `
                 <div class="d-flex">
-                    <div class="toast-body">${message}</div>
+                    <div class="toast-body" style="word-wrap: break-word; white-space: normal; overflow-wrap: break-word;">${message}</div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             `;

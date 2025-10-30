@@ -1,266 +1,394 @@
 @model List<JohnHenryFashionWeb.Models.PaymentMethodConfig>
 @{
-    ViewData["Title"] = "Cấu hình Phương thức Thanh toán";
+    ViewData["Title"] = "Phương thức thanh toán";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item\"><a href=\"/admin/payments\">Thanh toán</a></li><li class=\"breadcrumb-item active\">Phương thức thanh toán</li>";
+    
+    var activeCount = Model?.Count(m => m.IsActive) ?? 0;
+    var inactiveCount = Model?.Count(m => !m.IsActive) ?? 0;
+    var totalCount = Model?.Count ?? 0;
 }
 
-<style>
-    .payment-container {
-        padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: calc(100vh - 80px);
-    }
-
-    .page-header-glass {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .method-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    .method-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .method-card.disabled {
-        opacity: 0.6;
-    }
-
-    .method-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .status-active {
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-    }
-
-    .status-inactive {
-        background: linear-gradient(135deg, #6b7280, #4b5563);
-        color: white;
-    }
-
-    .form-switch {
-        padding-left: 3rem;
-    }
-
-    .form-switch .form-check-input {
-        width: 3rem;
-        height: 1.5rem;
-        margin-left: -3rem;
-        cursor: pointer;
-    }
-
-    .form-switch .form-check-input:checked {
-        background-color: #10b981;
-        border-color: #10b981;
-    }
-
-    .btn-modern {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary-modern {
-        background: linear-gradient(135deg, var(--jh-red), #ff6b6b);
-        color: white;
-    }
-
-    .btn-primary-modern:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(206, 25, 58, 0.3);
-        color: white;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .info-row:last-child {
-        border-bottom: none;
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: #6b7280;
-    }
-
-    .info-value {
-        color: #111827;
-        font-weight: 500;
-    }
-</style>
-
-<div class="payment-container">
+<div class="admin-content">
     <!-- Page Header -->
-    <div class="page-header-glass">
-        <div class="d-flex justify-content-between align-items-center">
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="credit-card"></i>
+                Phương thức thanh toán
+            </h1>
             <div>
-                <h2 class="mb-2">
-                    <i class="fas fa-credit-card me-2" style="color: var(--jh-red);"></i>
-                    Cấu hình Phương thức Thanh toán
-                </h2>
-                <p class="text-muted mb-0">Quản lý các phương thức thanh toán có sẵn trên hệ thống</p>
+                <a href="/admin/payments" class="admin-btn admin-btn-secondary me-2">
+                    <i data-lucide="arrow-left"></i>
+                    Quay lại
+                </a>
+                <button type="button" class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#addMethodModal">
+                    <i data-lucide="plus"></i>
+                    Thêm phương thức
+                </button>
+            </div>
+        </div>
+        <p class="admin-page-subtitle">Quản lý các phương thức thanh toán có sẵn trên hệ thống</p>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-danger">
+            <i data-lucide="alert-circle"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng số phương thức</h3>
+                    <p class="value">@totalCount</p>
+                    <p class="change">Tất cả phương thức</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="credit-card"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang hoạt động</h3>
+                    <p class="value">@activeCount</p>
+                    <p class="change">@((activeCount > 0 && totalCount > 0 ? (activeCount * 100.0 / totalCount).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tạm ngừng</h3>
+                    <p class="value">@inactiveCount</p>
+                    <p class="change">@((inactiveCount > 0 && totalCount > 0 ? (inactiveCount * 100.0 / totalCount).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="pause-circle"></i>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Payment Methods Table -->
     @if (Model != null && Model.Any())
     {
-        <div class="row g-4">
-            @foreach (var method in Model.OrderBy(m => m.SortOrder))
-            {
-                var isActive = method.IsActive;
-                var cardClass = isActive ? "" : "disabled";
-                
-                <div class="col-md-6">
-                    <div class="method-card @cardClass">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="d-flex align-items-center">
-                                <div class="method-icon" style="background: linear-gradient(135deg, @GetMethodColor(method.Code));">
-                                    <i class="@GetMethodIcon(method.Code) text-white"></i>
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Icon</th>
+                        <th>Phương thức</th>
+                        <th>Mã</th>
+                        <th>Phí giao dịch</th>
+                        <th>Thứ tự</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 180px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var method in Model.OrderBy(m => m.SortOrder))
+                    {
+                        <tr>
+                            <td>
+                                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, @GetMethodColor(method.Code)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="@GetMethodIcon(method.Code)" style="width: 24px; height: 24px; color: white;"></i>
                                 </div>
-                                <div class="ms-3">
-                                    <h4 class="mb-1">@method.Name</h4>
-                                    <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
-                                        <i class="fas fa-circle me-1"></i>
-                                        @(isActive ? "Đang hoạt động" : "Tạm ngừng")
+                            </td>
+                            <td>
+                                <div style="font-weight: 500; color: var(--admin-text); margin-bottom: 0.25rem;">
+                                    @method.Name
+                                </div>
+                                @if (!string.IsNullOrEmpty(method.Description))
+                                {
+                                    <div style="font-size: 0.8125rem; color: var(--admin-text-light);">
+                                        @method.Description
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <code style="padding: 0.25rem 0.5rem; background: var(--admin-bg-secondary); border-radius: 6px; font-size: 0.875rem;">
+                                    @method.Code
+                                </code>
+                            </td>
+                            <td>
+                                @if (method.TransactionFeePercent > 0 || method.TransactionFeeFixed > 0)
+                                {
+                                    <div style="color: var(--admin-danger);">
+                                        @if (method.TransactionFeePercent > 0 && method.TransactionFeeFixed > 0)
+                                        {
+                                            <span>@method.TransactionFeePercent% + @method.TransactionFeeFixed.ToString("N0") ₫</span>
+                                        }
+                                        else if (method.TransactionFeePercent > 0)
+                                        {
+                                            <span>@method.TransactionFeePercent%</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@method.TransactionFeeFixed.ToString("N0") ₫</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-success">Miễn phí</span>
+                                }
+                            </td>
+                            <td>
+                                <span style="font-weight: 500;">#@method.SortOrder</span>
+                            </td>
+                            <td>
+                                @if (method.IsActive)
+                                {
+                                    <span class="admin-badge admin-badge-success">
+                                        <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                        Hoạt động
                                     </span>
-                                </div>
-                            </div>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="toggle_@method.Id" 
-                                       @(isActive ? "checked" : "") 
-                                       onchange="toggleMethod('@method.Id', this.checked)">
-                            </div>
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">Mã phương thức:</span>
-                            <span class="info-value"><code>@method.Code</code></span>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(method.Description))
-                        {
-                            <div class="info-row">
-                                <span class="info-label">Mô tả:</span>
-                                <span class="info-value">@method.Description</span>
-                            </div>
-                        }
-
-                        @if (method.TransactionFeePercent > 0 || method.TransactionFeeFixed > 0)
-                        {
-                            <div class="info-row">
-                                <span class="info-label">Phí giao dịch:</span>
-                                <span class="info-value text-danger">
-                                    @if (method.TransactionFeePercent > 0 && method.TransactionFeeFixed > 0)
+                                }
+                                else
+                                {
+                                    <span class="admin-badge admin-badge-warning">
+                                        <i data-lucide="pause-circle" style="width: 12px; height: 12px;"></i>
+                                        Tạm ngừng
+                                    </span>
+                                }
+                            </td>
+                            <td class="actions">
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button type="button" class="admin-btn admin-btn-sm admin-btn-secondary" 
+                                            onclick="editMethod('@method.Id')" title="Chỉnh sửa">
+                                        <i data-lucide="edit"></i>
+                                    </button>
+                                    @if (method.IsActive)
                                     {
-                                        <span>@method.TransactionFeePercent% + @method.TransactionFeeFixed.ToString("N0") ₫</span>
-                                    }
-                                    else if (method.TransactionFeePercent > 0)
-                                    {
-                                        <span>@method.TransactionFeePercent%</span>
+                                        <button type="button" class="admin-btn admin-btn-sm admin-btn-warning" 
+                                                onclick="toggleMethod('@method.Id', false)" title="Tạm ngừng">
+                                            <i data-lucide="pause"></i>
+                                        </button>
                                     }
                                     else
                                     {
-                                        <span>@method.TransactionFeeFixed.ToString("N0") ₫</span>
+                                        <button type="button" class="admin-btn admin-btn-sm admin-btn-success" 
+                                                onclick="toggleMethod('@method.Id', true)" title="Kích hoạt">
+                                            <i data-lucide="play"></i>
+                                        </button>
                                     }
-                                </span>
-                            </div>
-                        }
-
-                        <div class="info-row">
-                            <span class="info-label">Thứ tự hiển thị:</span>
-                            <span class="info-value">@method.SortOrder</span>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(method.LogoUrl))
-                        {
-                            <div class="mt-3 text-center">
-                                <img src="@method.LogoUrl" alt="@method.Name" style="max-height: 40px;">
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
+                                    <button type="button" class="admin-btn admin-btn-sm admin-btn-danger" 
+                                            onclick="deleteMethod('@method.Id', '@method.Name')" title="Xóa">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
     else
     {
-        <div class="method-card text-center py-5">
-            <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
-            <h4 class="text-muted">Chưa có phương thức thanh toán nào</h4>
-            <p class="text-muted">Vui lòng thêm phương thức thanh toán trong cấu hình hệ thống</p>
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                <i data-lucide="credit-card" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Chưa có phương thức thanh toán</h3>
+                <p style="color: var(--admin-text-light); margin-bottom: 1.5rem;">
+                    Vui lòng thêm phương thức thanh toán để khách hàng có thể thanh toán
+                </p>
+                <button type="button" class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#addMethodModal">
+                    <i data-lucide="plus"></i>
+                    Thêm phương thức đầu tiên
+                </button>
+            </div>
         </div>
     }
 </div>
 
+<!-- Add/Edit Method Modal -->
+<div class="modal fade" id="addMethodModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i data-lucide="plus-circle"></i>
+                    Thêm phương thức thanh toán
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="methodForm" method="post" asp-action="AddOrUpdatePaymentMethod">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="methodId" name="Id" value="" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="admin-form-label">Tên phương thức <span style="color: var(--admin-danger);">*</span></label>
+                            <input type="text" name="Name" id="methodName" class="admin-form-input" required placeholder="VD: Ví MoMo">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="admin-form-label">Mã phương thức <span style="color: var(--admin-danger);">*</span></label>
+                            <input type="text" name="Code" id="methodCode" class="admin-form-input" required placeholder="VD: MOMO">
+                        </div>
+                        <div class="col-12">
+                            <label class="admin-form-label">Mô tả</label>
+                            <textarea name="Description" id="methodDescription" class="admin-form-input" rows="2" placeholder="Mô tả ngắn về phương thức thanh toán"></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="admin-form-label">Phí % giao dịch</label>
+                            <input type="number" name="TransactionFeePercent" id="methodFeePercent" class="admin-form-input" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="admin-form-label">Phí cố định (₫)</label>
+                            <input type="number" name="TransactionFeeFixed" id="methodFeeFixed" class="admin-form-input" step="1" min="0" placeholder="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="admin-form-label">Thứ tự hiển thị</label>
+                            <input type="number" name="SortOrder" id="methodSortOrder" class="admin-form-input" min="0" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="admin-form-label">Logo URL</label>
+                            <input type="url" name="LogoUrl" id="methodLogoUrl" class="admin-form-input" placeholder="https://...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="admin-form-label">Trạng thái</label>
+                            <select name="IsActive" id="methodIsActive" class="admin-form-select">
+                                <option value="true">Hoạt động</option>
+                                <option value="false">Tạm ngừng</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="admin-form-label">Cấu hình API (JSON)</label>
+                            <textarea name="ApiConfiguration" id="methodApiConfig" class="admin-form-input" rows="4" placeholder='{"apiKey": "", "secretKey": "", "endpoint": ""}'></textarea>
+                            <small style="color: var(--admin-text-light);">Nhập cấu hình API dạng JSON nếu cần thiết</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">
+                        <i data-lucide="x"></i>
+                        Hủy
+                    </button>
+                    <button type="submit" class="admin-btn admin-btn-primary">
+                        <i data-lucide="save"></i>
+                        Lưu phương thức
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        function toggleMethod(id, isActive) {
-            if (!confirm('Bạn có chắc chắn muốn ' + (isActive ? 'bật' : 'tắt') + ' phương thức thanh toán này?')) {
-                // Revert checkbox state if user cancels
-                $('#toggle_' + id).prop('checked', !isActive);
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Toggle payment method status
+        function toggleMethod(id, activate) {
+            const action = activate ? 'kích hoạt' : 'tạm ngừng';
+            if (!confirm(`Bạn có chắc chắn muốn ${action} phương thức thanh toán này?`)) {
                 return;
             }
 
-            $.ajax({
-                url: '@Url.Action("TogglePaymentMethod", "PaymentManagement")',
-                type: 'POST',
-                data: {
-                    id: id,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            fetch('/admin/payments/methods/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
                 },
-                success: function(response) {
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + (response.message || 'Vui lòng thử lại'));
-                        $('#toggle_' + id).prop('checked', !isActive);
-                    }
-                },
-                error: function() {
-                    alert('Có lỗi xảy ra. Vui lòng thử lại');
-                    $('#toggle_' + id).prop('checked', !isActive);
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại'));
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại');
             });
         }
+
+        // Edit payment method
+        function editMethod(id) {
+            // TODO: Load method data and populate form
+            $('#addMethodModal').modal('show');
+            $('#methodId').val(id);
+            $('.modal-title').html('<i data-lucide="edit"></i> Chỉnh sửa phương thức thanh toán');
+            lucide.createIcons();
+        }
+
+        // Delete payment method
+        function deleteMethod(id, name) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa phương thức "${name}"?\n\nLưu ý: Hành động này không thể hoàn tác!`)) {
+                return;
+            }
+
+            fetch(`/admin/payments/methods/delete/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại');
+            });
+        }
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+
+        // Reset modal on close
+        $('#addMethodModal').on('hidden.bs.modal', function () {
+            $('#methodForm')[0].reset();
+            $('#methodId').val('');
+            $('.modal-title').html('<i data-lucide="plus-circle"></i> Thêm phương thức thanh toán');
+            lucide.createIcons();
+        });
+
+        // Initialize modal icons
+        $('#addMethodModal').on('shown.bs.modal', function () {
+            lucide.createIcons();
+        });
     </script>
 }
 
@@ -269,13 +397,14 @@
     {
         return methodCode switch
         {
-            "COD" => "fas fa-money-bill-wave",
-            "VNPay" => "fas fa-credit-card",
-            "Momo" => "fas fa-mobile-alt",
-            "ZaloPay" => "fas fa-wallet",
-            "BankTransfer" => "fas fa-university",
-            "CreditCard" => "fas fa-credit-card",
-            _ => "fas fa-credit-card"
+            "COD" => "banknote",
+            "VNPay" => "credit-card",
+            "Momo" => "smartphone",
+            "ZaloPay" => "wallet",
+            "BankTransfer" => "building-2",
+            "CreditCard" => "credit-card",
+            "Stripe" => "credit-card",
+            _ => "credit-card"
         };
     }
 
@@ -289,6 +418,7 @@
             "ZaloPay" => "#0ea5e9, #0284c7",
             "BankTransfer" => "#8b5cf6, #7c3aed",
             "CreditCard" => "#f59e0b, #d97706",
+            "Stripe" => "#635bff, #5469d4",
             _ => "#6b7280, #4b5563"
         };
     }

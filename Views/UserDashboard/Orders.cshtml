@@ -1,0 +1,510 @@
+@model List<JohnHenryFashionWeb.Models.Order>
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block user-sidebar">
+            <div class="sidebar-content">
+                <div class="text-center mb-3">
+                    <div class="user-avatar">
+                        @if (!string.IsNullOrEmpty(currentUser?.Avatar))
+                        {
+                            <img src="@currentUser.Avatar" alt="Avatar" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <i data-lucide="user-circle" style="width: 60px; height: 60px; color: #6c757d;"></i>
+                        }
+                    </div>
+                    <h5 class="mt-2">@(currentUser?.FullName ?? "User")</h5>
+                    <p class="text-muted">@currentUser?.Email</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Profile", "UserDashboard")">
+                            <i data-lucide="user" class="me-2"></i>
+                            Hồ sơ 
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="@Url.Action("Orders", "UserDashboard")">
+                            <i data-lucide="shopping-bag" class="me-2"></i>
+                            Đơn hàng 
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Wishlist">
+                            <i data-lucide="heart" class="me-2"></i>
+                            Yêu thích
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("ChangePassword", "Account")">
+                            <i data-lucide="lock" class="me-2"></i>
+                            Đổi mật khẩu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Notifications", "UserDashboard")">
+                            <i data-lucide="bell" class="me-2"></i>
+                            Thông báo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-action="Logout" asp-controller="Account" method="post" style="display: inline; width: 100%;">
+                            <button type="submit" class="nav-link w-100 text-start" style="background: none; border: none; color: #000000;">
+                                <i data-lucide="log-out" class="me-2"></i>
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Đơn hàng của tôi</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <select class="form-select form-select-sm" id="orderFilter">
+                        <option value="">Tất cả đơn hàng</option>
+                        <option value="pending">Chờ xử lý</option>
+                        <option value="processing">Đang xử lý</option>
+                        <option value="shipped">Đã giao hàng</option>
+                        <option value="delivered">Đã nhận hàng</option>
+                        <option value="cancelled">Đã hủy</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="order-history">
+                    @foreach (var order in Model)
+                    {
+                        <div class="card shadow mb-3 order-item" data-status="@order.Status">
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">Đơn hàng #@order.OrderNumber</h6>
+                                        <small class="text-muted">Đặt ngày: @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                "delivered" => "bg-success",
+                                                "shipped" => "bg-info",
+                                                "processing" => "bg-warning text-dark",
+                                                "cancelled" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                            
+                                            var statusText = order.Status switch
+                                            {
+                                                "pending" => "Chờ xử lý",
+                                                "processing" => "Đang xử lý", 
+                                                "shipped" => "Đã giao hàng",
+                                                "delivered" => "Đã nhận hàng",
+                                                "cancelled" => "Đã hủy",
+                                                _ => "Không xác định"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@statusText</span>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <strong class="text-primary">@order.TotalAmount.ToString("N0") đ</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        @if (order.OrderItems?.Any() == true)
+                                        {
+                                            <div class="order-products">
+                                                @foreach (var item in order.OrderItems.Take(3))
+                                                {
+                                                    <div class="product-item d-flex align-items-center mb-3">
+                                                        <img src="@(!string.IsNullOrEmpty(item.ProductImage) ? item.ProductImage : (!string.IsNullOrEmpty(item.Product?.FeaturedImageUrl) ? item.Product.FeaturedImageUrl : "/images/placeholder.jpg"))" 
+                                                             alt="@(item.ProductName ?? item.Product?.Name)" 
+                                                             class="img-thumbnail me-3" 
+                                                             style="width: 60px; height: 60px; object-fit: cover;">
+                                                        <div>
+                                                            <h6 class="mb-1">@(item.ProductName ?? item.Product?.Name)</h6>
+                                                            <small class="text-muted">
+                                                                SKU: @(item.ProductSKU ?? item.Product?.SKU ?? "N/A") | SL: @item.Quantity
+                                                            </small>
+                                                            <div class="price text-danger">@item.UnitPrice.ToString("N0") đ</div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                @if (order.OrderItems.Count > 3)
+                                                {
+                                                    <small class="text-muted">Và @(order.OrderItems.Count - 3) sản phẩm khác...</small>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">Không có sản phẩm</small>
+                                        }
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="order-actions text-end">
+                                            <a href="/UserDashboard/OrderDetail/@order.Id" class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-eye me-1"></i>Chi tiết
+                                            </a>
+                                            @if (order.Status != "cancelled" && order.Status != "delivered")
+                                            {
+                                                <button class="btn btn-outline-danger btn-sm" onclick="cancelOrder('@order.Id')">
+                                                    <i class="fas fa-times me-1"></i>Hủy
+                                                </button>
+                                            }
+                                        </div>
+                                        <div class="delivery-info mt-3">
+                                            @if (order.Status == "delivered" && order.DeliveredAt.HasValue)
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="fas fa-truck me-1"></i>Giao ngày: @order.DeliveredAt.Value.ToString("dd/MM/yyyy")
+                                                </small>
+                                            }
+                                            else if (order.Status == "shipped")
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="fas fa-truck me-1"></i>Đang giao hàng
+                                                </small>
+                                            }
+                                            else if (order.Status == "cancelled")
+                                            {
+                                                <small class="text-muted text-danger">
+                                                    <i class="fas fa-info-circle me-1"></i>Đã hủy
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="empty-orders text-center py-5">
+                    <div class="empty-icon mb-4">
+                        <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                    </div>
+                    <h5 class="mb-3">Chưa có đơn hàng nào</h5>
+                    <p class="text-muted mb-4">Bạn chưa thực hiện đơn hàng nào. Hãy khám phá sản phẩm và mua sắm ngay!</p>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Mua sắm ngay
+                    </a>
+                </div>
+            }
+        </main>
+    </div>
+</div>
+
+<style>
+/* Container and Layout Fixes */
+.container-fluid {
+    padding: 0;
+}
+
+.row {
+    margin: 0;
+    display: flex;
+}
+
+/* Sidebar - Optimized shorter layout */
+.user-sidebar {
+    background: #ffffff !important;
+    border-right: 1px solid #dee2e6;
+    min-height: auto;
+    max-height: 80vh;
+    position: relative !important;
+    padding: 0 !important;
+    z-index: 1;
+}
+
+.sidebar-content {
+    padding: 15px 10px;
+    height: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Main content area */
+main.col-md-9 {
+    margin-left: 0 !important;
+    padding: 20px;
+    flex: 1;
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+/* Navigation styles */
+.user-sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 3px;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.user-sidebar .nav-link:hover {
+    color: #333;
+    background-color: #f8f9fa;
+    text-decoration: none;
+}
+
+.user-sidebar .nav-link.active {
+    color: #333;
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+
+.user-sidebar .nav-link i {
+    width: 18px;
+    height: 18px;
+    text-align: center;
+}
+
+/* Lucide icons styling */
+.user-sidebar i[data-lucide] {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.5;
+}
+
+/* Avatar and user info - Compact */
+.user-avatar {
+    margin-bottom: 10px;
+}
+
+.text-center h5 {
+    margin-bottom: 3px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.text-center .text-muted {
+    margin-bottom: 15px;
+}
+
+/* Form and button styling */
+.user-sidebar form {
+    width: 100%;
+}
+
+.user-sidebar button.nav-link {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    color: #000000 !important;
+}
+
+.user-sidebar button.nav-link:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #000000 !important;
+}
+
+/* Order specific styles */
+.order-item {
+    transition: all 0.3s ease;
+}
+
+.order-item:hover {
+    transform: translateY(-2px);
+}
+
+.product-item h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.price {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.order-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.delivery-info {
+    font-size: 0.8rem;
+}
+
+.empty-icon i {
+    opacity: 0.3;
+}
+
+/* Shadow utility */
+.shadow {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+}
+
+/* Mobile Responsive */
+@@media (max-width: 767.98px) {
+    .row {
+        flex-direction: column;
+    }
+    
+    .user-sidebar {
+        min-height: auto;
+        max-height: 60vh;
+        order: 2;
+    }
+    
+    main.col-md-9 {
+        order: 1;
+        min-height: auto;
+        margin-bottom: 0;
+    }
+    
+    .sidebar-content {
+        padding: 10px 8px;
+    }
+    
+    .card-header .row,
+    .card-body .row {
+        text-align: center;
+    }
+    
+    .order-actions {
+        margin-top: 1rem;
+        text-align: center !important;
+    }
+    
+    .delivery-info {
+        text-align: center;
+    }
+}
+
+/* Ensure footer is never covered */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container-fluid {
+    flex: 1;
+}
+
+footer {
+    margin-top: auto;
+    z-index: 999 !important;
+}
+</style>
+
+@section Scripts {
+    <script>
+        // Order filter functionality
+        document.getElementById('orderFilter')?.addEventListener('change', function() {
+            const filterValue = this.value;
+            const orderItems = document.querySelectorAll('.order-item');
+            let visibleCount = 0;
+            
+            orderItems.forEach(item => {
+                const status = item.getAttribute('data-status');
+                let shouldShow = true;
+                
+                if (filterValue) {
+                    shouldShow = status === filterValue;
+                }
+                
+                if (shouldShow) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Show empty state if no orders match filter
+            const emptyState = document.querySelector('.empty-orders');
+            const orderHistory = document.querySelector('.order-history');
+            
+            if (visibleCount === 0 && orderHistory) {
+                orderHistory.style.display = 'none';
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                }
+            } else {
+                if (orderHistory) {
+                    orderHistory.style.display = 'block';
+                }
+                if (emptyState) {
+                    emptyState.style.display = 'none';
+                }
+            }
+        });
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            // Try to use global showNotification if available
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+                return;
+            }
+            
+            alert(message);
+        }
+        
+        // Cancel order function
+        function cancelOrder(orderId) {
+            if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
+                // Get anti-forgery token
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                const token = tokenElement ? tokenElement.value : '';
+                
+                fetch('/UserDashboard/CancelOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ orderId: orderId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Đơn hàng đã được hủy thành công!', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+                });
+            }
+        }
+    </script>
+}

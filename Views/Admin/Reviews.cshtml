@@ -3,6 +3,14 @@
     ViewData["Title"] = "Quản lý đánh giá";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["CurrentSection"] = "Reviews";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Marketing</li>";
+    
+    // Statistics
+    var totalCount = Model.Count();
+    var pendingCount = Model.Count(r => !r.IsApproved);
+    var approvedCount = Model.Count(r => r.IsApproved);
+    var averageRating = totalCount > 0 ? Model.Average(r => r.Rating) : 0;
+    var fiveStarCount = Model.Count(r => r.Rating == 5);
 }
 
 <div class="admin-content">
@@ -17,117 +25,235 @@
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng đánh giá</h3>
+                    <p class="value">@totalCount</p>
+                    <p class="change">Tất cả đánh giá</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="star"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Chờ duyệt</h3>
+                    <p class="value">@pendingCount</p>
+                    <p class="change">@((totalCount > 0 ? (pendingCount * 100.0 / totalCount).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="clock"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đã duyệt</h3>
+                    <p class="value">@approvedCount</p>
+                    <p class="change">@((totalCount > 0 ? (approvedCount * 100.0 / totalCount).ToString("F1") : "0"))% tổng số</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đánh giá TB</h3>
+                    <p class="value">@averageRating.ToString("F1") <i data-lucide="star" style="width: 20px; height: 20px; color: #ffc107;"></i></p>
+                    <p class="change">@fiveStarCount đánh giá 5 sao</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="award"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="admin-filters">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-10">
+                <label class="admin-form-label">Tìm kiếm</label>
+                <div class="admin-search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" class="admin-form-input" placeholder="Tìm kiếm sản phẩm, khách hàng..." />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs">
+        <button class="admin-filter-tab active" data-filter="all">
+            Tất cả (@totalCount)
+        </button>
+        <button class="admin-filter-tab" data-filter="pending">
+            <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+            Chờ duyệt (@pendingCount)
+        </button>
+        <button class="admin-filter-tab" data-filter="approved">
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
+            Đã duyệt (@approvedCount)
+        </button>
+    </div>
+
     <!-- Content Section -->
     <div class="content-wrapper">
         <div class="row">
             <div class="col-12">
-                    <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h5 class="admin-card-title">Danh sách đánh giá</h5>
+                @if (Model.Any())
+                {
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;"></th>
+                                    <th>Sản phẩm</th>
+                                    <th>Khách hàng</th>
+                                    <th>Đánh giá</th>
+                                    <th>Nội dung</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Trạng thái</th>
+                                    <th style="width: 160px;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviewsTableBody">
+                                @foreach (var review in Model)
+                                {
+                                    <tr data-status="@(review.IsApproved ? "approved" : "pending")" data-searchable="@review.Product?.Name @review.User?.Email @(review.User?.FirstName + " " + review.User?.LastName)">
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(review.Product?.FeaturedImageUrl))
+                                            {
+                                                <img src="@review.Product.FeaturedImageUrl" alt="@review.Product.Name" 
+                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px; border: 2px solid var(--admin-border);">
+                                            }
+                                            else
+                                            {
+                                                <div style="width: 40px; height: 40px; background: var(--admin-bg-secondary); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--admin-border);">
+                                                    <i data-lucide="package" style="width: 18px; height: 18px; color: var(--admin-text-muted);"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 500; color: var(--admin-text); margin-bottom: 0.25rem;">
+                                                @review.Product?.Name
+                                            </div>
+                                            <div style="font-size: 0.8125rem; color: var(--admin-text-light);">
+                                                SKU: @review.Product?.SKU
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 500; color: var(--admin-text); margin-bottom: 0.25rem;">
+                                                @(review.User?.FirstName + " " + review.User?.LastName)
+                                            </div>
+                                            <div style="font-size: 0.8125rem; color: var(--admin-text-light);">
+                                                @review.User?.Email
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i data-lucide="star" style="width: 14px; height: 14px; @(i <= review.Rating ? "color: #ffc107; fill: #ffc107;" : "color: #dee2e6;")"></i>
+                                                }
+                                                <span style="margin-left: 0.5rem; font-weight: 500;">@review.Rating.0</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="max-width: 250px; font-size: 0.875rem; line-height: 1.5;">
+                                                @if (!string.IsNullOrEmpty(review.Comment))
+                                                {
+                                                    <text>@(review.Comment.Length > 80 ? review.Comment.Substring(0, 80) + "..." : review.Comment)</text>
+                                                }
+                                                else
+                                                {
+                                                    <span style="color: var(--admin-text-light); font-style: italic;">Không có bình luận</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="font-size: 0.875rem;">@review.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                            <div style="font-size: 0.8125rem; color: var(--admin-text-light);">@review.CreatedAt.ToString("HH:mm")</div>
+                                        </td>
+                                        <td>
+                                            @if (review.IsApproved)
+                                            {
+                                                <span class="admin-badge admin-badge-success">
+                                                    <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                                                    Đã duyệt
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="admin-badge admin-badge-warning">
+                                                    <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                                                    Chờ duyệt
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="actions">
+                                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                                <button onclick="viewReviewDetails('@review.Id')" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem">
+                                                    <i data-lucide="eye"></i>
+                                                </button>
+                                                @if (!review.IsApproved)
+                                                {
+                                                    <button onclick="approveReview('@review.Id')" class="admin-btn admin-btn-sm admin-btn-success" title="Duyệt">
+                                                        <i data-lucide="check"></i>
+                                                    </button>
+                                                }
+                                                <button onclick="deleteReview('@review.Id')" class="admin-btn admin-btn-sm admin-btn-danger" title="Xóa">
+                                                    <i data-lucide="trash-2"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="admin-card-body">
-                        @if (Model.Any())
-                        {
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Sản phẩm</th>
-                                            <th>Khách hàng</th>
-                                            <th>Đánh giá</th>
-                                            <th>Nội dung</th>
-                                            <th>Ngày tạo</th>
-                                            <th>Trạng thái</th>
-                                            <th>Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var review in Model)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        @if (!string.IsNullOrEmpty(review.Product?.FeaturedImageUrl))
-                                                        {
-                                                            <img src="@review.Product.FeaturedImageUrl" alt="@review.Product.Name" 
-                                                                 class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                                        }
-                                                        <div>
-                                                            <div class="fw-semibold">@review.Product?.Name</div>
-                                                            <small class="text-muted">@review.Product?.SKU</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div>
-                                                        <div class="fw-semibold">@(review.User?.FirstName + " " + review.User?.LastName)</div>
-                                                        <small class="text-muted">@review.User?.Email</small>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        @for (int i = 1; i <= 5; i++)
-                                                        {
-                                                            <i data-lucide="star" class="@(i <= review.Rating ? "text-warning" : "text-muted")" style="width: 16px; height: 16px; @(i <= review.Rating ? "fill: currentColor;" : "")"></i>
-                                                        }
-                                                        <span class="ms-1">(@review.Rating)</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="review-content" style="max-width: 300px;">
-                                                        @if (!string.IsNullOrEmpty(review.Comment))
-                                                        {
-                                                            @(review.Comment.Length > 100 ? review.Comment.Substring(0, 100) + "..." : review.Comment)
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted">Không có bình luận</span>
-                                                        }
-                                                    </div>
-                                                </td>
-                                                <td>@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                                <td>
-                                                    @if (review.IsApproved)
-                                                    {
-                                                        <span class="admin-badge admin-badge-success">Đã duyệt</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="admin-badge admin-badge-warning">Chờ duyệt</span>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        @if (!review.IsApproved)
-                                                        {
-                                                            <form asp-action="ApproveReview" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                                <button type="submit" class="admin-btn admin-btn-sm admin-btn-success" title="Duyệt">
-                                                                    <i data-lucide="check"></i>
-                                                                </button>
-                                                            </form>
-                                                        }
-                                                        <form asp-action="DeleteReview" asp-route-id="@review.Id" method="post" class="d-inline">
-                                                            <button type="submit" class="admin-btn admin-btn-sm admin-btn-danger" 
-                                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')" title="Xóa">
-                                                                <i data-lucide="trash-2"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="admin-empty-state">
-                                <i data-lucide="star" style="width: 64px; height: 64px;"></i>
-                                <h5>Chưa có đánh giá nào</h5>
-                                <p>Các đánh giá của khách hàng sẽ hiển thị tại đây</p>
-                            </div>
-                        }
+                }
+                else
+                {
+                    <div class="admin-card">
+                        <div class="admin-card-body admin-text-center" style="padding: 3rem;">
+                            <i data-lucide="star" style="width: 64px; height: 64px; color: var(--admin-text-muted); margin-bottom: 1rem;"></i>
+                            <h3 style="margin-bottom: 0.5rem;">Chưa có đánh giá nào</h3>
+                            <p style="color: var(--admin-text-light);">Các đánh giá của khách hàng sẽ hiển thị tại đây</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Details Modal -->
+<div class="modal fade" id="reviewDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i data-lucide="star"></i> Chi tiết đánh giá
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="reviewDetailsContent">
+                <!-- Content loaded via AJAX -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -135,29 +261,243 @@
     </div>
 </div>
 
-<style>
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        color: #495057;
-        background-color: #f8f9fa;
-    }
-
-    .table td {
-        vertical-align: middle;
-    }
-
-    .review-content {
-        word-wrap: break-word;
-        white-space: normal;
-    }
-</style>
-
+@section Scripts {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Lucide icons
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
+        
+        // Filter functionality
+        const tabs = document.querySelectorAll('.admin-filter-tab');
+        const rows = document.querySelectorAll('#reviewsTableBody tr');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Reinitialize icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+                
+                // Filter rows
+                rows.forEach(row => {
+                    const status = row.dataset.status;
+                    if (filter === 'all' || status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                rows.forEach(row => {
+                    const searchable = row.dataset.searchable.toLowerCase();
+                    if (searchable.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
     });
+    
+    // View review details
+    async function viewReviewDetails(reviewId) {
+        const modal = new bootstrap.Modal(document.getElementById('reviewDetailsModal'));
+        const content = document.getElementById('reviewDetailsContent');
+        
+        modal.show();
+        
+        // Reinitialize icons after modal is shown
+        document.getElementById('reviewDetailsModal').addEventListener('shown.bs.modal', function () {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+        
+        try {
+            const response = await fetch(`/admin/reviews/details/${reviewId}`);
+            if (!response.ok) throw new Error('Failed to fetch review details');
+            
+            const review = await response.json();
+            content.innerHTML = renderReviewDetails(review);
+            
+            // Reinitialize icons after content loaded
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        } catch (error) {
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i data-lucide="alert-circle"></i>
+                    Không thể tải chi tiết đánh giá. Vui lòng thử lại.
+                </div>
+            `;
+            console.error('Error loading review details:', error);
+        }
+    }
+    
+    function renderReviewDetails(review) {
+        const starsHtml = Array.from({length: 5}, (_, i) => {
+            const filled = i < review.rating;
+            return `<i data-lucide="star" style="width: 18px; height: 18px; ${filled ? 'color: #ffc107; fill: #ffc107;' : 'color: #dee2e6;'}"></i>`;
+        }).join('');
+        
+        const imagesHtml = review.images && review.images.length > 0 ? `
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1rem;">
+                ${review.images.map(img => `<img src="${img}" alt="Review image" onclick="window.open('${img}', '_blank')" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`).join('')}
+            </div>
+        ` : '';
+        
+        return `
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                <h6 style="color: var(--admin-text); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="package"></i> Sản phẩm
+                </h6>
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    ${review.product.image ? `<img src="${review.product.image}" alt="${review.product.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 1rem; border: 2px solid var(--admin-border);">` : ''}
+                    <div>
+                        <div style="font-weight: 500; font-size: 1.1rem; color: var(--admin-text);">${review.product.name}</div>
+                        <small style="color: var(--admin-text-light);">SKU: ${review.product.sku}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                <h6 style="color: var(--admin-text); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="user"></i> Khách hàng
+                </h6>
+                <div style="margin-bottom: 0.5rem;"><strong>Tên:</strong> ${review.user.name}</div>
+                <div style="margin-bottom: 0.5rem;"><strong>Email:</strong> ${review.user.email}</div>
+                ${review.user.phone ? `<div><strong>Số điện thoại:</strong> ${review.user.phone}</div>` : ''}
+            </div>
+            
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                <h6 style="color: var(--admin-text); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="star"></i> Đánh giá
+                </h6>
+                <div style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0.25rem;">
+                    ${starsHtml}
+                    <span style="margin-left: 0.5rem; font-weight: 500; font-size: 1.2rem;">${review.rating}.0</span>
+                </div>
+                <div style="margin-bottom: 0.5rem;"><strong>Ngày đánh giá:</strong> ${formatDateTime(review.createdAt)}</div>
+                <div><strong>Trạng thái:</strong> 
+                    ${review.isApproved 
+                        ? '<span class="admin-badge admin-badge-success"><i data-lucide="check-circle" style="width: 12px; height: 12px;"></i> Đã duyệt</span>' 
+                        : '<span class="admin-badge admin-badge-warning"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Chờ duyệt</span>'}
+                </div>
+            </div>
+            
+            ${review.comment ? `
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                <h6 style="color: var(--admin-text); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="message-square"></i> Nội dung đánh giá
+                </h6>
+                <p style="white-space: pre-line; line-height: 1.6; color: var(--admin-text);">${review.comment}</p>
+                ${imagesHtml}
+            </div>
+            ` : ''}
+            
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                ${!review.isApproved ? `
+                <button class="admin-btn admin-btn-success" onclick="approveReview('${review.id}')">
+                    <i data-lucide="check"></i> Duyệt đánh giá
+                </button>
+                ` : ''}
+                <button class="admin-btn admin-btn-danger" onclick="deleteReview('${review.id}')">
+                    <i data-lucide="trash-2"></i> Xóa đánh giá
+                </button>
+            </div>
+        `;
+    }
+    
+    // Approve review
+    async function approveReview(reviewId) {
+        if (!confirm('Bạn có chắc chắn muốn duyệt đánh giá này?')) return;
+        
+        try {
+            const response = await fetch(`/admin/reviews/approve/${reviewId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to approve review');
+            
+            showAlert('success', 'Đã duyệt đánh giá thành công!');
+            setTimeout(() => location.reload(), 1000);
+        } catch (error) {
+            showError('Không thể duyệt đánh giá. Vui lòng thử lại.');
+            console.error('Error approving review:', error);
+        }
+    }
+    
+    // Delete review
+    async function deleteReview(reviewId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.')) return;
+        
+        try {
+            const response = await fetch(`/admin/reviews/delete/${reviewId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to delete review');
+            
+            showAlert('success', 'Đã xóa đánh giá thành công!');
+            setTimeout(() => location.reload(), 1000);
+        } catch (error) {
+            showError('Không thể xóa đánh giá. Vui lòng thử lại.');
+            console.error('Error deleting review:', error);
+        }
+    }
+    
+    // Helper functions
+    function formatDateTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+    
+    function showError(message) {
+        showAlert('danger', message);
+    }
 </script>
+}
