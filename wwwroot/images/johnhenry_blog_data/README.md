@@ -1,4 +1,4 @@
-# 📚 JOHN HENRY BLOG COLLECTION
+# JOHN HENRY BLOG COLLECTION
 
 > Bộ sưu tập bài viết về thời trang nam từ John Henry Vietnam
 
@@ -6,14 +6,14 @@
 
 ---
 
-## 📊 Thống Kê
+## Thống Kê
 
 | Metric | Value |
 |--------|-------|
-| 📝 **Tổng số bài viết** | 2 |
+| **Tổng số bài viết** | 2 |
 | 📸 **Tổng số hình ảnh** | 11 |
-| 🎨 **Banner** | 3 |
-| 📄 **Tổng nội dung** | 4,949 ký tự |
+| **Banner** | 3 |
+| **Tổng nội dung** | 4,949 ký tự |
 | 📅 **Ngày crawl** | 16/10/2025 |
 
 ---
@@ -32,7 +32,7 @@ Khám phá chất liệu viscose - "lụa nhân tạo" mang lại sự mềm m�
 - 🌸 Mềm mại & thoáng khí
 - 💧 Hút ẩm tốt
 - 👔 Giữ form & hạn chế xù lông
-- 🎨 Đa dạng ứng dụng
+- Đa dạng ứng dụng
 
 **Nội dung:** 2,487 ký tự | **Hình ảnh:** 5
 
@@ -49,7 +49,7 @@ Khám phá chất liệu viscose - "lụa nhân tạo" mang lại sự mềm m�
 Món quà tinh tế dành tặng Ngày Doanh nhân Việt Nam - Dòng sơ mi công sở lịch lãm, hiện đại.
 
 **Highlights:**
-- 🎨 Đa dạng màu sắc & họa tiết
+- Đa dạng màu sắc & họa tiết
 - 👕 Form slim fit ôm gọn gàng
 - 🌟 Chất liệu cotton mềm mại
 - 💼 Phù hợp công sở & sự kiện
@@ -90,9 +90,9 @@ johnhenry_blog_data/
 
 ---
 
-## 🔍 Tính Năng Crawler
+## Tính Năng Crawler
 
-### ✅ Đã Hoàn Thành
+### Đã Hoàn Thành
 
 - [x] **Crawl nội dung blog** với 9 CSS selectors
 - [x] **Image markers** đánh dấu vị trí ảnh: `[IMAGE_img_xxx_00]`
@@ -103,14 +103,14 @@ johnhenry_blog_data/
 - [x] **Export JSON/CSV** - đầy đủ metadata
 - [x] **Content files** - file text riêng cho mỗi bài
 
-### 📊 Chất Lượng Data
+### Chất Lượng Data
 
 | Metric | Result |
 |--------|--------|
-| **Posts with content** | ✅ 2/2 (100%) |
-| **Posts with images** | ✅ 2/2 (100%) |
-| **Posts with banners** | ✅ 2/2 (100%) |
-| **Duplicate images** | ✅ 0 (removed) |
+| **Posts with content** | 2/2 (100%) |
+| **Posts with images** | 2/2 (100%) |
+| **Posts with banners** | 2/2 (100%) |
+| **Duplicate images** | 0 (removed) |
 | **Avg content length** | 2,474 chars |
 | **Total images** | 11 unique |
 
@@ -184,7 +184,7 @@ for img_id in images:
 
 ---
 
-## 📝 License & Credits
+## License & Credits
 
 **Data Source:** [John Henry Vietnam Blog](https://johnhenry.vn/blogs/xu-huong)  
 **Crawler:** [Crawl4AI](https://github.com/unclecode/crawl4ai)  
@@ -194,7 +194,7 @@ for img_id in images:
 
 <div align="center">
 
-### 🎯 JOHN HENRY
+### JOHN HENRY
 *Thời trang nam chính hãng - Phong cách lịch lãm Việt Nam*
 
 **Made with ❤️ using Crawl4AI**
