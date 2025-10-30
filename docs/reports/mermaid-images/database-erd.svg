@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2000">
+  <defs>
+    <style>
+      .entity-box { fill: #ffffff; stroke: #2d3748; stroke-width: 2; }
+      .entity-header { fill: #4a5568; }
+      .entity-title { fill: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; }
+      .attribute { fill: #2d3748; font-family: Arial, sans-serif; font-size: 11px; }
+      .pk { font-weight: bold; }
+      .fk { fill: #718096; font-style: italic; }
+      .relationship { stroke: #4a5568; stroke-width: 1.5; fill: none; }
+      .section-title { fill: #2d3748; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1600" height="2000" fill="#f7fafc"/>
+  
+  <!-- Title -->
+  <text x="800" y="30" text-anchor="middle" style="font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; fill: #2d3748;">
+    JOHN HENRY FASHION - DATABASE ERD
+  </text>
+  <text x="800" y="55" text-anchor="middle" style="font-family: Arial, sans-serif; font-size: 14px; fill: #718096;">
+    Entity Relationship Diagram - Multi-Vendor E-Commerce Platform
+  </text>
+  
+  <!-- CORE ENTITIES SECTION -->
+  <text x="50" y="90" class="section-title">CORE ENTITIES</text>
+  <line x1="50" y1="95" x2="400" y2="95" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- Users (ApplicationUser) -->
+  <rect x="50" y="110" width="200" height="220" class="entity-box"/>
+  <rect x="50" y="110" width="200" height="30" class="entity-header"/>
+  <text x="150" y="130" text-anchor="middle" class="entity-title">Users</text>
+  <text x="60" y="155" class="attribute pk">+ Id: string</text>
+  <text x="60" y="170" class="attribute">Email: string</text>
+  <text x="60" y="185" class="attribute">UserName: string</text>
+  <text x="60" y="200" class="attribute">PasswordHash: string</text>
+  <text x="60" y="215" class="attribute">FullName: string</text>
+  <text x="60" y="230" class="attribute">PhoneNumber: string</text>
+  <text x="60" y="245" class="attribute">IsAdmin: bool</text>
+  <text x="60" y="260" class="attribute">IsSeller: bool</text>
+  <text x="60" y="275" class="attribute">EmailConfirmed: bool</text>
+  <text x="60" y="290" class="attribute">CreatedAt: DateTime</text>
+  <text x="60" y="305" class="attribute">LastLoginDate: DateTime</text>
+  <text x="60" y="320" class="attribute">IsActive: bool</text>
+  
+  <!-- Products -->
+  <rect x="300" y="110" width="200" height="250" class="entity-box"/>
+  <rect x="300" y="110" width="200" height="30" class="entity-header"/>
+  <text x="400" y="130" text-anchor="middle" class="entity-title">Products</text>
+  <text x="310" y="155" class="attribute pk">+ ProductId: int</text>
+  <text x="310" y="170" class="attribute">Name: string</text>
+  <text x="310" y="185" class="attribute">Description: string</text>
+  <text x="310" y="200" class="attribute">Price: decimal</text>
+  <text x="310" y="215" class="attribute">StockQuantity: int</text>
+  <text x="310" y="230" class="attribute">SKU: string</text>
+  <text x="310" y="245" class="attribute">IsActive: bool</text>
+  <text x="310" y="260" class="attribute">IsFeatured: bool</text>
+  <text x="310" y="275" class="attribute">Rating: decimal</text>
+  <text x="310" y="290" class="attribute fk">CategoryId: int</text>
+  <text x="310" y="305" class="attribute fk">BrandId: int</text>
+  <text x="310" y="320" class="attribute fk">StoreId: int</text>
+  <text x="310" y="335" class="attribute fk">SellerId: string</text>
+  <text x="310" y="350" class="attribute">CreatedAt: DateTime</text>
+  
+  <!-- Categories -->
+  <rect x="550" y="110" width="200" height="160" class="entity-box"/>
+  <rect x="550" y="110" width="200" height="30" class="entity-header"/>
+  <text x="650" y="130" text-anchor="middle" class="entity-title">Categories</text>
+  <text x="560" y="155" class="attribute pk">+ CategoryId: int</text>
+  <text x="560" y="170" class="attribute">Name: string</text>
+  <text x="560" y="185" class="attribute">Description: string</text>
+  <text x="560" y="200" class="attribute">Slug: string</text>
+  <text x="560" y="215" class="attribute">ImageUrl: string</text>
+  <text x="560" y="230" class="attribute">IsActive: bool</text>
+  <text x="560" y="245" class="attribute fk">ParentCategoryId: int</text>
+  <text x="560" y="260" class="attribute">DisplayOrder: int</text>
+  
+  <!-- Brands -->
+  <rect x="800" y="110" width="200" height="145" class="entity-box"/>
+  <rect x="800" y="110" width="200" height="30" class="entity-header"/>
+  <text x="900" y="130" text-anchor="middle" class="entity-title">Brands</text>
+  <text x="810" y="155" class="attribute pk">+ BrandId: int</text>
+  <text x="810" y="170" class="attribute">Name: string</text>
+  <text x="810" y="185" class="attribute">Description: string</text>
+  <text x="810" y="200" class="attribute">LogoUrl: string</text>
+  <text x="810" y="215" class="attribute">WebsiteUrl: string</text>
+  <text x="810" y="230" class="attribute">IsActive: bool</text>
+  <text x="810" y="245" class="attribute">Country: string</text>
+  
+  <!-- Stores -->
+  <rect x="1050" y="110" width="200" height="205" class="entity-box"/>
+  <rect x="1050" y="110" width="200" height="30" class="entity-header"/>
+  <text x="1150" y="130" text-anchor="middle" class="entity-title">Stores</text>
+  <text x="1060" y="155" class="attribute pk">+ StoreId: int</text>
+  <text x="1060" y="170" class="attribute">Name: string</text>
+  <text x="1060" y="185" class="attribute">Description: string</text>
+  <text x="1060" y="200" class="attribute">LogoUrl: string</text>
+  <text x="1060" y="215" class="attribute">Rating: decimal</text>
+  <text x="1060" y="230" class="attribute">IsActive: bool</text>
+  <text x="1060" y="245" class="attribute">IsVerified: bool</text>
+  <text x="1060" y="260" class="attribute fk">OwnerId: string</text>
+  <text x="1060" y="275" class="attribute">ContactEmail: string</text>
+  <text x="1060" y="290" class="attribute">PhoneNumber: string</text>
+  <text x="1060" y="305" class="attribute">CreatedAt: DateTime</text>
+  
+  <!-- ORDER MANAGEMENT SECTION -->
+  <text x="50" y="410" class="section-title">ORDER MANAGEMENT</text>
+  <line x1="50" y1="415" x2="450" y2="415" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- Orders -->
+  <rect x="50" y="430" width="220" height="235" class="entity-box"/>
+  <rect x="50" y="430" width="220" height="30" class="entity-header"/>
+  <text x="160" y="450" text-anchor="middle" class="entity-title">Orders</text>
+  <text x="60" y="475" class="attribute pk">+ OrderId: int</text>
+  <text x="60" y="490" class="attribute">OrderNumber: string</text>
+  <text x="60" y="505" class="attribute fk">UserId: string</text>
+  <text x="60" y="520" class="attribute">TotalAmount: decimal</text>
+  <text x="60" y="535" class="attribute">ShippingCost: decimal</text>
+  <text x="60" y="550" class="attribute">TaxAmount: decimal</text>
+  <text x="60" y="565" class="attribute">DiscountAmount: decimal</text>
+  <text x="60" y="580" class="attribute">Status: string</text>
+  <text x="60" y="595" class="attribute">PaymentStatus: string</text>
+  <text x="60" y="610" class="attribute">ShippingAddress: string</text>
+  <text x="60" y="625" class="attribute">OrderDate: DateTime</text>
+  <text x="60" y="640" class="attribute fk">CouponId: int</text>
+  <text x="60" y="655" class="attribute">TrackingNumber: string</text>
+  
+  <!-- OrderItems -->
+  <rect x="320" y="430" width="220" height="190" class="entity-box"/>
+  <rect x="320" y="430" width="220" height="30" class="entity-header"/>
+  <text x="430" y="450" text-anchor="middle" class="entity-title">OrderItems</text>
+  <text x="330" y="475" class="attribute pk">+ OrderItemId: int</text>
+  <text x="330" y="490" class="attribute fk">OrderId: int</text>
+  <text x="330" y="505" class="attribute fk">ProductId: int</text>
+  <text x="330" y="520" class="attribute">ProductName: string</text>
+  <text x="330" y="535" class="attribute">Quantity: int</text>
+  <text x="330" y="550" class="attribute">UnitPrice: decimal</text>
+  <text x="330" y="565" class="attribute">TotalPrice: decimal</text>
+  <text x="330" y="580" class="attribute">Discount: decimal</text>
+  <text x="330" y="595" class="attribute fk">StoreId: int</text>
+  <text x="330" y="610" class="attribute">Commission: decimal</text>
+  
+  <!-- Payments -->
+  <rect x="590" y="430" width="220" height="190" class="entity-box"/>
+  <rect x="590" y="430" width="220" height="30" class="entity-header"/>
+  <text x="700" y="450" text-anchor="middle" class="entity-title">Payments</text>
+  <text x="600" y="475" class="attribute pk">+ PaymentId: int</text>
+  <text x="600" y="490" class="attribute fk">OrderId: int</text>
+  <text x="600" y="505" class="attribute">Amount: decimal</text>
+  <text x="600" y="520" class="attribute">PaymentMethod: string</text>
+  <text x="600" y="535" class="attribute">Status: string</text>
+  <text x="600" y="550" class="attribute">TransactionId: string</text>
+  <text x="600" y="565" class="attribute">PaymentDate: DateTime</text>
+  <text x="600" y="580" class="attribute">Gateway: string</text>
+  <text x="600" y="595" class="attribute">Notes: string</text>
+  <text x="600" y="610" class="attribute">RefundAmount: decimal</text>
+  
+  <!-- ShippingMethods -->
+  <rect x="860" y="430" width="220" height="160" class="entity-box"/>
+  <rect x="860" y="430" width="220" height="30" class="entity-header"/>
+  <text x="970" y="450" text-anchor="middle" class="entity-title">ShippingMethods</text>
+  <text x="870" y="475" class="attribute pk">+ ShippingMethodId: int</text>
+  <text x="870" y="490" class="attribute">Name: string</text>
+  <text x="870" y="505" class="attribute">Description: string</text>
+  <text x="870" y="520" class="attribute">Cost: decimal</text>
+  <text x="870" y="535" class="attribute">EstimatedDays: int</text>
+  <text x="870" y="550" class="attribute">IsActive: bool</text>
+  <text x="870" y="565" class="attribute">Carrier: string</text>
+  <text x="870" y="580" class="attribute">MinOrderAmount: decimal</text>
+  
+  <!-- SHOPPING FEATURES SECTION -->
+  <text x="50" y="720" class="section-title">SHOPPING FEATURES</text>
+  <line x1="50" y1="725" x2="450" y2="725" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- ShoppingCartItems -->
+  <rect x="50" y="740" width="220" height="160" class="entity-box"/>
+  <rect x="50" y="740" width="220" height="30" class="entity-header"/>
+  <text x="160" y="760" text-anchor="middle" class="entity-title">ShoppingCartItems</text>
+  <text x="60" y="785" class="attribute pk">+ CartItemId: int</text>
+  <text x="60" y="800" class="attribute fk">UserId: string</text>
+  <text x="60" y="815" class="attribute fk">ProductId: int</text>
+  <text x="60" y="830" class="attribute">Quantity: int</text>
+  <text x="60" y="845" class="attribute">Price: decimal</text>
+  <text x="60" y="860" class="attribute">SelectedVariant: string</text>
+  <text x="60" y="875" class="attribute">AddedDate: DateTime</text>
+  <text x="60" y="890" class="attribute">SessionId: string</text>
+  
+  <!-- Wishlists -->
+  <rect x="320" y="740" width="220" height="130" class="entity-box"/>
+  <rect x="320" y="740" width="220" height="30" class="entity-header"/>
+  <text x="430" y="760" text-anchor="middle" class="entity-title">Wishlists</text>
+  <text x="330" y="785" class="attribute pk">+ WishlistId: int</text>
+  <text x="330" y="800" class="attribute fk">UserId: string</text>
+  <text x="330" y="815" class="attribute fk">ProductId: int</text>
+  <text x="330" y="830" class="attribute">AddedDate: DateTime</text>
+  <text x="330" y="845" class="attribute">Notes: string</text>
+  <text x="330" y="860" class="attribute">NotifyOnSale: bool</text>
+  
+  <!-- Coupons -->
+  <rect x="590" y="740" width="220" height="190" class="entity-box"/>
+  <rect x="590" y="740" width="220" height="30" class="entity-header"/>
+  <text x="700" y="760" text-anchor="middle" class="entity-title">Coupons</text>
+  <text x="600" y="785" class="attribute pk">+ CouponId: int</text>
+  <text x="600" y="800" class="attribute">Code: string</text>
+  <text x="600" y="815" class="attribute">Description: string</text>
+  <text x="600" y="830" class="attribute">DiscountType: string</text>
+  <text x="600" y="845" class="attribute">DiscountValue: decimal</text>
+  <text x="600" y="860" class="attribute">MinOrderAmount: decimal</text>
+  <text x="600" y="875" class="attribute">MaxUsage: int</text>
+  <text x="600" y="890" class="attribute">ValidFrom: DateTime</text>
+  <text x="600" y="905" class="attribute">ValidTo: DateTime</text>
+  <text x="600" y="920" class="attribute">IsActive: bool</text>
+  
+  <!-- Addresses -->
+  <rect x="860" y="740" width="220" height="190" class="entity-box"/>
+  <rect x="860" y="740" width="220" height="30" class="entity-header"/>
+  <text x="970" y="760" text-anchor="middle" class="entity-title">Addresses</text>
+  <text x="870" y="785" class="attribute pk">+ AddressId: int</text>
+  <text x="870" y="800" class="attribute fk">UserId: string</text>
+  <text x="870" y="815" class="attribute">AddressLine1: string</text>
+  <text x="870" y="830" class="attribute">AddressLine2: string</text>
+  <text x="870" y="845" class="attribute">City: string</text>
+  <text x="870" y="860" class="attribute">Province: string</text>
+  <text x="870" y="875" class="attribute">PostalCode: string</text>
+  <text x="870" y="890" class="attribute">Country: string</text>
+  <text x="870" y="905" class="attribute">IsDefault: bool</text>
+  <text x="870" y="920" class="attribute">PhoneNumber: string</text>
+  
+  <!-- PRODUCT DETAILS SECTION -->
+  <text x="50" y="980" class="section-title">PRODUCT DETAILS</text>
+  <line x1="50" y1="985" x2="450" y2="985" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- ProductImages -->
+  <rect x="50" y="1000" width="220" height="145" class="entity-box"/>
+  <rect x="50" y="1000" width="220" height="30" class="entity-header"/>
+  <text x="160" y="1020" text-anchor="middle" class="entity-title">ProductImages</text>
+  <text x="60" y="1045" class="attribute pk">+ ImageId: int</text>
+  <text x="60" y="1060" class="attribute fk">ProductId: int</text>
+  <text x="60" y="1075" class="attribute">ImageUrl: string</text>
+  <text x="60" y="1090" class="attribute">AltText: string</text>
+  <text x="60" y="1105" class="attribute">IsPrimary: bool</text>
+  <text x="60" y="1120" class="attribute">DisplayOrder: int</text>
+  <text x="60" y="1135" class="attribute">UploadedDate: DateTime</text>
+  
+  <!-- ProductReviews -->
+  <rect x="320" y="1000" width="220" height="175" class="entity-box"/>
+  <rect x="320" y="1000" width="220" height="30" class="entity-header"/>
+  <text x="430" y="1020" text-anchor="middle" class="entity-title">ProductReviews</text>
+  <text x="330" y="1045" class="attribute pk">+ ReviewId: int</text>
+  <text x="330" y="1060" class="attribute fk">ProductId: int</text>
+  <text x="330" y="1075" class="attribute fk">UserId: string</text>
+  <text x="330" y="1090" class="attribute">Rating: int</text>
+  <text x="330" y="1105" class="attribute">Title: string</text>
+  <text x="330" y="1120" class="attribute">Comment: string</text>
+  <text x="330" y="1135" class="attribute">IsVerified: bool</text>
+  <text x="330" y="1150" class="attribute">ReviewDate: DateTime</text>
+  <text x="330" y="1165" class="attribute">IsApproved: bool</text>
+  
+  <!-- ProductApprovals -->
+  <rect x="590" y="1000" width="220" height="160" class="entity-box"/>
+  <rect x="590" y="1000" width="220" height="30" class="entity-header"/>
+  <text x="700" y="1020" text-anchor="middle" class="entity-title">ProductApprovals</text>
+  <text x="600" y="1045" class="attribute pk">+ ApprovalId: int</text>
+  <text x="600" y="1060" class="attribute fk">ProductId: int</text>
+  <text x="600" y="1075" class="attribute">Status: string</text>
+  <text x="600" y="1090" class="attribute fk">ReviewedBy: string</text>
+  <text x="600" y="1105" class="attribute">ReviewDate: DateTime</text>
+  <text x="600" y="1120" class="attribute">Comments: string</text>
+  <text x="600" y="1135" class="attribute">SubmittedDate: DateTime</text>
+  <text x="600" y="1150" class="attribute">RejectionReason: string</text>
+  
+  <!-- CONTENT & COMMUNICATION SECTION -->
+  <text x="50" y="1220" class="section-title">CONTENT &amp; COMMUNICATION</text>
+  <line x1="50" y1="1225" x2="500" y2="1225" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- BlogPosts -->
+  <rect x="50" y="1240" width="220" height="175" class="entity-box"/>
+  <rect x="50" y="1240" width="220" height="30" class="entity-header"/>
+  <text x="160" y="1260" text-anchor="middle" class="entity-title">BlogPosts</text>
+  <text x="60" y="1285" class="attribute pk">+ PostId: int</text>
+  <text x="60" y="1300" class="attribute">Title: string</text>
+  <text x="60" y="1315" class="attribute">Content: string</text>
+  <text x="60" y="1330" class="attribute">Slug: string</text>
+  <text x="60" y="1345" class="attribute fk">AuthorId: string</text>
+  <text x="60" y="1360" class="attribute fk">CategoryId: int</text>
+  <text x="60" y="1375" class="attribute">PublishedDate: DateTime</text>
+  <text x="60" y="1390" class="attribute">IsPublished: bool</text>
+  <text x="60" y="1405" class="attribute">ViewCount: int</text>
+  
+  <!-- Notifications -->
+  <rect x="320" y="1240" width="220" height="160" class="entity-box"/>
+  <rect x="320" y="1240" width="220" height="30" class="entity-header"/>
+  <text x="430" y="1260" text-anchor="middle" class="entity-title">Notifications</text>
+  <text x="330" y="1285" class="attribute pk">+ NotificationId: int</text>
+  <text x="330" y="1300" class="attribute fk">UserId: string</text>
+  <text x="330" y="1315" class="attribute">Title: string</text>
+  <text x="330" y="1330" class="attribute">Message: string</text>
+  <text x="330" y="1345" class="attribute">Type: string</text>
+  <text x="330" y="1360" class="attribute">IsRead: bool</text>
+  <text x="330" y="1375" class="attribute">CreatedAt: DateTime</text>
+  <text x="330" y="1390" class="attribute">Link: string</text>
+  
+  <!-- ContactMessages -->
+  <rect x="590" y="1240" width="220" height="160" class="entity-box"/>
+  <rect x="590" y="1240" width="220" height="30" class="entity-header"/>
+  <text x="700" y="1260" text-anchor="middle" class="entity-title">ContactMessages</text>
+  <text x="600" y="1285" class="attribute pk">+ MessageId: int</text>
+  <text x="600" y="1300" class="attribute">Name: string</text>
+  <text x="600" y="1315" class="attribute">Email: string</text>
+  <text x="600" y="1330" class="attribute">Subject: string</text>
+  <text x="600" y="1345" class="attribute">Message: string</text>
+  <text x="600" y="1360" class="attribute">CreatedAt: DateTime</text>
+  <text x="600" y="1375" class="attribute">IsRead: bool</text>
+  <text x="600" y="1390" class="attribute">RepliedAt: DateTime</text>
+  
+  <!-- SupportTickets -->
+  <rect x="860" y="1240" width="220" height="175" class="entity-box"/>
+  <rect x="860" y="1240" width="220" height="30" class="entity-header"/>
+  <text x="970" y="1260" text-anchor="middle" class="entity-title">SupportTickets</text>
+  <text x="870" y="1285" class="attribute pk">+ TicketId: int</text>
+  <text x="870" y="1300" class="attribute fk">UserId: string</text>
+  <text x="870" y="1315" class="attribute">TicketNumber: string</text>
+  <text x="870" y="1330" class="attribute">Subject: string</text>
+  <text x="870" y="1345" class="attribute">Description: string</text>
+  <text x="870" y="1360" class="attribute">Priority: string</text>
+  <text x="870" y="1375" class="attribute">Status: string</text>
+  <text x="870" y="1390" class="attribute">CreatedAt: DateTime</text>
+  <text x="870" y="1405" class="attribute">ResolvedAt: DateTime</text>
+  
+  <!-- SECURITY & AUDIT SECTION -->
+  <text x="50" y="1475" class="section-title">SECURITY &amp; AUDIT</text>
+  <line x1="50" y1="1480" x2="450" y2="1480" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- AuditLogs -->
+  <rect x="50" y="1495" width="220" height="175" class="entity-box"/>
+  <rect x="50" y="1495" width="220" height="30" class="entity-header"/>
+  <text x="160" y="1515" text-anchor="middle" class="entity-title">AuditLogs</text>
+  <text x="60" y="1540" class="attribute pk">+ LogId: int</text>
+  <text x="60" y="1555" class="attribute fk">UserId: string</text>
+  <text x="60" y="1570" class="attribute">Action: string</text>
+  <text x="60" y="1585" class="attribute">EntityType: string</text>
+  <text x="60" y="1600" class="attribute">EntityId: string</text>
+  <text x="60" y="1615" class="attribute">OldValues: string</text>
+  <text x="60" y="1630" class="attribute">NewValues: string</text>
+  <text x="60" y="1645" class="attribute">Timestamp: DateTime</text>
+  <text x="60" y="1660" class="attribute">IpAddress: string</text>
+  
+  <!-- ActiveSessions -->
+  <rect x="320" y="1495" width="220" height="160" class="entity-box"/>
+  <rect x="320" y="1495" width="220" height="30" class="entity-header"/>
+  <text x="430" y="1515" text-anchor="middle" class="entity-title">ActiveSessions</text>
+  <text x="330" y="1540" class="attribute pk">+ SessionId: int</text>
+  <text x="330" y="1555" class="attribute fk">UserId: string</text>
+  <text x="330" y="1570" class="attribute">Token: string</text>
+  <text x="330" y="1585" class="attribute">IpAddress: string</text>
+  <text x="330" y="1600" class="attribute">UserAgent: string</text>
+  <text x="330" y="1615" class="attribute">CreatedAt: DateTime</text>
+  <text x="330" y="1630" class="attribute">LastActivity: DateTime</text>
+  <text x="330" y="1645" class="attribute">IsActive: bool</text>
+  
+  <!-- SecurityLogs -->
+  <rect x="590" y="1495" width="220" height="160" class="entity-box"/>
+  <rect x="590" y="1495" width="220" height="30" class="entity-header"/>
+  <text x="700" y="1515" text-anchor="middle" class="entity-title">SecurityLogs</text>
+  <text x="600" y="1540" class="attribute pk">+ LogId: int</text>
+  <text x="600" y="1555" class="attribute fk">UserId: string</text>
+  <text x="600" y="1570" class="attribute">EventType: string</text>
+  <text x="600" y="1585" class="attribute">Description: string</text>
+  <text x="600" y="1600" class="attribute">IpAddress: string</text>
+  <text x="600" y="1615" class="attribute">Timestamp: DateTime</text>
+  <text x="600" y="1630" class="attribute">Severity: string</text>
+  <text x="600" y="1645" class="attribute">UserAgent: string</text>
+  
+  <!-- ANALYTICS SECTION -->
+  <text x="50" y="1725" class="section-title">ANALYTICS &amp; REPORTS</text>
+  <line x1="50" y1="1730" x2="450" y2="1730" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- AnalyticsData -->
+  <rect x="50" y="1745" width="220" height="160" class="entity-box"/>
+  <rect x="50" y="1745" width="220" height="30" class="entity-header"/>
+  <text x="160" y="1765" text-anchor="middle" class="entity-title">AnalyticsData</text>
+  <text x="60" y="1790" class="attribute pk">+ Id: int</text>
+  <text x="60" y="1805" class="attribute">MetricName: string</text>
+  <text x="60" y="1820" class="attribute">MetricValue: decimal</text>
+  <text x="60" y="1835" class="attribute">Date: DateTime</text>
+  <text x="60" y="1850" class="attribute">Category: string</text>
+  <text x="60" y="1865" class="attribute">Dimensions: string</text>
+  <text x="60" y="1880" class="attribute">Source: string</text>
+  <text x="60" y="1895" class="attribute">CreatedAt: DateTime</text>
+  
+  <!-- SalesReports -->
+  <rect x="320" y="1745" width="220" height="160" class="entity-box"/>
+  <rect x="320" y="1745" width="220" height="30" class="entity-header"/>
+  <text x="430" y="1765" text-anchor="middle" class="entity-title">SalesReports</text>
+  <text x="330" y="1790" class="attribute pk">+ ReportId: int</text>
+  <text x="330" y="1805" class="attribute">ReportType: string</text>
+  <text x="330" y="1820" class="attribute">StartDate: DateTime</text>
+  <text x="330" y="1835" class="attribute">EndDate: DateTime</text>
+  <text x="330" y="1850" class="attribute">TotalSales: decimal</text>
+  <text x="330" y="1865" class="attribute">TotalOrders: int</text>
+  <text x="330" y="1880" class="attribute">GeneratedAt: DateTime</text>
+  <text x="330" y="1895" class="attribute">GeneratedBy: string</text>
+  
+  <!-- SYSTEM CONFIG SECTION -->
+  <text x="590" y="1725" class="section-title">SYSTEM CONFIGURATION</text>
+  <line x1="590" y1="1730" x2="1000" y2="1730" stroke="#cbd5e0" stroke-width="2"/>
+  
+  <!-- SystemConfiguration -->
+  <rect x="590" y="1745" width="220" height="145" class="entity-box"/>
+  <rect x="590" y="1745" width="220" height="30" class="entity-header"/>
+  <text x="700" y="1765" text-anchor="middle" class="entity-title">SystemConfiguration</text>
+  <text x="600" y="1790" class="attribute pk">+ ConfigId: int</text>
+  <text x="600" y="1805" class="attribute">ConfigKey: string</text>
+  <text x="600" y="1820" class="attribute">ConfigValue: string</text>
+  <text x="600" y="1835" class="attribute">Category: string</text>
+  <text x="600" y="1850" class="attribute">Description: string</text>
+  <text x="600" y="1865" class="attribute">IsActive: bool</text>
+  <text x="600" y="1880" class="attribute">UpdatedAt: DateTime</text>
+  
+  <!-- PaymentMethodConfig -->
+  <rect x="860" y="1745" width="220" height="145" class="entity-box"/>
+  <rect x="860" y="1745" width="220" height="30" class="entity-header"/>
+  <text x="970" y="1765" text-anchor="middle" class="entity-title">PaymentMethodConfig</text>
+  <text x="870" y="1790" class="attribute pk">+ ConfigId: int</text>
+  <text x="870" y="1805" class="attribute">MethodName: string</text>
+  <text x="870" y="1820" class="attribute">IsEnabled: bool</text>
+  <text x="870" y="1835" class="attribute">ApiKey: string</text>
+  <text x="870" y="1850" class="attribute">ApiSecret: string</text>
+  <text x="870" y="1865" class="attribute">IsSandbox: bool</text>
+  <text x="870" y="1880" class="attribute">Settings: string</text>
+  
+  <!-- RELATIONSHIPS (Selected Key Relationships) -->
+  
+  <!-- Users to Products (SellerId) -->
+  <path d="M 250 225 L 300 235" class="relationship"/>
+  
+  <!-- Products to Categories -->
+  <path d="M 500 180 L 550 180" class="relationship"/>
+  
+  <!-- Products to Brands -->
+  <path d="M 500 160 L 800 160" class="relationship"/>
+  
+  <!-- Products to Stores -->
+  <path d="M 500 200 L 1050 200" class="relationship"/>
+  
+  <!-- Users to Stores (OwnerId) -->
+  <path d="M 250 150 Q 650 80 1050 180" class="relationship"/>
+  
+  <!-- Users to Orders -->
+  <path d="M 150 330 L 150 430" class="relationship"/>
+  
+  <!-- Orders to OrderItems -->
+  <path d="M 270 530 L 320 530" class="relationship"/>
+  
+  <!-- OrderItems to Products -->
+  <path d="M 430 430 L 400 360" class="relationship"/>
+  
+  <!-- Orders to Payments -->
+  <path d="M 270 530 L 590 530" class="relationship"/>
+  
+  <!-- Users to ShoppingCartItems -->
+  <path d="M 150 330 L 150 740" class="relationship"/>
+  
+  <!-- Products to ShoppingCartItems -->
+  <path d="M 400 360 L 200 740" class="relationship"/>
+  
+  <!-- Users to Wishlists -->
+  <path d="M 180 330 L 390 740" class="relationship"/>
+  
+  <!-- Products to ProductImages -->
+  <path d="M 400 360 L 160 1000" class="relationship"/>
+  
+  <!-- Products to ProductReviews -->
+  <path d="M 400 360 L 430 1000" class="relationship"/>
+  
+  <!-- Users to Addresses -->
+  <path d="M 200 330 L 920 740" class="relationship"/>
+  
+  <!-- Users to BlogPosts (Author) -->
+  <path d="M 150 330 L 160 1240" class="relationship"/>
+  
+  <!-- Users to Notifications -->
+  <path d="M 180 330 L 430 1240" class="relationship"/>
+  
+  <!-- Users to AuditLogs -->
+  <path d="M 150 330 L 160 1495" class="relationship"/>
+  
+  <!-- Users to ActiveSessions -->
+  <path d="M 180 330 L 430 1495" class="relationship"/>
+  
+  <!-- Legend -->
+  <rect x="1150" y="1500" width="380" height="200" fill="white" stroke="#2d3748" stroke-width="2"/>
+  <text x="1340" y="1525" text-anchor="middle" style="font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #2d3748;">
+    LEGEND
+  </text>
+  <line x1="1170" y1="1535" x2="1510" y2="1535" stroke="#cbd5e0" stroke-width="1"/>
+  
+  <text x="1170" y="1560" class="attribute pk">+ Primary Key (PK)</text>
+  <text x="1170" y="1580" class="attribute fk">Foreign Key (FK)</text>
+  <text x="1170" y="1600" class="attribute">Regular Attribute</text>
+  
+  <line x1="1170" y1="1620" x2="1250" y2="1620" class="relationship"/>
+  <text x="1270" y="1625" style="font-family: Arial, sans-serif; font-size: 11px; fill: #2d3748;">
+    Relationship
+  </text>
+  
+  <text x="1170" y="1655" style="font-family: Arial, sans-serif; font-size: 10px; fill: #718096;">
+    Total Entities: 40+ tables
+  </text>
+  <text x="1170" y="1673" style="font-family: Arial, sans-serif; font-size: 10px; fill: #718096;">
+    Database: PostgreSQL 15
+  </text>
+  <text x="1170" y="1691" style="font-family: Arial, sans-serif; font-size: 10px; fill: #718096;">
+    ORM: Entity Framework Core 9.0
+  </text>
+  
+  <!-- Footer -->
+  <text x="800" y="1970" text-anchor="middle" style="font-family: Arial, sans-serif; font-size: 12px; fill: #718096; font-style: italic;">
+    Multi-Vendor E-Commerce Database Schema - ASP.NET Core Identity Integrated
+  </text>
+</svg>
