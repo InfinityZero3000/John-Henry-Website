@@ -1,6 +1,6 @@
 # Hướng Dẫn Backup và Restore Database
 
-## 📦 Backup Database Là Gì?
+## Backup Database Là Gì?
 
 **Backup database** = Sao lưu toàn bộ dữ liệu hiện có trong PostgreSQL thành file SQL.
 
@@ -8,18 +8,18 @@
 ```
 backup_johnhenry_db_20251009_143022.sql
 │
-├── 📋 Schema (Cấu trúc)
+├── Schema (Cấu trúc)
 │   ├── CREATE TABLE statements
 │   ├── Constraints, Indexes
 │   └── Foreign Keys
 │
-├── 💾 Data (Dữ liệu)
+├── Data (Dữ liệu)
 │   ├── INSERT INTO "Products" ...
 │   ├── INSERT INTO "Orders" ...
 │   ├── INSERT INTO "AspNetUsers" ...
 │   └── Tất cả dữ liệu trong mọi bảng
 │
-└── 🔧 Functions & Sequences
+└── Functions & Sequences
     ├── Stored procedures
     └── Auto-increment counters
 ```
@@ -45,26 +45,26 @@ INSERT INTO "Products" VALUES
 
 ---
 
-## 🎯 Tại Sao Cần Backup?
+## Tại Sao Cần Backup?
 
-### ✅ Trước khi import 903 sản phẩm mới:
+### Trước khi import 903 sản phẩm mới:
 - Nếu import lỗi → Restore lại database cũ
 - Nếu duplicate data → Xóa và thử lại
 - Nếu muốn so sánh trước/sau
 
-### ✅ Trong quá trình phát triển:
+### Trong quá trình phát triển:
 - Test tính năng mới → Rollback nếu lỗi
 - Migrate schema → Backup trước khi đổi
 - Update code → Đảm bảo có dữ liệu safe
 
-### ✅ Production (Vận hành):
+### Production (Vận hành):
 - Backup định kỳ hàng ngày
 - Trước mỗi deployment
 - Trước khi update critical data
 
 ---
 
-## 🚀 Cách Sử Dụng Scripts
+## Cách Sử Dụng Scripts
 
 ### **1. Backup Database (Tạo bản sao lưu)**
 
@@ -84,28 +84,28 @@ chmod +x backup_database.sh
 PostgreSQL Database Backup Tool
 ==========================================
 
-🔍 Reading database connection...
+Reading database connection...
 ✓ Database: johnhenry_db
 ✓ Host: localhost:5432
 
-📦 Creating backup...
+Creating backup...
    File: backup_johnhenry_db_20251009_143022.sql
 
-✅ Backup completed successfully!
+Backup completed successfully!
 
-📊 Backup Information:
+Backup Information:
    File: backup_johnhenry_db_20251009_143022.sql
    Size: 2.5M
    Path: /Users/.../database/backups/backup_johnhenry_db_20251009_143022.sql
 
-📈 Database Statistics:
+Database Statistics:
    Products: 150
    Categories: 10
    Brands: 2
    Orders: 45
    Users: 23
 
-💡 To restore this backup:
+To restore this backup:
    psql -h localhost -p 5432 -U postgres -d johnhenry_db < backup_johnhenry_db_20251009_143022.sql
 ```
 
@@ -134,7 +134,7 @@ chmod +x restore_database.sh
 PostgreSQL Database Restore Tool
 ==========================================
 
-📋 Available backups:
+Available backups:
 
    [1] backup_johnhenry_db_20251009_143022.sql (2.5M)
    [2] backup_johnhenry_db_20251009_120000.sql (2.3M)
@@ -144,36 +144,36 @@ Select backup number to restore (or 0 to cancel): 1
 
 Selected backup: backup_johnhenry_db_20251009_143022.sql
 
-🎯 Target Database:
+Target Database:
    Database: johnhenry_db
    Host: localhost:5432
 
-⚠️  WARNING: This will DELETE all current data and restore from backup!
+ WARNING: This will DELETE all current data and restore from backup!
 
 Are you sure? Type 'YES' to confirm: YES
 
-🔄 Restoring database...
+Restoring database...
 
 1. Dropping existing tables...
 2. Restoring from backup...
 
-✅ Restore completed successfully!
+Restore completed successfully!
 
-📊 Restored Database Statistics:
+Restored Database Statistics:
    Products: 150
    Categories: 10
    Brands: 2
    Orders: 45
 ```
 
-**⚠️ CẢNH BÁO:** 
+**CẢNH BÁO:** 
 - Restore sẽ **XÓA TẤT CẢ** dữ liệu hiện tại
 - Phải gõ chính xác `YES` để xác nhận
 - Không thể undo sau khi restore!
 
 ---
 
-## 📝 Quy Trình Khuyến Nghị
+## Quy Trình Khuyến Nghị
 
 ### **Trước khi import 903 sản phẩm:**
 
@@ -204,7 +204,7 @@ cd database
 
 ---
 
-## 💡 Sử Dụng Nâng Cao
+## Sử Dụng Nâng Cao
 
 ### **Backup bằng command line:**
 ```bash
@@ -236,7 +236,7 @@ psql -U postgres -h localhost -d johnhenry_db < products_backup.sql
 
 ---
 
-## 🗂️ Quản Lý Backup Files
+## Quản Lý Backup Files
 
 ### **Vị trí lưu backup:**
 ```
@@ -266,7 +266,7 @@ ls -t *.sql | tail -n +6 | xargs rm
 
 ---
 
-## 📊 So Sánh Trước/Sau Import
+## So Sánh Trước/Sau Import
 
 ### **Kiểm tra trước khi import:**
 ```bash
@@ -293,15 +293,15 @@ psql -U postgres -d johnhenry_db -c "SELECT COUNT(*) FROM \"Products\";"
 
 ---
 
-## ⚠️ Lưu Ý Quan Trọng
+## Lưu Ý Quan Trọng
 
-### ✅ **NÊN:**
+### **NÊN:**
 - Backup trước mỗi lần thay đổi lớn
 - Lưu backup ở nhiều nơi (local + cloud)
 - Đặt tên backup rõ ràng với timestamp
 - Test restore định kỳ để đảm bảo backup hoạt động
 
-### ❌ **KHÔNG NÊN:**
+### **KHÔNG NÊN:**
 - Không backup trên production server
 - Không lưu backup trong git repository (file quá lớn)
 - Không share backup file có chứa password
@@ -309,7 +309,7 @@ psql -U postgres -d johnhenry_db -c "SELECT COUNT(*) FROM \"Products\";"
 
 ---
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### **Lỗi: "permission denied"**
 ```bash
@@ -342,7 +342,7 @@ gunzip -c backup_johnhenry_db_20251009.sql.gz | psql -U postgres -d johnhenry_db
 
 ---
 
-## 📚 Tóm Tắt Commands
+## Tóm Tắt Commands
 
 ```bash
 # Backup

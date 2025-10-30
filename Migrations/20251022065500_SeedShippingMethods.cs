@@ -59,20 +59,6 @@ namespace JohnHenryFashionWeb.Migrations
                         DateTime.UtcNow 
                     },
                     { 
-                        "Miễn phí giao hàng", 
-                        "FREE", 
-                        "Miễn phí vận chuyển cho đơn hàng trên 500k", 
-                        0m, 
-                        5, 
-                        true, 
-                        500000m, 
-                        null, 
-                        null, 
-                        4, 
-                        DateTime.UtcNow, 
-                        DateTime.UtcNow 
-                    },
-                    { 
                         "Giao hàng tiết kiệm", 
                         "ECONOMY", 
                         "Giao hàng trong 5-7 ngày làm việc (phí thấp)", 
@@ -82,7 +68,7 @@ namespace JohnHenryFashionWeb.Migrations
                         null, 
                         null, 
                         null, 
-                        5, 
+                        4, 
                         DateTime.UtcNow, 
                         DateTime.UtcNow 
                     }
@@ -93,7 +79,7 @@ namespace JohnHenryFashionWeb.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             // Remove seeded shipping methods
-            migrationBuilder.Sql("DELETE FROM \"ShippingMethods\" WHERE \"Code\" IN ('STANDARD', 'EXPRESS', 'SUPER_EXPRESS', 'FREE', 'ECONOMY')");
+            migrationBuilder.Sql("DELETE FROM \"ShippingMethods\" WHERE \"Code\" IN ('STANDARD', 'EXPRESS', 'SUPER_EXPRESS', 'ECONOMY')");
         }
     }
 }

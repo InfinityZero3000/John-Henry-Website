@@ -1,6 +1,6 @@
 # Database Migrations Guide
 
-## ⚠️ Important Note
+## Important Note
 
 **Không còn sử dụng file SQL init!**
 
@@ -9,7 +9,7 @@ Thư mục `init/` đã bị xóa vì các file SQL schema không khớp với C
 - C# Models dùng `GUID` cho ID
 - Có conflict về bảng users (SQL có bảng riêng, C# dùng ASP.NET Identity)
 
-## ✅ Sử dụng EF Core Migrations
+## Sử dụng EF Core Migrations
 
 ### 1. Kiểm tra trạng thái migrations
 
@@ -54,7 +54,7 @@ dotnet ef migrations script FromMigration ToMigration -o script.sql
 dotnet ef migrations script --idempotent -o script.sql
 ```
 
-## 📋 Migrations hiện có
+## Migrations hiện có
 
 Hiện tại project có các migrations:
 1. `20250911051832_InitialCreate` - Tạo database ban đầu
@@ -73,7 +73,7 @@ Hiện tại project có các migrations:
 14. `20251005132333_AddSocialMediaWebsiteToStore` - Thêm social media
 15. `20251008070843_AddSellerIdToProduct` - Thêm seller ID cho product
 
-## 🔄 Setup Database mới
+## Setup Database mới
 
 ### Cách 1: Sử dụng Migrations (Khuyên dùng)
 
@@ -97,7 +97,7 @@ dotnet ef migrations script -o database/setup_database.sql
 psql -U postgres -d johnhenry_db -f database/setup_database.sql
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Migration conflict
 ```bash
@@ -120,7 +120,7 @@ dotnet ef database update
 dotnet ef migrations script 20250911051832_InitialCreate 20250911071624_AddAdminFields
 ```
 
-## 📝 Best Practices
+## Best Practices
 
 1. **Luôn tạo migration khi thay đổi models**
    ```bash
@@ -145,12 +145,12 @@ dotnet ef migrations script 20250911051832_InitialCreate 20250911071624_AddAdmin
 5. **Không xóa migration đã apply vào production**
 
 6. **Đặt tên migration rõ ràng**
-   - ✅ `AddEmailToUser`
-   - ✅ `UpdateProductPriceType`
-   - ❌ `Update1`
-   - ❌ `Fix`
+   - `AddEmailToUser`
+   - `UpdateProductPriceType`
+   - `Update1`
+   - `Fix`
 
-## 🔗 Useful Commands
+## Useful Commands
 
 ```bash
 # Xem thông tin DbContext
@@ -163,7 +163,7 @@ dotnet ef dbcontext scaffold "ConnectionString" Npgsql.EntityFrameworkCore.Postg
 dotnet ef dbcontext optimize
 ```
 
-## 📚 Tài liệu tham khảo
+## Tài liệu tham khảo
 
 - [EF Core Migrations](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
 - [PostgreSQL with EF Core](https://www.npgsql.org/efcore/)

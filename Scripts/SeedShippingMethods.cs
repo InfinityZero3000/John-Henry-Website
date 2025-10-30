@@ -61,26 +61,13 @@ public class SeedShippingMethods
             },
             new ShippingMethod
             {
-                Name = "Miễn phí giao hàng",
-                Code = "FREE",
-                Description = "Miễn phí vận chuyển cho đơn hàng trên 500k",
-                Cost = 0,
-                EstimatedDays = 5,
-                IsActive = true,
-                MinOrderAmount = 500000,
-                SortOrder = 4,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new ShippingMethod
-            {
                 Name = "Giao hàng tiết kiệm",
                 Code = "ECONOMY",
                 Description = "Giao hàng trong 5-7 ngày làm việc (phí thấp)",
                 Cost = 20000,
                 EstimatedDays = 6,
                 IsActive = true,
-                SortOrder = 5,
+                SortOrder = 4,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             }

@@ -25,11 +25,11 @@ mkdir -p "$BACKUP_DIR"
 APPSETTINGS="$PROJECT_ROOT/appsettings.json"
 
 if [ ! -f "$APPSETTINGS" ]; then
-    echo "❌ Error: appsettings.json not found!"
+    echo "Error: appsettings.json not found!"
     exit 1
 fi
 
-echo "🔍 Reading database connection..."
+echo "Reading database connection..."
 
 CONN_STRING=$(grep -A 2 "DefaultConnection" "$APPSETTINGS" | grep -o '".*"' | tr -d '"' | tail -1)
 
@@ -54,7 +54,7 @@ echo ""
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/backup_${DB_NAME}_${TIMESTAMP}.sql"
 
-echo "📦 Creating backup..."
+echo "Creating backup..."
 echo "   File: $(basename "$BACKUP_FILE")"
 echo ""
 
@@ -76,16 +76,16 @@ if pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
     BACKUP_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
     
     echo ""
-    echo -e "${GREEN}✅ Backup completed successfully!${NC}"
+    echo -e "${GREEN}Backup completed successfully!${NC}"
     echo ""
-    echo "📊 Backup Information:"
-    echo "   File: $(basename "$BACKUP_FILE")"
-    echo "   Size: $BACKUP_SIZE"
-    echo "   Path: $BACKUP_FILE"
+    echo "Backup Information:"
+    echo "File: $(basename "$BACKUP_FILE")"
+    echo "Size: $BACKUP_SIZE"
+    echo "Path: $BACKUP_FILE"
     echo ""
     
     # Count records
-    echo "📈 Database Statistics:"
+    echo "Database Statistics:"
     
     PRODUCT_COUNT=$(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
         -t -c 'SELECT COUNT(*) FROM "Products";' 2>/dev/null | tr -d ' ' || echo "N/A")
@@ -108,17 +108,17 @@ if pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
     echo "   Users: $USER_COUNT"
     
     echo ""
-    echo "💡 To restore this backup:"
+    echo "To restore this backup:"
     echo "   psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME < $BACKUP_FILE"
     echo ""
     
     # List all backups
-    echo "📋 All backups in $BACKUP_DIR:"
+    echo "All backups in $BACKUP_DIR:"
     ls -lh "$BACKUP_DIR"/*.sql 2>/dev/null | awk '{print "   " $9 " (" $5 ")"}'
     
 else
     echo ""
-    echo "❌ Backup failed!"
+    echo "Backup failed!"
     exit 1
 fi
 
@@ -126,5 +126,5 @@ unset PGPASSWORD
 
 echo ""
 echo "=========================================="
-echo "✨ Done!"
+echo "Done!"
 echo "=========================================="

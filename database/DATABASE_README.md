@@ -4,13 +4,13 @@
 
 Dự án này sử dụng PostgreSQL làm cơ sở dữ liệu chính, được đóng gói trong Docker để dễ dàng cài đặt và triển khai.
 
-## ⚠️ LƯU Ý QUAN TRỌNG - Sửa lỗi Store
+## LƯU Ý QUAN TRỌNG - Sửa lỗi Store
 
 Nếu bạn gặp lỗi `PostgresException: 42703: column s0.SocialMedia does not exist` khi truy cập trang seller/store, vui lòng xem:
 
-📄 **[FIX_STORE_ERROR.md](./FIX_STORE_ERROR.md)** - Hướng dẫn chi tiết  
-📄 **[ANALYSIS_REPORT.md](./ANALYSIS_REPORT.md)** - Báo cáo phân tích đầy đủ  
-💾 **[complete_fix.sql](./complete_fix.sql)** - Script SQL để sửa lỗi  
+**[FIX_STORE_ERROR.md](./FIX_STORE_ERROR.md)** - Hướng dẫn chi tiết  
+**[ANALYSIS_REPORT.md](./ANALYSIS_REPORT.md)** - Báo cáo phân tích đầy đủ  
+**[complete_fix.sql](./complete_fix.sql)** - Script SQL để sửa lỗi  
 
 **Sửa nhanh:**
 ```bash
@@ -44,7 +44,7 @@ docker-compose ps
 
 ### 3. Thông tin kết nối Database
 
-#### 🔴 QUAN TRỌNG: Kết nối từ pgAdmin
+#### QUAN TRỌNG: Kết nối từ pgAdmin
 Khi kết nối từ **pgAdmin (trong Docker)**, dùng tên container:
 ```
 Host: postgres

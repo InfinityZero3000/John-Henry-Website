@@ -21,17 +21,17 @@ BACKUP_DIR="$SCRIPT_DIR/backups"
 
 # Check if backup directory exists
 if [ ! -d "$BACKUP_DIR" ]; then
-    echo "❌ Backup directory not found: $BACKUP_DIR"
+    echo "Backup directory not found: $BACKUP_DIR"
     exit 1
 fi
 
 # List available backups
-echo "📋 Available backups:"
+echo "Available backups:"
 echo ""
 BACKUPS=($(ls -t "$BACKUP_DIR"/*.sql 2>/dev/null))
 
 if [ ${#BACKUPS[@]} -eq 0 ]; then
-    echo "❌ No backup files found in $BACKUP_DIR"
+    echo "No backup files found in $BACKUP_DIR"
     exit 1
 fi
 
@@ -51,7 +51,7 @@ if [ "$CHOICE" -eq 0 ]; then
 fi
 
 if [ "$CHOICE" -lt 1 ] || [ "$CHOICE" -gt ${#BACKUPS[@]} ]; then
-    echo "❌ Invalid choice!"
+    echo "Invalid choice!"
     exit 1
 fi
 
@@ -65,7 +65,7 @@ echo ""
 APPSETTINGS="$PROJECT_ROOT/appsettings.json"
 
 if [ ! -f "$APPSETTINGS" ]; then
-    echo "❌ Error: appsettings.json not found!"
+    echo "Error: appsettings.json not found!"
     exit 1
 fi
 
@@ -84,13 +84,13 @@ DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-johnhenry_db}
 DB_USER=${DB_USER:-$(whoami)}
 
-echo "🎯 Target Database:"
+echo "Target Database:"
 echo "   Database: $DB_NAME"
 echo "   Host: $DB_HOST:$DB_PORT"
 echo ""
 
 # Warning
-echo -e "${RED}⚠️  WARNING: This will DELETE all current data and restore from backup!${NC}"
+echo -e "${RED} WARNING: This will DELETE all current data and restore from backup!${NC}"
 echo ""
 read -p "Are you sure? Type 'YES' to confirm: " CONFIRM
 
@@ -100,7 +100,7 @@ if [ "$CONFIRM" != "YES" ]; then
 fi
 
 echo ""
-echo "🔄 Restoring database..."
+echo "Restoring database..."
 echo ""
 
 # Export password (only if set)
@@ -128,11 +128,11 @@ echo "2. Restoring from backup..."
 # Restore
 if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_FILE" 2>&1; then
     echo ""
-    echo -e "${GREEN}✅ Restore completed successfully!${NC}"
+    echo -e "${GREEN}Restore completed successfully!${NC}"
     echo ""
     
     # Verify
-    echo "📊 Restored Database Statistics:"
+    echo "Restored Database Statistics:"
     
     PRODUCT_COUNT=$(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
         -t -c 'SELECT COUNT(*) FROM "Products";' 2>/dev/null | tr -d ' ' || echo "N/A")
@@ -152,7 +152,7 @@ if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_FILE"
     
 else
     echo ""
-    echo -e "${RED}❌ Restore failed!${NC}"
+    echo -e "${RED}Restore failed!${NC}"
     exit 1
 fi
 
@@ -160,5 +160,5 @@ unset PGPASSWORD
 
 echo ""
 echo "=========================================="
-echo "✨ Done!"
+echo "Done!"
 echo "=========================================="
