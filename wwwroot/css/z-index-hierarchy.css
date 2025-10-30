@@ -1,0 +1,179 @@
+/**
+ * Z-Index Hierarchy Management
+ * Centralized z-index values for all fixed/absolute positioned elements
+ * 
+ * Layer Structure (from bottom to top):
+ * - Base content: 1-99
+ * - Header & Top line: 9995
+ * - Cart sidebar overlay: 9996
+ * - Cart sidebar: 9997
+ * - Notifications & Alerts: 99999 (ALWAYS ON TOP!)
+ * - Modals & Dialogs: 100000
+ */
+
+/* ========================================
+   LAYER 1: HEADER (9995)
+   ======================================== */
+
+/* Top red line - same level as header */
+.top-red-line {
+    z-index: 9995 !important;
+}
+
+/* Main header - same level as top red line */
+.main-header {
+    z-index: 9995 !important;
+}
+
+/* Header children inherit from header */
+.main-header .container,
+.header-content,
+.header-icons,
+.nav-section {
+    z-index: inherit;
+}
+
+/* ========================================
+   LAYER 2: CART (9996-9997)
+   ======================================== */
+
+/* Cart sidebar overlay - below cart sidebar */
+.cart-sidebar-overlay {
+    z-index: 9996 !important;
+}
+
+/* Cart sidebar - above overlay, below notifications */
+.cart-sidebar {
+    z-index: 9997 !important;
+}
+
+/* ========================================
+   LAYER 3: NOTIFICATIONS (99999) - ALWAYS ON TOP!
+   ======================================== */
+
+/* All notification types - MUST be above everything except modals */
+.notification,
+.toast,
+.toast-container,
+.alert.position-fixed,
+div[class*="notification"],
+div[style*="notification"] {
+    z-index: 99999 !important;
+}
+
+/* SweetAlert2 containers */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+/* ========================================
+   LAYER 4: MODALS (100000+)
+   ======================================== */
+
+/* Bootstrap modals */
+.modal {
+    z-index: 100000 !important;
+}
+
+.modal-backdrop {
+    z-index: 99999 !important;
+}
+
+/* ========================================
+   POSITIONING HELPERS
+   ======================================== */
+
+/* Notifications should appear at top, above everything */
+.notification,
+.toast,
+div[class*="notification"] {
+    position: fixed !important;
+    top: 10px !important;
+    right: 20px !important;
+    max-width: 400px !important;
+    min-width: 300px !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    z-index: 99999 !important;
+}
+
+/* Fixed alerts */
+.alert.position-fixed {
+    top: 10px !important;
+    z-index: 99999 !important;
+}
+
+/* Toast container */
+.toast-container {
+    top: 10px !important;
+    z-index: 99999 !important;
+}
+
+/* ========================================
+   NOTES & DOCUMENTATION
+   ======================================== */
+
+/*
+ * Z-Index Hierarchy Summary:
+ * 
+ * 100000+ Modals & Dialogs
+ * 99999   Notifications & Alerts (ALWAYS VISIBLE - HIGHEST!)
+ * 9997    Cart Sidebar
+ * 9996    Cart Sidebar Overlay
+ * 9995    Header & Top Red Line
+ * 1-99    Base content
+ * 
+ * Important Rules:
+ * 1. Notifications MUST be at top (z-index: 99999)
+ * 2. Header MUST be below notifications (z-index: 9995)
+ * 3. Cart MUST be above header (z-index: 9997)
+ * 4. Modals MUST be above everything (z-index: 100000+)
+ * 
+ * Position Strategy:
+ * - Notifications: top: 10px (absolute top, always visible)
+ * - Header: top: 40px (after red line)
+ * - Cart: top: 0 (full height)
+ */
+
+/* ========================================
+   ADDITIONAL NOTIFICATION STYLES
+   ======================================== */
+
+/* Ensure all Bootstrap toasts are on top */
+.toast,
+.toast-container,
+#toast-container {
+    z-index: 99999 !important;
+}
+
+/* Toast specific positioning */
+.toast-container,
+#toast-container {
+    position: fixed !important;
+    top: 10px !important;
+    right: 20px !important;
+    max-width: 450px !important;
+}
+
+/* Individual toast styling for readability */
+.toast {
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
+}
+
+.toast .toast-body {
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.5 !important;
+}
+
+/* Alert boxes that are position fixed */
+.alert.position-fixed {
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    max-width: 450px !important;
+}

@@ -21,6 +21,39 @@ body {
   margin-bottom: 60px;
 }
 
+/* Global notification and alert styles - ALWAYS ON TOP! */
+.notification,
+.toast,
+.alert.position-fixed,
+.swal2-container,
+div[class*="notification"],
+div[style*="notification"] {
+    z-index: 99999 !important;
+}
+
+/* Fixed alerts and notifications positioning */
+.notification,
+.toast,
+.alert.position-fixed {
+    position: fixed !important;
+    top: 10px !important;
+    right: 20px !important;
+    max-width: 450px !important;
+    min-width: 320px !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    z-index: 99999 !important;
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 99999 !important;
+    top: 10px !important;
+    position: fixed !important;
+    right: 20px !important;
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
