@@ -6,7 +6,25 @@
 <!-- Blog Hero Banner -->
 <section class="blog-hero-banner">
     <div class="blog-banner-container">
-        <img src="~/images/Banner/banner-blog.jpg" alt="John Henry Blog" class="blog-banner-img">
+        @if (ViewBag.PageBanner != null)
+        {
+            var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.PageBanner;
+            @if (!string.IsNullOrEmpty(banner.LinkUrl))
+            {
+                <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")">
+                    <img src="@banner.ImageUrl" alt="@banner.Title" class="blog-banner-img">
+                </a>
+            }
+            else
+            {
+                <img src="@banner.ImageUrl" alt="@banner.Title" class="blog-banner-img">
+            }
+        }
+        else
+        {
+            <!-- Fallback: Default banner if no DB banner -->
+            <img src="~/images/Banner/banner-blog.jpg" alt="John Henry Blog" class="blog-banner-img">
+        }
         </div>
     </div>
 </section>
