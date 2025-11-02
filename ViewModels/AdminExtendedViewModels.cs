@@ -2,6 +2,16 @@ using JohnHenryFashionWeb.Models;
 
 namespace JohnHenryFashionWeb.ViewModels
 {
+    #region Banner Management ViewModels
+
+    public class BannerOrderModel
+    {
+        public Guid Id { get; set; }
+        public int SortOrder { get; set; }
+    }
+
+    #endregion
+
     #region Enhanced User Management ViewModels
 
     public class EnhancedUserViewModel

@@ -5,173 +5,204 @@
     ViewData["Breadcrumb"] = $"<li class=\"breadcrumb-item\"><a href=\"{Url.Action("Categories")}\">Danh mục</a></li><li class=\"breadcrumb-item active\">{(Model.Id.HasValue ? "Chỉnh sửa" : "Thêm mới")}</li>";
 }
 
-<div class="page-header">
-    <h1 class="page-title">
-        <i class="fas fa-@(Model.Id.HasValue ? "edit" : "plus")"></i>
-        @(Model.Id.HasValue ? "Chỉnh sửa danh mục" : "Thêm danh mục mới")
-    </h1>
-    <div class="page-actions">
-        <a href="@Url.Action("Categories")" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i>
-            Quay lại
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-8">
-        <div class="admin-form">
-            <form method="post" enctype="multipart/form-data" id="categoryForm">
-                @if (Model.Id.HasValue)
-                {
-                    <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="ImageUrl" />
-                }
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="admin-form-group">
-                            <label asp-for="Name" class="admin-form-label required">Tên danh mục</label>
-                            <input asp-for="Name" class="admin-form-input" placeholder="Nhập tên danh mục...">
-                            <span asp-validation-for="Name" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="admin-form-group">
-                            <label asp-for="ParentId" class="admin-form-label">Danh mục cha</label>
-                            <select asp-for="ParentId" class="admin-form-select">
-                                <option value="">-- Chọn danh mục cha (tùy chọn) --</option>
-                                @foreach (var parent in Model.ParentCategories)
-                                {
-                                    <option value="@parent.Id">@parent.Name</option>
-                                }
-                            </select>
-                            <small class="admin-form-help">Để trống nếu đây là danh mục chính</small>
-                            <span asp-validation-for="ParentId" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="admin-form-group">
-                            <label asp-for="SortOrder" class="admin-form-label">Thứ tự sắp xếp</label>
-                            <input asp-for="SortOrder" type="number" class="admin-form-input" min="0" placeholder="0">
-                            <small class="admin-form-help">Số nhỏ hơn sẽ hiển thị trước</small>
-                            <span asp-validation-for="SortOrder" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="admin-form-group">
-                    <label asp-for="Description" class="admin-form-label">Mô tả</label>
-                    <textarea asp-for="Description" class="admin-form-textarea" rows="4" 
-                              placeholder="Nhập mô tả cho danh mục..."></textarea>
-                    <span asp-validation-for="Description" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                </div>
-
-                <div class="admin-form-group">
-                    <label asp-for="Image" class="admin-form-label">Hình ảnh danh mục</label>
-                    <input asp-for="Image" type="file" class="admin-form-input" accept="image/*" id="categoryImage">
-                    <small class="admin-form-help">Chấp nhận file: JPG, JPEG, PNG. Kích thước tối đa: 5MB</small>
-                    <span asp-validation-for="Image" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                    
-                    <!-- Image Preview -->
-                    <div id="imagePreview" class="mt-3">
-                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                        {
-                            <div class="current-image">
-                                <label class="admin-form-label">Hình ảnh hiện tại:</label>
-                                <div>
-                                    <img src="@Model.ImageUrl" alt="Current image" class="img-thumbnail" 
-                                         style="max-width: 200px; max-height: 200px;">
-                                </div>
-                            </div>
-                        }
-                        <div id="categoryImagePreview"></div>
-                    </div>
-                </div>
-
-                <div class="admin-form-group">
-                    <div class="form-check form-switch">
-                        <input asp-for="IsActive" class="form-check-input" type="checkbox">
-                        <label asp-for="IsActive" class="form-check-label">
-                            Danh mục hoạt động
-                        </label>
-                    </div>
-                    <small class="admin-form-help">Danh mục không hoạt động sẽ bị ẩn khỏi website</small>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        @(Model.Id.HasValue ? "Cập nhật" : "Tạo mới")
-                    </button>
-                    <a href="@Url.Action("Categories")" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        Hủy bỏ
-                    </a>
-                </div>
-            </form>
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="@(Model.Id.HasValue ? "edit" : "folder-plus")"></i>
+                @(Model.Id.HasValue ? "Chỉnh sửa danh mục" : "Thêm danh mục mới")
+            </h1>
+            <a href="@Url.Action("Categories")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Quay lại
+            </a>
         </div>
     </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="categoryForm">
+        <div class="row g-4">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i data-lucide="folder"></i>
+                            Thông tin danh mục
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        @if (Model.Id.HasValue)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="ImageUrl" />
+                        }
+
+                        <div class="admin-form-group">
+                            <label asp-for="Name" class="admin-form-label">
+                                Tên danh mục <span style="color: var(--admin-danger);">*</span>
+                            </label>
+                            <input asp-for="Name" class="admin-form-input" placeholder="Nhập tên danh mục...">
+                            <span asp-validation-for="Name" class="admin-form-error"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="ParentId" class="admin-form-label">Danh mục cha</label>
+                                    <select asp-for="ParentId" class="admin-form-select">
+                                        <option value="">-- Chọn danh mục cha (tùy chọn) --</option>
+                                        @foreach (var parent in Model.ParentCategories)
+                                        {
+                                            <option value="@parent.Id">@parent.Name</option>
+                                        }
+                                    </select>
+                                    <small class="admin-form-help">Để trống nếu đây là danh mục chính</small>
+                                    <span asp-validation-for="ParentId" class="admin-form-error"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="SortOrder" class="admin-form-label">Thứ tự sắp xếp</label>
+                                    <input asp-for="SortOrder" type="number" class="admin-form-input" min="0" placeholder="0">
+                                    <small class="admin-form-help">Số nhỏ hơn sẽ hiển thị trước</small>
+                                    <span asp-validation-for="SortOrder" class="admin-form-error"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label asp-for="Description" class="admin-form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="admin-form-textarea" rows="4" 
+                                      placeholder="Nhập mô tả cho danh mục..."></textarea>
+                            <span asp-validation-for="Description" class="admin-form-error"></span>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label asp-for="Image" class="admin-form-label">Hình ảnh danh mục</label>
+                            <input asp-for="Image" type="file" class="admin-form-input" accept="image/*" id="categoryImage">
+                            <small class="admin-form-help">Chấp nhận file: JPG, JPEG, PNG. Kích thước tối đa: 5MB</small>
+                            <span asp-validation-for="Image" class="admin-form-error"></span>
+                            
+                            <!-- Image Preview -->
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="mt-3">
+                                    <label class="admin-form-label">Hình ảnh hiện tại:</label>
+                                    <div style="margin-top: 0.5rem;">
+                                        <img src="@Model.ImageUrl" alt="Current image" 
+                                             style="max-width: 200px; max-height: 200px; border-radius: var(--admin-border-radius); border: 1px solid var(--admin-border);">
+                                    </div>
+                                </div>
+                            }
+                            <div id="categoryImagePreview" class="mt-3"></div>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <div class="admin-form-check">
+                                <input asp-for="IsActive" class="admin-form-check-input" type="checkbox" id="isActive">
+                                <label asp-for="IsActive" class="admin-form-check-label" for="isActive">
+                                    Danh mục hoạt động
+                                </label>
+                            </div>
+                            <small class="admin-form-help">Danh mục không hoạt động sẽ bị ẩn khỏi website</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
     <div class="col-md-4">
         <!-- Quick Tips -->
-        <div class="admin-form">
-            <h6 class="mb-3">
-                <i class="fas fa-lightbulb text-warning"></i>
-                Gợi ý
-            </h6>
-            <ul class="list-unstyled">
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Sử dụng tên danh mục ngắn gọn và dễ hiểu
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Mô tả nên từ 100-200 ký tự
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Hình ảnh nên có tỷ lệ 1:1 (vuông)
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-check text-success me-2"></i>
-                    Danh mục con giúp tổ chức sản phẩm tốt hơn
-                </li>
-            </ul>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i data-lucide="lightbulb"></i>
+                    Gợi ý
+                </h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="admin-help-section">
+                    <p class="admin-help-text">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--admin-success);"></i>
+                        Sử dụng tên danh mục ngắn gọn và dễ hiểu
+                    </p>
+                    <p class="admin-help-text">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--admin-success);"></i>
+                        Mô tả nên từ 100-200 ký tự
+                    </p>
+                    <p class="admin-help-text">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--admin-success);"></i>
+                        Hình ảnh nên có tỷ lệ 1:1 (vuông)
+                    </p>
+                    <p class="admin-help-text">
+                        <i data-lucide="check" style="width: 16px; height: 16px; color: var(--admin-success);"></i>
+                        Danh mục con giúp tổ chức sản phẩm tốt hơn
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!-- Image Categories from Folder -->
         @if (Model.Id == null)
         {
-            <div class="admin-form mt-4">
-                <h6 class="mb-3">
-                    <i class="fas fa-folder text-info"></i>
-                    Danh mục từ thư mục ảnh
-                </h6>
-                <p class="text-muted small">
-                    Hệ thống phát hiện các thư mục ảnh sau có thể tạo thành danh mục:
-                </p>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-folder me-2"></i> Áo nam</li>
-                    <li><i class="fas fa-folder me-2"></i> Áo nữ</li>
-                    <li><i class="fas fa-folder me-2"></i> Chân váy nữ</li>
-                    <li><i class="fas fa-folder me-2"></i> Đầm nữ</li>
-                    <li><i class="fas fa-folder me-2"></i> Quần nam</li>
-                </ul>
-                <a href="@Url.Action("CreateCategoriesFromImages")" class="btn btn-info btn-sm">
-                    <i class="fas fa-magic"></i>
-                    Tạo tự động
-                </a>
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="admin-card-title">
+                        <i data-lucide="folder"></i>
+                        Danh mục từ thư mục ảnh
+                    </h6>
+                </div>
+                <div class="admin-card-body">
+                    <p style="color: var(--admin-text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
+                        Hệ thống phát hiện các thư mục ảnh sau có thể tạo thành danh mục:
+                    </p>
+                    <div class="admin-help-section">
+                        <p class="admin-help-text" style="margin-bottom: 0.5rem;">
+                            <i data-lucide="folder" style="width: 16px; height: 16px;"></i> Áo nam
+                        </p>
+                        <p class="admin-help-text" style="margin-bottom: 0.5rem;">
+                            <i data-lucide="folder" style="width: 16px; height: 16px;"></i> Áo nữ
+                        </p>
+                        <p class="admin-help-text" style="margin-bottom: 0.5rem;">
+                            <i data-lucide="folder" style="width: 16px; height: 16px;"></i> Chân váy nữ
+                        </p>
+                        <p class="admin-help-text" style="margin-bottom: 0.5rem;">
+                            <i data-lucide="folder" style="width: 16px; height: 16px;"></i> Đầm nữ
+                        </p>
+                        <p class="admin-help-text" style="margin-bottom: 1rem;">
+                            <i data-lucide="folder" style="width: 16px; height: 16px;"></i> Quần nam
+                        </p>
+                    </div>
+                    <a href="@Url.Action("CreateCategoriesFromImages")" class="admin-btn admin-btn-primary admin-btn-sm">
+                        <i data-lucide="wand-2"></i>
+                        Tạo tự động
+                    </a>
+                </div>
             </div>
         }
     </div>
 </div>
 
+<!-- Form Actions -->
+<div class="admin-form-actions" style="margin-top: 0.5rem;">
+    <button type="submit" class="admin-btn admin-btn-primary">
+        <i data-lucide="save"></i>
+        @(Model.Id.HasValue ? "Cập nhật" : "Tạo mới")
+    </button>
+    <a href="@Url.Action("Categories")" class="admin-btn admin-btn-secondary">
+        <i data-lucide="x"></i>
+        Hủy bỏ
+    </a>
+</div>
+</form>
+</div>
+
 @section Scripts {
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
         document.addEventListener('DOMContentLoaded', function() {
             // Image preview
             const imageInput = document.getElementById('categoryImage');
@@ -185,12 +216,11 @@
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         const preview = document.createElement('div');
-                        preview.className = 'mt-2';
                         preview.innerHTML = `
                             <label class="admin-form-label">Xem trước:</label>
-                            <div>
-                                <img src="${e.target.result}" alt="Preview" class="img-thumbnail" 
-                                     style="max-width: 200px; max-height: 200px;">
+                            <div style="margin-top: 0.5rem;">
+                                <img src="${e.target.result}" alt="Preview" 
+                                     style="max-width: 200px; max-height: 200px; border-radius: var(--admin-border-radius); border: 1px solid var(--admin-border);">
                             </div>
                         `;
                         previewContainer.appendChild(preview);
@@ -201,10 +231,12 @@
 
             // Auto-generate slug from name (optional feature)
             const nameInput = document.querySelector('input[name="Name"]');
-            nameInput.addEventListener('input', function() {
-                // You could implement auto-slug generation here
-                console.log('Category name changed:', this.value);
-            });
+            if (nameInput) {
+                nameInput.addEventListener('input', function() {
+                    // You could implement auto-slug generation here
+                    console.log('Category name changed:', this.value);
+                });
+            }
 
             // Form validation
             const form = document.getElementById('categoryForm');
@@ -214,22 +246,29 @@
                 if (!nameInput.value.trim()) {
                     e.preventDefault();
                     nameInput.focus();
-                    adminDashboard.showToast('Vui lòng nhập tên danh mục!', 'error');
+                    if (typeof adminDashboard !== 'undefined') {
+                        adminDashboard.showToast('Vui lòng nhập tên danh mục!', 'error');
+                    }
                     return false;
                 }
 
                 // Show loading state
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                submitBtn.innerHTML = '<i data-lucide="loader" class="spinning"></i> Đang xử lý...';
                 submitBtn.disabled = true;
+                lucide.createIcons();
 
                 // Re-enable after 3 seconds (in case of error)
                 setTimeout(() => {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
+                    lucide.createIcons();
                 }, 3000);
             });
+
+            // Reinitialize icons after any dynamic content
+            lucide.createIcons();
         });
     </script>
 }

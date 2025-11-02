@@ -1,87 +1,87 @@
 @model Brand
 @{
     ViewData["Title"] = "Thêm Thương hiệu";
-    ViewData["CurrentSection"] = "brands";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item\"><a href=\"" + Url.Action("Brands") + "\">Thương hiệu</a></li><li class=\"breadcrumb-item active\">Thêm mới</li>";
 }
 
-<div class="admin-header">
-    <h2>
-        <i data-lucide="plus"></i>
-        Thêm Thương hiệu
-    </h2>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="@Url.Action("Dashboard")">Dashboard</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="@Url.Action("Brands")">Thương hiệu</a>
-            </li>
-            <li class="breadcrumb-item active">Thêm mới</li>
-        </ol>
-    </nav>
-</div>
-
 <div class="admin-content">
-    <div class="row">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="plus"></i>
+                Thêm Thương hiệu
+            </h1>
+            <a href="@Url.Action("Brands")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Form -->
         <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
                         <i data-lucide="info"></i>
                         Thông tin thương hiệu
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="admin-card-body">
                     <form asp-action="CreateBrand" method="post">
-                        <div asp-validation-summary="All" class="alert alert-danger" style="display: none;"></div>
+                        <div asp-validation-summary="All" class="alert alert-danger"></div>
                         
                         <div class="admin-form-group">
-                            <label asp-for="Name" class="admin-form-label required">Tên thương hiệu</label>
-                            <input asp-for="Name" class="admin-form-input" placeholder="Nhập tên thương hiệu...">
-                            <span asp-validation-for="Name" style="color: var(--status-danger); font-size: 0.875rem;"></span>
+                            <label asp-for="Name" class="admin-form-label">
+                                Tên thương hiệu <span style="color: var(--admin-danger);">*</span>
+                            </label>
+                            <input asp-for="Name" class="admin-form-input" placeholder="VD: Nike, Adidas, Gucci...">
+                            <span asp-validation-for="Name" class="admin-form-error"></span>
                         </div>
 
                         <div class="admin-form-group">
                             <label asp-for="Description" class="admin-form-label">Mô tả</label>
                             <textarea asp-for="Description" class="admin-form-textarea" rows="4" 
-                                      placeholder="Nhập mô tả về thương hiệu..."></textarea>
-                            <span asp-validation-for="Description" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                            <small class="admin-form-help">Mô tả ngắn gọn về thương hiệu</small>
+                                      placeholder="Nhập mô tả ngắn gọn về thương hiệu..."></textarea>
+                            <span asp-validation-for="Description" class="admin-form-error"></span>
+                            <small class="admin-form-help">Mô tả ngắn gọn về thương hiệu, lịch sử và đặc điểm nổi bật</small>
                         </div>
 
                         <div class="admin-form-group">
                             <label asp-for="LogoUrl" class="admin-form-label">URL Logo</label>
                             <input asp-for="LogoUrl" class="admin-form-input" type="url" 
                                    placeholder="https://example.com/logo.png">
-                            <span asp-validation-for="LogoUrl" style="color: var(--status-danger); font-size: 0.875rem;"></span>
-                            <small class="admin-form-help">Đường dẫn đến logo của thương hiệu</small>
+                            <span asp-validation-for="LogoUrl" class="admin-form-error"></span>
+                            <small class="admin-form-help">Đường dẫn đến logo của thương hiệu (khuyến nghị: 200x200px, PNG/JPG)</small>
                         </div>
 
                         <div class="admin-form-group">
                             <label asp-for="Website" class="admin-form-label">Website</label>
                             <input asp-for="Website" class="admin-form-input" type="url" 
                                    placeholder="https://www.example.com">
-                            <span asp-validation-for="Website" style="color: var(--status-danger); font-size: 0.875rem;"></span>
+                            <span asp-validation-for="Website" class="admin-form-error"></span>
                             <small class="admin-form-help">Website chính thức của thương hiệu</small>
                         </div>
 
                         <div class="admin-form-group">
-                            <div class="form-check form-switch">
-                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked>
-                                <label asp-for="IsActive" class="form-check-label">
+                            <div class="admin-form-check">
+                                <input asp-for="IsActive" class="admin-form-check-input" type="checkbox" id="isActive" checked>
+                                <label asp-for="IsActive" class="admin-form-check-label" for="isActive">
                                     Kích hoạt thương hiệu
                                 </label>
                             </div>
                             <small class="admin-form-help">Thương hiệu được kích hoạt sẽ hiển thị trong danh sách lựa chọn</small>
                         </div>
 
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="admin-form-actions">
+                            <button type="submit" class="admin-btn admin-btn-primary">
                                 <i data-lucide="save"></i>
                                 Lưu thương hiệu
                             </button>
-                            <a href="@Url.Action("Brands")" class="btn btn-secondary">
+                            <a href="@Url.Action("Brands")" class="admin-btn admin-btn-secondary">
                                 <i data-lucide="x"></i>
                                 Hủy bỏ
                             </a>
@@ -91,33 +91,35 @@
             </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">
+            <!-- Help Card -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="admin-card-title">
                         <i data-lucide="lightbulb"></i>
                         Hướng dẫn
                     </h6>
                 </div>
-                <div class="card-body">
-                    <div class="help-content">
-                        <h6>Tên thương hiệu</h6>
-                        <p class="small text-muted">
+                <div class="admin-card-body">
+                    <div class="admin-help-section">
+                        <h6 class="admin-help-title">Tên thương hiệu</h6>
+                        <p class="admin-help-text">
                             Tên thương hiệu sẽ được hiển thị trong danh sách sản phẩm và trang chi tiết sản phẩm.
                         </p>
 
-                        <h6>Mô tả</h6>
-                        <p class="small text-muted">
+                        <h6 class="admin-help-title">Mô tả</h6>
+                        <p class="admin-help-text">
                             Mô tả ngắn gọn về thương hiệu, lịch sử, đặc điểm nổi bật.
                         </p>
 
-                        <h6>Logo</h6>
-                        <p class="small text-muted">
+                        <h6 class="admin-help-title">Logo</h6>
+                        <p class="admin-help-text">
                             Sử dụng URL của logo thương hiệu. Kích thước khuyến nghị: 200x200px, định dạng PNG hoặc JPG.
                         </p>
 
-                        <h6>Website</h6>
-                        <p class="small text-muted">
+                        <h6 class="admin-help-title">Website</h6>
+                        <p class="admin-help-text">
                             Website chính thức của thương hiệu để khách hàng có thể tham khảo thêm thông tin.
                         </p>
                     </div>
@@ -125,27 +127,28 @@
             </div>
 
             <!-- Preview Card -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="admin-card-title">
                         <i data-lucide="eye"></i>
                         Xem trước
                     </h6>
                 </div>
-                <div class="card-body" id="brand-preview">
-                    <div class="text-center">
-                        <div class="brand-logo-preview mb-2">
-                            <img id="logo-preview" src="" alt="Logo" style="max-width: 100px; max-height: 100px; object-fit: contain; display: none;">
-                            <div id="logo-placeholder" class="bg-light d-flex align-items-center justify-content-center" 
-                                 style="width: 100px; height: 100px; margin: 0 auto; border-radius: 4px;">
-                                <i data-lucide="image" class="text-muted"></i>
+                <div class="admin-card-body">
+                    <div class="admin-text-center" id="brand-preview">
+                        <div class="brand-logo-preview" style="margin-bottom: 1rem;">
+                            <img id="logo-preview" src="" alt="Logo" 
+                                 style="max-width: 100px; max-height: 100px; object-fit: contain; display: none; border-radius: 8px;">
+                            <div id="logo-placeholder" 
+                                 style="width: 100px; height: 100px; margin: 0 auto; background: var(--admin-bg-secondary); border: 2px dashed var(--admin-border); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="image" style="width: 32px; height: 32px; color: var(--admin-text-muted);"></i>
                             </div>
                         </div>
-                        <h6 id="name-preview" class="brand-name-preview text-muted">Tên thương hiệu</h6>
-                        <p id="description-preview" class="small text-muted">Mô tả thương hiệu sẽ hiển thị ở đây...</p>
+                        <h6 id="name-preview" style="color: var(--admin-text); margin-bottom: 0.5rem;">Tên thương hiệu</h6>
+                        <p id="description-preview" style="font-size: 0.875rem; color: var(--admin-text-light); margin-bottom: 1rem;">Mô tả thương hiệu sẽ hiển thị ở đây...</p>
                         <div id="website-preview" style="display: none;">
-                            <a href="#" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i data-lucide="external-link"></i>
+                            <a href="#" target="_blank" class="admin-btn admin-btn-sm admin-btn-secondary">
+                                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
                                 Website
                             </a>
                         </div>
@@ -161,6 +164,9 @@
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
         $(document).ready(function() {
             // Real-time preview
             function updatePreview() {
@@ -186,6 +192,9 @@
                 } else {
                     $('#website-preview').hide();
                 }
+
+                // Reinitialize icons
+                lucide.createIcons();
             }
 
             // Bind preview updates
@@ -198,40 +207,8 @@
             $('#logo-preview').on('error', function() {
                 $(this).hide();
                 $('#logo-placeholder').show();
+                lucide.createIcons();
             });
         });
     </script>
-}
-
-@section Styles {
-    <style>
-        .required::after {
-            content: " *";
-            color: #dc3545;
-        }
-        
-        .form-actions {
-            border-top: 1px solid #dee2e6;
-            padding-top: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .help-content h6 {
-            color: #495057;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .help-content h6:first-child {
-            margin-top: 0;
-        }
-        
-        .brand-logo-preview {
-            position: relative;
-        }
-        
-        #logo-placeholder {
-            border: 2px dashed #dee2e6;
-        }
-    </style>
 }

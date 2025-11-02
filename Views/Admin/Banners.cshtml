@@ -1,9 +1,23 @@
+@model List<JohnHenryFashionWeb.Models.MarketingBanner>
 @{
     ViewData["Title"] = "Quản lý banner";
     ViewData["CurrentSection"] = "Banners";
     ViewData["PageIcon"] = "image";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Marketing</li>";
+
+    var activeBanners = Model.Count(b => b.IsActive);
+    var totalViews = Model.Sum(b => b.ViewCount);
+    var totalClicks = Model.Sum(b => b.ClickCount);
+    var avgCTR = totalViews > 0 ? (decimal)totalClicks / totalViews * 100 : 0;
+
+    var mainBanners = Model.Where(b => b.Position == "home_main").OrderBy(b => b.SortOrder).ToList();
+    var secondaryBanners = Model.Where(b => b.Position == "home_side").OrderBy(b => b.SortOrder).ToList();
+    
+    // Collection banners
+    var johnHenryBanners = Model.Where(b => b.Position == "collection_hero" && b.TargetPage == "JohnHenry").OrderBy(b => b.SortOrder).ToList();
+    var freelancerBanners = Model.Where(b => b.Position == "collection_hero" && b.TargetPage == "Freelancer").OrderBy(b => b.SortOrder).ToList();
+    var bestSellerBanners = Model.Where(b => b.Position == "collection_hero" && b.TargetPage == "BestSeller").OrderBy(b => b.SortOrder).ToList();
 }
 
 <div class="admin-content">
@@ -23,42 +37,85 @@
 
     <!-- Stats Section -->
     <div class="admin-stats-grid">
-        <div class="admin-stat-card admin-stat-primary">
-            <div class="admin-stat-icon">
-                <i data-lucide="images"></i>
-            </div>
-            <div class="admin-stat-content">
-                <div class="admin-stat-label">Tổng banner</div>
-                <div class="admin-stat-value">8</div>
-            </div>
-        </div>
-        <div class="admin-stat-card admin-stat-success">
-            <div class="admin-stat-icon">
-                <i data-lucide="eye"></i>
-            </div>
-            <div class="admin-stat-content">
-                <div class="admin-stat-label">Đang hiển thị</div>
-                <div class="admin-stat-value">5</div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng banner</h3>
+                    <p class="value">@Model.Count</p>
+                    <p class="change">Tất cả banner</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="images"></i>
+                </div>
             </div>
         </div>
-        <div class="admin-stat-card admin-stat-warning">
-            <div class="admin-stat-icon">
-                <i data-lucide="clock"></i>
-            </div>
-            <div class="admin-stat-content">
-                <div class="admin-stat-label">Đã lên lịch</div>
-                <div class="admin-stat-value">2</div>
-            </div>
-        </div>
-        <div class="admin-stat-card admin-stat-info">
-            <div class="admin-stat-icon">
-                <i data-lucide="mouse-pointer"></i>
-            </div>
-            <div class="admin-stat-content">
-                <div class="admin-stat-label">Lượt click hôm nay</div>
-                <div class="admin-stat-value">1,234</div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang hiển thị</h3>
+                    <p class="value">@activeBanners</p>
+                    <p class="change">@((activeBanners > 0 && Model.Count > 0 ? (activeBanners * 100.0 / Model.Count).ToString("F1") : "0"))% đang hoạt động</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="eye"></i>
+                </div>
             </div>
         </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng lượt click</h3>
+                    <p class="value">@totalClicks.ToString("N0")</p>
+                    <p class="change">@totalViews.ToString("N0") lượt hiển thị</p>
+                </div>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="mouse-pointer-click"></i>
+                </div>
+            </div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>CTR trung bình</h3>
+                    <p class="value">@avgCTR.ToString("F2")%</p>
+                    <p class="change">Tỷ lệ nhấp chuột</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="trending-up"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="admin-filter-tabs">
+        <a href="#all-banners" class="admin-filter-tab active" onclick="filterBanners('all'); return false;">
+            Tất cả (@Model.Count)
+        </a>
+        <a href="#main-banners" class="admin-filter-tab" onclick="filterBanners('home_main'); return false;">
+            <i data-lucide="layout" style="width: 14px; height: 14px;"></i>
+            Trang chủ chính (@mainBanners.Count)
+        </a>
+        <a href="#side-banners" class="admin-filter-tab" onclick="filterBanners('home_side'); return false;">
+            <i data-lucide="sidebar" style="width: 14px; height: 14px;"></i>
+            Banner phụ (@secondaryBanners.Count)
+        </a>
+        <a href="#johnhenry-banners" class="admin-filter-tab" onclick="filterBanners('collection_johnhenry'); return false;">
+            <i data-lucide="users" style="width: 14px; height: 14px;"></i>
+            John Henry (@johnHenryBanners.Count)
+        </a>
+        <a href="#freelancer-banners" class="admin-filter-tab" onclick="filterBanners('collection_freelancer'); return false;">
+            <i data-lucide="briefcase" style="width: 14px; height: 14px;"></i>
+            Freelancer (@freelancerBanners.Count)
+        </a>
+        <a href="#bestseller-banners" class="admin-filter-tab" onclick="filterBanners('collection_bestseller'); return false;">
+            <i data-lucide="star" style="width: 14px; height: 14px;"></i>
+            Best Seller (@bestSellerBanners.Count)
+        </a>
+        <a href="#active-banners" class="admin-filter-tab" onclick="filterBanners('active'); return false;">
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
+            Hoạt động (@activeBanners)
+        </a>
     </div>
 
     <!-- Banner Positions Section -->
@@ -70,56 +127,42 @@
                     <h5 class="admin-card-title">Banner trang chủ chính</h5>
                 </div>
                 <div class="admin-card-body">
-                        <div class="banner-grid" id="mainBanners">
-                            <div class="banner-slot active" data-position="main-1">
+                    <div class="banner-grid" id="mainBanners">
+                        @foreach (var banner in mainBanners.Take(3))
+                        {
+                            <div class="banner-slot active" data-position="main-@banner.SortOrder" data-id="@banner.Id">
                                 <div class="banner-preview">
-                                    <img src="https://via.placeholder.com/400x200/007bff/ffffff?text=Banner+1" alt="Banner 1" class="img-fluid">
+                                    <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
                                     <div class="banner-overlay">
                                         <div class="banner-actions">
-                                            <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('main-1')">
+                                            <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@banner.Id')">
                                                 <i data-lucide="edit"></i>
                                             </button>
-                                            <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="removeBanner('main-1')">
+                                            <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@banner.Id')">
                                                 <i data-lucide="trash-2"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="banner-info">
-                                    <h6 class="mb-1">Khuyến mãi mùa hè</h6>
-                                    <small class="text-muted">Clicks: 456 | CTR: 3.2%</small>
+                                    <h6 class="mb-1">@banner.Title</h6>
+                                    <small class="text-muted">Clicks: @banner.ClickCount.ToString("N0") | CTR: @((banner.ViewCount > 0 ? (decimal)banner.ClickCount / banner.ViewCount * 100 : 0).ToString("F1"))%</small>
                                 </div>
                             </div>
-
-                            <div class="banner-slot active" data-position="main-2">
-                                <div class="banner-preview">
-                                    <img src="https://via.placeholder.com/400x200/28a745/ffffff?text=Banner+2" alt="Banner 2" class="img-fluid">
-                                    <div class="banner-overlay">
-                                        <div class="banner-actions">
-                                            <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('main-2')">
-                                                <i data-lucide="edit"></i>
-                                            </button>
-                                            <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="removeBanner('main-2')">
-                                                <i data-lucide="trash-2"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="banner-info">
-                                    <h6 class="mb-1">Bộ sưu tập mới</h6>
-                                    <small class="text-muted">Clicks: 278 | CTR: 2.8%</small>
-                                </div>
-                            </div>
-
-                            <div class="banner-slot empty" data-position="main-3">
-                                <div class="banner-placeholder" onclick="addBanner('main-3')">
+                        }
+                        
+                        @for (int i = mainBanners.Count; i < 3; i++)
+                        {
+                            <div class="banner-slot empty" data-position="main-@(i + 1)">
+                                <div class="banner-placeholder" onclick="addBanner('home_main')">
                                     <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                                     <p class="mt-2">Thêm banner</p>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
+            </div>
 
             <!-- Secondary Banners -->
             <div class="admin-card">
@@ -127,39 +170,200 @@
                     <h5 class="admin-card-title">Banner phụ</h5>
                 </div>
                 <div class="admin-card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="banner-slot active small" data-position="secondary-1">
-                                    <div class="banner-preview">
-                                        <img src="https://via.placeholder.com/300x150/dc3545/ffffff?text=Sale+Banner" alt="Sale Banner" class="img-fluid">
-                                        <div class="banner-overlay">
-                                            <div class="banner-actions">
-                                                <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('secondary-1')">
-                                                    <i data-lucide="edit"></i>
-                                                </button>
-                                                <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="removeBanner('secondary-1')">
-                                                    <i data-lucide="trash-2"></i>
-                                                </button>
+                    <div class="row">
+                        @{
+                            var sideBannersList = secondaryBanners.Take(3).ToList();
+                        }
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            <div class="col-md-4">
+                                @if (i < sideBannersList.Count)
+                                {
+                                    var banner = sideBannersList[i];
+                                    <div class="banner-slot active small" data-position="secondary-@(i + 1)" data-id="@banner.Id">
+                                        <div class="banner-preview">
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
+                                            <div class="banner-overlay">
+                                                <div class="banner-actions">
+                                                    <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@banner.Id')">
+                                                        <i data-lucide="edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@banner.Id')">
+                                                        <i data-lucide="trash-2"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
+                                        <div class="banner-info">
+                                            <h6 class="mb-1">@banner.Title</h6>
+                                            <small class="text-muted">Clicks: @banner.ClickCount.ToString("N0")</small>
+                                        </div>
                                     </div>
-                                    <div class="banner-info">
-                                        <h6 class="mb-1">Flash Sale</h6>
-                                        <small class="text-muted">Clicks: 189</small>
+                                }
+                                else
+                                {
+                                    <div class="banner-slot empty small" data-position="secondary-@(i + 1)">
+                                        <div class="banner-placeholder" onclick="addBanner('home_side')">
+                                            <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
+                                            <p class="mt-2">Thêm banner</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- John Henry Collection Banners -->
+            <div class="admin-card mt-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Collection: John Henry</h5>
+                    <span class="admin-badge admin-badge-primary">@johnHenryBanners.Count banner(s)</span>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-3">
+                        @if (johnHenryBanners.Any())
+                        {
+                            @foreach (var banner in johnHenryBanners.Take(4))
+                            {
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="banner-slot active small" data-position="collection-jh-@banner.SortOrder" data-id="@banner.Id">
+                                        <div class="banner-preview">
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
+                                            <div class="banner-overlay">
+                                                <div class="banner-actions">
+                                                    <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@banner.Id')">
+                                                        <i data-lucide="edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@banner.Id')">
+                                                        <i data-lucide="trash-2"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="banner-info">
+                                            <h6 class="mb-1">@banner.Title</h6>
+                                            <small class="text-muted">Sort: @banner.SortOrder | Clicks: @banner.ClickCount.ToString("N0")</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="banner-slot empty small" data-position="secondary-2">
-                                    <div class="banner-placeholder" onclick="addBanner('secondary-2')">
+                            }
+                        }
+                        @if (johnHenryBanners.Count < 4)
+                        {
+                            <div class="col-md-6 col-lg-3">
+                                <div class="banner-slot empty small">
+                                    <div class="banner-placeholder" onclick="addCollectionBanner('JohnHenry')">
                                         <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
                                         <p class="mt-2">Thêm banner</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
+            </div>
+
+            <!-- Freelancer Collection Banners -->
+            <div class="admin-card mt-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Collection: Freelancer</h5>
+                    <span class="admin-badge admin-badge-info">@freelancerBanners.Count banner(s)</span>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-3">
+                        @if (freelancerBanners.Any())
+                        {
+                            @foreach (var banner in freelancerBanners.Take(4))
+                            {
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="banner-slot active small" data-position="collection-fl-@banner.SortOrder" data-id="@banner.Id">
+                                        <div class="banner-preview">
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
+                                            <div class="banner-overlay">
+                                                <div class="banner-actions">
+                                                    <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@banner.Id')">
+                                                        <i data-lucide="edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@banner.Id')">
+                                                        <i data-lucide="trash-2"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="banner-info">
+                                            <h6 class="mb-1">@banner.Title</h6>
+                                            <small class="text-muted">Sort: @banner.SortOrder | Clicks: @banner.ClickCount.ToString("N0")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if (freelancerBanners.Count < 4)
+                        {
+                            <div class="col-md-6 col-lg-3">
+                                <div class="banner-slot empty small">
+                                    <div class="banner-placeholder" onclick="addCollectionBanner('Freelancer')">
+                                        <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
+                                        <p class="mt-2">Thêm banner</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Seller Collection Banners -->
+            <div class="admin-card mt-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Collection: Best Seller</h5>
+                    <span class="admin-badge admin-badge-warning">@bestSellerBanners.Count banner(s)</span>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-3">
+                        @if (bestSellerBanners.Any())
+                        {
+                            @foreach (var banner in bestSellerBanners.Take(4))
+                            {
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="banner-slot active small" data-position="collection-bs-@banner.SortOrder" data-id="@banner.Id">
+                                        <div class="banner-preview">
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
+                                            <div class="banner-overlay">
+                                                <div class="banner-actions">
+                                                    <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@banner.Id')">
+                                                        <i data-lucide="edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@banner.Id')">
+                                                        <i data-lucide="trash-2"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="banner-info">
+                                            <h6 class="mb-1">@banner.Title</h6>
+                                            <small class="text-muted">Sort: @banner.SortOrder | Clicks: @banner.ClickCount.ToString("N0")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if (bestSellerBanners.Count < 4)
+                        {
+                            <div class="col-md-6 col-lg-3">
+                                <div class="banner-slot empty small">
+                                    <div class="banner-placeholder" onclick="addCollectionBanner('BestSeller')">
+                                        <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
+                                        <p class="mt-2">Thêm banner</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
             </div>
 
         <!-- Banner Management Sidebar -->
@@ -169,101 +373,79 @@
                     <h5 class="admin-card-title">Danh sách banner</h5>
                 </div>
                 <div class="admin-card-body p-0">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/50x30/007bff/ffffff?text=1" alt="Banner 1" class="me-2 rounded">
-                                        <div>
-                                            <h6 class="mb-0">Khuyến mãi mùa hè</h6>
-                                            <small class="text-muted">Trang chủ chính</small>
+                    <div class="list-group list-group-flush">
+                        @if (!Model.Any())
+                        {
+                            <div class="list-group-item text-center text-muted py-4">
+                                <i data-lucide="image-off" class="mb-2"></i>
+                                <p>Chưa có banner nào</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var banner in Model.OrderBy(b => b.SortOrder).ThenByDescending(b => b.CreatedAt))
+                            {
+                                var filterKey = banner.Position;
+                                if (banner.Position == "collection_hero")
+                                {
+                                    filterKey = banner.TargetPage == "JohnHenry" ? "collection_johnhenry" :
+                                               banner.TargetPage == "Freelancer" ? "collection_freelancer" :
+                                               banner.TargetPage == "BestSeller" ? "collection_bestseller" :
+                                               "collection_hero";
+                                }
+                                
+                                <div class="list-group-item" data-position="@filterKey" data-active="@banner.IsActive.ToString().ToLower()">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center flex-grow-1 overflow-hidden me-2">
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="me-2 rounded flex-shrink-0" style="width: 50px; height: 30px; object-fit: cover;">
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <h6 class="mb-0 text-truncate">@banner.Title</h6>
+                                                <small class="text-muted d-block text-truncate">
+                                                    @(banner.Position == "home_main" ? "Trang chủ chính" : 
+                                                      banner.Position == "home_side" ? "Banner phụ" :
+                                                      banner.Position == "collection_hero" && banner.TargetPage == "JohnHenry" ? "John Henry Collection" :
+                                                      banner.Position == "collection_hero" && banner.TargetPage == "Freelancer" ? "Freelancer Collection" :
+                                                      banner.Position == "collection_hero" && banner.TargetPage == "BestSeller" ? "Best Seller Collection" :
+                                                      banner.Position)
+                                                </small>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <span class="admin-badge admin-badge-success">Hoạt động</span>
-                                        <div class="btn-group btn-group-sm ms-1">
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('banner-1')">
-                                                <i data-lucide="eye-off"></i>
-                                            </button>
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-1')">
-                                                <i data-lucide="edit"></i>
-                                            </button>
+                                        <div class="d-flex align-items-center flex-shrink-0 gap-1">
+                                            @if (banner.IsActive)
+                                            {
+                                                @if (banner.EndDate.HasValue && banner.EndDate.Value < DateTime.UtcNow)
+                                                {
+                                                    <span class="admin-badge admin-badge-warning text-nowrap">Hết hạn</span>
+                                                }
+                                                else if (banner.StartDate > DateTime.UtcNow)
+                                                {
+                                                    <span class="admin-badge admin-badge-info text-nowrap">Đã lên lịch</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="admin-badge admin-badge-success text-nowrap">Hoạt động</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="admin-badge admin-badge-secondary text-nowrap">Tạm dừng</span>
+                                            }
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('@banner.Id')" title="Bật/Tắt">
+                                                    <i data-lucide="@(banner.IsActive ? "eye-off" : "eye")"></i>
+                                                </button>
+                                                <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('@banner.Id')" title="Chỉnh sửa">
+                                                    <i data-lucide="edit"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/50x30/28a745/ffffff?text=2" alt="Banner 2" class="me-2 rounded">
-                                        <div>
-                                            <h6 class="mb-0">Bộ sưu tập mới</h6>
-                                            <small class="text-muted">Trang chủ chính</small>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <span class="admin-badge admin-badge-success">Hoạt động</span>
-                                        <div class="btn-group btn-group-sm ms-1">
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('banner-2')">
-                                                <i data-lucide="eye-off"></i>
-                                            </button>
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-2')">
-                                                <i data-lucide="edit"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/50x30/dc3545/ffffff?text=3" alt="Banner 3" class="me-2 rounded">
-                                        <div>
-                                            <h6 class="mb-0">Flash Sale</h6>
-                                            <small class="text-muted">Banner phụ</small>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <span class="admin-badge admin-badge-success">Hoạt động</span>
-                                        <div class="btn-group btn-group-sm ms-1">
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="toggleBanner('banner-3')">
-                                                <i data-lucide="eye-off"></i>
-                                            </button>
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-3')">
-                                                <i data-lucide="edit"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/50x30/6c757d/ffffff?text=4" alt="Banner 4" class="me-2 rounded">
-                                        <div>
-                                            <h6 class="mb-0">Giáng sinh 2024</h6>
-                                            <small class="text-muted">Lên lịch: 15/12/2024</small>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <span class="admin-badge admin-badge-warning">Chờ lịch</span>
-                                        <div class="btn-group btn-group-sm ms-1">
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="scheduleNow('banner-4')">
-                                                <i data-lucide="play"></i>
-                                            </button>
-                                            <button class="admin-btn admin-btn-sm admin-btn-ghost" onclick="editBanner('banner-4')">
-                                                <i data-lucide="edit"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            }
+                        }
                     </div>
                 </div>
+            </div>
 
             <!-- Performance Stats -->
             <div class="admin-card mt-4">
@@ -271,247 +453,514 @@
                     <h5 class="admin-card-title">Thống kê hiệu suất</h5>
                 </div>
                 <div class="admin-card-body">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>Lượt hiển thị hôm nay</span>
-                                <strong>12,345</strong>
-                            </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Tổng lượt hiển thị</span>
+                            <strong>@totalViews.ToString("N0")</strong>
                         </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>Lượt click hôm nay</span>
-                                <strong>1,234</strong>
-                            </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Tổng lượt click</span>
+                            <strong>@totalClicks.ToString("N0")</strong>
                         </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>Tỷ lệ click (CTR)</span>
-                                <strong>10.0%</strong>
-                            </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Tỷ lệ click (CTR)</span>
+                            <strong>@avgCTR.ToString("F2")%</strong>
                         </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" style="width: 10%"></div>
-                        </div>
-                    <small class="text-muted">Banner có hiệu suất tốt (>5% CTR)</small>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: @Math.Min(avgCTR, 100)%"></div>
+                    </div>
+                    <small class="text-muted">
+                        @if (avgCTR >= 5)
+                        {
+                            <text>Banner có hiệu suất tốt (≥5% CTR)</text>
+                        }
+                        else if (avgCTR >= 2)
+                        {
+                            <text>Banner có hiệu suất trung bình (2-5% CTR)</text>
+                        }
+                        else
+                        {
+                            <text>Nên cải thiện banner để tăng CTR</text>
+                        }
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Create Banner Modal -->
+<!-- Create/Edit Banner Modal -->
 <div class="modal fade" id="createBannerModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tạo banner mới</h5>
+                <h5 class="modal-title">
+                    <i data-lucide="image" style="width: 20px; height: 20px;"></i>
+                    <span id="bannerModalTitle">Tạo banner mới</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="createBannerForm" enctype="multipart/form-data">
+                    <input type="hidden" id="bannerId" name="Id">
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="admin-form-group">
-                                <label for="bannerTitle" class="admin-label">Tiêu đề banner <span class="text-danger">*</span></label>
-                                <input type="text" class="admin-input" id="bannerTitle" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="admin-form-group">
-                                <label for="bannerPosition" class="admin-label">Vị trí hiển thị <span class="text-danger">*</span></label>
-                                <select class="admin-input" id="bannerPosition" required>
-                                    <option value="">Chọn vị trí</option>
-                                    <option value="main">Trang chủ chính</option>
-                                    <option value="secondary">Banner phụ</option>
-                                    <option value="sidebar">Sidebar</option>
-                                    <option value="footer">Footer</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="bannerImage" class="admin-label">Hình ảnh banner <span class="text-danger">*</span></label>
-                        <input type="file" class="admin-input" id="bannerImage" accept="image/*" required>
-                        <small class="admin-form-help">Khuyến nghị: 1200x400px cho banner chính, 600x300px cho banner phụ</small>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="bannerUrl" class="admin-label">URL liên kết</label>
-                        <input type="url" class="admin-input" id="bannerUrl" placeholder="https://example.com">
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="bannerAlt" class="admin-label">Alt text</label>
-                        <input type="text" class="admin-input" id="bannerAlt" placeholder="Mô tả hình ảnh">
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="admin-form-group">
-                                <label for="startDate" class="admin-label">Ngày bắt đầu</label>
-                                <input type="datetime-local" class="admin-input" id="startDate">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="admin-form-group">
-                                <label for="endDate" class="admin-label">Ngày kết thúc</label>
-                                <input type="datetime-local" class="admin-input" id="endDate">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="admin-form-group">
-                                <label for="priority" class="admin-label">Độ ưu tiên</label>
-                                <select class="admin-input" id="priority">
-                                    <option value="1">Thấp</option>
-                                    <option value="2" selected>Trung bình</option>
-                                    <option value="3">Cao</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="admin-form-group">
-                                <label class="admin-checkbox">
-                                    <input type="checkbox" id="isActive" checked>
-                                    <span>Kích hoạt ngay</span>
+                                <label for="bannerTitle" class="admin-form-label">
+                                    Tiêu đề banner <span style="color: var(--status-danger);">*</span>
                                 </label>
+                                <input type="text" class="admin-form-input" id="bannerTitle" name="Title" 
+                                       placeholder="VD: Banner Trang Chủ 1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="bannerPosition" class="admin-form-label">
+                                    Vị trí hiển thị <span style="color: var(--status-danger);">*</span>
+                                </label>
+                                <select class="admin-form-select" id="bannerPosition" name="Position" required>
+                                    <option value="">Chọn vị trí</option>
+                                    <option value="home_main">Trang chủ - Hero Carousel</option>
+                                    <option value="home_side">Trang chủ - Small Banners</option>
+                                    <option value="collection_hero">Collection Hero Banner</option>
+                                    <option value="category_banner">Category Banner</option>
+                                    <option value="page_hero">Page Hero Banner</option>
+                                </select>
+                                <small class="admin-form-help">
+                                    Xem <a href="/Scripts/BANNER_MAPPING.md" target="_blank">BANNER_MAPPING.md</a> để biết chi tiết
+                                </small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Image Preview -->
-                    <div class="admin-form-group" id="imagePreview" style="display: none;">
-                        <label class="admin-label">Xem trước</label>
-                        <div class="border rounded p-2">
-                            <img id="previewImg" class="img-fluid" style="max-height: 200px;">
+                    <div class="admin-form-group">
+                        <label for="bannerTargetPage" class="admin-form-label">Trang đích (TargetPage)</label>
+                        <input type="text" class="admin-form-input" id="bannerTargetPage" name="TargetPage" 
+                               placeholder="Ví dụ: JohnHenry, Freelancer, AoSoMiNam">
+                        <small class="admin-form-help">
+                            Để trống cho home_main/home_side. Các giá trị: JohnHenry, Freelancer, BestSeller, AoNam, AoNu, AoSoMiNam, QuanTayNam, PhuKienNam, AoSoMiNu, QuanShortNu, ChanVayNu, PhuKienNu, Blog
+                        </small>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="bannerDescription" class="admin-form-label">Mô tả</label>
+                        <textarea class="admin-form-textarea" id="bannerDescription" name="Description" 
+                                  rows="2" placeholder="Mô tả ngắn về banner"></textarea>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="bannerImage" class="admin-form-label">
+                            Hình ảnh banner <span style="color: var(--status-danger);">*</span>
+                        </label>
+                        <input type="file" class="admin-form-input" id="bannerImage" name="imageFile" accept="image/*">
+                        <small class="admin-form-help">Khuyến nghị: 1200x400px cho banner chính, 600x300px cho banner phụ</small>
+                        <input type="hidden" id="existingImageUrl" name="ImageUrl">
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="bannerMobileImage" class="admin-form-label">Hình ảnh mobile (tùy chọn)</label>
+                        <input type="file" class="admin-form-input" id="bannerMobileImage" name="mobileImageFile" accept="image/*">
+                        <small class="admin-form-help">Hình ảnh riêng cho thiết bị di động (750x400px)</small>
+                        <input type="hidden" id="existingMobileImageUrl" name="MobileImageUrl">
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="bannerUrl" class="admin-form-label">URL liên kết</label>
+                        <input type="url" class="admin-form-input" id="bannerUrl" name="LinkUrl" 
+                               placeholder="https://example.com">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="startDate" class="admin-form-label">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="admin-form-input" id="startDate" name="StartDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="endDate" class="admin-form-label">Ngày kết thúc</label>
+                                <input type="datetime-local" class="admin-form-input" id="endDate" name="EndDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="admin-form-group">
+                                <label for="sortOrder" class="admin-form-label">Thứ tự sắp xếp</label>
+                                <input type="number" class="admin-form-input" id="sortOrder" name="SortOrder" 
+                                       value="0" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-form-group">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="openInNewTab" name="OpenInNewTab">
+                                    <label class="form-check-label" for="openInNewTab">
+                                        Mở tab mới
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-form-group">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" checked>
+                                    <label class="form-check-label" for="isActive">
+                                        Kích hoạt ngay
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="admin-btn admin-btn-primary" onclick="createBanner()">Tạo banner</button>
+                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                    Hủy
+                </button>
+                <button type="submit" form="createBannerForm" class="admin-btn admin-btn-primary">
+                    <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                    <span id="btnSaveText">Tạo banner</span>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    let currentBannerId = null;
+    let currentFilter = 'all';
+
     function addBanner(position) {
+        resetForm();
         document.getElementById('bannerPosition').value = position;
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('createBannerModal')).show();
+        document.getElementById('bannerModalTitle').textContent = 'Tạo banner mới';
+        document.getElementById('btnSaveText').textContent = 'Tạo banner';
+        currentBannerId = null;
+        
+        const modal = new bootstrap.Modal(document.getElementById('createBannerModal'));
+        modal.show();
     }
 
-    function editBanner(bannerId) {
-        // Implementation for editing banner
-        window.location.href = `/admin/banners/${bannerId}/edit`;
+    function addCollectionBanner(targetPage) {
+        resetForm();
+        document.getElementById('bannerPosition').value = 'collection_hero';
+        document.getElementById('bannerTargetPage').value = targetPage;
+        document.getElementById('bannerModalTitle').textContent = 'Thêm banner cho ' + targetPage;
+        document.getElementById('btnSaveText').textContent = 'Tạo banner';
+        currentBannerId = null;
+        
+        const modal = new bootstrap.Modal(document.getElementById('createBannerModal'));
+        modal.show();
     }
 
-    function removeBanner(position) {
-        if (confirm('Bạn có chắc chắn muốn gỡ banner này?')) {
-            fetch(`/admin/api/banners/position/${position}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Có lỗi xảy ra: ' + data.message);
-                }
-            });
-        }
-    }
-
-    function toggleBanner(bannerId) {
-        fetch(`/admin/api/banners/${bannerId}/toggle`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
+    function filterBanners(filter) {
+        currentFilter = filter;
+        
+        // Update active tab
+        document.querySelectorAll('.admin-filter-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Filter banners in sidebar list
+        const listItems = document.querySelectorAll('.list-group-item[data-position], .list-group-item[data-active]');
+        listItems.forEach(item => {
+            const position = item.dataset.position;
+            const isActive = item.dataset.active === 'true';
+            
+            if (filter === 'all') {
+                item.style.display = '';
+            } else if (filter === 'active') {
+                item.style.display = isActive ? '' : 'none';
             } else {
-                alert('Có lỗi xảy ra: ' + data.message);
+                item.style.display = position === filter ? '' : 'none';
             }
         });
     }
 
-    function scheduleNow(bannerId) {
-        if (confirm('Bạn có muốn kích hoạt banner này ngay bây giờ?')) {
-            fetch(`/admin/api/banners/${bannerId}/activate`, {
+    async function editBanner(bannerId) {
+        try {
+            const response = await fetch(`/admin/api/banners/${bannerId}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                const banner = result.data;
+                currentBannerId = bannerId;
+                
+                document.getElementById('bannerId').value = banner.id;
+                document.getElementById('bannerTitle').value = banner.title;
+                document.getElementById('bannerDescription').value = banner.description || '';
+                document.getElementById('bannerPosition').value = banner.position;
+                document.getElementById('bannerTargetPage').value = banner.targetPage || '';
+                document.getElementById('bannerUrl').value = banner.linkUrl || '';
+                document.getElementById('sortOrder').value = banner.sortOrder;
+                document.getElementById('openInNewTab').checked = banner.openInNewTab;
+                document.getElementById('isActive').checked = banner.isActive;
+                document.getElementById('existingImageUrl').value = banner.imageUrl;
+                document.getElementById('existingMobileImageUrl').value = banner.mobileImageUrl || '';
+                
+                if (banner.startDate) {
+                    const startDate = new Date(banner.startDate);
+                    startDate.setMinutes(startDate.getMinutes() - startDate.getTimezoneOffset());
+                    document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
+                }
+                
+                if (banner.endDate) {
+                    const endDate = new Date(banner.endDate);
+                    endDate.setMinutes(endDate.getMinutes() - endDate.getTimezoneOffset());
+                    document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
+                }
+                
+                // Show preview
+                if (banner.imageUrl) {
+                    document.getElementById('previewImg').src = banner.imageUrl;
+                    document.getElementById('imagePreview').style.display = 'block';
+                }
+                
+                document.getElementById('bannerModalTitle').textContent = 'Chỉnh sửa banner';
+                document.getElementById('btnSaveText').textContent = 'Cập nhật';
+                
+                const modal = new bootstrap.Modal(document.getElementById('createBannerModal'));
+                modal.show();
+            } else {
+                alert('Không thể tải thông tin banner: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi tải thông tin banner');
+        }
+    }
+
+    async function deleteBanner(bannerId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa banner này?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/api/banners/${bannerId}/delete`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Có lỗi xảy ra: ' + data.message);
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('success', 'Banner đã được xóa thành công!');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi xóa banner');
+        }
+    }
+
+    async function toggleBanner(bannerId) {
+        try {
+            const response = await fetch(`/admin/api/banners/${bannerId}/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
-        }
-    }
-
-    function createBanner() {
-        const formData = new FormData(document.getElementById('createBannerForm'));
-        
-        fetch('/admin/api/banners', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Banner đã được tạo thành công!');
-                bootstrap.Modal.getInstance(document.getElementById('createBannerModal')).hide();
-                location.reload();
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('success', result.message);
+                setTimeout(() => location.reload(), 1000);
             } else {
-                alert('Có lỗi xảy ra: ' + data.message);
+                showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi cập nhật trạng thái banner');
+        }
     }
 
-    // Image preview functionality
-    document.getElementById('bannerImage').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('previewImg').src = e.target.result;
-                document.getElementById('imagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+    async function scheduleNow(bannerId) {
+        if (!confirm('Bạn có muốn kích hoạt banner này ngay bây giờ?')) {
+            return;
         }
-    });
 
-    // Set default start date to now
-    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const response = await fetch(`/admin/api/banners/${bannerId}/activate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('success', 'Banner đã được kích hoạt!');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra');
+        }
+    }
+
+    async function saveBanner() {
+        const form = document.getElementById('createBannerForm');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Show loading
+        const btnSave = document.querySelector('#createBannerModal .admin-btn-primary');
+        const originalText = btnSave.innerHTML;
+        btnSave.disabled = true;
+        btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+
+        const formData = new FormData(form);
+        const url = currentBannerId 
+            ? `/admin/api/banners/${currentBannerId}/update`
+            : '/admin/api/banners';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createBannerModal'));
+                modal.hide();
+                showAlert('success', result.message);
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
+                btnSave.disabled = false;
+                btnSave.innerHTML = originalText;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi lưu banner');
+            btnSave.disabled = false;
+            btnSave.innerHTML = originalText;
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('createBannerForm').reset();
+        document.getElementById('bannerId').value = '';
+        document.getElementById('existingImageUrl').value = '';
+        document.getElementById('existingMobileImageUrl').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        
+        // Set default start date to now
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('startDate').value = now.toISOString().slice(0, 16);
+    }
+
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `admin-alert admin-alert-${type}`;
+        alertDiv.innerHTML = `
+            <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        const content = document.querySelector('.admin-content');
+        content.insertBefore(alertDiv, content.firstChild);
+        
+        // Reinitialize icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            alertDiv.style.transition = 'opacity 0.5s ease';
+            alertDiv.style.opacity = '0';
+            setTimeout(() => alertDiv.remove(), 500);
+        }, 5000);
+    }
+
+    // Image preview functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('bannerImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Set default start date
+        resetForm();
+        
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.admin-alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+
+        // Add data attributes to list items for filtering
+        document.querySelectorAll('.list-group-item').forEach((item, index) => {
+            const badge = item.querySelector('.admin-badge');
+            if (badge) {
+                const isActive = badge.classList.contains('admin-badge-success') || 
+                                badge.classList.contains('admin-badge-info');
+                item.dataset.active = isActive;
+                
+                const positionText = item.querySelector('small').textContent.trim();
+                if (positionText.includes('Trang chủ chính')) {
+                    item.dataset.position = 'home_main';
+                } else if (positionText.includes('Banner phụ')) {
+                    item.dataset.position = 'home_side';
+                }
+            }
+        });
     });
 </script>
 
 @section Scripts {
+    <link rel="stylesheet" href="~/css/admin-banners.css" />
     <script>
         // Initialize Lucide icons after page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -521,94 +970,3 @@
         });
     </script>
 }
-
-<style>
-    .banner-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-    }
-
-    .banner-slot {
-        border: 2px dashed #dee2e6;
-        border-radius: 0.375rem;
-        overflow: hidden;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-
-    .banner-slot.active {
-        border-style: solid;
-        border-color: #28a745;
-    }
-
-    .banner-slot.small {
-        max-width: 300px;
-    }
-
-    .banner-preview {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .banner-preview img {
-        width: 100%;
-        height: auto;
-        transition: transform 0.3s ease;
-    }
-
-    .banner-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .banner-slot:hover .banner-overlay {
-        opacity: 1;
-    }
-
-    .banner-placeholder {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 3rem 1rem;
-        color: #6c757d;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .banner-placeholder:hover {
-        color: #007bff;
-        background-color: #f8f9fa;
-    }
-
-    .banner-info {
-        padding: 0.75rem;
-        background: white;
-        border-top: 1px solid #dee2e6;
-    }
-
-    .banner-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .list-group-item img {
-        width: 50px;
-        height: 30px;
-        object-fit: cover;
-    }
-
-    .progress {
-        height: 8px;
-    }
-</style>

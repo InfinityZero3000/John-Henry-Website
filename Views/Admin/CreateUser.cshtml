@@ -1,0 +1,329 @@
+@model UserCreateViewModel
+@{
+    ViewData["Title"] = "Thêm Người Dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item\"><a href=\"" + Url.Action("Users") + "\">Người dùng</a></li><li class=\"breadcrumb-item active\">Thêm mới</li>";
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="user-plus"></i>
+                Thêm Người Dùng
+            </h1>
+            <a href="@Url.Action("Users")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Quay lại
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="CreateUser" method="post" enctype="multipart/form-data">
+        <div class="row g-4">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i data-lucide="user"></i>
+                            Thông tin cá nhân
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="FirstName" class="admin-form-label">
+                                        Họ <span style="color: var(--admin-danger);">*</span>
+                                    </label>
+                                    <input asp-for="FirstName" class="admin-form-input" placeholder="VD: Nguyễn">
+                                    <span asp-validation-for="FirstName" class="admin-form-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="LastName" class="admin-form-label">
+                                        Tên <span style="color: var(--admin-danger);">*</span>
+                                    </label>
+                                    <input asp-for="LastName" class="admin-form-input" placeholder="VD: Văn A">
+                                    <span asp-validation-for="LastName" class="admin-form-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Email" class="admin-form-label">
+                                        Email <span style="color: var(--admin-danger);">*</span>
+                                    </label>
+                                    <input asp-for="Email" class="admin-form-input" type="email" placeholder="email@example.com">
+                                    <span asp-validation-for="Email" class="admin-form-error"></span>
+                                    <small class="admin-form-help">Email sẽ được sử dụng làm tên đăng nhập</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="PhoneNumber" class="admin-form-label">Số điện thoại</label>
+                                    <input asp-for="PhoneNumber" class="admin-form-input" type="tel" placeholder="0123456789">
+                                    <span asp-validation-for="PhoneNumber" class="admin-form-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="DateOfBirth" class="admin-form-label">Ngày sinh</label>
+                                    <input asp-for="DateOfBirth" class="admin-form-input" type="date">
+                                    <span asp-validation-for="DateOfBirth" class="admin-form-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Gender" class="admin-form-label">Giới tính</label>
+                                    <select asp-for="Gender" class="admin-form-select">
+                                        <option value="">-- Chọn giới tính --</option>
+                                        <option value="Male">Nam</option>
+                                        <option value="Female">Nữ</option>
+                                        <option value="Other">Khác</option>
+                                    </select>
+                                    <span asp-validation-for="Gender" class="admin-form-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="admin-form-group">
+                                    <label asp-for="Address" class="admin-form-label">Địa chỉ</label>
+                                    <textarea asp-for="Address" class="admin-form-textarea" rows="3" 
+                                              placeholder="Nhập địa chỉ đầy đủ..."></textarea>
+                                    <span asp-validation-for="Address" class="admin-form-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Card -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i data-lucide="lock"></i>
+                            Thông tin bảo mật
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="Password" class="admin-form-label">
+                                        Mật khẩu <span style="color: var(--admin-danger);">*</span>
+                                    </label>
+                                    <input asp-for="Password" class="admin-form-input" type="password" placeholder="Nhập mật khẩu">
+                                    <span asp-validation-for="Password" class="admin-form-error"></span>
+                                    <small class="admin-form-help">Tối thiểu 6 ký tự</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label asp-for="ConfirmPassword" class="admin-form-label">
+                                        Xác nhận mật khẩu <span style="color: var(--admin-danger);">*</span>
+                                    </label>
+                                    <input asp-for="ConfirmPassword" class="admin-form-input" type="password" placeholder="Nhập lại mật khẩu">
+                                    <span asp-validation-for="ConfirmPassword" class="admin-form-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Roles Card -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h6 class="admin-card-title">
+                            <i data-lucide="shield"></i>
+                            Vai trò
+                        </h6>
+                    </div>
+                    <div class="admin-card-body">
+                        @if (Model.AvailableRoles.Any())
+                        {
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Chọn vai trò cho người dùng</label>
+                                @foreach (var role in Model.AvailableRoles)
+                                {
+                                    <div class="admin-form-check">
+                                        <input type="checkbox" 
+                                               class="admin-form-check-input" 
+                                               name="SelectedRoles" 
+                                               value="@role" 
+                                               id="role_@role"
+                                               @(Model.SelectedRoles?.Contains(role) == true ? "checked" : "")>
+                                        <label class="admin-form-check-label" for="role_@role">
+                                            @role
+                                        </label>
+                                    </div>
+                                }
+                                <small class="admin-form-help">Người dùng có thể có nhiều vai trò</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="admin-text-muted" style="text-align: center; padding: 2rem 0;">
+                                <i data-lucide="alert-circle"></i><br>
+                                Chưa có vai trò nào trong hệ thống
+                            </p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h6 class="admin-card-title">
+                            <i data-lucide="settings"></i>
+                            Trạng thái
+                        </h6>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="admin-form-group">
+                            <div class="admin-form-check">
+                                <input asp-for="IsActive" class="admin-form-check-input" type="checkbox" id="isActive">
+                                <label asp-for="IsActive" class="admin-form-check-label" for="isActive">
+                                    Kích hoạt tài khoản
+                                </label>
+                            </div>
+                            <small class="admin-form-help">Tài khoản được kích hoạt có thể đăng nhập vào hệ thống</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avatar Card -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h6 class="admin-card-title">
+                            <i data-lucide="image"></i>
+                            Ảnh đại diện
+                        </h6>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="admin-form-group">
+                            <div class="admin-text-center" style="padding: 1rem;">
+                                <div id="avatar-preview" style="width: 120px; height: 120px; margin: 0 auto 1rem; border-radius: 50%; background: var(--admin-bg-secondary); border: 2px dashed var(--admin-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <img id="preview-img" src="" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                    <i data-lucide="user" id="placeholder-icon" style="width: 48px; height: 48px; color: var(--admin-text-muted);"></i>
+                                </div>
+                                <input type="file" asp-for="AvatarFile" class="admin-form-input" accept="image/*" id="avatarInput">
+                                <small class="admin-form-help">Định dạng: JPG, PNG (Tối đa 2MB)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Card -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h6 class="admin-card-title">
+                            <i data-lucide="help-circle"></i>
+                            Lưu ý
+                        </h6>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="admin-help-section">
+                            <p class="admin-help-text">
+                                <strong>Email:</strong> Được sử dụng làm tên đăng nhập và không thể thay đổi sau khi tạo.
+                            </p>
+                            <p class="admin-help-text">
+                                <strong>Mật khẩu:</strong> Phải có ít nhất 6 ký tự, nên kết hợp chữ hoa, chữ thường và số.
+                            </p>
+                            <p class="admin-help-text">
+                                <strong>Vai trò:</strong> Quyết định quyền truy cập của người dùng trong hệ thống.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="admin-form-actions" style="margin-top: 0.5rem;">
+            <button type="submit" class="admin-btn admin-btn-primary">
+                <i data-lucide="save"></i>
+                Tạo người dùng
+            </button>
+            <a href="@Url.Action("Users")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="x"></i>
+                Hủy bỏ
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Avatar preview
+        document.getElementById('avatarInput')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Kích thước file không được vượt quá 2MB');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file ảnh');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('preview-img').src = event.target.result;
+                    document.getElementById('preview-img').style.display = 'block';
+                    document.getElementById('placeholder-icon').style.display = 'none';
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Password strength indicator (optional enhancement)
+        $('#Password').on('input', function() {
+            const password = $(this).val();
+            const strength = getPasswordStrength(password);
+            // You can add visual feedback here
+        });
+
+        function getPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            return strength;
+        }
+
+        // Auto-hide alerts after 3 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 3000);
+    </script>
+}
