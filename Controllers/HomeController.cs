@@ -119,6 +119,68 @@ public class HomeController : Controller
 
         ViewBag.SmallBanners = smallBanners;
 
+        // Load collection hero banners for Index page collections
+        var johnHenryCollectionBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "collection_hero"
+                && b.TargetPage == "JohnHenry"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .Take(1)
+            .FirstOrDefaultAsync();
+
+        ViewBag.JohnHenryCollectionBanner = johnHenryCollectionBanner;
+
+        var freelancerCollectionBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "collection_hero"
+                && b.TargetPage == "Freelancer"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .Take(1)
+            .FirstOrDefaultAsync();
+
+        ViewBag.FreelancerCollectionBanner = freelancerCollectionBanner;
+
+        var bestSellerCollectionBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "collection_hero"
+                && b.TargetPage == "BestSeller"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .Take(1)
+            .FirstOrDefaultAsync();
+
+        ViewBag.BestSellerCollectionBanner = bestSellerCollectionBanner;
+
+        // Load category banners
+        var aoNamBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "AoNam"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .Take(1)
+            .FirstOrDefaultAsync();
+
+        ViewBag.AoNamBanner = aoNamBanner;
+
+        var aoNuBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "AoNu"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .Take(1)
+            .FirstOrDefaultAsync();
+
+        ViewBag.AoNuBanner = aoNuBanner;
+
         return View();
     }
 
@@ -165,6 +227,19 @@ public class HomeController : Controller
         ViewBag.Breadcrumbs = breadcrumbs;
         ViewBag.MetaTitle = "JOHN HENRY - Thời trang nam nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập JOHN HENRY với các sản phẩm thời trang nam nữ chất lượng cao, phong cách hiện đại và sang trọng.";
+
+        // Load active marketing banners for John Henry collection page
+        var now = DateTime.UtcNow;
+        var collectionBanners = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "collection_hero"
+                && b.TargetPage == "JohnHenry"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .ToListAsync();
+
+        ViewBag.CollectionBanners = collectionBanners;
 
         // Load products from database - John Henry collection (Products with SKU NOT starting with "FW")
         // Get total count for pagination
@@ -215,6 +290,19 @@ public class HomeController : Controller
         ViewBag.Breadcrumbs = breadcrumbs;
         ViewBag.MetaTitle = "FREELANCER - Thời trang nữ hiện đại";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập FREELANCER với các sản phẩm thời trang nữ chất lượng cao, phong cách hiện đại và sang trọng dành riêng cho phái đẹp.";
+
+        // Load active marketing banners for Freelancer collection page
+        var now = DateTime.UtcNow;
+        var collectionBanners = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "collection_hero"
+                && b.TargetPage == "Freelancer"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .ToListAsync();
+
+        ViewBag.CollectionBanners = collectionBanners;
 
         // Load products from database - Freelancer collection (Products with SKU starting with "FW")
         // Get total count for pagination
@@ -352,6 +440,19 @@ public class HomeController : Controller
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
 
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "AoSoMiNu"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
+
         return View(products);
     }
 
@@ -405,6 +506,19 @@ public class HomeController : Controller
         ViewBag.TotalPages = totalPages;
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
+
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "QuanShortNu"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
 
         return View(products);
     }
@@ -460,6 +574,19 @@ public class HomeController : Controller
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
 
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "ChanVayNu"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
+
         return View(products);
     }
 
@@ -513,6 +640,19 @@ public class HomeController : Controller
         ViewBag.TotalPages = totalPages;
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
+
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "PhuKienNu"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
 
         return View(products);
     }
@@ -568,6 +708,19 @@ public class HomeController : Controller
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
 
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "AoSoMiNam"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
+
         return View(products);
     }
 
@@ -622,6 +775,19 @@ public class HomeController : Controller
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
 
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "QuanTayNam"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
+
         return View(products);
     }
 
@@ -675,6 +841,19 @@ public class HomeController : Controller
         ViewBag.TotalPages = totalPages;
         ViewBag.TotalProducts = totalProducts;
         ViewBag.PageSize = pageSize;
+
+        // Load category banner
+        var now = DateTime.UtcNow;
+        var categoryBanner = await _context.MarketingBanners
+            .Where(b => b.IsActive 
+                && b.Position == "category_banner"
+                && b.TargetPage == "PhuKienNam"
+                && b.StartDate <= now
+                && (b.EndDate == null || b.EndDate >= now))
+            .OrderBy(b => b.SortOrder)
+            .FirstOrDefaultAsync();
+
+        ViewBag.CategoryBanner = categoryBanner;
 
         return View(products);
     }

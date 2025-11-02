@@ -43,6 +43,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Wishlist/Add
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(string productId)
         {
             try
@@ -113,6 +114,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Wishlist/Remove
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Remove([FromBody] string productId)
         {
             try
@@ -166,6 +168,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Wishlist/Clear
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Clear()
         {
             try
@@ -199,6 +202,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         // POST: Wishlist/AddToCart
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart([FromBody] string productId)
         {
             try

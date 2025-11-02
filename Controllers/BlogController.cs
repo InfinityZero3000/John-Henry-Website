@@ -88,6 +88,19 @@ namespace JohnHenryFashionWeb.Controllers
                 };
                 ViewBag.Breadcrumbs = breadcrumbs;
 
+                // Load blog page banner
+                var now = DateTime.UtcNow;
+                var pageBanner = await _context.MarketingBanners
+                    .Where(b => b.IsActive 
+                        && b.Position == "page_hero"
+                        && b.TargetPage == "Blog"
+                        && b.StartDate <= now
+                        && (b.EndDate == null || b.EndDate >= now))
+                    .OrderBy(b => b.SortOrder)
+                    .FirstOrDefaultAsync();
+
+                ViewBag.PageBanner = pageBanner;
+
                 return View(posts);
             }
             catch (Exception ex)

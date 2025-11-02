@@ -324,6 +324,12 @@ builder.Services.AddControllersWithViews(options =>
 })
     .AddNewtonsoftJson();
 
+// Configure Antiforgery to accept token from header
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
+
 // Add HttpClient for Payment Service
 builder.Services.AddHttpClient();
 
@@ -790,13 +796,6 @@ static async Task SeedBlogPosts(ApplicationDbContext context, UserManager<Applic
 
     context.BlogPosts.AddRange(blogPosts);
     await context.SaveChangesAsync();
-}
-
-// Seed Shipping Methods
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await JohnHenryFashionWeb.Scripts.SeedShippingMethods.Run(context);
 }
 
 try
