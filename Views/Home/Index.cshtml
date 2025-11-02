@@ -140,14 +140,7 @@
                                     {
                                         <div class="small-banner-content">
                                             <h4>@banner.Title</h4>
-                                            @if (!string.IsNullOrEmpty(banner.Description))
-                                            {
-                                                <p class="banner-link">@banner.Description</p>
-                                            }
-                                            else
-                                            {
-                                                <p class="banner-link">Xem ngay</p>
-                                            }
+                                            <p class="banner-link">Xem ngay</p>
                                         </div>
                                     }
                                 </a>
@@ -167,10 +160,7 @@
                                 {
                                     <div class="small-banner-content">
                                         <h4>@banner.Title</h4>
-                                        @if (!string.IsNullOrEmpty(banner.Description))
-                                        {
-                                            <p class="banner-link">@banner.Description</p>
-                                        }
+                                        <p class="banner-link">Xem ngay</p>
                                     </div>
                                 }
                             }
@@ -187,10 +177,23 @@
                 <div class="col-lg-4 col-md-4">
                     <div class="small-banner-card">
                         <div class="small-banner-image">
-                            <img src="~/images/Banner/banner-man-0.jpg" alt="John Henry New Arrival" class="img-fluid">
+                            <img src="~/images/Banner/banner-home-1.jpg" alt="John Henry New Arrival" class="img-fluid">
                         </div>
                         <div class="small-banner-content">
                             <h4>JOHN HENRY - NEW ARRIVAL</h4>
+                            <p class="banner-link">Xem ngay</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Freelancer - New Arrival -->
+                <div class="col-lg-4 col-md-4">
+                    <div class="small-banner-card">
+                        <div class="small-banner-image">
+                            <img src="~/images/Banner/banner-home-2.jpg" alt="Freelancer New Arrival" class="img-fluid">
+                        </div>
+                        <div class="small-banner-content">
+                            <h4>FREELANCER - NEW ARRIVAL</h4>
                             <p class="banner-link">Xem ngay</p>
                         </div>
                     </div>
@@ -200,23 +203,10 @@
                 <div class="col-lg-4 col-md-4">
                     <div class="small-banner-card">
                         <div class="small-banner-image">
-                            <img src="~/images/Banner/banner-man-bestseller.jpg" alt="Best Seller" class="img-fluid">
+                            <img src="~/images/Banner/banner-home-3.jpg" alt="Best Seller" class="img-fluid">
                         </div>
                         <div class="small-banner-content">
                             <h4>BEST SELLER</h4>
-                            <p class="banner-link">Xem ngay</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Freelancer - New Arrival -->
-                <div class="col-lg-4 col-md-4">
-                    <div class="small-banner-card">
-                        <div class="small-banner-image">
-                            <img src="~/images/Banner/banner-women-1.jpg" alt="Freelancer New Arrival" class="img-fluid">
-                        </div>
-                        <div class="small-banner-content">
-                            <h4>FREELANCER - NEW ARRIVAL</h4>
                             <p class="banner-link">Xem ngay</p>
                         </div>
                     </div>
@@ -241,7 +231,25 @@
             </div>
             
             <div class="collection-hero-banner position-relative mb-4">
-                <img src="~/images/Banner/banner-man-bestseller.jpg" alt="John Henry Collection" class="w-100 hero-image">
+                @if (ViewBag.JohnHenryCollectionBanner != null)
+                {
+                    var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.JohnHenryCollectionBanner;
+                    @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                    {
+                        <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")">
+                            <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                        </a>
+                    }
+                    else
+                    {
+                        <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                    }
+                }
+                else
+                {
+                    <!-- Fallback: Default banner if no DB banner -->
+                    <img src="~/images/Banner/banner-man-bestseller.jpg" alt="John Henry Collection" class="w-100 hero-image">
+                }
             </div>
             
             <div class="products-grid">
@@ -297,7 +305,25 @@
             </div>
 
                 <div class="collection-hero-banner position-relative mb-4">
-                    <img src="~/images/Banner/banner-women-main.jpg" alt="Freelancer Collection" class="w-100 hero-image">
+                    @if (ViewBag.FreelancerCollectionBanner != null)
+                    {
+                        var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.FreelancerCollectionBanner;
+                        @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                        {
+                            <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")">
+                                <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                            </a>
+                        }
+                        else
+                        {
+                            <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                        }
+                    }
+                    else
+                    {
+                        <!-- Fallback: Default banner if no DB banner -->
+                        <img src="~/images/Banner/banner-women-main.jpg" alt="Freelancer Collection" class="w-100 hero-image">
+                    }
                 </div>
                 
                 <div class="products-grid">
@@ -352,7 +378,25 @@
             </div>
             
             <div class="collection-hero-banner position-relative mb-4">
-                <img src="~/images/Banner/banner-women-bestseller.jpg" alt="Best Seller Collection" class="w-100 hero-image">
+                @if (ViewBag.BestSellerCollectionBanner != null)
+                {
+                    var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.BestSellerCollectionBanner;
+                    @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                    {
+                        <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")">
+                            <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                        </a>
+                    }
+                    else
+                    {
+                        <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                    }
+                }
+                else
+                {
+                    <!-- Fallback: Default banner if no DB banner -->
+                    <img src="~/images/Banner/banner-women-bestseller.jpg" alt="Best Seller Collection" class="w-100 hero-image">
+                }
             </div>
             
             <div class="products-grid">
@@ -409,7 +453,16 @@
             <div class="col-lg-6">
                 <div class="category-card">
                     <div class="category-image-container">
-                        <img src="~/images/Banner/banner-man-2.jpg" alt="Áo Nam" class="category-image">
+                        @if (ViewBag.AoNamBanner != null)
+                        {
+                            var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.AoNamBanner;
+                            <img src="@banner.ImageUrl" alt="@banner.Title" class="category-image">
+                        }
+                        else
+                        {
+                            <!-- Fallback: Default banner if no DB banner -->
+                            <img src="~/images/Banner/banner-man-2.jpg" alt="Áo Nam" class="category-image">
+                        }
                         <div class="category-overlay">
                             <div class="category-content">
                                 <h3 class="category-title">ÁO NAM</h3>
@@ -428,7 +481,16 @@
             <div class="col-lg-6">
                 <div class="category-card">
                     <div class="category-image-container">
-                        <img src="~/images/Banner/banner-women-2.jpg" alt="Áo Nữ" class="category-image">
+                        @if (ViewBag.AoNuBanner != null)
+                        {
+                            var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.AoNuBanner;
+                            <img src="@banner.ImageUrl" alt="@banner.Title" class="category-image">
+                        }
+                        else
+                        {
+                            <!-- Fallback: Default banner if no DB banner -->
+                            <img src="~/images/Banner/banner-women-2.jpg" alt="Áo Nữ" class="category-image">
+                        }
                         <div class="category-overlay">
                             <div class="category-content">
                                 <h3 class="category-title">ÁO NỮ</h3>
@@ -619,6 +681,7 @@
         overflow: hidden;
         position: relative;
         margin: 0;
+        margin-top: -20px; /* Dịch banner lên để che chỗ hở giữa header và banner */
         margin-left: calc(-50vw + 50%); /* Căn giữa và loại bỏ padding container */
         margin-right: calc(-50vw + 50%);
         padding: 0;
@@ -777,6 +840,7 @@
         .hero-carousel {
             min-height: 50vh;
             max-height: 80vh;
+            margin-top: -20px;
             margin-left: calc(-50vw + 50%);
             margin-right: calc(-50vw + 50%);
         }
@@ -791,6 +855,7 @@
         .hero-carousel {
             min-height: 45vh;
             max-height: 75vh;
+            margin-top: -20px;
             margin-left: calc(-50vw + 50%);
             margin-right: calc(-50vw + 50%);
         }
@@ -810,6 +875,7 @@
         .hero-carousel {
             min-height: 40vh;
             max-height: 70vh;
+            margin-top: -15px;
             margin-left: calc(-50vw + 50%);
             margin-right: calc(-50vw + 50%);
         }
@@ -859,6 +925,7 @@
         .hero-carousel {
             min-height: 35vh;
             max-height: 60vh;
+            margin-top: -10px;
         }
         
         .carousel-item {
@@ -911,6 +978,7 @@
         .hero-carousel {
             min-height: 30vh;
             max-height: 55vh;
+            margin-top: -10px;
         }
         
         .carousel-item {

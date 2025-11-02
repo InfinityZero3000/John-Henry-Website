@@ -141,9 +141,69 @@
                 <div class="col-12">
                 </div>
 
-                <div class="collection-hero-banner position-relative mb-5">
-                    <img src="~/images/Banner/banner-women-0.jpg" alt="Freelancer Collection" class="w-100 hero-image">
-                </div>
+                @if (ViewBag.CollectionBanners != null && ((List<JohnHenryFashionWeb.Models.MarketingBanner>)ViewBag.CollectionBanners).Any())
+                {
+                    var banners = (List<JohnHenryFashionWeb.Models.MarketingBanner>)ViewBag.CollectionBanners;
+                    
+                    @if (banners.Count == 1)
+                    {
+                        <!-- Single banner -->
+                        <div class="collection-hero-banner position-relative mb-5">
+                            <img src="@banners[0].ImageUrl" alt="@banners[0].Title" class="w-100 hero-image">
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Multiple banners with carousel -->
+                        <div class="collection-hero-banner position-relative mb-5">
+                            <div id="freelancerCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    @for (int i = 0; i < banners.Count; i++)
+                                    {
+                                        <button type="button" data-bs-target="#freelancerCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+                                    }
+                                </div>
+                                
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < banners.Count; i++)
+                                    {
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            @if (!string.IsNullOrEmpty(banners[i].LinkUrl))
+                                            {
+                                                <a href="@banners[i].LinkUrl" target="@(banners[i].OpenInNewTab ? "_blank" : "_self")">
+                                                    <img src="@banners[i].ImageUrl" alt="@banners[i].Title" class="d-block w-100">
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <img src="@banners[i].ImageUrl" alt="@banners[i].Title" class="d-block w-100">
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                
+                                @if (banners.Count > 1)
+                                {
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#freelancerCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#freelancerCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <!-- Fallback: Default banner if no banners in database -->
+                    <div class="collection-hero-banner position-relative mb-5">
+                        <img src="~/images/Banner/banner-women-0.jpg" alt="Freelancer Collection" class="w-100 hero-image">
+                    </div>
+                }
             </div>
         </div>
     </section>

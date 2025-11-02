@@ -164,18 +164,16 @@
         .product-image-container {
             position: relative;
             width: 100%;
-            padding-top: 133.33%; /* 3:4 aspect ratio */
+            aspect-ratio: 3 / 4;
             overflow: hidden;
             background: #f8f9fa;
         }
         
         .product-image {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
             transition: transform 0.5s ease;
         }
         
@@ -350,11 +348,14 @@
                 const originalIcon = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
                 const response = await fetch('/Wishlist/Remove', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        'X-CSRF-TOKEN': token,
+                        'RequestVerificationToken': token
                     },
                     body: JSON.stringify(productId)
                 });
@@ -399,11 +400,14 @@
                 const originalIcon = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
                 const response = await fetch('/wishlist/addtocart', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        'X-CSRF-TOKEN': token,
+                        'RequestVerificationToken': token
                     },
                     body: JSON.stringify(productId)
                 });
@@ -438,11 +442,14 @@
             }
             
             try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
                 const response = await fetch('/Wishlist/Clear', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        'X-CSRF-TOKEN': token,
+                        'RequestVerificationToken': token
                     }
                 });
                 
@@ -478,11 +485,14 @@
             
             for (const productId of productIds) {
                 try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
                     const response = await fetch('/wishlist/addtocart', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            'X-CSRF-TOKEN': token,
+                            'RequestVerificationToken': token
                         },
                         body: JSON.stringify(productId)
                     });

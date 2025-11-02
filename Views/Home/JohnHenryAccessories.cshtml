@@ -224,8 +224,26 @@
             <div class="collection-section mb-3">
                 <div class="col-12">
                 </div>
-                <div class="collection-hero-banner position-relative mb-5">
-                    <img src="~/images/Banner/banner-accessory-man.jpg" alt="John Henry Accessories Collection" class="w-100 hero-image">
+                <div class="collection-hero-banner">
+                    @if (ViewBag.CategoryBanner != null)
+                    {
+                        var banner = (JohnHenryFashionWeb.Models.MarketingBanner)ViewBag.CategoryBanner;
+                        @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                        {
+                            <a href="@banner.LinkUrl" target="@(banner.OpenInNewTab ? "_blank" : "_self")">
+                                <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                            </a>
+                        }
+                        else
+                        {
+                            <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100 hero-image">
+                        }
+                    }
+                    else
+                    {
+                        <!-- Fallback: Default banner if no DB banner -->
+                        <img src="~/images/Banner/banner-accessory-man.jpg" alt="John Henry Accessories Collection" class="w-100 hero-image">
+                    }
                 </div>
             </div>
         </div>
