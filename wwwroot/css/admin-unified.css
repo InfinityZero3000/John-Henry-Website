@@ -1243,6 +1243,90 @@ html, body {
    RESPONSIVE
    ========================================== */
 
+/* Desktop - Sidebar visible */
+@media (min-width: 992px) {
+    .admin-sidebar {
+        transform: translateX(0) !important;
+    }
+    
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    .admin-main {
+        margin-left: 260px;
+    }
+}
+
+/* Tablet and Mobile */
+@media (max-width: 991px) {
+    /* Mobile Sidebar - Hidden by default */
+    .admin-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1050;
+        width: 280px;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .admin-sidebar.show,
+    .admin-sidebar.active {
+        transform: translateX(0);
+    }
+    
+    /* Sidebar Overlay for Mobile */
+    .admin-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+    
+    .admin-main {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    /* Hide toggle button when sidebar is shown on mobile */
+    .admin-sidebar.show .sidebar-toggle,
+    .admin-sidebar.active .sidebar-toggle {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        display: none !important;
+    }
+    
+    /* Hide breadcrumb on mobile to save space */
+    .breadcrumb-wrapper,
+    .breadcrumb {
+        display: none !important;
+    }
+}
+
 @media (max-width: 768px) {
     .admin-content {
         padding: var(--spacing-md);
@@ -1270,24 +1354,6 @@ html, body {
     
     .chart-container {
         height: 250px;
-    }
-    
-    /* Mobile Sidebar */
-    .admin-sidebar {
-        transform: translateX(-100%);
-    }
-    
-    .admin-sidebar.active {
-        transform: translateX(0);
-    }
-    
-    .admin-main {
-        margin-left: 0;
-        width: 100%;
-    }
-    
-    .sidebar-toggle {
-        display: block;
     }
     .shadow-admin {
     box-shadow: 0 5px 25px rgba(0,0,0,0.08) !important;

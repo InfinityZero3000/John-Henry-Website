@@ -1,0 +1,676 @@
+/* ========================================
+   RESPONSIVE MOBILE IMPROVEMENTS
+   ======================================== */
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    color: #333;
+    transition: all 0.3s ease;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-menu-toggle:hover {
+    color: var(--jh-red);
+    transform: scale(1.1);
+}
+
+.mobile-menu-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Mobile Navigation Overlay */
+.mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Navigation Menu */
+.mobile-nav-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 380px;
+    height: 100%;
+    background: #fff;
+    z-index: 9999;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-menu.active {
+    left: 0;
+}
+
+/* Mobile Nav Header */
+.mobile-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--jh-red) 0%, #c41e3a 100%);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.mobile-nav-close {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-close:hover {
+    transform: rotate(90deg) scale(1.2);
+}
+
+.mobile-nav-close svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Mobile Nav Content */
+.mobile-nav-content {
+    padding: 0;
+}
+
+.mobile-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Mobile Nav Item */
+.mobile-nav-item {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-height: 56px;
+    position: relative;
+}
+
+.mobile-nav-link:hover {
+    background: #f8f9fa;
+    color: var(--jh-red);
+    padding-left: 25px;
+}
+
+.mobile-nav-link svg:first-child {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.mobile-nav-link span {
+    flex: 1;
+}
+
+.mobile-nav-link .submenu-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.mobile-nav-item.has-submenu > .mobile-nav-link.active .submenu-icon {
+    transform: rotate(180deg);
+}
+
+/* Mobile Submenu */
+.mobile-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #f8f9fa;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.mobile-submenu.active {
+    max-height: 1000px;
+}
+
+.mobile-submenu-item {
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.mobile-submenu-link {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px 14px 50px;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-height: 52px;
+}
+
+.mobile-submenu-link:hover {
+    background: #fff;
+    color: var(--jh-red);
+    padding-left: 55px;
+}
+
+.mobile-submenu-link span {
+    flex: 1;
+}
+
+.mobile-submenu-link .submenu-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.mobile-submenu-item.has-submenu > .mobile-submenu-link.active .submenu-icon {
+    transform: rotate(180deg);
+}
+
+/* Mobile Nested Submenu */
+.mobile-submenu-nested {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.mobile-submenu-nested.active {
+    max-height: 800px;
+}
+
+.mobile-submenu-nested li {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.mobile-submenu-nested a {
+    display: block;
+    padding: 12px 20px 12px 70px;
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    min-height: 48px;
+}
+
+.mobile-submenu-nested a:hover {
+    background: #f8f9fa;
+    color: var(--jh-red);
+    padding-left: 75px;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 991px) {
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    
+    /* Hide desktop navigation on mobile/tablet */
+    .nav-section {
+        display: none;
+    }
+}
+
+/* Improved Touch Targets */
+@media (max-width: 768px) {
+    /* Header Icons - Larger Touch Targets */
+    .header-icon {
+        font-size: 24px !important;
+        padding: 12px;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .header-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .header-icons {
+        gap: 8px;
+    }
+    
+    /* Header Adjustments */
+    .header-content {
+        padding: 10px 0;
+    }
+    
+    /* Logo Size */
+    .logo-icon img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    /* Search Box */
+    .search-section {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    /* Body Padding */
+    body {
+        padding-top: 180px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra Small Phones */
+    body {
+        padding-top: 160px !important;
+    }
+    
+    .logo-icon img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .header-icon {
+        font-size: 22px !important;
+        padding: 10px;
+    }
+    
+    .mobile-nav-menu {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Very Small Phones */
+    body {
+        padding-top: 150px !important;
+    }
+    
+    .logo-icon img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .header-icons {
+        gap: 6px;
+    }
+    
+    .header-icon {
+        font-size: 20px !important;
+        padding: 8px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+    
+    .mobile-nav-menu {
+        width: 95%;
+    }
+}
+
+/* Prevent Body Scroll When Menu Open */
+body.mobile-menu-open {
+    overflow: hidden;
+}
+
+/* Animation Classes */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   RESPONSIVE TYPOGRAPHY
+   ======================================== */
+
+/* Fluid Typography - Scales smoothly across screen sizes */
+h1, .h1 {
+    font-size: clamp(1.75rem, 4vw + 1rem, 3rem);
+    line-height: 1.2;
+}
+
+h2, .h2 {
+    font-size: clamp(1.5rem, 3vw + 1rem, 2.5rem);
+    line-height: 1.3;
+}
+
+h3, .h3 {
+    font-size: clamp(1.25rem, 2.5vw + 0.5rem, 2rem);
+    line-height: 1.3;
+}
+
+h4, .h4 {
+    font-size: clamp(1.125rem, 2vw + 0.5rem, 1.5rem);
+    line-height: 1.4;
+}
+
+h5, .h5 {
+    font-size: clamp(1rem, 1.5vw + 0.5rem, 1.25rem);
+    line-height: 1.4;
+}
+
+body, p, .body-text {
+    font-size: clamp(0.875rem, 1vw + 0.5rem, 1rem);
+    line-height: 1.6;
+}
+
+.btn, button {
+    font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1rem);
+    padding: clamp(8px, 2vw, 12px) clamp(16px, 3vw, 24px);
+}
+
+/* ========================================
+   PRODUCT GRID RESPONSIVE
+   ======================================== */
+
+@media (max-width: 575px) {
+    /* Mobile: 2 columns */
+    .product-card {
+        margin-bottom: 15px;
+    }
+    
+    .product-image-container,
+    .product-image-wrapper {
+        height: 200px;
+    }
+    
+    .product-name,
+    .product-title {
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+    
+    .product-price {
+        font-size: 0.9rem;
+    }
+    
+    .product-info,
+    .product-details {
+        padding: 10px;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    /* Large mobile: 2 columns */
+    .product-image-container,
+    .product-image-wrapper {
+        height: 220px;
+    }
+    
+    .product-name,
+    .product-title {
+        font-size: 0.85rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    /* Tablet: 3 columns (col-md-6 = 2 cols, col-lg-4 = 3 cols) */
+    .product-image-container,
+    .product-image-wrapper {
+        height: 240px;
+    }
+}
+
+/* ========================================
+   CLICK-BASED DROPDOWNS FOR MOBILE
+   ======================================== */
+
+@media (max-width: 991px) {
+    /* Disable hover dropdowns on mobile/tablet */
+    .nav-menu .dropdown-menu {
+        display: none !important;
+    }
+    
+    .nav-menu .dropdown-category-item:hover .submenu {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   FORM IMPROVEMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Larger form inputs for touch */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important; /* Prevents zoom on iOS */
+        min-height: 44px;
+        padding: 12px;
+    }
+    
+    /* Larger buttons */
+    .btn {
+        min-height: 44px;
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    /* Stack form buttons vertically */
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   TABLE RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Make tables scrollable */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        font-size: 0.875rem;
+    }
+    
+    th, td {
+        padding: 8px;
+        white-space: nowrap;
+    }
+}
+
+/* ========================================
+   IMAGE OPTIMIZATION
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Optimize images for mobile */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Hero images */
+    .hero-image,
+    .banner-image {
+        min-height: 300px;
+        object-fit: cover;
+    }
+}
+
+/* ========================================
+   SPACING ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Reduce spacing on mobile */
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    section {
+        padding: 40px 0;
+    }
+    
+    .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .mb-5 {
+        margin-bottom: 2rem !important;
+    }
+    
+    .mt-5 {
+        margin-top: 2rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    section {
+        padding: 30px 0;
+    }
+    
+    .py-5 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+}
+
+/* ========================================
+   FOOTER RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .footer-section .col-lg-4,
+    .footer-section .col-lg-2,
+    .footer-section .col-md-6 {
+        margin-bottom: 30px;
+    }
+    
+    .footer-title {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    
+    .footer-links {
+        font-size: 0.9rem;
+    }
+}
+
+/* ========================================
+   MODAL RESPONSIVE
+   ======================================== */
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        border-radius: 8px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 20px 15px;
+    }
+    
+    .modal-footer {
+        padding: 15px;
+    }
+}
+
+/* ========================================
+   CART SIDEBAR RESPONSIVE
+   ======================================== */
+
+@media (max-width: 576px) {
+    #cart-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* ========================================
+   NAVIGATION BAR IMPROVEMENTS
+   ======================================== */
+
+@media (max-width: 991px) {
+    /* Hide desktop nav items, show mobile toggle */
+    .nav-menu .nav-item {
+        display: none;
+    }
+}

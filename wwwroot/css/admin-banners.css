@@ -7,6 +7,26 @@
     margin-top: 1rem;
 }
 
+/* Banner Gallery Styles */
+.banner-gallery-item .card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.banner-gallery-item .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.banner-gallery-item .card-img-top {
+    transition: opacity 0.3s ease;
+}
+
+.banner-gallery-item .card:hover .card-img-top {
+    opacity: 0.9;
+}
+
 .banner-slot {
     border: 2px dashed #dee2e6;
     border-radius: 0.5rem;
@@ -84,6 +104,19 @@
     transform: scale(1.1);
 }
 
+.banner-slot.empty {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.banner-slot.empty * {
+    pointer-events: none;
+    user-drag: none;
+    -webkit-user-drag: none;
+}
+
 .banner-placeholder {
     display: flex;
     flex-direction: column;
@@ -95,6 +128,9 @@
     transition: all 0.3s ease;
     min-height: 200px;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .banner-placeholder:hover {
@@ -103,9 +139,13 @@
 }
 
 .banner-placeholder svg,
-.banner-placeholder i {
+.banner-placeholder i,
+.banner-placeholder p {
     opacity: 0.6;
     transition: all 0.3s ease;
+    pointer-events: none; /* Prevent children from being draggable */
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .banner-placeholder:hover svg,
@@ -322,4 +362,166 @@
 .empty-state p {
     color: #6c757d;
     margin-bottom: 1.5rem;
+}
+
+/* ========== DRAG & DROP STYLES ========== */
+
+/* Drag Handle */
+.drag-handle {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    cursor: grab;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.drag-handle i,
+.drag-handle svg {
+    width: 20px;
+    height: 20px;
+    color: #6c757d;
+}
+
+.banner-slot:hover .drag-handle {
+    opacity: 1;
+}
+
+/* Draggable Elements */
+.banner-slot.draggable {
+    cursor: move;
+    user-select: none;
+}
+
+.banner-slot.draggable:active {
+    cursor: grabbing;
+}
+
+/* Dragging State */
+.banner-slot.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    border: 2px dashed #007bff;
+    box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+}
+
+/* Drop Zone Hover State */
+.banner-slot.drag-over {
+    border-color: #007bff;
+    border-width: 3px;
+    border-style: dashed;
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.1) 100%);
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+}
+
+.banner-slot.drop-zone.drag-over {
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0.2) 100%);
+}
+
+.banner-slot.empty.drag-over .banner-placeholder {
+    color: #007bff;
+    background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 50%, #bbdefb 100%);
+}
+
+/* Drag Animation */
+@keyframes dragPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+}
+
+.banner-slot.drag-over {
+    animation: dragPulse 2s infinite;
+}
+
+/* Drop Feedback */
+.banner-slot.drop-success {
+    animation: dropSuccess 0.6s ease;
+}
+
+@keyframes dropSuccess {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+        border-color: #28a745;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Drag Instructions */
+.drag-instructions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #e3f2fd;
+    border-left: 4px solid #007bff;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #0d47a1;
+}
+
+.drag-instructions i,
+.drag-instructions svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Mobile Drag Feedback */
+@media (max-width: 768px) {
+    .drag-handle {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .banner-slot.dragging {
+        opacity: 0.7;
+    }
+}
+
+/* Prevent Text Selection During Drag */
+.dragging * {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Ghost Image Styling */
+.banner-slot.draggable::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    transition: background 0.3s ease;
+}
+
+.banner-slot.draggable:active::after {
+    background: rgba(0, 123, 255, 0.1);
 }

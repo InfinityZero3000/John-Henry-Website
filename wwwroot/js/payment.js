@@ -1,13 +1,28 @@
-// Payment JavaScript
+// Payment JavaScript - Redesigned
 let stripe;
 let elements;
 let cardNumber, cardExpiry, cardCvc;
+let pollingInterval;
+let countdown = 900; // 15 minutes
 
 $(document).ready(function() {
     initializePaymentForm();
     initializeStripe();
-    initializePaymentMethods();
-    initializeBankTransfer();
+    initializeCopyButtons();
+    
+    // Show appropriate payment section based on selected method
+    showPaymentSection();
+    
+    // Auto-generate QR code for VNPay or MoMo
+    const selectedMethod = $('input[name="SelectedPaymentMethod"]').val();
+    console.log('Selected payment method:', selectedMethod); // Debug log
+    
+    if (selectedMethod === 'vnpay' || selectedMethod === 'momo') {
+        console.log('Generating QR code for', selectedMethod); // Debug log
+        generateAndShowQRCode(selectedMethod);
+    } else {
+        console.log('Payment method not vnpay/momo, skipping QR generation'); // Debug log
+    }
 });
 
 function initializePaymentForm() {
@@ -19,15 +34,49 @@ function initializePaymentForm() {
             processPayment();
         }
     });
+}
 
-    // Handle terms acceptance
-    $('#acceptTerms').change(function() {
-        const submitBtn = $('#submitPaymentBtn');
-        if ($(this).is(':checked')) {
-            submitBtn.prop('disabled', false);
-        } else {
-            submitBtn.prop('disabled', true);
-        }
+function showPaymentSection() {
+    // No need to handle payment method changes since it's pre-selected
+    // Just show the correct section on page load
+    const selectedMethod = $('input[name="SelectedPaymentMethod"]').val();
+    
+    // Hide all sections first
+    $('.payment-details-form, .payment-qr-section').hide();
+    
+    // Show appropriate section
+    switch (selectedMethod) {
+        case 'vnpay':
+            $('#vnpayPaymentForm').show();
+            break;
+        case 'momo':
+            $('#momoPaymentForm').show();
+            break;
+        case 'stripe':
+            $('#stripePaymentForm').show();
+            break;
+        case 'bank_transfer':
+            $('#bankTransferForm').show();
+            break;
+        case 'cod':
+            $('#codForm').show();
+            break;
+    }
+}
+
+function initializeCopyButtons() {
+    // Handle copy bank account number and transfer content
+    $('.copy-btn').click(function() {
+        const textToCopy = $(this).data('copy');
+        copyToClipboard(textToCopy);
+        
+        // Show feedback
+        const originalHtml = $(this).html();
+        $(this).html('<i class="fas fa-check"></i> Đã copy!').prop('disabled', true);
+        
+        setTimeout(() => {
+            $(this).html(originalHtml).prop('disabled', false);
+        }, 2000);
     });
 }
 
@@ -76,71 +125,155 @@ function handleCardChange(event) {
     }
 }
 
-function initializePaymentMethods() {
-    // Handle payment method selection
-    $('input[name="SelectedPaymentMethod"]').change(function() {
-        const selectedMethod = $(this).val();
-        const gateway = $(this).data('gateway');
-        
-        // Hide all payment detail forms
-        $('.payment-details-form').hide();
-        
-        // Show relevant form based on selection
-        switch (gateway) {
-            case 'stripe':
-                $('#stripePaymentForm').show();
-                break;
-            case 'bank_transfer':
-                $('#bankTransferForm').show();
-                break;
-            case 'cod':
-                $('#codForm').show();
-                break;
-        }
-        
-        // Update button text
-        updatePaymentButtonText(selectedMethod);
-    });
+// Open MoMo App
+function openMoMoApp() {
+    const sessionId = $('#SessionId').val();
+    const amountText = $('.payment-amount').first().text();
+    const amount = amountText.replace(/[^\d]/g, '');
+    
+    // MoMo deep link format
+    const momoUrl = `momo://app?action=payment&amount=${amount}&note=Thanh toan don hang ${sessionId}`;
+    
+    // Try to open MoMo app
+    window.location.href = momoUrl;
+    
+    // Fallback: If app doesn't open, show instruction
+    setTimeout(() => {
+        showInfo('Nếu ứng dụng MoMo không tự động mở, vui lòng mở ứng dụng và quét mã QR.');
+    }, 1000);
 }
 
-function initializeBankTransfer() {
-    // Handle copy bank account number
-    $('.copy-btn').click(function() {
-        const textToCopy = $(this).data('copy');
-        copyToClipboard(textToCopy);
+// Show info message
+function showInfo(message) {
+    const alertHtml = `
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    $('#paymentForm').prepend(alertHtml);
+    $('html, body').animate({ scrollTop: 0 }, 300);
+    
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 8000);
+}
+
+// Start payment status polling (for QR code payments)
+function startPaymentPolling(sessionId) {
+    // Stop any existing polling
+    if (pollingInterval) clearInterval(pollingInterval);
+    
+    // Reset countdown
+    countdown = 900; // 15 minutes
+    updateCountdown();
+    
+    // Poll every 3 seconds
+    pollingInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`/Checkout/CheckPaymentStatus?sessionId=${sessionId}`);
+            const data = await response.json();
+            
+            if (data.status === 'paid') {
+                // Payment successful!
+                stopPolling();
+                showPaymentSuccess(data);
+                
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl;
+                }, 2000);
+            } else if (data.status === 'failed') {
+                // Payment failed
+                stopPolling();
+                showPaymentError(data.message);
+            }
+            
+        } catch (error) {
+            console.error('Polling error:', error);
+        }
+    }, 3000);
+}
+
+function updateCountdown() {
+    const method = $('input[name="SelectedPaymentMethod"]').val();
+    const countdownId = method === 'vnpay' ? '#vnpayCountdown' : '#momoCountdown';
+    
+    const countdownInterval = setInterval(() => {
+        countdown--;
         
-        // Show feedback
-        const originalText = $(this).text();
-        $(this).text('Đã copy!').prop('disabled', true);
+        if (countdown <= 0) {
+            stopPolling();
+            clearInterval(countdownInterval);
+            showPaymentTimeout();
+            return;
+        }
         
-        setTimeout(() => {
-            $(this).text(originalText).prop('disabled', false);
-        }, 2000);
-    });
+        const minutes = Math.floor(countdown / 60);
+        const seconds = countdown % 60;
+        $(countdownId).text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        
+        // Update timer class based on time remaining
+        const timerElement = $(countdownId).parent();
+        timerElement.removeClass('warning danger');
+        
+        if (countdown < 60) {
+            timerElement.addClass('danger');
+        } else if (countdown < 120) {
+            timerElement.addClass('warning');
+        }
+    }, 1000);
+}
+
+function stopPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+}
+
+function showPaymentSuccess(data) {
+    const method = $('input[name="SelectedPaymentMethod"]').val();
+    const qrSectionId = method === 'vnpay' ? '#vnpayPaymentForm' : '#momoPaymentForm';
+    
+    $(qrSectionId + ' .qr-payment-container').html(`
+        <div class="payment-success-animation">
+            <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+            <h3 class="text-success mb-2">Thanh toán thành công!</h3>
+            <p class="text-muted">Đang chuyển hướng đến trang xác nhận...</p>
+        </div>
+    `);
+}
+
+function showPaymentError(message) {
+    showError(message || 'Thanh toán thất bại. Vui lòng thử lại.');
+}
+
+function showPaymentTimeout() {
+    const method = $('input[name="SelectedPaymentMethod"]').val();
+    const qrSectionId = method === 'vnpay' ? '#vnpayPaymentForm' : '#momoPaymentForm';
+    
+    $(qrSectionId + ' .qr-code-display').html(`
+        <i class="fas fa-clock fa-4x text-warning mb-3"></i>
+        <h5 class="text-warning mb-2">Mã QR đã hết hạn</h5>
+        <p class="text-muted">Vui lòng tạo lại mã QR mới</p>
+        <button type="button" class="btn btn-primary mt-3" onclick="location.reload()">
+            <i class="fas fa-redo me-2"></i>Tạo mã mới
+        </button>
+    `);
 }
 
 function validatePaymentForm() {
-    const selectedPaymentMethod = $('input[name="SelectedPaymentMethod"]:checked').val();
+    const selectedPaymentMethod = $('input[name="SelectedPaymentMethod"]').val();
     
     if (!selectedPaymentMethod) {
         showError('Vui lòng chọn phương thức thanh toán');
         return false;
     }
 
-    // Validate terms acceptance
-    if (!$('#acceptTerms').is(':checked')) {
-        showError('Vui lòng đồng ý với điều khoản sử dụng');
-        return false;
-    }
-
     // Validate specific payment methods
-    const gateway = $('input[name="SelectedPaymentMethod"]:checked').data('gateway');
-    
-    switch (gateway) {
+    switch (selectedPaymentMethod) {
         case 'stripe':
             return validateStripeForm();
-        case 'bank_transfer':
-            return validateBankTransferForm();
         default:
             return true;
     }
@@ -164,19 +297,15 @@ function validateBankTransferForm() {
 }
 
 function processPayment() {
-    const selectedPaymentMethod = $('input[name="SelectedPaymentMethod"]:checked').val();
-    const gateway = $('input[name="SelectedPaymentMethod"]:checked').data('gateway');
+    const selectedPaymentMethod = $('input[name="SelectedPaymentMethod"]').val();
     
     // Show loading modal
     $('#paymentLoadingModal').modal('show');
     
-    switch (gateway) {
-        case 'stripe':
-            processStripePayment();
-            break;
-        default:
-            processStandardPayment();
-            break;
+    if (selectedPaymentMethod === 'stripe') {
+        processStripePayment();
+    } else {
+        processStandardPayment();
     }
 }
 
@@ -210,14 +339,12 @@ function processStandardPayment() {
 }
 
 function getPaymentFormData() {
-    const selectedPaymentMethod = $('input[name="SelectedPaymentMethod"]:checked').val();
+    const selectedPaymentMethod = $('input[name="SelectedPaymentMethod"]').val();
     
     return {
         sessionId: $('#SessionId').val(),
         paymentMethod: selectedPaymentMethod,
-        paymentMethodId: $('input[name="PaymentMethodId"]').val(),
-        selectedBankAccount: $('#selectedBankAccount').val(),
-        transferNote: $('#transferNote').val()
+        paymentMethodId: $('input[name="PaymentMethodId"]').val()
     };
 }
 
@@ -369,25 +496,128 @@ $('#paymentForm').submit(function(e) {
     }, 30000);
 });
 
-// Security: Disable right-click and certain keyboard shortcuts on payment page
+// Auto-focus on submit button
 $(document).ready(function() {
-    // Disable right-click context menu
-    $(document).on('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Disable certain keyboard shortcuts
-    $(document).keydown(function(e) {
-        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        if (e.keyCode === 123 || 
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
-            (e.ctrlKey && e.keyCode === 85)) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    $('#submitPaymentBtn').focus();
 });
+
+// ===================================
+// QR Code Generation Functions
+// ===================================
+
+async function generateAndShowQRCode(paymentMethod) {
+    const sessionId = $('#SessionId').val();
+    
+    if (!sessionId) {
+        console.error('Session ID not found');
+        return;
+    }
+
+    const qrDisplayId = paymentMethod === 'vnpay' ? '#vnpayQRCode' : '#momoQRCode';
+    const countdownSectionId = paymentMethod === 'vnpay' ? '#vnpayPaymentForm .countdown-section' : '#momoPaymentForm .countdown-section';
+    
+    // Show loading
+    $(qrDisplayId).html(`
+        <div class="qr-code-loading">
+            <div class="spinner-qr"></div>
+            <p class="text-muted mt-3">Đang tạo mã QR thanh toán...</p>
+        </div>
+    `);
+
+    try {
+        const response = await fetch('/Checkout/GeneratePaymentQR', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            body: JSON.stringify({
+                sessionId: sessionId,
+                paymentMethod: paymentMethod
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Display QR code
+            if (paymentMethod === 'momo' && data.qrCodeUrl) {
+                // MoMo provides QR image URL
+                $(qrDisplayId).html(`
+                    <img src="${data.qrCodeUrl}" alt="MoMo QR Code" class="img-fluid" style="max-width: 300px;" />
+                `);
+                
+                // Show MoMo app button if deep link available
+                if (data.deepLink && $('#openMoMoBtn').length) {
+                    $('#openMoMoBtn').show();
+                    $('#openMoMoBtn').attr('onclick', `window.location.href='${data.deepLink}'`);
+                }
+            } else if (paymentMethod === 'vnpay' && data.paymentUrl) {
+                // VNPay - Generate QR code from URL using QRCode.js library
+                $(qrDisplayId).html('<div id="vnpayQRCodeImage"></div>');
+                
+                // Check if QRCode library is loaded
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(document.getElementById('vnpayQRCodeImage'), {
+                        text: data.paymentUrl,
+                        width: 280,
+                        height: 280,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } else {
+                    // Fallback if library not loaded
+                    $(qrDisplayId).html(`
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <p class="mb-2">Vui lòng click vào nút bên dưới để thanh toán</p>
+                            <a href="${data.paymentUrl}" class="btn btn-primary" target="_blank">
+                                <i class="fas fa-external-link-alt me-2"></i>
+                                Thanh toán với VNPay
+                            </a>
+                        </div>
+                    `);
+                }
+            } else if (data.paymentUrl) {
+                // Generic fallback for other payment methods
+                $(qrDisplayId).html(`
+                    <div class="alert alert-info">
+                        <a href="${data.paymentUrl}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Tiếp tục thanh toán
+                        </a>
+                    </div>
+                `);
+            }
+            
+            // Show countdown
+            $(countdownSectionId).show();
+            
+            // Start countdown and polling
+            countdown = data.expiresInSeconds || 900;
+            updateCountdown();
+            startPaymentPolling(sessionId);
+            
+        } else {
+            // Show error
+            $(qrDisplayId).html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <p class="mb-0">${data.message || 'Không thể tạo mã QR'}</p>
+                </div>
+            `);
+        }
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+        $(qrDisplayId).html(`
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <p class="mb-0">Lỗi kết nối. Vui lòng thử lại.</p>
+            </div>
+        `);
+    }
+}
 
 // Payment method specific validations
 function validatePaymentMethodSpecific(gateway) {
@@ -423,5 +653,77 @@ $(document).ready(function() {
     const firstPaymentMethod = $('input[name="SelectedPaymentMethod"]:first');
     if (firstPaymentMethod.length) {
         firstPaymentMethod.focus();
+    }
+});
+
+// Open MoMo App
+function openMoMoApp() {
+    const sessionId = $('#SessionId').val();
+    const amount = $('.payment-amount-display h4').first().text().replace(/[^\d]/g, '');
+    
+    // MoMo deep link format
+    const momoUrl = `momo://app?action=payment&amount=${amount}&note=Thanh toan don hang ${sessionId}`;
+    
+    // Try to open MoMo app
+    window.location.href = momoUrl;
+    
+    // Fallback: If app doesn't open, show instruction
+    setTimeout(() => {
+        showInfo('Nếu ứng dụng MoMo không tự động mở, vui lòng mở ứng dụng và quét mã QR.');
+    }, 1000);
+}
+
+// Show info message
+function showInfo(message) {
+    const alertHtml = `
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    $('#paymentForm').prepend(alertHtml);
+    $('html, body').animate({ scrollTop: 0 }, 300);
+    
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 8000);
+}
+
+// Generate QR Code (placeholder - will be replaced with actual QR generation)
+function generatePaymentQR(paymentMethod, amount, orderId) {
+    // This is a placeholder. In production, you would:
+    // 1. Call your backend API to generate QR code
+    // 2. Backend calls VNPay/MoMo API
+    // 3. Return QR code image URL or base64
+    
+    const qrContainer = $(`#${paymentMethod}QRCode`);
+    
+    // Show loading
+    qrContainer.html(`
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tạo mã QR...</span>
+        </div>
+        <p class="text-muted mt-3">Đang tạo mã QR thanh toán...</p>
+    `);
+    
+    // Simulate API call
+    setTimeout(() => {
+        // In production, replace this with actual QR image from API
+        qrContainer.html(`
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Mã QR sẽ được hiển thị sau khi bạn xác nhận thanh toán
+            </div>
+        `);
+    }, 1500);
+}
+
+// Auto-select first payment method if only one is available
+$(document).ready(function() {
+    const paymentMethods = $('input[name="SelectedPaymentMethod"]');
+    if (paymentMethods.length === 1) {
+        paymentMethods.first().prop('checked', true).trigger('change');
     }
 });

@@ -48,7 +48,22 @@
 }
 
 /* ========================================
-   LAYER 3: NOTIFICATIONS (99999) - ALWAYS ON TOP!
+   LAYER 3: SEARCH SUGGESTIONS (999998-999999)
+   ======================================== */
+
+/* Search section - DO NOT set z-index to avoid creating stacking context */
+.search-section {
+    position: relative;
+}
+
+/* Search suggestions dropdown - MUST use position: fixed with highest z-index */
+.search-suggestions {
+    z-index: 999999 !important;
+    position: fixed !important; /* Fixed positioning escapes parent stacking context */
+}
+
+/* ========================================
+   LAYER 4: NOTIFICATIONS (100000) - ALWAYS ON TOP!
    ======================================== */
 
 /* All notification types - MUST be above everything except modals */
@@ -58,25 +73,25 @@
 .alert.position-fixed,
 div[class*="notification"],
 div[style*="notification"] {
-    z-index: 99999 !important;
+    z-index: 100000 !important;
 }
 
 /* SweetAlert2 containers */
 .swal2-container {
-    z-index: 99999 !important;
+    z-index: 100000 !important;
 }
 
 /* ========================================
-   LAYER 4: MODALS (100000+)
+   LAYER 5: MODALS (100001+)
    ======================================== */
 
 /* Bootstrap modals */
 .modal {
-    z-index: 100000 !important;
+    z-index: 100001 !important;
 }
 
 .modal-backdrop {
-    z-index: 99999 !important;
+    z-index: 100000 !important;
 }
 
 /* ========================================
@@ -116,23 +131,34 @@ div[class*="notification"] {
 /*
  * Z-Index Hierarchy Summary:
  * 
- * 100000+ Modals & Dialogs
- * 99999   Notifications & Alerts (ALWAYS VISIBLE - HIGHEST!)
+ * 100001+ Modals & Dialogs
+ * 100000  Notifications & Alerts (ALWAYS VISIBLE - HIGHEST!)
+ * 999999  Search Suggestions Dropdown (FIXED POSITIONING - ESCAPES STACKING CONTEXT!)
  * 9997    Cart Sidebar
  * 9996    Cart Sidebar Overlay
  * 9995    Header & Top Red Line
+ * 9990    Navigation Dropdown Menu
  * 1-99    Base content
  * 
  * Important Rules:
- * 1. Notifications MUST be at top (z-index: 99999)
- * 2. Header MUST be below notifications (z-index: 9995)
- * 3. Cart MUST be above header (z-index: 9997)
- * 4. Modals MUST be above everything (z-index: 100000+)
+ * 1. Modals MUST be at top (z-index: 100001+)
+ * 2. Notifications MUST be below modals (z-index: 100000)
+ * 3. Search suggestions uses position: fixed + z-index: 999999 to escape parent stacking context
+ * 4. Search section has NO z-index to avoid creating stacking context that traps children
+ * 5. Header MUST be below search (z-index: 9995)
+ * 6. Cart MUST be above header (z-index: 9997)
  * 
  * Position Strategy:
+ * - Modals: Full screen overlay
  * - Notifications: top: 10px (absolute top, always visible)
+ * - Search Suggestions: position: fixed + JavaScript calculated position (ESCAPES PARENT!)
  * - Header: top: 40px (after red line)
  * - Cart: top: 0 (full height)
+ * 
+ * CRITICAL FIX for dropdown appearing under header:
+ * - Changed search-suggestions from position: absolute to position: fixed
+ * - Removed z-index from search-section to prevent stacking context creation
+ * - JavaScript calculates dropdown position dynamically using getBoundingClientRect()
  */
 
 /* ========================================
@@ -143,7 +169,7 @@ div[class*="notification"] {
 .toast,
 .toast-container,
 #toast-container {
-    z-index: 99999 !important;
+    z-index: 100000 !important;
 }
 
 /* Toast specific positioning */

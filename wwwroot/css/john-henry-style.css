@@ -102,29 +102,51 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: auto;
+    min-height: 40px;
+    width: 100%;
 }
 
 .product-price-actions .product-actions {
     position: static;
     opacity: 1;
     transform: none;
+    display: flex;
     flex-direction: row;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .product-price-actions .action-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 14px;
+    flex-shrink: 0;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .product-price {
     font-size: 16px;
     font-weight: 500;
-    color: #b4282b#b4282b;
+    color: #b4282b;
     margin: 0;
+    flex: 0 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 65%;
+}
+
+.product-price .current-price {
+    display: inline-block;
 }
 
 /* Responsive Design for Product Cards */
@@ -169,12 +191,25 @@
     
     .product-price {
         font-size: 14px;
+        max-width: 60%;
     }
     
     .action-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 11px;
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .product-price-actions .action-btn {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        font-size: 12px;
+    }
+    
+    .product-price-actions {
+        gap: 8px;
     }
     
     .product-actions {
@@ -196,6 +231,27 @@
     .product-name {
         font-size: 11px;
         margin-bottom: 6px;
+    }
+    
+    .product-price {
+        font-size: 13px;
+        max-width: 55%;
+    }
+    
+    .product-price-actions {
+        gap: 6px;
+    }
+    
+    .product-price-actions .action-btn {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        min-height: 30px;
+        font-size: 11px;
+    }
+    
+    .product-price-actions .product-actions {
+        gap: 6px;
     }
     
     .product-price {

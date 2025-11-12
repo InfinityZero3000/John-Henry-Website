@@ -89,9 +89,24 @@ class AdminDashboard {
             this.sidebar.classList.toggle('collapsed');
             this.mainContent.classList.toggle('sidebar-collapsed');
             
+            // Update toggle icon
+            this.updateToggleIcon();
+            
             // Save state to localStorage
             const isCollapsed = this.sidebar.classList.contains('collapsed');
             localStorage.setItem('admin_sidebar_collapsed', isCollapsed);
+        }
+    }
+
+    updateToggleIcon() {
+        // Update sidebar toggle button icon if exists
+        if (this.sidebarToggle) {
+            const isCollapsed = this.sidebar && this.sidebar.classList.contains('collapsed');
+            const icon = this.sidebarToggle.querySelector('i');
+            if (icon) {
+                // Update icon class for collapsed/expanded state
+                icon.className = isCollapsed ? 'fas fa-bars' : 'fas fa-times';
+            }
         }
     }
 
