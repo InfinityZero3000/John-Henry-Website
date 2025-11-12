@@ -99,12 +99,19 @@ namespace JohnHenryFashionWeb.Models
         public int ReviewCount { get; set; } = 0;
         public Guid CategoryId { get; set; }
         public Guid? BrandId { get; set; }
+        
+        [MaxLength(450)]
+        public string? SellerId { get; set; }
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public Category Category { get; set; } = null!;
         public Brand? Brand { get; set; }
+        
+        [ForeignKey("SellerId")]
+        public ApplicationUser? Seller { get; set; }
         public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
         public ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
@@ -243,7 +250,10 @@ namespace JohnHenryFashionWeb.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; } = true;
-        // public string CreatedBy { get; set; } = string.Empty; // Seller ID
+        
+        [MaxLength(450)]
+        public string? SellerId { get; set; }  // NULL = system-wide coupon
+        
         [NotMapped]
         public string? TargetAudience { get; set; } = "all"; // all, new_customers, returning_customers
         [NotMapped]
@@ -254,7 +264,8 @@ namespace JohnHenryFashionWeb.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        // public ApplicationUser Creator { get; set; } = null!;
+        [ForeignKey("SellerId")]
+        public ApplicationUser? Seller { get; set; }
         public ICollection<CouponUsage> CouponUsages { get; set; } = new List<CouponUsage>();
     }
 
@@ -772,5 +783,45 @@ namespace JohnHenryFashionWeb.Models
         // Navigation properties
         public ApplicationUser? User { get; set; }
         public ApplicationUser? TargetUser { get; set; }
+    }
+
+    // Vietnamese Administrative Divisions
+    public class Province
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? CodeName { get; set; }
+
+        // Navigation
+        public ICollection<District> Districts { get; set; } = new List<District>();
+    }
+
+    public class District
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? CodeName { get; set; }
+        public int ProvinceId { get; set; }
+
+        // Navigation
+        public Province Province { get; set; } = null!;
+        public ICollection<Ward> Wards { get; set; } = new List<Ward>();
+    }
+
+    public class Ward
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? CodeName { get; set; }
+        public int DistrictId { get; set; }
+
+        // Navigation
+        public District District { get; set; } = null!;
     }
 }

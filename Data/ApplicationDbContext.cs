@@ -63,6 +63,11 @@ namespace JohnHenryFashionWeb.Data
         // Audit and Security
         public DbSet<AuditLog> AuditLogs { get; set; }
         
+        // Vietnamese Administrative Divisions
+        public DbSet<Province> Provinces { get; set; }
+        public DbSet<District> Districts { get; set; }
+        public DbSet<Ward> Wards { get; set; }
+        
         // Payment Management (New)
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
         public DbSet<SellerSettlement> SellerSettlements { get; set; }

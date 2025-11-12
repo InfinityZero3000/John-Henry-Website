@@ -3,6 +3,7 @@ using System;
 using JohnHenryFashionWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JohnHenryFashionWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251106070431_AddVietnameseAdministrativeDivisions")]
+    partial class AddVietnameseAdministrativeDivisions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -986,10 +989,6 @@ namespace JohnHenryFashionWeb.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("SellerId")
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)");
-
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -1010,8 +1009,6 @@ namespace JohnHenryFashionWeb.Migrations
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SellerId");
 
                     b.ToTable("Coupons");
                 });
@@ -2344,10 +2341,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Property<decimal?>("SalePrice")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<string>("SellerId")
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)");
-
                     b.Property<string>("ShortDescription")
                         .HasColumnType("text");
 
@@ -2384,8 +2377,6 @@ namespace JohnHenryFashionWeb.Migrations
 
                     b.HasIndex("SKU")
                         .IsUnique();
-
-                    b.HasIndex("SellerId");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -4379,15 +4370,6 @@ namespace JohnHenryFashionWeb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JohnHenryFashionWeb.Models.Coupon", b =>
-                {
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "Seller")
-                        .WithMany()
-                        .HasForeignKey("SellerId");
-
-                    b.Navigation("Seller");
-                });
-
             modelBuilder.Entity("JohnHenryFashionWeb.Models.CouponUsage", b =>
                 {
                     b.HasOne("JohnHenryFashionWeb.Models.Coupon", "Coupon")
@@ -4667,15 +4649,9 @@ namespace JohnHenryFashionWeb.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("JohnHenryFashionWeb.Models.ApplicationUser", "Seller")
-                        .WithMany()
-                        .HasForeignKey("SellerId");
-
                     b.Navigation("Brand");
 
                     b.Navigation("Category");
-
-                    b.Navigation("Seller");
                 });
 
             modelBuilder.Entity("JohnHenryFashionWeb.Models.ProductApproval", b =>

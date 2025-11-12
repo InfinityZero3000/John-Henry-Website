@@ -233,8 +233,10 @@ namespace JohnHenryFashionWeb.Models
     public class TimeSeriesData
     {
         public DateTime Date { get; set; }
+        public DateTime Timestamp => Date; // Alias for compatibility
         public decimal Value { get; set; }
         public string? Label { get; set; }
+        public Dictionary<string, object> AdditionalData { get; set; } = new();
     }
 
     public class MultiSeriesData
