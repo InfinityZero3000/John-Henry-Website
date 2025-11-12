@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "Fix Freelancer Images";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-tools"></i>
+                        Fix Freelancer Product Images
+                    </h3>
+                </div>
+                <div class="card-body">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Thông tin:</strong> Tool này sẽ kiểm tra và cập nhật đường dẫn hình ảnh của tất cả sản phẩm Freelancer (SKU bắt đầu với FW) 
+                để match với cấu trúc thư mục thực tế.
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-search"></i> Check Missing Images</h5>
+                </div>
+                <div class="card-body">
+                    <button id="btnCheck" class="btn btn-info btn-lg">
+                        <i class="fas fa-search"></i> Kiểm Tra Images
+                    </button>
+                    
+                    <div id="checkResult" class="mt-4" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-tools"></i> Fix Freelancer Image Paths</h5>
+                </div>
+                <div class="card-body">
+                    <button id="btnFix" class="btn btn-success btn-lg">
+                        <i class="fas fa-play"></i> Chạy Fix Images
+                    </button>
+                    
+                    <div id="result" class="mt-4" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>                    <div id="result" class="mb-3" style="display: none;"></div>
+
+                    <div class="text-center">
+                        <button id="btnFix" class="btn btn-primary btn-lg" onclick="fixImages()">
+                            <i class="fas fa-magic"></i>
+                            Chạy Fix Images
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Check missing images
+        document.getElementById('btnCheck').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...';
+            
+            try {
+                const response = await fetch('/admin/api/check-missing-images', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('checkResult');
+                resultDiv.style.display = 'block';
+                
+                if (data.success) {
+                    let detailsHtml = '';
+                    if (data.details && data.details.length > 0) {
+                        detailsHtml = '<div class="table-responsive mt-3"><table class="table table-sm table-striped"><thead><tr><th>SKU</th><th>Tên</th><th>Đường dẫn hiện tại</th><th>Đường dẫn đúng</th><th>Trạng thái</th></tr></thead><tbody>';
+                        data.details.forEach(item => {
+                            const statusBadge = item.status === 'file_not_found' 
+                                ? '<span class="badge bg-danger">File không tồn tại</span>' 
+                                : '<span class="badge bg-warning">Path sai</span>';
+                            detailsHtml += `
+                                <tr>
+                                    <td><code>${item.sku}</code></td>
+                                    <td>${item.name || 'N/A'}</td>
+                                    <td><small>${item.currentPath || 'null'}</small></td>
+                                    <td><small>${item.correctPath || 'N/A'}</small></td>
+                                    <td>${statusBadge}</td>
+                                </tr>
+                            `;
+                        });
+                        detailsHtml += '</tbody></table></div>';
+                        if (data.missingImages > 50) {
+                            detailsHtml += `<p class="text-muted"><small>Chỉ hiển thị 50 sản phẩm đầu tiên. Tổng cộng: ${data.missingImages}</small></p>`;
+                        }
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle"></i> Kết quả kiểm tra</h5>
+                            <ul class="mb-0">
+                                <li><strong>Tổng sản phẩm Freelancer:</strong> ${data.totalProducts}</li>
+                                <li><strong>Images tồn tại:</strong> ${data.existingImages}</li>
+                                <li><strong>Sản phẩm có vấn đề:</strong> <span class="badge bg-${data.missingImages > 0 ? 'danger' : 'success'}">${data.missingImages}</span></li>
+                            </ul>
+                        </div>
+                        ${detailsHtml}
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5><i class="fas fa-times-circle"></i> Lỗi!</h5>
+                            <p>${data.message || 'Có lỗi xảy ra'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('checkResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-times-circle"></i> Lỗi kết nối!</h5>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-search"></i> Kiểm Tra Images';
+            }
+        });
+        
+        // Fix images
+        document.getElementById('btnFix').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            
+            try {
+                const response = await fetch('/admin/api/fix-freelancer-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle"></i> Thành công!</h5>
+                            <p><strong>Đã cập nhật:</strong> ${data.productsFixed} sản phẩm</p>
+                            <p class="mb-0"><small>Vui lòng refresh trang chủ để xem kết quả.</small></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5><i class="fas fa-times-circle"></i> Lỗi!</h5>
+                            <p>${data.message || 'Có lỗi xảy ra'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-times-circle"></i> Lỗi kết nối!</h5>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Chạy Fix Images';
+            }
+        });
+    </script>
+}

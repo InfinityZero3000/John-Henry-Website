@@ -83,19 +83,34 @@
 
     <!-- Search and Filters -->
     <div class="admin-filters">
-        <form method="get" class="admin-search-box">
-            <i data-lucide="search"></i>
-            <input type="text" name="search" value="@ViewBag.Search" 
-                   placeholder="Tìm kiếm thương hiệu..." class="admin-search-input">
+        <form method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="admin-form-label">Tìm kiếm</label>
+                    <div class="admin-search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" name="search" class="admin-form-input" 
+                               placeholder="Tìm theo mã đơn, tên khách hàng, email..." 
+                               value="@ViewBag.Search">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width:100%">
+                        <i data-lucide="search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+                @if (!string.IsNullOrEmpty(ViewBag.Search))
+                {
+                    <div class="col-md-2">
+                        <a href="@Url.Action("Brands")" class="admin-btn admin-btn-secondary" style="width:100%">
+                            <i data-lucide="rotate-ccw"></i>
+                            Đặt lại
+                        </a>
+                    </div>
+                }
+            </div>
             <input type="hidden" name="page" value="1">
-            <button type="submit" class="admin-btn admin-btn-primary">Tìm kiếm</button>
-            @if (!string.IsNullOrEmpty(ViewBag.Search))
-            {
-                <a href="@Url.Action("Brands")" class="admin-btn admin-btn-secondary">
-                    <i data-lucide="rotate-ccw"></i>
-                    Đặt lại
-                </a>
-            }
         </form>
     </div>
     <!-- Brands Table -->

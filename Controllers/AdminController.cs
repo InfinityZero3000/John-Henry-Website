@@ -54,6 +54,19 @@ namespace JohnHenryFashionWeb.Controllers
             var revenueTimeSeries = await _reportingService.GetRevenueTimeSeriesAsync(
                 DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, "daily");
 
+            // Debug logging
+            _logger.LogInformation("📊 Dashboard Data Retrieved:");
+            _logger.LogInformation($"  - Sales Chart Data: {salesChartData?.Count ?? 0} records");
+            _logger.LogInformation($"  - Revenue Time Series: {revenueTimeSeries?.Count ?? 0} records");
+            if (salesChartData?.Any() == true)
+            {
+                _logger.LogInformation($"  - First chart record: Label={salesChartData.First().Label}, Value={salesChartData.First().Value}");
+            }
+            if (revenueTimeSeries?.Any() == true)
+            {
+                _logger.LogInformation($"  - First time series: Date={revenueTimeSeries.First().Date}, Value={revenueTimeSeries.First().Value}");
+            }
+
             // Enhanced data for comprehensive dashboard
             var recentOrders = await _context.Orders
                 .Include(o => o.User)
@@ -125,19 +138,26 @@ namespace JohnHenryFashionWeb.Controllers
                 new ViewModels.QuickAction { Title = "Thương hiệu", Icon = "fas fa-award", Url = "/Admin/Brands", Color = "purple" }
             };
 
+            // Get additional analytics data
+            var categoryPerformance = await _reportingService.GetCategoryPerformanceAsync(
+                DateTime.UtcNow.AddDays(-30), DateTime.UtcNow) ?? new List<CategoryPerformanceData>();
+            var realTimeData = await _analyticsService.GetRealTimeAnalyticsAsync() ?? new RealTimeAnalyticsData();
+            var performanceMetrics = await _reportingService.GetPerformanceMetricsAsync(
+                DateTime.UtcNow.AddDays(-7), DateTime.UtcNow) ?? new PerformanceMetrics();
+            var geographicData = await _reportingService.GetGeographicPerformanceAsync(
+                DateTime.UtcNow.AddDays(-30), DateTime.UtcNow) ?? new List<GeographicData>();
+
+#pragma warning disable CS8601 // Possible null reference assignment - handled with ?? operator
             var viewModel = new DashboardViewModel
             {
                 Summary = dashboardSummary,
                 DashboardSummary = dashboardSummary,
                 SalesChartData = salesChartData,
                 RevenueTimeSeriesData = revenueTimeSeries,
-                CategoryPerformance = await _reportingService.GetCategoryPerformanceAsync(
-                    DateTime.UtcNow.AddDays(-30), DateTime.UtcNow),
-                RealTimeData = await _analyticsService.GetRealTimeAnalyticsAsync(),
-                PerformanceMetrics = await _reportingService.GetPerformanceMetricsAsync(
-                    DateTime.UtcNow.AddDays(-7), DateTime.UtcNow),
-                GeographicData = await _reportingService.GetGeographicPerformanceAsync(
-                    DateTime.UtcNow.AddDays(-30), DateTime.UtcNow),
+                CategoryPerformance = categoryPerformance,
+                RealTimeData = realTimeData,
+                PerformanceMetrics = performanceMetrics,
+                GeographicData = geographicData,
                 DeviceAnalytics = new DeviceAnalytics(), // Would be populated from analytics
                 
                 // Enhanced dashboard data
@@ -165,6 +185,7 @@ namespace JohnHenryFashionWeb.Controllers
                 SelectedTab = "overview",
                 LastUpdated = DateTime.UtcNow
             };
+#pragma warning restore CS8601
 
             return View("Dashboard", viewModel);
         }
@@ -1480,12 +1501,40 @@ namespace JohnHenryFashionWeb.Controllers
         {
             try
             {
+                _logger.LogInformation($"SaveCoupon called - Id: {model.Id}, Code: {model.Code}, Name: {model.Name}, Type: {model.Type}, Value: {model.Value}");
+
+                // Validation
+                if (string.IsNullOrWhiteSpace(model.Code))
+                {
+                    return Json(new { success = false, message = "Mã giảm giá không được để trống" });
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Name))
+                {
+                    return Json(new { success = false, message = "Tên mã giảm giá không được để trống" });
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Type))
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn loại giảm giá" });
+                }
+
+                if (model.Value <= 0)
+                {
+                    return Json(new { success = false, message = "Giá trị giảm phải lớn hơn 0" });
+                }
+
+                if (model.Type == "percentage" && model.Value > 100)
+                {
+                    return Json(new { success = false, message = "Giá trị phần trăm không được vượt quá 100%" });
+                }
+
                 if (model.Id == Guid.Empty)
                 {
                     // Create new coupon
                     // Check if code already exists
                     var existingCoupon = await _context.Coupons
-                        .FirstOrDefaultAsync(c => c.Code == model.Code);
+                        .FirstOrDefaultAsync(c => c.Code.ToUpper() == model.Code.ToUpper());
                     
                     if (existingCoupon != null)
                     {
@@ -1493,9 +1542,12 @@ namespace JohnHenryFashionWeb.Controllers
                     }
 
                     model.Id = Guid.NewGuid();
+                    model.Code = model.Code.ToUpper();
                     model.CreatedAt = DateTime.UtcNow;
+                    model.UpdatedAt = DateTime.UtcNow;
                     model.UsageCount = 0;
                     
+                    _logger.LogInformation($"Creating new coupon: {model.Code} (ID: {model.Id})");
                     _context.Coupons.Add(model);
                 }
                 else
@@ -1507,6 +1559,7 @@ namespace JohnHenryFashionWeb.Controllers
                         return Json(new { success = false, message = "Không tìm thấy mã giảm giá" });
                     }
 
+                    coupon.Code = model.Code.ToUpper();
                     coupon.Name = model.Name;
                     coupon.Description = model.Description;
                     coupon.Type = model.Type;
@@ -1517,9 +1570,12 @@ namespace JohnHenryFashionWeb.Controllers
                     coupon.EndDate = model.EndDate;
                     coupon.IsActive = model.IsActive;
                     coupon.UpdatedAt = DateTime.UtcNow;
+                    
+                    _logger.LogInformation($"Updating coupon: {coupon.Code} (ID: {coupon.Id})");
                 }
 
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"Coupon saved successfully: {model.Code}");
                 
                 return Json(new
                 {
@@ -1529,7 +1585,7 @@ namespace JohnHenryFashionWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving coupon");
+                _logger.LogError(ex, $"Error saving coupon - Code: {model?.Code}, Message: {ex.Message}");
                 return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
@@ -1640,6 +1696,14 @@ namespace JohnHenryFashionWeb.Controllers
             return View(banners);
         }
 
+        [HttpGet("fix-freelancer-images")]
+        public IActionResult FixFreelancerImages()
+        {
+            ViewData["CurrentSection"] = "utilities";
+            ViewData["Title"] = "Fix Freelancer Images";
+            return View();
+        }
+
         #region Banner API Endpoints
 
         [HttpGet("api/banners")]
@@ -1743,13 +1807,26 @@ namespace JohnHenryFashionWeb.Controllers
                 model.CreatedBy = user?.Id;
                 model.CreatedAt = DateTime.UtcNow;
                 model.UpdatedAt = DateTime.UtcNow;
+                
+                // Store banner in storage (unassigned) by default
+                // User will assign it later to specific positions
+                if (string.IsNullOrEmpty(model.Position) || 
+                    model.Position == "home_main" || 
+                    model.Position == "home_side" || 
+                    model.Position == "collection_hero" || 
+                    model.Position == "category")
+                {
+                    model.Position = "unassigned";
+                    model.TargetPage = null;
+                    model.SortOrder = 0;
+                }
 
                 _context.MarketingBanners.Add(model);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Banner created: {BannerId} by {UserId}", model.Id, user?.Id);
+                _logger.LogInformation("Banner created in storage: {BannerId} by {UserId}", model.Id, user?.Id);
 
-                return Json(new { success = true, message = "Banner đã được tạo thành công!", data = model });
+                return Json(new { success = true, message = "Banner đã được lưu vào kho thành công!", data = model });
             }
             catch (Exception ex)
             {
@@ -1810,8 +1887,28 @@ namespace JohnHenryFashionWeb.Controllers
                 banner.Position = model.Position;
                 banner.SortOrder = model.SortOrder;
                 banner.IsActive = model.IsActive;
-                banner.StartDate = model.StartDate;
-                banner.EndDate = model.EndDate;
+                // Normalize start/end dates to UTC before saving to PostgreSQL (Npgsql requires UTC for timestamptz)
+                var sd = model.StartDate;
+                if (sd.Kind == DateTimeKind.Unspecified)
+                {
+                    // Treat unspecified as local and convert to UTC
+                    sd = DateTime.SpecifyKind(sd, DateTimeKind.Local);
+                }
+                banner.StartDate = sd.ToUniversalTime();
+
+                if (model.EndDate.HasValue)
+                {
+                    var ed = model.EndDate.Value;
+                    if (ed.Kind == DateTimeKind.Unspecified)
+                    {
+                        ed = DateTime.SpecifyKind(ed, DateTimeKind.Local);
+                    }
+                    banner.EndDate = ed.ToUniversalTime();
+                }
+                else
+                {
+                    banner.EndDate = null;
+                }
                 banner.OpenInNewTab = model.OpenInNewTab;
                 banner.TargetPage = model.TargetPage;
                 banner.UpdatedAt = DateTime.UtcNow;
@@ -1872,6 +1969,33 @@ namespace JohnHenryFashionWeb.Controllers
                     return Json(new { success = false, message = "Không tìm thấy banner" });
                 }
 
+                // Only delete from database, keep image files
+                // Images might be used by other banners or needed for backup
+                _context.MarketingBanners.Remove(banner);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner deleted from database (files kept): {BannerId}", id);
+
+                return Json(new { success = true, message = "Banner đã được xóa thành công!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting banner {BannerId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa banner" });
+            }
+        }
+
+        [HttpPost("api/banners/{id}/delete-with-files")]
+        public async Task<IActionResult> DeleteBannerWithFiles(Guid id)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy banner" });
+                }
+
                 // Delete image files if they exist
                 if (!string.IsNullOrEmpty(banner.ImageUrl))
                 {
@@ -1894,13 +2018,13 @@ namespace JohnHenryFashionWeb.Controllers
                 _context.MarketingBanners.Remove(banner);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Banner deleted: {BannerId}", id);
+                _logger.LogInformation("Banner and files deleted: {BannerId}", id);
 
-                return Json(new { success = true, message = "Banner đã được xóa thành công!" });
+                return Json(new { success = true, message = "Banner và files đã được xóa thành công!" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting banner {BannerId}", id);
+                _logger.LogError(ex, "Error deleting banner with files {BannerId}", id);
                 return Json(new { success = false, message = "Có lỗi xảy ra khi xóa banner" });
             }
         }
@@ -1995,6 +2119,237 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 _logger.LogError(ex, "Error reordering banners");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi sắp xếp banner" });
+            }
+        }
+
+        [HttpGet("api/banners/unassigned")]
+        public async Task<IActionResult> GetUnassignedBanners()
+        {
+            try
+            {
+                // Get banners that are in storage (not assigned to specific positions)
+                // These are banners with default/generic position or marked as "unassigned"
+                var unassignedBanners = await _context.MarketingBanners
+                    .Where(b => b.IsActive && (
+                        b.Position == "unassigned" || 
+                        b.Position == "storage" ||
+                        b.Position == null ||
+                        b.Position == ""
+                    ))
+                    .OrderByDescending(b => b.CreatedAt)
+                    .Select(b => new
+                    {
+                        b.Id,
+                        b.Title,
+                        b.Description,
+                        b.ImageUrl,
+                        b.MobileImageUrl,
+                        b.CreatedAt,
+                        b.UpdatedAt
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, data = unassignedBanners });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting unassigned banners");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách banner" });
+            }
+        }
+
+        [HttpGet("api/banners/all")]
+        public async Task<IActionResult> GetAllBanners()
+        {
+            try
+            {
+                // Get ALL active banners (including assigned ones)
+                var allBanners = await _context.MarketingBanners
+                    .Where(b => b.IsActive)
+                    .OrderByDescending(b => b.CreatedAt)
+                    .Select(b => new
+                    {
+                        b.Id,
+                        b.Title,
+                        b.Description,
+                        b.ImageUrl,
+                        b.MobileImageUrl,
+                        b.Position,
+                        b.TargetPage,
+                        b.CreatedAt,
+                        b.UpdatedAt,
+                        // Check if banner is assigned to a specific position
+                        IsAssigned = !string.IsNullOrEmpty(b.Position) && 
+                                   b.Position != "unassigned" && 
+                                   b.Position != "storage"
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, data = allBanners });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all banners");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách banner" });
+            }
+        }
+
+        [HttpPost("api/banners/{id}/assign")]
+        public async Task<IActionResult> AssignBanner(Guid id, [FromBody] BannerAssignmentModel model)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy banner" });
+                }
+
+                // Update banner position and target page
+                banner.Position = model.Position;
+                banner.TargetPage = model.TargetPage;
+                
+                // Get the highest sort order in this position group
+                var maxSortOrder = await _context.MarketingBanners
+                    .Where(b => b.Position == model.Position && 
+                               (string.IsNullOrEmpty(model.TargetPage) || b.TargetPage == model.TargetPage) &&
+                               b.Id != id)
+                    .MaxAsync(b => (int?)b.SortOrder) ?? 0;
+                
+                banner.SortOrder = maxSortOrder + 1;
+                banner.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner {BannerId} assigned to position {Position}, TargetPage {TargetPage}", 
+                    id, model.Position, model.TargetPage);
+
+                return Json(new { 
+                    success = true, 
+                    message = "Banner đã được gán vào vị trí thành công!",
+                    data = banner 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning banner {BannerId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi gán banner: " + ex.Message });
+            }
+        }
+
+        [HttpPost("api/banners/{id}/reorder")]
+        public async Task<IActionResult> ReorderSingleBanner(Guid id, [FromBody] BannerReorderModel model)
+        {
+            try
+            {
+                _logger.LogInformation("========== REORDER REQUEST START ==========");
+                _logger.LogInformation("Banner ID: {BannerId}", id);
+                _logger.LogInformation("Position: {Position}", model.Position);
+                _logger.LogInformation("TargetPage: {TargetPage}", model.TargetPage ?? "NULL");
+                _logger.LogInformation("OldSortOrder: {OldSort}", model.OldSortOrder);
+                _logger.LogInformation("NewSortOrder: {NewSort}", model.NewSortOrder);
+
+                // Get ALL banners in the same group (position + targetPage)
+                var bannersQuery = _context.MarketingBanners
+                    .Where(b => b.Position == model.Position);
+
+                // For collection banners, filter by TargetPage
+                if (model.Position == "collection_hero" && !string.IsNullOrEmpty(model.TargetPage))
+                {
+                    bannersQuery = bannersQuery.Where(b => b.TargetPage == model.TargetPage);
+                    _logger.LogInformation("Filtering collection_hero by TargetPage: {TargetPage}", model.TargetPage);
+                }
+
+                // Load all banners, sorted by current order
+                var allBanners = await bannersQuery
+                    .OrderBy(b => b.SortOrder)
+                    .ThenBy(b => b.CreatedAt)
+                    .ToListAsync();
+
+                _logger.LogInformation("Found {Count} banners in group", allBanners.Count);
+                
+                // Log current state
+                _logger.LogInformation("CURRENT STATE:");
+                for (int i = 0; i < allBanners.Count; i++)
+                {
+                    var b = allBanners[i];
+                    _logger.LogInformation("  [{Index}] Id={Id}, Title={Title}, SortOrder={Sort}", 
+                        i, b.Id, b.Title, b.SortOrder);
+                }
+
+                if (allBanners.Count == 0)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy banner nào trong nhóm" });
+                }
+
+                // Find the banner to move
+                var currentIndex = allBanners.FindIndex(b => b.Id == id);
+                if (currentIndex == -1)
+                {
+                    _logger.LogError("Banner {Id} not found in list", id);
+                    return Json(new { success = false, message = "Không tìm thấy banner cần di chuyển" });
+                }
+
+                _logger.LogInformation("Banner found at currentIndex: {CurrentIndex}", currentIndex);
+
+                // Calculate new index (NewSortOrder - 1, because SortOrder starts from 1 but index from 0)
+                var newIndex = model.NewSortOrder - 1;
+                _logger.LogInformation("Calculated newIndex: {NewIndex} (from NewSortOrder={NewSort})", newIndex, model.NewSortOrder);
+                
+                // Validate new index
+                if (newIndex < 0 || newIndex >= allBanners.Count)
+                {
+                    var oldNewIndex = newIndex;
+                    newIndex = Math.Max(0, Math.Min(newIndex, allBanners.Count - 1));
+                    _logger.LogWarning("newIndex {OldIndex} out of bounds, adjusted to {NewIndex}", oldNewIndex, newIndex);
+                }
+
+                // If no change, return early
+                if (currentIndex == newIndex)
+                {
+                    _logger.LogInformation("No position change needed (currentIndex == newIndex)");
+                    return Json(new { success = true, message = "Vị trí không thay đổi" });
+                }
+
+                _logger.LogInformation("Moving banner from index {CurrentIndex} to {NewIndex}", currentIndex, newIndex);
+
+                // Reorder: Remove from old position, insert at new position
+                var bannerToMove = allBanners[currentIndex];
+                allBanners.RemoveAt(currentIndex);
+                allBanners.Insert(newIndex, bannerToMove);
+
+                // Log after move
+                _logger.LogInformation("AFTER MOVE (before SortOrder reassignment):");
+                for (int i = 0; i < allBanners.Count; i++)
+                {
+                    var b = allBanners[i];
+                    _logger.LogInformation("  [{Index}] Id={Id}, Title={Title}, SortOrder={Sort}", 
+                        i, b.Id, b.Title, b.SortOrder);
+                }
+
+                // Reassign ALL SortOrder values sequentially (1, 2, 3, 4...)
+                for (int i = 0; i < allBanners.Count; i++)
+                {
+                    var banner = allBanners[i];
+                    var oldSort = banner.SortOrder;
+                    banner.SortOrder = i + 1;
+                    banner.UpdatedAt = DateTime.UtcNow;
+                    _logger.LogInformation("  Banner {Id} ({Title}): SortOrder {OldSort} → {NewSort}", 
+                        banner.Id, banner.Title, oldSort, banner.SortOrder);
+                }
+
+                // Save all changes
+                _logger.LogInformation("Calling SaveChangesAsync...");
+                var savedCount = await _context.SaveChangesAsync();
+                _logger.LogInformation("SaveChanges completed: {Count} entities updated", savedCount);
+                _logger.LogInformation("========== REORDER REQUEST END (SUCCESS) ==========");
+
+                return Json(new { success = true, message = "Đã cập nhật thứ tự banner!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "========== REORDER REQUEST END (ERROR) ==========");
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
 
@@ -2403,6 +2758,233 @@ namespace JohnHenryFashionWeb.Controllers
                 {
                     success = false,
                     message = $"Error: {ex.Message}"
+                });
+            }
+        }
+
+        // Check missing Freelancer images
+        [HttpGet("api/check-missing-images")]
+        public async Task<IActionResult> CheckMissingImages()
+        {
+            try
+            {
+                var freelancerProducts = await _context.Products
+                    .Where(p => p.SKU.StartsWith("FW"))
+                    .ToListAsync();
+                
+                var missingImages = new List<object>();
+                var existingImages = 0;
+                
+                foreach (var product in freelancerProducts)
+                {
+                    // Try different possible paths
+                    var possiblePaths = new List<string>
+                    {
+                        $"/images/ao-nu/{product.SKU}.jpg",
+                        $"/images/quan-nu/{product.SKU}.jpg",
+                        $"/images/chan-vay-nu/{product.SKU}.jpg",
+                        $"/images/dam-nu/{product.SKU}.jpg",
+                        $"/images/products/{product.SKU}.jpg"
+                    };
+                    
+                    bool foundFile = false;
+                    string? foundPath = null;
+                    
+                    foreach (var path in possiblePaths)
+                    {
+                        var physicalPath = Path.Combine(_webHostEnvironment.WebRootPath, path.TrimStart('/'));
+                        if (System.IO.File.Exists(physicalPath))
+                        {
+                            foundFile = true;
+                            foundPath = path;
+                            break;
+                        }
+                    }
+                    
+                    if (foundFile)
+                    {
+                        existingImages++;
+                        // Check if database path matches found file
+                        if (product.FeaturedImageUrl != foundPath)
+                        {
+                            missingImages.Add(new 
+                            {
+                                sku = product.SKU,
+                                name = product.Name,
+                                currentPath = product.FeaturedImageUrl,
+                                correctPath = foundPath,
+                                status = "path_mismatch"
+                            });
+                        }
+                    }
+                    else
+                    {
+                        missingImages.Add(new 
+                        {
+                            sku = product.SKU,
+                            name = product.Name,
+                            currentPath = product.FeaturedImageUrl,
+                            correctPath = (string?)null,
+                            status = "file_not_found"
+                        });
+                    }
+                }
+                
+                return Json(new 
+                {
+                    success = true,
+                    totalProducts = freelancerProducts.Count,
+                    existingImages,
+                    missingImages = missingImages.Count,
+                    details = missingImages.Take(50) // Limit to first 50 for display
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking missing images");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        
+        // Fix specific products with suffix issues
+        [HttpPost("api/fix-suffix-images")]
+        public async Task<IActionResult> FixSuffixImages()
+        {
+            try
+            {
+                var fixedCount = 0;
+                var updates = new Dictionary<string, string>
+                {
+                    { "FWSK24FH04C", "/images/chan-vay-nu/FWSK24FH04C-1.jpg" },
+                    { "FWSK24SS02C", "/images/chan-vay-nu/FWSK24SS02C-O.jpg" },
+                    { "FWDR24SS21C", "/images/dam-nu/FWDR24SS21C-O.jpg" },
+                    { "FWSP25FH02G", "/images/quan-nu/FWSP25FH02G-J.jpg" }
+                };
+
+                foreach (var update in updates)
+                {
+                    var product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.SKU == update.Key);
+                    
+                    if (product != null && product.FeaturedImageUrl != update.Value)
+                    {
+                        product.FeaturedImageUrl = update.Value;
+                        product.UpdatedAt = DateTime.UtcNow;
+                        fixedCount++;
+                        _logger.LogInformation($"Fixed {update.Key}: {product.FeaturedImageUrl} → {update.Value}");
+                    }
+                }
+
+                if (fixedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                }
+
+                return Json(new { success = true, fixedCount, total = updates.Count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fixing suffix images");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        
+        // Fix Freelancer product image paths
+        [HttpPost("api/fix-freelancer-images")]
+        public async Task<IActionResult> FixFreelancerImagePaths()
+        {
+            try
+            {
+                _logger.LogInformation("Starting Freelancer image path fix...");
+                
+                var fixedCount = 0;
+                
+                // Get all Freelancer products (SKU starts with FW)
+                var freelancerProducts = await _context.Products
+                    .Where(p => p.SKU.StartsWith("FW"))
+                    .ToListAsync();
+                
+                _logger.LogInformation($"Found {freelancerProducts.Count} Freelancer products");
+                
+                foreach (var product in freelancerProducts)
+                {
+                    var oldPath = product.FeaturedImageUrl;
+                    string? newPath = null;
+                    
+                    // Search for file in all possible locations (actual file system check)
+                    // This handles cases where files might be in different folders than expected
+                    // Also searches for files with suffixes like -1, -O, -J, etc.
+                    var folders = new[] { "ao-nu", "quan-nu", "chan-vay-nu", "dam-nu", "products" };
+                    
+                    foreach (var folder in folders)
+                    {
+                        var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", folder);
+                        if (Directory.Exists(folderPath))
+                        {
+                            // Try exact match first
+                            var exactFile = Path.Combine(folderPath, $"{product.SKU}.jpg");
+                            if (System.IO.File.Exists(exactFile))
+                            {
+                                newPath = $"/images/{folder}/{product.SKU}.jpg";
+                                break;
+                            }
+                            
+                            // Try with wildcard for files with suffixes (e.g., FWSK24FH04C-1.jpg)
+                            var matchingFiles = Directory.GetFiles(folderPath, $"{product.SKU}*.jpg");
+                            if (matchingFiles.Length > 0)
+                            {
+                                var fileName = Path.GetFileName(matchingFiles[0]);
+                                newPath = $"/images/{folder}/{fileName}";
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (newPath != null && product.FeaturedImageUrl != newPath)
+                    {
+                        product.FeaturedImageUrl = newPath;
+                        product.UpdatedAt = DateTime.UtcNow;
+                        fixedCount++;
+                        
+                        _logger.LogInformation($"Fixed {product.SKU}: {oldPath} → {newPath}");
+                    }
+                    else if (newPath == null)
+                    {
+                        _logger.LogWarning($"File not found for {product.SKU} in any location");
+                    }
+                }
+                
+                if (fixedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Successfully updated {fixedCount} Freelancer product image paths");
+                    
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Đã cập nhật {fixedCount} đường dẫn hình ảnh sản phẩm Freelancer",
+                        productsFixed = fixedCount,
+                        totalFreelancerProducts = freelancerProducts.Count
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Không có sản phẩm nào cần cập nhật",
+                        productsFixed = 0,
+                        totalFreelancerProducts = freelancerProducts.Count
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fixing Freelancer image paths");
+                return Json(new
+                {
+                    success = false,
+                    message = $"Lỗi: {ex.Message}"
                 });
             }
         }

@@ -622,6 +622,19 @@
                         </div>
                     </div>
                     <div class="section-card-body">
+                        @if ((Model.SalesChartData == null || !Model.SalesChartData.Any()) && 
+                             (Model.RevenueTimeSeriesData == null || !Model.RevenueTimeSeriesData.Any()))
+                        {
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <i data-lucide="info" class="me-2" style="width: 20px; height: 20px;"></i>
+                                <div>
+                                    <strong>Chưa có dữ liệu doanh thu</strong><br />
+                                    <small>Dữ liệu biểu đồ sẽ hiển thị sau khi có đơn hàng hoặc import dữ liệu mẫu.</small>
+                                    <br />
+                                    <small class="text-muted">Chạy: <code>cd database && ./import_dashboard_data.sh</code></small>
+                                </div>
+                            </div>
+                        }
                         <div class="chart-container">
                             <canvas id="salesChart"></canvas>
                         </div>
@@ -728,16 +741,81 @@
 </div>
 
 @section Scripts {
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <script>
-        // Sales Chart
-        const ctx = document.getElementById('salesChart').getContext('2d');
+        // Wait for DOM and Chart.js to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎬 Initializing Dashboard Chart...');
+            
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js is not loaded!');
+                return;
+            }
+            console.log('✅ Chart.js loaded');
+            
+            // Sales Chart - Using real data from Model
+            const ctx = document.getElementById('salesChart');
+            if (!ctx) {
+                console.error('❌ Canvas element #salesChart not found!');
+                return;
+            }
+            console.log('✅ Canvas element found');
+            
+            // Get data from Model
+            const chartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SalesChartData ?? new List<ChartData>(), new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            const revenueData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueTimeSeriesData ?? new List<TimeSeriesData>(), new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+        
+        // Debug logging
+        console.log('📊 Dashboard Chart Data Debug:');
+        console.log('Chart Data:', chartData);
+        console.log('Revenue Data:', revenueData);
+        console.log('Chart Data Length:', chartData ? chartData.length : 0);
+        console.log('Revenue Data Length:', revenueData ? revenueData.length : 0);
+        
+        // Prepare labels and data
+        let labels = [];
+        let dataValues = [];
+        
+        if (revenueData && revenueData.length > 0) {
+            console.log('✅ Using revenue time series data');
+            // Use revenue time series data if available
+            labels = revenueData.map(d => {
+                // Try both timestamp and date properties
+                const dateStr = d.timestamp || d.date || d.Date;
+                if (!dateStr) {
+                    console.warn('No date found in revenue data:', d);
+                    return 'N/A';
+                }
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            });
+            dataValues = revenueData.map(d => d.value || d.Value || 0);
+            console.log('Labels:', labels);
+            console.log('Values:', dataValues);
+        } else if (chartData && chartData.length > 0) {
+            console.log('✅ Using chart data as fallback');
+            // Fallback to chart data
+            labels = chartData.map(d => d.label || d.Label || 'N/A');
+            dataValues = chartData.map(d => d.value || d.Value || 0);
+            console.log('Labels:', labels);
+            console.log('Values:', dataValues);
+        } else {
+            console.warn('⚠️ No data available, using empty default');
+            // Show message instead of empty chart
+            labels = ['Không có dữ liệu'];
+            dataValues = [0];
+        }
+        
         const salesChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                labels: labels,
                 datasets: [{
                     label: 'Doanh thu',
-                    data: [1200000, 1900000, 3000000, 5000000, 2000000, 3000000, 4500000],
+                    data: dataValues,
                     borderColor: 'rgb(99, 102, 241)',
                     backgroundColor: 'rgba(99, 102, 241, 0.1)',
                     borderWidth: 3,
@@ -755,6 +833,17 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND',
+                                    minimumFractionDigits: 0
+                                }).format(context.parsed.y);
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -785,32 +874,64 @@
         // Chart period controls
         document.querySelectorAll('.period-toggle button').forEach(btn => {
             btn.addEventListener('click', function() {
+                const periodBtn = this;
                 document.querySelectorAll('.period-toggle button').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+                periodBtn.classList.add('active');
                 
                 // Update chart data based on period
-                const period = this.dataset.period;
-                // Here you would typically make an AJAX call to get new data
-                console.log('Loading data for period:', period);
+                const period = periodBtn.dataset.period;
+                
+                // Show loading state
+                periodBtn.disabled = true;
+                periodBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang tải...';
+                
+                // Fetch new data
+                fetch(`/admin/analytics/api/chart-data?type=sales&period=daily&days=${period}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && Array.isArray(data)) {
+                            const labels = data.map(d => d.label);
+                            const values = data.map(d => d.value);
+                            
+                            salesChart.data.labels = labels;
+                            salesChart.data.datasets[0].data = values;
+                            salesChart.update();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading chart data:', error);
+                        alert('Không thể tải dữ liệu biểu đồ. Vui lòng thử lại.');
+                    })
+                    .finally(() => {
+                        // Restore button state
+                        periodBtn.disabled = false;
+                        periodBtn.textContent = period === '7' ? '7 ngày' : 
+                                               period === '30' ? '30 ngày' : '3 tháng';
+                    });
             });
         });
 
-        // Auto-refresh dashboard data every 30 seconds
+        }); // End DOMContentLoaded
+
+        // Auto-refresh disabled - API endpoint not implemented
+        // TODO: Implement /admin/api/dashboard/metrics endpoint if real-time updates needed
+        /*
         setInterval(function() {
-            // Update real-time metrics
             fetch('/admin/api/dashboard/metrics')
                 .then(response => response.json())
                 .then(data => {
-                    // Update UI with new data
                     console.log('Dashboard data refreshed');
                 })
                 .catch(error => console.error('Error refreshing dashboard:', error));
         }, 30000);
+        */
 
         // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
     </script>
 }

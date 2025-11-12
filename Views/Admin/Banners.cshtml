@@ -18,6 +18,11 @@
     var johnHenryBanners = Model.Where(b => b.Position == "collection_hero" && b.TargetPage == "JohnHenry").OrderBy(b => b.SortOrder).ToList();
     var freelancerBanners = Model.Where(b => b.Position == "collection_hero" && b.TargetPage == "Freelancer").OrderBy(b => b.SortOrder).ToList();
     var bestSellerBanners = Model.Where(b => b.Position == "collection_hero" && b.TargetPage == "BestSeller").OrderBy(b => b.SortOrder).ToList();
+    
+    // Category banners (Product Categories Section)
+    var categoryBanners = Model.Where(b => b.Position == "category").OrderBy(b => b.SortOrder).ToList();
+    var aoNamBanner = categoryBanners.FirstOrDefault(b => b.TargetPage == "AoNam");
+    var aoNuBanner = categoryBanners.FirstOrDefault(b => b.TargetPage == "AoNu");
 }
 
 <div class="admin-content">
@@ -112,6 +117,10 @@
             <i data-lucide="star" style="width: 14px; height: 14px;"></i>
             Best Seller (@bestSellerBanners.Count)
         </a>
+        <a href="#category-banners" class="admin-filter-tab" onclick="filterBanners('category'); return false;">
+            <i data-lucide="grid" style="width: 14px; height: 14px;"></i>
+            Danh mục (@categoryBanners.Count)
+        </a>
         <a href="#active-banners" class="admin-filter-tab" onclick="filterBanners('active'); return false;">
             <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
             Hoạt động (@activeBanners)
@@ -130,8 +139,20 @@
                     <div class="banner-grid" id="mainBanners">
                         @foreach (var banner in mainBanners.Take(3))
                         {
-                            <div class="banner-slot active" data-position="main-@banner.SortOrder" data-id="@banner.Id">
+                            <div class="banner-slot active draggable" 
+                                 data-position="main-@banner.SortOrder" 
+                                 data-id="@banner.Id" 
+                                 data-sort="@banner.SortOrder"
+                                 data-banner-position="home_main"
+                                 draggable="true"
+                                 ondragstart="handleDragStart(event)"
+                                 ondragover="handleDragOver(event)"
+                                 ondrop="handleDrop(event)"
+                                 ondragend="handleDragEnd(event)">
                                 <div class="banner-preview">
+                                    <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                        <i data-lucide="grip-vertical"></i>
+                                    </div>
                                     <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
                                     <div class="banner-overlay">
                                         <div class="banner-actions">
@@ -153,8 +174,12 @@
                         
                         @for (int i = mainBanners.Count; i < 3; i++)
                         {
-                            <div class="banner-slot empty" data-position="main-@(i + 1)">
-                                <div class="banner-placeholder" onclick="addBanner('home_main')">
+                            <div class="banner-slot empty" 
+                                 data-position="main-@(i + 1)"
+                                 data-sort="@(i + 1)"
+                                 data-banner-position="home_main"
+                                 onclick="addBanner('home_main')">
+                                <div class="banner-placeholder">
                                     <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                                     <p class="mt-2">Thêm banner</p>
                                 </div>
@@ -180,8 +205,20 @@
                                 @if (i < sideBannersList.Count)
                                 {
                                     var banner = sideBannersList[i];
-                                    <div class="banner-slot active small" data-position="secondary-@(i + 1)" data-id="@banner.Id">
+                                    <div class="banner-slot active small draggable" 
+                                         data-position="secondary-@(i + 1)" 
+                                         data-id="@banner.Id"
+                                         data-sort="@banner.SortOrder"
+                                         data-banner-position="home_side"
+                                         draggable="true"
+                                         ondragstart="handleDragStart(event)"
+                                         ondragover="handleDragOver(event)"
+                                         ondrop="handleDrop(event)"
+                                         ondragend="handleDragEnd(event)">
                                         <div class="banner-preview">
+                                            <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                                <i data-lucide="grip-vertical"></i>
+                                            </div>
                                             <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
                                             <div class="banner-overlay">
                                                 <div class="banner-actions">
@@ -202,8 +239,12 @@
                                 }
                                 else
                                 {
-                                    <div class="banner-slot empty small" data-position="secondary-@(i + 1)">
-                                        <div class="banner-placeholder" onclick="addBanner('home_side')">
+                                    <div class="banner-slot empty small" 
+                                         data-position="secondary-@(i + 1)"
+                                         data-sort="@(i + 1)"
+                                         data-banner-position="home_side"
+                                         onclick="addBanner('home_side')">
+                                        <div class="banner-placeholder">
                                             <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
                                             <p class="mt-2">Thêm banner</p>
                                         </div>
@@ -222,14 +263,27 @@
                     <span class="admin-badge admin-badge-primary">@johnHenryBanners.Count banner(s)</span>
                 </div>
                 <div class="admin-card-body">
-                    <div class="row g-3">
+                    <div class="row g-3" id="johnHenryBannersContainer">
                         @if (johnHenryBanners.Any())
                         {
                             @foreach (var banner in johnHenryBanners.Take(4))
                             {
                                 <div class="col-md-6 col-lg-3">
-                                    <div class="banner-slot active small" data-position="collection-jh-@banner.SortOrder" data-id="@banner.Id">
+                                    <div class="banner-slot active small draggable" 
+                                         data-position="collection-jh-@banner.SortOrder" 
+                                         data-id="@banner.Id"
+                                         data-sort="@banner.SortOrder"
+                                         data-banner-position="collection_hero"
+                                         data-target-page="JohnHenry"
+                                         draggable="true"
+                                         ondragstart="handleDragStart(event)"
+                                         ondragover="handleDragOver(event)"
+                                         ondrop="handleDrop(event)"
+                                         ondragend="handleDragEnd(event)">
                                         <div class="banner-preview">
+                                            <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                                <i data-lucide="grip-vertical"></i>
+                                            </div>
                                             <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
                                             <div class="banner-overlay">
                                                 <div class="banner-actions">
@@ -250,11 +304,18 @@
                                 </div>
                             }
                         }
-                        @if (johnHenryBanners.Count < 4)
+                        @for (int i = johnHenryBanners.Count; i < 4; i++)
                         {
                             <div class="col-md-6 col-lg-3">
-                                <div class="banner-slot empty small">
-                                    <div class="banner-placeholder" onclick="addCollectionBanner('JohnHenry')">
+                                <div class="banner-slot empty small drop-zone" 
+                                     data-position="collection-jh-@(i + 1)"
+                                     data-sort="@(i + 1)"
+                                     data-banner-position="collection_hero"
+                                     data-target-page="JohnHenry"
+                                     onclick="event.stopPropagation(); addCollectionBanner('JohnHenry');"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)">
+                                    <div class="banner-placeholder">
                                         <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
                                         <p class="mt-2">Thêm banner</p>
                                     </div>
@@ -272,14 +333,27 @@
                     <span class="admin-badge admin-badge-info">@freelancerBanners.Count banner(s)</span>
                 </div>
                 <div class="admin-card-body">
-                    <div class="row g-3">
+                    <div class="row g-3" id="freelancerBannersContainer">
                         @if (freelancerBanners.Any())
                         {
                             @foreach (var banner in freelancerBanners.Take(4))
                             {
                                 <div class="col-md-6 col-lg-3">
-                                    <div class="banner-slot active small" data-position="collection-fl-@banner.SortOrder" data-id="@banner.Id">
+                                    <div class="banner-slot active small draggable" 
+                                         data-position="collection-fl-@banner.SortOrder" 
+                                         data-id="@banner.Id"
+                                         data-sort="@banner.SortOrder"
+                                         data-banner-position="collection_hero"
+                                         data-target-page="Freelancer"
+                                         draggable="true"
+                                         ondragstart="handleDragStart(event)"
+                                         ondragover="handleDragOver(event)"
+                                         ondrop="handleDrop(event)"
+                                         ondragend="handleDragEnd(event)">
                                         <div class="banner-preview">
+                                            <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                                <i data-lucide="grip-vertical"></i>
+                                            </div>
                                             <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
                                             <div class="banner-overlay">
                                                 <div class="banner-actions">
@@ -300,11 +374,18 @@
                                 </div>
                             }
                         }
-                        @if (freelancerBanners.Count < 4)
+                        @for (int i = freelancerBanners.Count; i < 4; i++)
                         {
                             <div class="col-md-6 col-lg-3">
-                                <div class="banner-slot empty small">
-                                    <div class="banner-placeholder" onclick="addCollectionBanner('Freelancer')">
+                                <div class="banner-slot empty small drop-zone" 
+                                     data-position="collection-fl-@(i + 1)"
+                                     data-sort="@(i + 1)"
+                                     data-banner-position="collection_hero"
+                                     data-target-page="Freelancer"
+                                     onclick="event.stopPropagation(); addCollectionBanner('Freelancer');"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)">
+                                    <div class="banner-placeholder">
                                         <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
                                         <p class="mt-2">Thêm banner</p>
                                     </div>
@@ -322,14 +403,27 @@
                     <span class="admin-badge admin-badge-warning">@bestSellerBanners.Count banner(s)</span>
                 </div>
                 <div class="admin-card-body">
-                    <div class="row g-3">
+                    <div class="row g-3" id="bestSellerBannersContainer">
                         @if (bestSellerBanners.Any())
                         {
                             @foreach (var banner in bestSellerBanners.Take(4))
                             {
                                 <div class="col-md-6 col-lg-3">
-                                    <div class="banner-slot active small" data-position="collection-bs-@banner.SortOrder" data-id="@banner.Id">
+                                    <div class="banner-slot active small draggable" 
+                                         data-position="collection-bs-@banner.SortOrder" 
+                                         data-id="@banner.Id"
+                                         data-sort="@banner.SortOrder"
+                                         data-banner-position="collection_hero"
+                                         data-target-page="BestSeller"
+                                         draggable="true"
+                                         ondragstart="handleDragStart(event)"
+                                         ondragover="handleDragOver(event)"
+                                         ondrop="handleDrop(event)"
+                                         ondragend="handleDragEnd(event)">
                                         <div class="banner-preview">
+                                            <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                                <i data-lucide="grip-vertical"></i>
+                                            </div>
                                             <img src="@banner.ImageUrl" alt="@banner.Title" class="img-fluid">
                                             <div class="banner-overlay">
                                                 <div class="banner-actions">
@@ -350,11 +444,18 @@
                                 </div>
                             }
                         }
-                        @if (bestSellerBanners.Count < 4)
+                        @for (int i = bestSellerBanners.Count; i < 4; i++)
                         {
                             <div class="col-md-6 col-lg-3">
-                                <div class="banner-slot empty small">
-                                    <div class="banner-placeholder" onclick="addCollectionBanner('BestSeller')">
+                                <div class="banner-slot empty small drop-zone" 
+                                     data-position="collection-bs-@(i + 1)"
+                                     data-sort="@(i + 1)"
+                                     data-banner-position="collection_hero"
+                                     data-target-page="BestSeller"
+                                     onclick="event.stopPropagation(); addCollectionBanner('BestSeller');"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)">
+                                    <div class="banner-placeholder">
                                         <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
                                         <p class="mt-2">Thêm banner</p>
                                     </div>
@@ -364,13 +465,163 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Product Category Banners -->
+            <div class="admin-card mt-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">Danh mục sản phẩm (Product Categories)</h5>
+                    <span class="admin-badge admin-badge-warning">@categoryBanners.Count banner(s)</span>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-3">
+                        <!-- Áo Nam Banner -->
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Áo Nam</strong>
+                            </div>
+                            @if (aoNamBanner != null)
+                            {
+                                <div class="banner-slot active draggable" 
+                                     data-position="category-aonam" 
+                                     data-id="@aoNamBanner.Id"
+                                     data-sort="@aoNamBanner.SortOrder"
+                                     data-banner-position="category"
+                                     data-target-page="AoNam"
+                                     draggable="true"
+                                     ondragstart="handleDragStart(event)"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)"
+                                     ondragend="handleDragEnd(event)">
+                                    <div class="banner-preview">
+                                        <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                            <i data-lucide="grip-vertical"></i>
+                                        </div>
+                                        <img src="@aoNamBanner.ImageUrl" alt="@aoNamBanner.Title" class="img-fluid">
+                                        <div class="banner-overlay">
+                                            <div class="banner-actions">
+                                                <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@aoNamBanner.Id')">
+                                                    <i data-lucide="edit"></i>
+                                                </button>
+                                                <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@aoNamBanner.Id')">
+                                                    <i data-lucide="trash-2"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="banner-info">
+                                        <h6 class="mb-1">@aoNamBanner.Title</h6>
+                                        <small class="text-muted">Clicks: @aoNamBanner.ClickCount.ToString("N0")</small>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="banner-slot empty drop-zone" 
+                                     data-position="category-aonam"
+                                     data-sort="1"
+                                     data-banner-position="category"
+                                     data-target-page="AoNam"
+                                     onclick="addCategoryBanner('AoNam')"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)">
+                                    <div class="banner-placeholder">
+                                        <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
+                                        <p class="mt-2">Thêm banner Áo Nam</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Áo Nữ Banner -->
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Áo Nữ</strong>
+                            </div>
+                            @if (aoNuBanner != null)
+                            {
+                                <div class="banner-slot active draggable" 
+                                     data-position="category-aonu" 
+                                     data-id="@aoNuBanner.Id"
+                                     data-sort="@aoNuBanner.SortOrder"
+                                     data-banner-position="category"
+                                     data-target-page="AoNu"
+                                     draggable="true"
+                                     ondragstart="handleDragStart(event)"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)"
+                                     ondragend="handleDragEnd(event)">
+                                    <div class="banner-preview">
+                                        <div class="drag-handle" title="Kéo để sắp xếp lại">
+                                            <i data-lucide="grip-vertical"></i>
+                                        </div>
+                                        <img src="@aoNuBanner.ImageUrl" alt="@aoNuBanner.Title" class="img-fluid">
+                                        <div class="banner-overlay">
+                                            <div class="banner-actions">
+                                                <button class="admin-btn admin-btn-sm admin-btn-secondary" onclick="editBanner('@aoNuBanner.Id')">
+                                                    <i data-lucide="edit"></i>
+                                                </button>
+                                                <button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteBanner('@aoNuBanner.Id')">
+                                                    <i data-lucide="trash-2"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="banner-info">
+                                        <h6 class="mb-1">@aoNuBanner.Title</h6>
+                                        <small class="text-muted">Clicks: @aoNuBanner.ClickCount.ToString("N0")</small>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="banner-slot empty drop-zone" 
+                                     data-position="category-aonu"
+                                     data-sort="2"
+                                     data-banner-position="category"
+                                     data-target-page="AoNu"
+                                     onclick="addCategoryBanner('AoNu')"
+                                     ondragover="handleDragOver(event)"
+                                     ondrop="handleDrop(event)">
+                                    <div class="banner-placeholder">
+                                        <i data-lucide="plus" style="width: 32px; height: 32px;"></i>
+                                        <p class="mt-2">Thêm banner Áo Nữ</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
 
         <!-- Banner Management Sidebar -->
         <div class="col-lg-4">
+            <!-- Banner Library (Storage) -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="admin-card-title mb-0">
+                        <i data-lucide="archive" style="width: 18px; height: 18px;"></i>
+                        Kho banner
+                    </h5>
+                    <button class="btn btn-sm btn-primary" onclick="openCreateBannerModalDirect()">
+                        <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                        Tạo mới
+                    </button>
+                </div>
+                <div class="admin-card-body p-0">
+                    <div id="bannerLibraryList" class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                        <div class="list-group-item text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="admin-card">
                 <div class="admin-card-header">
-                    <h5 class="admin-card-title">Danh sách banner</h5>
+                    <h5 class="admin-card-title">Banner đã gán vào vị trí</h5>
                 </div>
                 <div class="admin-card-body p-0">
                     <div class="list-group list-group-flush">
@@ -494,6 +745,47 @@
     </div>
 </div>
 
+<!-- Select Banner Modal (For assigning existing banners) -->
+<div class="modal fade" id="selectBannerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i data-lucide="image" style="width: 20px; height: 20px;"></i>
+                    <span id="selectBannerModalTitle">Chọn banner từ kho</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="searchBannerInput" placeholder="Tìm kiếm banner theo tiêu đề..." onkeyup="filterBannerGallery()">
+                </div>
+                <div id="bannerGallery" class="row g-3" style="max-height: 500px; overflow-y: auto;">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted mt-3 mb-0">
+                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+                    Click vào banner để gán vào vị trí đã chọn. Banner có thể được dùng ở nhiều vị trí khác nhau.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                    Đóng
+                </button>
+                <button type="button" class="admin-btn admin-btn-success" onclick="openCreateBannerModalFromGallery()">
+                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    Tạo banner mới
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Create/Edit Banner Modal -->
 <div class="modal fade" id="createBannerModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -506,8 +798,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="createBannerForm" enctype="multipart/form-data">
+                <form id="createBannerForm" enctype="multipart/form-data" onsubmit="event.preventDefault(); saveBanner(); return false;">
                     <input type="hidden" id="bannerId" name="Id">
+                    <input type="hidden" id="hiddenPosition" name="Position">
+                    <input type="hidden" id="hiddenTargetPage" name="TargetPage">
                     
                     <div class="row">
                         <div class="col-md-6">
@@ -521,32 +815,20 @@
                         </div>
                         <div class="col-md-6">
                             <div class="admin-form-group">
-                                <label for="bannerPosition" class="admin-form-label">
-                                    Vị trí hiển thị <span style="color: var(--status-danger);">*</span>
+                                <label for="bannerPositionDisplay" class="admin-form-label">
+                                    Trạng thái
                                 </label>
-                                <select class="admin-form-select" id="bannerPosition" name="Position" required>
-                                    <option value="">Chọn vị trí</option>
-                                    <option value="home_main">Trang chủ - Hero Carousel</option>
-                                    <option value="home_side">Trang chủ - Small Banners</option>
-                                    <option value="collection_hero">Collection Hero Banner</option>
-                                    <option value="category_banner">Category Banner</option>
-                                    <option value="page_hero">Page Hero Banner</option>
-                                </select>
+                                <input type="text" class="admin-form-input" id="bannerPositionDisplay" readonly
+                                       value="Lưu vào kho banner" style="background-color: #f8f9fa;">
                                 <small class="admin-form-help">
-                                    Xem <a href="/Scripts/BANNER_MAPPING.md" target="_blank">BANNER_MAPPING.md</a> để biết chi tiết
+                                    <i data-lucide="info" style="width: 14px; height: 14px;"></i>
+                                    Banner sẽ được lưu vào kho chung. Sau đó click "Thêm banner" để gán vào vị trí hiển thị.
                                 </small>
                             </div>
                         </div>
                     </div>
 
-                    <div class="admin-form-group">
-                        <label for="bannerTargetPage" class="admin-form-label">Trang đích (TargetPage)</label>
-                        <input type="text" class="admin-form-input" id="bannerTargetPage" name="TargetPage" 
-                               placeholder="Ví dụ: JohnHenry, Freelancer, AoSoMiNam">
-                        <small class="admin-form-help">
-                            Để trống cho home_main/home_side. Các giá trị: JohnHenry, Freelancer, BestSeller, AoNam, AoNu, AoSoMiNam, QuanTayNam, PhuKienNam, AoSoMiNu, QuanShortNu, ChanVayNu, PhuKienNu, Blog
-                        </small>
-                    </div>
+
 
                     <div class="admin-form-group">
                         <label for="bannerDescription" class="admin-form-label">Mô tả</label>
@@ -561,6 +843,11 @@
                         <input type="file" class="admin-form-input" id="bannerImage" name="imageFile" accept="image/*">
                         <small class="admin-form-help">Khuyến nghị: 1200x400px cho banner chính, 600x300px cho banner phụ</small>
                         <input type="hidden" id="existingImageUrl" name="ImageUrl">
+                        
+                        <!-- Image Preview -->
+                        <div id="imagePreview" style="display: none; margin-top: 10px;">
+                            <img id="previewImg" src="" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 4px; border: 1px solid #ddd;">
+                        </div>
                     </div>
 
                     <div class="admin-form-group">
@@ -639,24 +926,205 @@
 <script>
     let currentBannerId = null;
     let currentFilter = 'all';
+    let pendingAssignment = null; // Stores {position, targetPage} for assignment
 
+    // ========== MODAL FUNCTIONS ==========
+    
     function addBanner(position) {
-        resetForm();
-        document.getElementById('bannerPosition').value = position;
-        document.getElementById('bannerModalTitle').textContent = 'Tạo banner mới';
-        document.getElementById('btnSaveText').textContent = 'Tạo banner';
-        currentBannerId = null;
-        
-        const modal = new bootstrap.Modal(document.getElementById('createBannerModal'));
-        modal.show();
+        console.log('addBanner called with position:', position);
+        pendingAssignment = { position: position, targetPage: null };
+        openSelectBannerModal(position, null);
     }
 
     function addCollectionBanner(targetPage) {
+        console.log('addCollectionBanner called with:', targetPage);
+        pendingAssignment = { position: 'collection_hero', targetPage: targetPage };
+        openSelectBannerModal('collection_hero', targetPage);
+    }
+
+    function addCategoryBanner(targetPage) {
+        console.log('addCategoryBanner called with:', targetPage);
+        pendingAssignment = { position: 'category', targetPage: targetPage };
+        openSelectBannerModal('category', targetPage);
+    }
+
+    async function openSelectBannerModal(position, targetPage) {
+        try {
+            const modal = new bootstrap.Modal(document.getElementById('selectBannerModal'));
+            
+            // Update modal title
+            let title = 'Chọn banner (có thể dùng lại banner đã gán)';
+            if (position === 'home_main') title = 'Chọn banner trang chủ chính';
+            else if (position === 'home_side') title = 'Chọn banner phụ';
+            else if (position === 'collection_hero' && targetPage) title = `Chọn banner cho ${targetPage}`;
+            else if (position === 'category' && targetPage) title = `Chọn banner danh mục ${targetPage}`;
+            
+            document.getElementById('selectBannerModalTitle').textContent = title;
+            
+            // Load ALL banners (including assigned ones)
+            await loadUnassignedBanners();
+            
+            modal.show();
+        } catch (error) {
+            console.error('Error opening select banner modal:', error);
+            alert('Lỗi: ' + error.message);
+        }
+    }
+
+    async function loadUnassignedBanners() {
+        const gallery = document.getElementById('bannerGallery');
+        gallery.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
+        
+        try {
+            // Load ALL banners (not just unassigned) since banners can be reused in multiple positions
+            const response = await fetch('/admin/api/banners/all');
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                displayBannerGallery(result.data);
+            } else {
+                gallery.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Không có banner nào. Vui lòng tạo banner mới.</p></div>';
+            }
+        } catch (error) {
+            console.error('Error loading banners:', error);
+            gallery.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Có lỗi xảy ra khi tải banner</p></div>';
+        }
+    }
+
+    function displayBannerGallery(banners) {
+        const gallery = document.getElementById('bannerGallery');
+        
+        if (!banners || banners.length === 0) {
+            gallery.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Không có banner nào. Vui lòng tạo banner mới.</p></div>';
+            return;
+        }
+        
+        // Helper function to format position name
+        const getPositionLabel = (position, targetPage) => {
+            if (!position || position === 'unassigned' || position === 'storage') {
+                return '<span class="badge bg-secondary">Chưa gán</span>';
+            }
+            
+            let label = '';
+            switch(position) {
+                case 'home_main': label = 'Trang chủ chính'; break;
+                case 'home_side': label = 'Banner phụ'; break;
+                case 'collection_hero': label = 'Collection: ' + targetPage; break;
+                case 'category': label = 'Danh mục: ' + targetPage; break;
+                default: label = position;
+            }
+            return `<span class="badge bg-info">${label}</span>`;
+        };
+        
+        let html = '';
+        banners.forEach(banner => {
+            const positionLabel = getPositionLabel(banner.position, banner.targetPage);
+            const isAssigned = banner.isAssigned;
+            
+            html += `
+                <div class="col-md-6 col-lg-4 banner-gallery-item" data-title="${banner.title.toLowerCase()}">
+                    <div class="card h-100" style="cursor: pointer;" onclick="assignBanner('${banner.id}')">
+                        ${isAssigned ? '<div class="position-absolute top-0 end-0 p-2"><i data-lucide="check-circle" class="text-success" style="width: 20px; height: 20px;"></i></div>' : ''}
+                        <img src="${banner.imageUrl}" class="card-img-top" alt="${banner.title}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">${banner.title}</h6>
+                            ${banner.description ? `<p class="card-text text-muted small">${banner.description}</p>` : ''}
+                            <div class="mt-2">
+                                ${positionLabel}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">
+                                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                                    ${new Date(banner.createdAt).toLocaleDateString('vi-VN')}
+                                </small>
+                            </div>
+                            ${isAssigned ? '<small class="text-info d-block mt-1"><i data-lucide="info" style="width: 12px; height: 12px;"></i></small>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        gallery.innerHTML = html;
+        
+        // Reinitialize icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    function filterBannerGallery() {
+        const searchTerm = document.getElementById('searchBannerInput').value.toLowerCase();
+        const items = document.querySelectorAll('.banner-gallery-item');
+        
+        items.forEach(item => {
+            const title = item.dataset.title;
+            if (title.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    async function assignBanner(bannerId) {
+        if (!pendingAssignment) {
+            alert('Lỗi: Không có thông tin gán banner');
+            return;
+        }
+        
+        if (!confirm('Bạn có chắc chắn muốn gán banner này vào vị trí đã chọn?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/admin/api/banners/${bannerId}/assign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    Position: pendingAssignment.position,
+                    TargetPage: pendingAssignment.targetPage
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('selectBannerModal'));
+                modal.hide();
+                
+                showAlert('success', '✅ ' + (result.message || 'Banner đã được gán thành công!') + ' Trang chủ sẽ cập nhật ngay lập tức khi reload.');
+                
+                // Reload banner library to remove assigned banner
+                loadBannerLibrary();
+                
+                // Reload page after 1.5 seconds to ensure user sees the message
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert('danger', result.message || 'Có lỗi xảy ra khi gán banner');
+            }
+        } catch (error) {
+            console.error('Error assigning banner:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi gán banner');
+        }
+    }
+
+    function openCreateBannerModalFromGallery() {
+        // Close select modal
+        const selectModal = bootstrap.Modal.getInstance(document.getElementById('selectBannerModal'));
+        if (selectModal) {
+            selectModal.hide();
+        }
+        
+        // Open create modal - just create banner, don't assign
         resetForm();
-        document.getElementById('bannerPosition').value = 'collection_hero';
-        document.getElementById('bannerTargetPage').value = targetPage;
-        document.getElementById('bannerModalTitle').textContent = 'Thêm banner cho ' + targetPage;
-        document.getElementById('btnSaveText').textContent = 'Tạo banner';
+        
+        document.getElementById('bannerModalTitle').textContent = 'Tạo banner mới';
+        document.getElementById('btnSaveText').textContent = 'Lưu vào kho';
         currentBannerId = null;
         
         const modal = new bootstrap.Modal(document.getElementById('createBannerModal'));
@@ -700,8 +1168,24 @@
                 document.getElementById('bannerId').value = banner.id;
                 document.getElementById('bannerTitle').value = banner.title;
                 document.getElementById('bannerDescription').value = banner.description || '';
-                document.getElementById('bannerPosition').value = banner.position;
-                document.getElementById('bannerTargetPage').value = banner.targetPage || '';
+                
+                // Set hidden fields for position and targetPage
+                document.getElementById('hiddenPosition').value = banner.position || '';
+                document.getElementById('hiddenTargetPage').value = banner.targetPage || '';
+                
+                // Update position display (readonly field)
+                const positionDisplay = document.getElementById('bannerPositionDisplay');
+                if (positionDisplay) {
+                    let positionText = 'Lưu vào kho banner';
+                    if (banner.position && banner.position !== 'unassigned' && banner.position !== 'storage' && banner.position !== '') {
+                        positionText = `Đang gán tại: ${banner.position}`;
+                        if (banner.targetPage) {
+                            positionText += ` - ${banner.targetPage}`;
+                        }
+                    }
+                    positionDisplay.value = positionText;
+                }
+                
                 document.getElementById('bannerUrl').value = banner.linkUrl || '';
                 document.getElementById('sortOrder').value = banner.sortOrder;
                 document.getElementById('openInNewTab').checked = banner.openInNewTab;
@@ -742,7 +1226,7 @@
     }
 
     async function deleteBanner(bannerId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa banner này?')) {
+        if (!confirm('Bạn có chắc chắn muốn xóa banner này?\n\nLưu ý: Chỉ xóa banner khỏi danh sách, file ảnh vẫn được giữ lại.')) {
             return;
         }
 
@@ -758,7 +1242,12 @@
             const result = await response.json();
             
             if (result.success) {
-                showAlert('success', 'Banner đã được xóa thành công!');
+                showAlert('success', 'Banner đã được xóa khỏi danh sách!');
+                
+                // Reload banner library immediately
+                loadBannerLibrary();
+                
+                // Also reload page after 1 second to refresh all data
                 setTimeout(() => location.reload(), 1000);
             } else {
                 showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
@@ -855,6 +1344,11 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('createBannerModal'));
                 modal.hide();
                 showAlert('success', result.message);
+                
+                // Reload banner library
+                loadBannerLibrary();
+                
+                // Reload page after 1 second to show changes
                 setTimeout(() => location.reload(), 1000);
             } else {
                 showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
@@ -872,15 +1366,251 @@
     function resetForm() {
         document.getElementById('createBannerForm').reset();
         document.getElementById('bannerId').value = '';
+        document.getElementById('hiddenPosition').value = '';
+        document.getElementById('hiddenTargetPage').value = '';
         document.getElementById('existingImageUrl').value = '';
         document.getElementById('existingMobileImageUrl').value = '';
         document.getElementById('imagePreview').style.display = 'none';
+        
+        // Reset position display to default
+        const positionDisplay = document.getElementById('bannerPositionDisplay');
+        if (positionDisplay) {
+            positionDisplay.value = 'Lưu vào kho banner';
+        }
         
         // Set default start date to now
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('startDate').value = now.toISOString().slice(0, 16);
     }
+
+    // ========== DRAG & DROP FUNCTIONALITY ==========
+    let draggedElement = null;
+    let draggedBannerId = null;
+
+    function handleDragStart(event) {
+        draggedElement = event.currentTarget;
+        draggedBannerId = draggedElement.dataset.id;
+        
+        // Debug info
+        console.log('Drag started:', {
+            id: draggedBannerId,
+            position: draggedElement.dataset.bannerPosition,
+            targetPage: draggedElement.dataset.targetPage,
+            sortOrder: draggedElement.dataset.sort
+        });
+        
+        // Add dragging class for visual feedback
+        draggedElement.classList.add('dragging');
+        
+        // Set drag data
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/html', draggedElement.innerHTML);
+        
+        // Make the drag image semi-transparent
+        setTimeout(() => {
+            draggedElement.style.opacity = '0.5';
+        }, 0);
+    }
+
+    function handleDragOver(event) {
+        // Only handle drag if something is actually being dragged
+        if (!draggedElement) {
+            return;
+        }
+        
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
+        
+        event.dataTransfer.dropEffect = 'move';
+        
+        const dropTarget = event.currentTarget;
+        
+        // Remove drag-over from all other elements
+        document.querySelectorAll('.drag-over').forEach(el => {
+            if (el !== dropTarget) {
+                el.classList.remove('drag-over');
+            }
+        });
+        
+        // Only allow drop if:
+        // 1. It's not the same element being dragged
+        // 2. It's in the same position group
+        // 3. For collection banners, same TargetPage
+        if (draggedElement && dropTarget !== draggedElement) {
+            const draggedPosition = draggedElement.dataset.bannerPosition;
+            const targetPosition = dropTarget.dataset.bannerPosition;
+            const draggedTargetPage = draggedElement.dataset.targetPage;
+            const targetTargetPage = dropTarget.dataset.targetPage;
+            
+            // Check if positions match
+            let canDrop = draggedPosition === targetPosition;
+            
+            // For collection banners, also check TargetPage
+            if (canDrop && draggedTargetPage && targetTargetPage) {
+                canDrop = draggedTargetPage === targetTargetPage;
+            }
+            
+            if (canDrop) {
+                dropTarget.classList.add('drag-over');
+                event.dataTransfer.dropEffect = 'move';
+            } else {
+                event.dataTransfer.dropEffect = 'none';
+            }
+        }
+        
+        return false;
+    }
+
+    function handleDragEnd(event) {
+        // Only handle if something was being dragged
+        if (!draggedElement) {
+            return;
+        }
+        
+        // Reset visual states
+        draggedElement.style.opacity = '1';
+        draggedElement.classList.remove('dragging');
+        
+        // Remove all drag-over classes
+        document.querySelectorAll('.drag-over').forEach(el => {
+            el.classList.remove('drag-over');
+        });
+        
+        // Reset drag state
+        draggedElement = null;
+        draggedBannerId = null;
+    }
+
+    async function handleDrop(event) {
+        // Only handle drop if something is actually being dragged
+        if (!draggedElement) {
+            return;
+        }
+        
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
+        
+        event.preventDefault();
+        
+        const dropTarget = event.currentTarget;
+        dropTarget.classList.remove('drag-over');
+        
+        // Check if dropping on same position group
+        const draggedPosition = draggedElement.dataset.bannerPosition;
+        const targetPosition = dropTarget.dataset.bannerPosition;
+        
+        if (draggedPosition !== targetPosition) {
+            showAlert('warning', 'Chỉ có thể di chuyển banner trong cùng một nhóm vị trí');
+            return false;
+        }
+        
+        // For collection banners, also check TargetPage
+        const draggedTargetPage = draggedElement.dataset.targetPage;
+        const targetTargetPage = dropTarget.dataset.targetPage;
+        
+        if (draggedTargetPage && targetTargetPage && draggedTargetPage !== targetTargetPage) {
+            showAlert('warning', 'Chỉ có thể di chuyển banner trong cùng một collection');
+            return false;
+        }
+        
+        if (draggedElement === dropTarget) {
+            return false;
+        }
+        
+        // Get new sort order from drop target
+        const newSortOrder = parseInt(dropTarget.dataset.sort) || 1;
+        const oldSortOrder = parseInt(draggedElement.dataset.sort) || 1;
+        
+        // Debug info
+        console.log('Drop event:', {
+            draggedId: draggedBannerId,
+            draggedPosition: draggedPosition,
+            draggedTargetPage: draggedTargetPage,
+            draggedSort: oldSortOrder,
+            targetPosition: targetPosition,
+            targetTargetPage: targetTargetPage,
+            targetSort: newSortOrder
+        });
+        
+        // If no change, return early
+        if (newSortOrder === oldSortOrder) {
+            console.log('No position change, aborting');
+            return false;
+        }
+        
+        // Show loading indicator
+        const loadingToast = document.createElement('div');
+        loadingToast.className = 'admin-alert admin-alert-info';
+        loadingToast.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang cập nhật vị trí...';
+        document.querySelector('.admin-content').insertBefore(loadingToast, document.querySelector('.admin-content').firstChild);
+        
+        // Update banner sort order via API
+        try {
+            const response = await fetch(`/admin/api/banners/${draggedBannerId}/reorder`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    Position: draggedPosition,
+                    TargetPage: draggedTargetPage || null,
+                    NewSortOrder: newSortOrder,
+                    OldSortOrder: oldSortOrder
+                })
+            });
+            
+            const result = await response.json();
+            
+            // Remove loading toast
+            loadingToast.remove();
+            
+            if (result.success) {
+                // Visual swap immediately for better UX
+                if (dropTarget.classList.contains('empty')) {
+                    // If dropping on empty slot, just reload
+                    showAlert('success', 'Đã cập nhật thứ tự banner');
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    // Swap the two banners visually
+                    const draggedParent = draggedElement.parentElement;
+                    const targetParent = dropTarget.parentElement;
+                    
+                    // Create temporary placeholder
+                    const placeholder = document.createElement('div');
+                    draggedParent.insertBefore(placeholder, draggedElement);
+                    
+                    // Swap elements
+                    targetParent.insertBefore(draggedElement, dropTarget);
+                    draggedParent.insertBefore(dropTarget, placeholder);
+                    
+                    // Remove placeholder
+                    placeholder.remove();
+                    
+                    // Update data-sort attributes
+                    draggedElement.dataset.sort = newSortOrder;
+                    dropTarget.dataset.sort = oldSortOrder;
+                    
+                    showAlert('success', 'Đã cập nhật thứ tự banner');
+                    
+                    // Reload after delay to ensure consistency
+                    setTimeout(() => location.reload(), 1500);
+                }
+            } else {
+                showAlert('danger', 'Có lỗi xảy ra: ' + result.message);
+            }
+        } catch (error) {
+            loadingToast.remove();
+            console.error('Error reordering banner:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi di chuyển banner');
+        }
+        
+        return false;
+    }
+    // ========== END DRAG & DROP ==========
 
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
@@ -906,8 +1636,83 @@
         }, 5000);
     }
 
+    // Open create banner modal directly (from header button)
+    function openCreateBannerModalDirect() {
+        resetForm();
+        document.getElementById('bannerModalTitle').textContent = 'Tạo banner mới';
+        document.getElementById('btnSaveText').textContent = 'Lưu vào kho';
+        currentBannerId = null;
+        
+        const modal = new bootstrap.Modal(document.getElementById('createBannerModal'));
+        modal.show();
+    }
+
+    // Load banner library on page load
+    async function loadBannerLibrary() {
+        const libraryList = document.getElementById('bannerLibraryList');
+        
+        try {
+            const response = await fetch('/admin/api/banners/unassigned');
+            const result = await response.json();
+            
+            if (result.success && result.data && result.data.length > 0) {
+                let html = '';
+                result.data.forEach(banner => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <img src="${banner.imageUrl}" alt="${banner.title}" 
+                                     class="me-2 rounded" style="width: 50px; height: 30px; object-fit: cover;">
+                                <div class="flex-grow-1 overflow-hidden me-2">
+                                    <h6 class="mb-0 text-truncate small">${banner.title}</h6>
+                                    <small class="text-muted d-block text-truncate">
+                                        <i data-lucide="calendar" style="width: 12px; height: 12px;"></i>
+                                        ${new Date(banner.createdAt).toLocaleDateString('vi-VN')}
+                                    </small>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editBanner('${banner.id}')" title="Chỉnh sửa">
+                                        <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteBanner('${banner.id}')" title="Xóa">
+                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                libraryList.innerHTML = html;
+            } else {
+                libraryList.innerHTML = `
+                    <div class="list-group-item text-center text-muted py-4">
+                        <i data-lucide="image-off" style="width: 32px; height: 32px; margin-bottom: 8px;"></i>
+                        <p class="mb-0">Chưa có banner nào trong kho</p>
+                        <small>Nhấn "Tạo mới" để thêm banner</small>
+                    </div>
+                `;
+            }
+            
+            // Reinitialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Error loading banner library:', error);
+            libraryList.innerHTML = `
+                <div class="list-group-item text-center text-danger py-3">
+                    <i data-lucide="alert-circle" style="width: 24px; height: 24px;"></i>
+                    <p class="mb-0 small">Có lỗi khi tải danh sách banner</p>
+                </div>
+            `;
+        }
+    }
+
     // Image preview functionality
     document.addEventListener('DOMContentLoaded', function() {
+        // Load banner library
+        loadBannerLibrary();
+        
         document.getElementById('bannerImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {

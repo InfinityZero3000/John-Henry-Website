@@ -275,19 +275,22 @@
                                 }
                             </td>
                             <td class="actions">
-                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <button type="button" class="admin-btn admin-btn-sm admin-btn-secondary" 
-                                            onclick="editCoupon('@coupon.Id')" title="Chỉnh sửa">
-                                        <i data-lucide="edit"></i>
+                                            onclick="editCoupon('@coupon.Id')" title="Chỉnh sửa" 
+                                            style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px;">
+                                        <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
                                     </button>
                                     <button type="button" class="admin-btn admin-btn-sm @(coupon.IsActive ? "admin-btn-warning" : "admin-btn-success")" 
                                             onclick="toggleCoupon('@coupon.Id', @coupon.IsActive.ToString().ToLower())"
-                                            title="@(coupon.IsActive ? "Tạm dừng" : "Kích hoạt")">
-                                        <i data-lucide="@(coupon.IsActive ? "pause" : "play")"></i>
+                                            title="@(coupon.IsActive ? "Tạm dừng" : "Kích hoạt")"
+                                            style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px;">
+                                        <i data-lucide="@(coupon.IsActive ? "pause" : "play")" style="width: 16px; height: 16px;"></i>
                                     </button>
                                     <button type="button" class="admin-btn admin-btn-sm admin-btn-danger" 
-                                            onclick="deleteCoupon('@coupon.Id', '@coupon.Code')" title="Xóa">
-                                        <i data-lucide="trash-2"></i>
+                                            onclick="deleteCoupon('@coupon.Id', '@coupon.Code')" title="Xóa"
+                                            style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px;">
+                                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                                     </button>
                                 </div>
                             </td>
@@ -518,22 +521,202 @@
 
     // Edit coupon
     function editCoupon(id) {
-        // TODO: Load coupon data and show modal
-        console.log('Edit coupon:', id);
+        // Load coupon data
+        fetch(`/admin/coupons/get/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Response trả về data trực tiếp, không có nested coupon object
+                    
+                    // Fill form with coupon data
+                    document.getElementById('modalTitle').textContent = 'Chỉnh sửa mã giảm giá';
+                    document.getElementById('submitBtnText').textContent = 'Cập nhật';
+                    document.getElementById('couponId').value = data.id;
+                    document.getElementById('couponCode').value = data.code;
+                    document.getElementById('couponName').value = data.name;
+                    document.getElementById('couponDescription').value = data.description || '';
+                    document.getElementById('couponType').value = data.type;
+                    document.getElementById('couponValue').value = data.value;
+                    document.getElementById('minOrderAmount').value = data.minOrderAmount || '';
+                    document.getElementById('usageLimit').value = data.usageLimit || '';
+                    
+                    // Format dates for datetime-local input
+                    if (data.startDate) {
+                        const startDate = new Date(data.startDate);
+                        document.getElementById('startDate').value = formatDateForInput(startDate);
+                    }
+                    if (data.endDate) {
+                        const endDate = new Date(data.endDate);
+                        document.getElementById('endDate').value = formatDateForInput(endDate);
+                    }
+                    
+                    document.getElementById('isActive').checked = data.isActive;
+                    
+                    updateValueLabel();
+                    
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('couponModal'));
+                    modal.show();
+                    
+                    // Reinitialize icons
+                    lucide.createIcons();
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: data.message || 'Không thể tải thông tin mã giảm giá'
+                        });
+                    } else {
+                        alert(data.message || 'Không thể tải thông tin mã giảm giá');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Có lỗi xảy ra khi tải dữ liệu'
+                    });
+                } else {
+                    alert('Có lỗi xảy ra khi tải dữ liệu');
+                }
+            });
     }
 
     // Toggle coupon status
     function toggleCoupon(id, isActive) {
-        // TODO: Toggle coupon active status
-        console.log('Toggle coupon:', id, isActive);
+        const action = isActive ? 'tạm dừng' : 'kích hoạt';
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: `${action.charAt(0).toUpperCase() + action.slice(1)} mã giảm giá?`,
+                text: `Bạn có chắc chắn muốn ${action} mã giảm giá này?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performToggle(id);
+                }
+            });
+        } else {
+            if (confirm(`Bạn có chắc chắn muốn ${action} mã giảm giá này?`)) {
+                performToggle(id);
+            }
+        }
+    }
+
+    function performToggle(id) {
+        fetch(`/admin/coupons/toggle/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    alert(data.message);
+                    location.reload();
+                }
+            } else {
+                alert(data.message || 'Có lỗi xảy ra');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi cập nhật trạng thái');
+        });
     }
 
     // Delete coupon
     function deleteCoupon(id, code) {
-        if (confirm(`Bạn có chắc chắn muốn xóa mã "${code}"?`)) {
-            // TODO: Delete coupon
-            console.log('Delete coupon:', id);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Xóa mã giảm giá?',
+                html: `Bạn có chắc chắn muốn xóa mã <strong>${code}</strong>?<br><small class="text-muted">Không thể hoàn tác sau khi xóa</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performDelete(id);
+                }
+            });
+        } else {
+            if (confirm(`Bạn có chắc chắn muốn xóa mã "${code}"? Không thể hoàn tác sau khi xóa.`)) {
+                performDelete(id);
+            }
         }
+    }
+
+    function performDelete(id) {
+        fetch(`/admin/coupons/delete/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã xóa!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    alert(data.message);
+                    location.reload();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Không thể xóa',
+                        text: data.message
+                    });
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa mã giảm giá');
+        });
+    }
+    
+    // Helper function to format date for datetime-local input
+    function formatDateForInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
     // Update value label based on type
@@ -556,6 +739,90 @@
     // Auto uppercase coupon code
     document.getElementById('couponCode')?.addEventListener('input', function(e) {
         e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    // Handle form submission
+    document.getElementById('couponForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            Id: document.getElementById('couponId').value || '00000000-0000-0000-0000-000000000000',
+            Code: document.getElementById('couponCode').value.trim().toUpperCase(),
+            Name: document.getElementById('couponName').value.trim(),
+            Description: document.getElementById('couponDescription').value.trim(),
+            Type: document.getElementById('couponType').value,
+            Value: parseFloat(document.getElementById('couponValue').value),
+            MinOrderAmount: document.getElementById('minOrderAmount').value ? parseFloat(document.getElementById('minOrderAmount').value) : null,
+            UsageLimit: document.getElementById('usageLimit').value ? parseInt(document.getElementById('usageLimit').value) : null,
+            StartDate: document.getElementById('startDate').value || null,
+            EndDate: document.getElementById('endDate').value || null,
+            IsActive: document.getElementById('isActive').checked
+        };
+
+        // Validate
+        if (!formData.Code) {
+            alert('Vui lòng nhập mã giảm giá');
+            return;
+        }
+        if (!formData.Name) {
+            alert('Vui lòng nhập tên mã giảm giá');
+            return;
+        }
+        if (!formData.Value || formData.Value <= 0) {
+            alert('Vui lòng nhập giá trị hợp lệ');
+            return;
+        }
+        if (formData.Type === 'percentage' && formData.Value > 100) {
+            alert('Giá trị phần trăm không được vượt quá 100%');
+            return;
+        }
+
+        // Submit
+        fetch('/admin/coupons/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('couponModal'));
+                if (modal) modal.hide();
+
+                // Show success message
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    alert(data.message);
+                    location.reload();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: data.message
+                    });
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi lưu mã giảm giá');
+        });
     });
 </script>
 }

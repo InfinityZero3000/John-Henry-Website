@@ -10,6 +10,20 @@ namespace JohnHenryFashionWeb.ViewModels
         public int SortOrder { get; set; }
     }
 
+    public class BannerReorderModel
+    {
+        public string Position { get; set; } = string.Empty;
+        public string? TargetPage { get; set; }
+        public int NewSortOrder { get; set; }
+        public int OldSortOrder { get; set; }
+    }
+
+    public class BannerAssignmentModel
+    {
+        public string Position { get; set; } = string.Empty;
+        public string? TargetPage { get; set; }
+    }
+
     #endregion
 
     #region Enhanced User Management ViewModels
