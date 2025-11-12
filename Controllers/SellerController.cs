@@ -106,420 +106,6 @@ namespace JohnHenryFashionWeb.Controllers
 
         // NOTE: Product management methods have been moved to SellerProductsController
         // to avoid routing conflicts. Use /seller/products routes instead.
-        
-        /*
-        [HttpGet("products")]
-        public async Task<IActionResult> Products(int page = 1, int pageSize = 12, string search = "", Guid? categoryId = null, string status = "")
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            // For now, show all products. In real implementation, filter by seller
-            var query = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .AsQueryable();
-
-            // Add filters
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(p => p.Name.Contains(search) || p.SKU.Contains(search));
-            }
-
-            if (categoryId.HasValue)
-            {
-                query = query.Where(p => p.CategoryId == categoryId.Value);
-            }
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                query = query.Where(p => p.Status == status);
-            }
-
-            var totalCount = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new ProductListItemViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    SKU = p.SKU,
-                    Price = p.Price,
-                    SalePrice = p.SalePrice,
-                    StockQuantity = p.StockQuantity,
-                    Status = p.Status,
-                    CategoryName = p.Category.Name,
-                    BrandName = p.Brand != null ? p.Brand.Name : "",
-                    FeaturedImageUrl = p.FeaturedImageUrl,
-                    CreatedAt = p.CreatedAt,
-                    IsFeatured = p.IsFeatured
-                })
-                .ToListAsync();
-
-            var categories = await _context.Categories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-
-            var viewModel = new ProductListViewModel
-            {
-                Products = products,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PageSize = pageSize,
-                SearchTerm = search,
-                CategoryId = categoryId,
-                Status = status,
-                Categories = categories,
-                TotalProducts = totalCount
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpGet("orders")]
-        public async Task<IActionResult> Orders(int page = 1, int pageSize = 10, string search = "", string status = "", DateTime? fromDate = null, DateTime? toDate = null)
-        {
-            var query = _context.Orders
-                .Include(o => o.User)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(o => o.OrderNumber.Contains(search) || 
-                                        (o.User != null && o.User.FirstName != null && o.User.FirstName.Contains(search)) || 
-                                        (o.User != null && o.User.LastName != null && o.User.LastName.Contains(search)) ||
-                                        (o.User != null && o.User.Email != null && o.User.Email.Contains(search)));
-            }
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                query = query.Where(o => o.Status == status);
-            }
-
-            if (fromDate.HasValue)
-            {
-                query = query.Where(o => o.CreatedAt >= fromDate.Value);
-            }
-
-            if (toDate.HasValue)
-            {
-                query = query.Where(o => o.CreatedAt <= toDate.Value.AddDays(1));
-            }
-
-            var totalCount = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-            var orders = await query
-                .OrderByDescending(o => o.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(o => new OrderListItemViewModel
-                {
-                    Id = o.Id,
-                    OrderNumber = o.OrderNumber,
-                    CustomerName = o.User != null ? (o.User.FirstName ?? "") + " " + (o.User.LastName ?? "") : "Unknown",
-                    CustomerEmail = o.User != null ? o.User.Email ?? "Unknown" : "Unknown",
-                    Total = o.TotalAmount,
-                    Status = o.Status,
-                    PaymentStatus = o.PaymentStatus,
-                    CreatedAt = o.CreatedAt,
-                    ItemCount = o.OrderItems.Count()
-                })
-                .ToListAsync();
-
-            var viewModel = new OrderListViewModel
-            {
-                Orders = orders,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                PageSize = pageSize,
-                SearchTerm = search,
-                Status = status,
-                FromDate = fromDate,
-                ToDate = toDate
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpGet("orders/{id}")]
-        public async Task<IActionResult> OrderDetail(Guid id)
-        {
-            var order = await _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            var viewModel = new OrderDetailViewModel
-            {
-                Id = order.Id,
-                OrderNumber = order.OrderNumber,
-                CustomerName = order.User != null ? $"{order.User.FirstName ?? ""} {order.User.LastName ?? ""}".Trim() : "Unknown",
-                CustomerEmail = order.User?.Email ?? "Unknown",
-                CustomerPhone = order.User?.PhoneNumber ?? "",
-                ShippingAddress = order.ShippingAddress,
-                BillingAddress = order.BillingAddress,
-                Subtotal = order.TotalAmount - order.ShippingFee,
-                ShippingCost = order.ShippingFee,
-                Tax = order.Tax,
-                Discount = order.DiscountAmount,
-                Total = order.TotalAmount,
-                Status = order.Status,
-                PaymentStatus = order.PaymentStatus,
-                PaymentMethod = order.PaymentMethod,
-                CreatedAt = order.CreatedAt,
-                Notes = order.Notes,
-                Items = order.OrderItems.Select(oi => new OrderItemViewModel
-                {
-                    ProductId = oi.ProductId,
-                    ProductName = oi.Product.Name,
-                    ProductSKU = oi.Product.SKU,
-                    ProductImage = oi.Product.FeaturedImageUrl,
-                    Quantity = oi.Quantity,
-                    Price = oi.UnitPrice,
-                    Total = oi.TotalPrice
-                }).ToList()
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("orders/{id}/update-status")]
-        public async Task<IActionResult> UpdateOrderStatus(Guid id, string status)
-        {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            order.Status = status;
-            order.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Trạng thái đơn hàng đã được cập nhật!";
-            return RedirectToAction(nameof(OrderDetail), new { id });
-        }
-
-        // NOTE: Product create/edit methods removed to avoid routing conflicts with SellerProductsController
-        // Use /seller/products routes in SellerProductsController instead
-
-        /*
-        // Removed CreateProduct and EditProduct methods - now handled by SellerProductsController
-        [HttpGet("products/create")]
-        public async Task<IActionResult> CreateProduct()
-        {
-            var viewModel = new ProductCreateEditViewModel
-            {
-                Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync(),
-                Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync()
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("products/create")]
-        public async Task<IActionResult> CreateProduct(ProductCreateEditViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var product = new Product
-                {
-                    Id = Guid.NewGuid(),
-                    Name = model.Name,
-                    SKU = model.SKU,
-                    Price = model.Price,
-                    SalePrice = model.SalePrice,
-                    CategoryId = model.CategoryId,
-                    BrandId = model.BrandId,
-                    ShortDescription = model.ShortDescription,
-                    Description = model.Description,
-                    StockQuantity = model.StockQuantity,
-                    ManageStock = model.ManageStock,
-                    InStock = model.InStock,
-                    IsFeatured = model.IsFeatured,
-                    IsActive = model.IsActive,
-                    Size = model.Size,
-                    Color = model.Color,
-                    Material = model.Material,
-                    Weight = model.Weight,
-                    Dimensions = model.Dimensions,
-                    Status = model.Status,
-                    Slug = GenerateSlug(model.Name),
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                // Handle featured image upload
-                if (model.FeaturedImage != null)
-                {
-                    product.FeaturedImageUrl = await SaveUploadedFile(model.FeaturedImage, "products");
-                }
-
-                // Handle gallery images upload
-                if (model.GalleryImages != null && model.GalleryImages.Count > 0)
-                {
-                    var galleryUrls = new List<string>();
-                    foreach (var image in model.GalleryImages)
-                    {
-                        var imageUrl = await SaveUploadedFile(image, "products");
-                        if (!string.IsNullOrEmpty(imageUrl))
-                        {
-                            galleryUrls.Add(imageUrl);
-                        }
-                    }
-                    product.GalleryImages = galleryUrls.ToArray();
-                }
-
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Sản phẩm đã được tạo thành công!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            // Reload dropdown data if validation fails
-            model.Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
-            model.Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync();
-
-            return View(model);
-        }
-
-        [HttpGet("products/edit/{id}")]
-        public async Task<IActionResult> EditProduct(Guid id)
-        {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (product == null)
-            {
-                TempData["Error"] = "Không tìm thấy sản phẩm!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            var viewModel = new ProductCreateEditViewModel
-            {
-                Id = product.Id,
-                Name = product.Name,
-                SKU = product.SKU,
-                Price = product.Price,
-                SalePrice = product.SalePrice,
-                CategoryId = product.CategoryId,
-                BrandId = product.BrandId,
-                ShortDescription = product.ShortDescription,
-                Description = product.Description,
-                StockQuantity = product.StockQuantity,
-                ManageStock = product.ManageStock,
-                InStock = product.InStock,
-                IsFeatured = product.IsFeatured,
-                IsActive = product.IsActive,
-                Size = product.Size,
-                Color = product.Color,
-                Material = product.Material,
-                Weight = product.Weight,
-                Dimensions = product.Dimensions,
-                Status = product.Status,
-                FeaturedImageUrl = product.FeaturedImageUrl,
-                ExistingGalleryImages = product.GalleryImages?.ToArray() ?? new string[0],
-                Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync(),
-                Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync()
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("products/edit/{id}")]
-        public async Task<IActionResult> EditProduct(Guid id, ProductCreateEditViewModel model)
-        {
-            if (id != model.Id)
-            {
-                TempData["Error"] = "ID sản phẩm không khớp!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                TempData["Error"] = "Không tìm thấy sản phẩm!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            if (ModelState.IsValid)
-            {
-                product.Name = model.Name;
-                product.SKU = model.SKU;
-                product.Price = model.Price;
-                product.SalePrice = model.SalePrice;
-                product.CategoryId = model.CategoryId;
-                product.BrandId = model.BrandId;
-                product.ShortDescription = model.ShortDescription;
-                product.Description = model.Description;
-                product.StockQuantity = model.StockQuantity;
-                product.ManageStock = model.ManageStock;
-                product.InStock = model.InStock;
-                product.IsFeatured = model.IsFeatured;
-                product.IsActive = model.IsActive;
-                product.Size = model.Size;
-                product.Color = model.Color;
-                product.Material = model.Material;
-                product.Weight = model.Weight;
-                product.Dimensions = model.Dimensions;
-                product.Status = model.Status;
-                product.Slug = GenerateSlug(model.Name);
-                product.UpdatedAt = DateTime.UtcNow;
-
-                // Handle featured image upload
-                if (model.FeaturedImage != null)
-                {
-                    product.FeaturedImageUrl = await SaveUploadedFile(model.FeaturedImage, "products");
-                }
-
-                // Handle gallery images upload
-                if (model.GalleryImages != null && model.GalleryImages.Count > 0)
-                {
-                    var galleryUrls = new List<string>();
-                    foreach (var image in model.GalleryImages)
-                    {
-                        var imageUrl = await SaveUploadedFile(image, "products");
-                        if (!string.IsNullOrEmpty(imageUrl))
-                        {
-                            galleryUrls.Add(imageUrl);
-                        }
-                    }
-                    product.GalleryImages = galleryUrls.ToArray();
-                }
-
-                _context.Update(product);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Sản phẩm đã được cập nhật thành công!";
-                return RedirectToAction(nameof(Products));
-            }
-
-            // Reload dropdown data if validation fails
-            model.Categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
-            model.Brands = await _context.Brands.Where(b => b.IsActive).OrderBy(b => b.Name).ToListAsync();
-
-            return View(model);
-        }
-        */
 
         [HttpGet("inventory")]
         public async Task<IActionResult> Inventory(string search = "", bool lowStock = false)
@@ -1847,6 +1433,355 @@ namespace JohnHenryFashionWeb.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Cập nhật kho thành công!" });
+        }
+
+        // MARK: - Quản lý Đơn hàng
+        [HttpGet("orders")]
+        public async Task<IActionResult> Orders(int page = 1, int pageSize = 20, string search = "", string status = "")
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get orders that contain products from this seller
+            var query = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .Where(o => o.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == currentUser.Id))
+                .AsQueryable();
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(o => 
+                    o.OrderNumber.Contains(search) || 
+                    (o.User != null && !string.IsNullOrEmpty(o.User.FirstName) && (o.User.FirstName + " " + o.User.LastName).Contains(search)) ||
+                    (o.User != null && !string.IsNullOrEmpty(o.User.Email) && o.User.Email.Contains(search)));
+            }
+
+            // Apply status filter
+            if (!string.IsNullOrEmpty(status) && status != "all")
+            {
+                query = query.Where(o => o.Status.ToLower() == status.ToLower());
+            }
+
+            // Get status counts for filters
+            var allOrders = await _context.Orders
+                .Where(o => o.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == currentUser.Id))
+                .ToListAsync();
+
+            var statusCounts = new Dictionary<string, int>
+            {
+                { "all", allOrders.Count },
+                { "pending", allOrders.Count(o => o.Status.ToLower() == "pending") },
+                { "processing", allOrders.Count(o => o.Status.ToLower() == "processing") },
+                { "completed", allOrders.Count(o => o.Status.ToLower() == "completed") },
+                { "cancelled", allOrders.Count(o => o.Status.ToLower() == "cancelled") }
+            };
+
+            // Get total count for pagination
+            var totalOrders = await query.CountAsync();
+
+            // Get paginated orders
+            var orders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Calculate today's stats
+            var today = DateTime.UtcNow.Date;
+            var todayOrders = allOrders.Where(o => o.CreatedAt.Date == today).ToList();
+            var todayRevenue = todayOrders
+                .Where(o => o.Status.ToLower() == "completed")
+                .Sum(o => o.TotalAmount);
+            var pendingOrdersCount = allOrders.Count(o => o.Status.ToLower() == "pending");
+
+            // Map to ViewModel
+            var model = new SellerOrdersViewModel
+            {
+                Orders = orders.Select(o => new OrderListItemViewModel
+                {
+                    Id = o.Id,
+                    OrderNumber = o.OrderNumber,
+                    CustomerName = $"{o.User.FirstName} {o.User.LastName}".Trim(),
+                    CustomerEmail = o.User.Email ?? "",
+                    Total = o.TotalAmount,
+                    Status = o.Status,
+                    PaymentStatus = o.PaymentStatus,
+                    CreatedAt = o.CreatedAt,
+                    ItemCount = o.OrderItems.Count(oi => oi.Product != null && oi.Product.SellerId == currentUser.Id)
+                }).ToList(),
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalOrders / (double)pageSize),
+                PageSize = pageSize,
+                TotalOrders = totalOrders,
+                SearchQuery = search ?? "",
+                StatusFilter = status ?? "",
+                StatusCounts = statusCounts,
+                TodayRevenue = todayRevenue,
+                TodayOrders = todayOrders.Count,
+                PendingOrders = pendingOrdersCount
+            };
+
+            return View(model);
+        }
+
+        [HttpGet("orders/{id}")]
+        public async Task<IActionResult> OrderDetail(Guid id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get order with all related data
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .Include(o => o.Payments)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                TempData["ErrorMessage"] = "Đơn hàng không tồn tại.";
+                return RedirectToAction(nameof(Orders));
+            }
+
+            // Check if seller has permission to view this order
+            // Seller can only view orders that contain their products
+            var sellerProducts = order.OrderItems
+                .Where(oi => oi.Product != null && oi.Product.SellerId == currentUser.Id)
+                .ToList();
+
+            if (!sellerProducts.Any())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền xem đơn hàng này.";
+                return RedirectToAction(nameof(Orders));
+            }
+
+            // Get order status history
+            var statusHistory = await _context.OrderStatusHistories
+                .Where(h => h.OrderId == id)
+                .OrderBy(h => h.CreatedAt)
+                .Select(h => new OrderStatusHistoryViewModel
+                {
+                    Status = h.Status,
+                    Notes = h.Notes,
+                    ChangedBy = h.ChangedBy,
+                    CreatedAt = h.CreatedAt
+                })
+                .ToListAsync();
+
+            // Calculate available status transitions based on current status
+            var availableStatuses = GetAvailableStatusTransitions(order.Status);
+
+            // Map to ViewModel - only include seller's items
+            var model = new SellerOrderDetailViewModel
+            {
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
+                Status = order.Status,
+                PaymentStatus = order.PaymentStatus,
+                PaymentMethod = order.PaymentMethod,
+                CreatedAt = order.CreatedAt,
+                UpdatedAt = order.UpdatedAt,
+                ShippedAt = order.ShippedAt,
+                DeliveredAt = order.DeliveredAt,
+                
+                // Customer information
+                CustomerName = $"{order.User.FirstName} {order.User.LastName}".Trim(),
+                CustomerEmail = order.User.Email ?? "",
+                CustomerPhone = order.User.PhoneNumber ?? "",
+                ShippingAddress = order.ShippingAddress,
+                BillingAddress = order.BillingAddress,
+                
+                // Order items - only seller's products
+                OrderItems = sellerProducts.Select(oi => new OrderItemDetailViewModel
+                {
+                    ProductId = oi.ProductId,
+                    ProductName = oi.ProductName ?? oi.Product?.Name ?? "N/A",
+                    ProductSKU = oi.ProductSKU ?? oi.Product?.SKU ?? "",
+                    ProductImage = oi.ProductImage ?? oi.Product?.FeaturedImageUrl ?? "/images/placeholder.jpg",
+                    Quantity = oi.Quantity,
+                    UnitPrice = oi.UnitPrice,
+                    TotalPrice = oi.TotalPrice
+                }).ToList(),
+                
+                // Calculate totals for seller's items only
+                Subtotal = sellerProducts.Sum(oi => oi.TotalPrice),
+                ShippingFee = order.ShippingFee, // Note: This is for the entire order
+                Tax = order.Tax, // Note: This is for the entire order
+                DiscountAmount = order.DiscountAmount,
+                TotalAmount = sellerProducts.Sum(oi => oi.TotalPrice), // Only seller's portion
+                
+                // Additional info
+                Notes = order.Notes,
+                CouponCode = order.CouponCode,
+                
+                // Status history
+                StatusHistory = statusHistory,
+                
+                // Available status transitions
+                AvailableStatusTransitions = availableStatuses,
+                
+                // Permissions
+                CanUpdateStatus = true, // Seller can update status of their portion
+                CanViewFullOrder = false // Seller only sees their items
+            };
+
+            return View(model);
+        }
+
+        private List<string> GetAvailableStatusTransitions(string currentStatus)
+        {
+            // Define valid status transitions for sellers
+            var transitions = new Dictionary<string, List<string>>
+            {
+                { "pending", new List<string> { "processing", "cancelled" } },
+                { "processing", new List<string> { "shipped", "cancelled" } },
+                { "shipped", new List<string> { "delivered" } },
+                { "delivered", new List<string>() }, // No transitions from delivered
+                { "cancelled", new List<string>() } // No transitions from cancelled
+            };
+
+            return transitions.ContainsKey(currentStatus.ToLower()) 
+                ? transitions[currentStatus.ToLower()] 
+                : new List<string>();
+        }
+
+        [HttpPost("orders/update-status")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateOrderStatus(Guid orderId, string newStatus, string? notes = null)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập." });
+            }
+
+            // Validate new status
+            var validStatuses = new[] { "pending", "processing", "shipped", "delivered", "cancelled" };
+            if (string.IsNullOrEmpty(newStatus) || !validStatuses.Contains(newStatus.ToLower()))
+            {
+                return Json(new { success = false, message = "Trạng thái không hợp lệ." });
+            }
+
+            // Get order with related data
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Đơn hàng không tồn tại." });
+            }
+
+            // Check if seller has permission to update this order
+            var sellerProducts = order.OrderItems
+                .Where(oi => oi.Product != null && oi.Product.SellerId == currentUser.Id)
+                .ToList();
+
+            if (!sellerProducts.Any())
+            {
+                return Json(new { success = false, message = "Bạn không có quyền cập nhật đơn hàng này." });
+            }
+
+            // Validate status transition
+            var availableStatuses = GetAvailableStatusTransitions(order.Status);
+            if (!availableStatuses.Contains(newStatus.ToLower()))
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Không thể chuyển từ trạng thái '{order.Status}' sang '{newStatus}'." 
+                });
+            }
+
+            // Update order status
+            var oldStatus = order.Status;
+            order.Status = newStatus.ToLower();
+            order.UpdatedAt = DateTime.UtcNow;
+
+            // Update specific date fields based on new status
+            switch (newStatus.ToLower())
+            {
+                case "shipped":
+                    order.ShippedAt = DateTime.UtcNow;
+                    break;
+                case "delivered":
+                    order.DeliveredAt = DateTime.UtcNow;
+                    break;
+            }
+
+            // Create status history record
+            var statusHistory = new OrderStatusHistory
+            {
+                OrderId = orderId,
+                Status = newStatus.ToLower(),
+                Notes = notes ?? $"Seller cập nhật trạng thái từ '{oldStatus}' sang '{newStatus}'",
+                ChangedBy = currentUser.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.OrderStatusHistories.Add(statusHistory);
+
+            // Create notification for customer
+            var statusMessages = new Dictionary<string, string>
+            {
+                { "processing", "đang được xử lý" },
+                { "shipped", "đã được giao cho đơn vị vận chuyển" },
+                { "delivered", "đã được giao thành công" },
+                { "cancelled", "đã bị hủy" }
+            };
+
+            var statusMessage = statusMessages.ContainsKey(newStatus.ToLower()) 
+                ? statusMessages[newStatus.ToLower()] 
+                : $"đã chuyển sang trạng thái {newStatus}";
+
+            var notification = new Notification
+            {
+                UserId = order.UserId,
+                Title = $"Cập nhật đơn hàng #{order.OrderNumber}",
+                Message = $"Đơn hàng #{order.OrderNumber} của bạn {statusMessage}.",
+                Type = "order",
+                ActionUrl = $"/user/orders/{orderId}",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Notifications.Add(notification);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                // Return success with updated data
+                return Json(new
+                {
+                    success = true,
+                    message = $"Đã cập nhật trạng thái đơn hàng thành '{newStatus}' thành công.",
+                    data = new
+                    {
+                        orderId = orderId,
+                        newStatus = newStatus.ToLower(),
+                        oldStatus = oldStatus,
+                        updatedAt = order.UpdatedAt.ToString("dd/MM/yyyy HH:mm"),
+                        availableStatuses = GetAvailableStatusTransitions(newStatus.ToLower())
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Lỗi khi cập nhật trạng thái: {ex.Message}" 
+                });
+            }
         }
         
         #endregion

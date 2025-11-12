@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using JohnHenryFashionWeb.Data;
 using JohnHenryFashionWeb.Models;
+using System.Security.Claims;
 
 namespace JohnHenryFashionWeb.Controllers;
 
@@ -29,14 +30,16 @@ public class SellerProductsController : Controller
     [HttpGet("")]
     public async Task<IActionResult> Index(string? search, Guid? categoryId, int page = 1, int pageSize = 20)
     {
-        // TODO: When SellerId is added to Product model, filter by current seller
-        // var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // var query = _context.Products.Where(p => p.SellerId == currentUserId);
+        var currentUserId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
         
         var query = _context.Products
             .Include(p => p.Category)
             .Include(p => p.Brand)
-            .AsQueryable();
+            .Where(p => p.SellerId == currentUserId);
 
         // Filter by search
         if (!string.IsNullOrEmpty(search))
@@ -87,6 +90,12 @@ public class SellerProductsController : Controller
     {
         if (ModelState.IsValid)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
             // Handle image upload
             if (imageFile != null && imageFile.Length > 0)
             {
@@ -109,9 +118,9 @@ public class SellerProductsController : Controller
             product.CreatedAt = DateTime.UtcNow;
             product.UpdatedAt = DateTime.UtcNow;
             product.IsActive = true;
-
-            // TODO: Set SellerId when field is added to model
-            // product.SellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Set SellerId to current user
+            product.SellerId = currentUserId;
 
             _context.Add(product);
             await _context.SaveChangesAsync();
@@ -129,18 +138,24 @@ public class SellerProductsController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> Edit(Guid id)
     {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+        
         var product = await _context.Products.FindAsync(id);
         if (product == null)
         {
             return NotFound();
         }
 
-        // TODO: Check if product belongs to current seller
-        // var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // if (product.SellerId != currentUserId)
-        // {
-        //     return Forbid();
-        // }
+        // Check if product belongs to current seller
+        if (product.SellerId != currentUserId)
+        {
+            TempData["Error"] = "Bạn không có quyền chỉnh sửa sản phẩm này!";
+            return RedirectToAction(nameof(Index));
+        }
 
         ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", product.CategoryId);
         ViewBag.Brands = new SelectList(await _context.Brands.ToListAsync(), "Id", "Name", product.BrandId);
@@ -157,6 +172,12 @@ public class SellerProductsController : Controller
             return NotFound();
         }
 
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
         if (ModelState.IsValid)
         {
             try
@@ -167,12 +188,12 @@ public class SellerProductsController : Controller
                     return NotFound();
                 }
 
-                // TODO: Check if product belongs to current seller
-                // var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                // if (existingProduct.SellerId != currentUserId)
-                // {
-                //     return Forbid();
-                // }
+                // Check if product belongs to current seller
+                if (existingProduct.SellerId != currentUserId)
+                {
+                    TempData["Error"] = "Bạn không có quyền chỉnh sửa sản phẩm này!";
+                    return RedirectToAction(nameof(Index));
+                }
 
                 // Handle image upload
                 if (imageFile != null && imageFile.Length > 0)
@@ -249,18 +270,24 @@ public class SellerProductsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+        
         var product = await _context.Products.FindAsync(id);
         if (product == null)
         {
             return NotFound();
         }
 
-        // TODO: Check if product belongs to current seller
-        // var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // if (product.SellerId != currentUserId)
-        // {
-        //     return Forbid();
-        // }
+        // Check if product belongs to current seller
+        if (product.SellerId != currentUserId)
+        {
+            TempData["Error"] = "Bạn không có quyền xóa sản phẩm này!";
+            return RedirectToAction(nameof(Index));
+        }
 
         // Delete image file if exists
         if (!string.IsNullOrEmpty(product.FeaturedImageUrl))
