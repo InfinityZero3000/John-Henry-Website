@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Chart.js with Sample Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .debug-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Biểu Đồ Doanh Thu</h1>
+        
+        <div class="debug-info" id="debug-info">
+            <strong>Debug Information:</strong><br>
+            <span id="status">Đang khởi tạo...</span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="testChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Sample data that mimics what the server should return
+        const sampleRevenueData = [
+            { date: "2025-10-13T00:00:00", value: 850000, label: "10/13" },
+            { date: "2025-10-14T00:00:00", value: 920000, label: "10/14" },
+            { date: "2025-10-15T00:00:00", value: 1100000, label: "10/15" },
+            { date: "2025-10-16T00:00:00", value: 780000, label: "10/16" },
+            { date: "2025-10-17T00:00:00", value: 1350000, label: "10/17" },
+            { date: "2025-10-18T00:00:00", value: 950000, label: "10/18" },
+            { date: "2025-10-19T00:00:00", value: 1200000, label: "10/19" }
+        ];
+
+        const debugInfo = document.getElementById('debug-info');
+        const statusEl = document.getElementById('status');
+
+        try {
+            statusEl.innerHTML = '<span class="success">✓ Chart.js loaded</span><br>';
+            
+            // Prepare data
+            const labels = sampleRevenueData.map(d => d.label);
+            const dataValues = sampleRevenueData.map(d => d.value);
+            
+            statusEl.innerHTML += `<span class="success">✓ Data prepared: ${labels.length} points</span><br>`;
+            statusEl.innerHTML += `<span>Labels: ${labels.join(', ')}</span><br>`;
+            statusEl.innerHTML += `<span>Values: ${dataValues.map(v => (v/1000).toFixed(0) + 'K').join(', ')}</span><br>`;
+
+            // Create chart
+            const ctx = document.getElementById('testChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu (VND)',
+                        data: dataValues,
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgb(99, 102, 241)',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                        minimumFractionDigits: 0
+                                    }).format(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                        minimumFractionDigits: 0
+                                    }).format(value);
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            statusEl.innerHTML += `<span class="success">✓ Chart rendered successfully!</span><br>`;
+            statusEl.innerHTML += `<br><strong>Kết quả:</strong> Nếu bạn thấy biểu đồ ở dưới, có nghĩa là Chart.js hoạt động OK.<br>`;
+            statusEl.innerHTML += `<strong>Vấn đề:</strong> Kiểm tra dữ liệu từ server có đúng format không.`;
+            
+        } catch (error) {
+            statusEl.innerHTML += `<span class="error">✗ Error: ${error.message}</span><br>`;
+            console.error('Chart error:', error);
+        }
+    </script>
+</body>
+</html>

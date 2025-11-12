@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Revenue Chart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        #status {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Revenue Chart - John Henry Admin</h1>
+    
+    <div id="status"></div>
+    
+    <div class="chart-container">
+        <h2>Doanh thu theo thời gian (30 ngày)</h2>
+        <canvas id="testChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <h3>Debug Information</h3>
+        <pre id="debug"></pre>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        const status = document.getElementById('status');
+        const debug = document.getElementById('debug');
+        
+        // Check if Chart.js loaded
+        if (typeof Chart === 'undefined') {
+            status.className = 'error';
+            status.textContent = '❌ Chart.js không load được! Kiểm tra kết nối internet.';
+            debug.textContent = 'ERROR: Chart.js library not loaded';
+        } else {
+            status.className = 'success';
+            status.textContent = '✅ Chart.js đã load thành công!';
+            
+            // Sample data (last 30 days)
+            const dates = [];
+            const revenues = [];
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }));
+                revenues.push(800000 + Math.random() * 1000000);
+            }
+            
+            debug.textContent = `Data Points: ${dates.length}\nDates: ${dates.join(', ')}\nRevenue Range: ${Math.min(...revenues).toFixed(0)} - ${Math.max(...revenues).toFixed(0)} VND`;
+            
+            // Create chart
+            const ctx = document.getElementById('testChart');
+            const testChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Doanh thu (VND)',
+                        data: revenues,
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgb(99, 102, 241)',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                        minimumFractionDigits: 0
+                                    }).format(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                        minimumFractionDigits: 0
+                                    }).format(value);
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Chart created successfully');
+            console.log('Chart instance:', testChart);
+        }
+    </script>
+</body>
+</html>
