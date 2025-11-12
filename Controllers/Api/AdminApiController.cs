@@ -495,6 +495,351 @@ namespace JohnHenryFashionWeb.Controllers.Api
 
         #endregion
 
+        #region Banner APIs
+
+        [HttpGet("banners/{id}")]
+        public async Task<IActionResult> GetBanner(Guid id)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return NotFound(new { success = false, message = "Banner không tồn tại" });
+                }
+
+                return Ok(new { success = true, data = banner });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting banner {BannerId}", id);
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("banners")]
+        [RequestSizeLimit(10_000_000)] // 10MB limit for images
+        public async Task<IActionResult> CreateBanner([FromForm] BannerFormRequest request)
+        {
+            try
+            {
+                var banner = new MarketingBanner
+                {
+                    Id = Guid.NewGuid(),
+                    Title = request.Title,
+                    Description = request.Description,
+                    Position = request.Position,
+                    TargetPage = request.TargetPage,
+                    LinkUrl = request.LinkUrl,
+                    OpenInNewTab = request.OpenInNewTab,
+                    SortOrder = request.SortOrder,
+                    IsActive = request.IsActive,
+                    StartDate = request.StartDate ?? DateTime.UtcNow,
+                    EndDate = request.EndDate,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                // Handle image upload
+                if (request.imageFile != null)
+                {
+                    var imageUrl = await SaveBannerImageAsync(request.imageFile, banner.Id);
+                    banner.ImageUrl = imageUrl;
+                }
+                else if (!string.IsNullOrEmpty(request.ImageUrl))
+                {
+                    banner.ImageUrl = request.ImageUrl;
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = "Vui lòng chọn hình ảnh banner" });
+                }
+
+                // Handle mobile image upload
+                if (request.mobileImageFile != null)
+                {
+                    var mobileImageUrl = await SaveBannerImageAsync(request.mobileImageFile, banner.Id, "mobile");
+                    banner.MobileImageUrl = mobileImageUrl;
+                }
+                else if (!string.IsNullOrEmpty(request.MobileImageUrl))
+                {
+                    banner.MobileImageUrl = request.MobileImageUrl;
+                }
+
+                _context.MarketingBanners.Add(banner);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner created: {BannerId} - {BannerTitle} by {User}", 
+                    banner.Id, banner.Title, User.Identity?.Name);
+
+                return Ok(new { 
+                    success = true, 
+                    message = "Banner đã được tạo thành công",
+                    data = banner 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating banner");
+                return BadRequest(new { success = false, message = "Có lỗi xảy ra khi thêm tin banner: " + ex.Message });
+            }
+        }
+
+        [HttpPost("banners/{id}/update")]
+        [RequestSizeLimit(10_000_000)]
+        public async Task<IActionResult> UpdateBanner(Guid id, [FromForm] BannerFormRequest request)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return NotFound(new { success = false, message = "Banner không tồn tại" });
+                }
+
+                banner.Title = request.Title;
+                banner.Description = request.Description;
+                banner.Position = request.Position;
+                banner.TargetPage = request.TargetPage;
+                banner.LinkUrl = request.LinkUrl;
+                banner.OpenInNewTab = request.OpenInNewTab;
+                banner.SortOrder = request.SortOrder;
+                banner.IsActive = request.IsActive;
+                banner.StartDate = request.StartDate ?? banner.StartDate;
+                banner.EndDate = request.EndDate;
+                banner.UpdatedAt = DateTime.UtcNow;
+
+                // Handle image upload
+                if (request.imageFile != null)
+                {
+                    var imageUrl = await SaveBannerImageAsync(request.imageFile, banner.Id);
+                    banner.ImageUrl = imageUrl;
+                }
+                else if (!string.IsNullOrEmpty(request.ImageUrl))
+                {
+                    banner.ImageUrl = request.ImageUrl;
+                }
+
+                // Handle mobile image upload
+                if (request.mobileImageFile != null)
+                {
+                    var mobileImageUrl = await SaveBannerImageAsync(request.mobileImageFile, banner.Id, "mobile");
+                    banner.MobileImageUrl = mobileImageUrl;
+                }
+                else if (!string.IsNullOrEmpty(request.MobileImageUrl))
+                {
+                    banner.MobileImageUrl = request.MobileImageUrl;
+                }
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner updated: {BannerId} - {BannerTitle} by {User}", 
+                    banner.Id, banner.Title, User.Identity?.Name);
+
+                return Ok(new { 
+                    success = true, 
+                    message = "Banner đã được cập nhật thành công",
+                    data = banner 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating banner {BannerId}", id);
+                return BadRequest(new { success = false, message = "Có lỗi xảy ra khi cập nhật banner: " + ex.Message });
+            }
+        }
+
+        [HttpPost("banners/{id}/delete")]
+        public async Task<IActionResult> DeleteBanner(Guid id)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return NotFound(new { success = false, message = "Banner không tồn tại" });
+                }
+
+                _context.MarketingBanners.Remove(banner);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner deleted: {BannerId} - {BannerTitle} by {User}", 
+                    banner.Id, banner.Title, User.Identity?.Name);
+
+                return Ok(new { success = true, message = "Banner đã được xóa thành công" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting banner {BannerId}", id);
+                return BadRequest(new { success = false, message = "Có lỗi xảy ra khi xóa banner: " + ex.Message });
+            }
+        }
+
+        [HttpPost("banners/{id}/toggle")]
+        public async Task<IActionResult> ToggleBanner(Guid id)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return NotFound(new { success = false, message = "Banner không tồn tại" });
+                }
+
+                banner.IsActive = !banner.IsActive;
+                banner.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                var status = banner.IsActive ? "kích hoạt" : "tạm dừng";
+                _logger.LogInformation("Banner toggled: {BannerId} - {BannerTitle} is now {Status} by {User}", 
+                    banner.Id, banner.Title, status, User.Identity?.Name);
+
+                return Ok(new { 
+                    success = true, 
+                    message = $"Banner đã được {status}",
+                    data = new { isActive = banner.IsActive }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling banner {BannerId}", id);
+                return BadRequest(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost("banners/{id}/activate")]
+        public async Task<IActionResult> ActivateBanner(Guid id)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return NotFound(new { success = false, message = "Banner không tồn tại" });
+                }
+
+                banner.IsActive = true;
+                banner.StartDate = DateTime.UtcNow;
+                banner.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner activated: {BannerId} - {BannerTitle} by {User}", 
+                    banner.Id, banner.Title, User.Identity?.Name);
+
+                return Ok(new { success = true, message = "Banner đã được kích hoạt" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error activating banner {BannerId}", id);
+                return BadRequest(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost("banners/{id}/reorder")]
+        public async Task<IActionResult> ReorderBanner(Guid id, [FromBody] ReorderBannerRequest request)
+        {
+            try
+            {
+                var banner = await _context.MarketingBanners.FindAsync(id);
+                if (banner == null)
+                {
+                    return NotFound(new { success = false, message = "Banner không tồn tại" });
+                }
+
+                // Get all banners in the same position (and same TargetPage if applicable)
+                var query = _context.MarketingBanners
+                    .Where(b => b.Position == request.Position);
+                
+                // For collection_hero banners, also filter by TargetPage
+                if (!string.IsNullOrEmpty(request.TargetPage))
+                {
+                    query = query.Where(b => b.TargetPage == request.TargetPage);
+                }
+                
+                var bannersInPosition = await query
+                    .OrderBy(b => b.SortOrder)
+                    .ToListAsync();
+
+                var oldSortOrder = banner.SortOrder;
+                var newSortOrder = request.NewSortOrder;
+
+                // If moving to a higher position (lower number)
+                if (newSortOrder < oldSortOrder)
+                {
+                    // Shift banners down that are between new and old position
+                    foreach (var b in bannersInPosition)
+                    {
+                        if (b.Id != id && b.SortOrder >= newSortOrder && b.SortOrder < oldSortOrder)
+                        {
+                            b.SortOrder++;
+                            b.UpdatedAt = DateTime.UtcNow;
+                        }
+                    }
+                }
+                // If moving to a lower position (higher number)
+                else if (newSortOrder > oldSortOrder)
+                {
+                    // Shift banners up that are between old and new position
+                    foreach (var b in bannersInPosition)
+                    {
+                        if (b.Id != id && b.SortOrder > oldSortOrder && b.SortOrder <= newSortOrder)
+                        {
+                            b.SortOrder--;
+                            b.UpdatedAt = DateTime.UtcNow;
+                        }
+                    }
+                }
+
+                // Update the dragged banner's sort order
+                banner.SortOrder = newSortOrder;
+                banner.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Banner reordered: {BannerId} - {BannerTitle} from position {OldSort} to {NewSort} by {User}", 
+                    banner.Id, banner.Title, oldSortOrder, newSortOrder, User.Identity?.Name);
+
+                return Ok(new { success = true, message = "Đã cập nhật thứ tự banner" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reordering banner {BannerId}", id);
+                return BadRequest(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        private async Task<string> SaveBannerImageAsync(IFormFile file, Guid bannerId, string suffix = "")
+        {
+            try
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "banners");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var fileExtension = Path.GetExtension(file.FileName);
+                var fileName = suffix != string.Empty 
+                    ? $"{bannerId}_{suffix}{fileExtension}"
+                    : $"{bannerId}{fileExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                return $"/uploads/banners/{fileName}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving banner image for {BannerId}", bannerId);
+                throw;
+            }
+        }
+
+        #endregion
+
         #region Helper Methods
 
         private async Task<object> CheckDatabaseHealthAsync()
@@ -518,5 +863,31 @@ namespace JohnHenryFashionWeb.Controllers.Api
     {
         public string Status { get; set; } = string.Empty;
         public string? Notes { get; set; }
+    }
+
+    public class BannerFormRequest
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string Position { get; set; } = string.Empty;
+        public string? TargetPage { get; set; }
+        public string? LinkUrl { get; set; }
+        public bool OpenInNewTab { get; set; }
+        public int SortOrder { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? MobileImageUrl { get; set; }
+        public IFormFile? imageFile { get; set; }
+        public IFormFile? mobileImageFile { get; set; }
+    }
+
+    public class ReorderBannerRequest
+    {
+        public string Position { get; set; } = string.Empty;
+        public string? TargetPage { get; set; }
+        public int NewSortOrder { get; set; }
+        public int OldSortOrder { get; set; }
     }
 }
