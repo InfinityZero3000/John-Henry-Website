@@ -575,5 +575,4 @@ target/
 # README.md
 
 # Documentation that changes frequently
-
-wwwroot/videos/0_Woman_Shopping_3840x2160.mov filter=lfs diff=lfs merge=lfs -text
+System-working

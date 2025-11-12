@@ -798,6 +798,26 @@ static async Task SeedBlogPosts(ApplicationDbContext context, UserManager<Applic
     await context.SaveChangesAsync();
 }
 
+// Check for import-products command
+if (args.Contains("--import-products"))
+{
+    Console.WriteLine("\n╔════════════════════════════════════════════════╗");
+    Console.WriteLine("║  JOHN HENRY - IMPORT PRODUCTS FROM CSV        ║");
+    Console.WriteLine("╚════════════════════════════════════════════════╝\n");
+    
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var csvPath = "database/johnhenry_products.csv";
+        
+        await JohnHenryFashionWeb.Scripts.ImportProductsFromCsv.RunAsync(context, csvPath);
+    }
+    
+    Console.WriteLine("\n✅ Import process completed! Press any key to exit...");
+    Console.ReadKey();
+    return;
+}
+
 try
 {
     Log.Information("Starting John Henry Fashion Web Application");
