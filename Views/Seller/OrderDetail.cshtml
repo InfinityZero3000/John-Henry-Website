@@ -1,285 +1,567 @@
-@model JohnHenryFashionWeb.Models.Order
+@model JohnHenryFashionWeb.ViewModels.SellerOrderDetailViewModel
 
 @{
-    ViewData["Title"] = "Chi tiết đơn hàng";
+    ViewData["Title"] = $"Chi tiết đơn hàng #{Model.OrderNumber}";
     Layout = "~/Views/Shared/_SellerLayout.cshtml";
 }
 
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Chi tiết đơn hàng #@Model.OrderNumber</h1>
+@functions {
+    string GetStatusBadgeClass(string status)
+    {
+        return status.ToLower() switch {
+            "pending" => "warning",
+            "processing" => "info",
+            "shipped" => "primary",
+            "delivered" => "success",
+            "cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+    
+    string GetStatusText(string status)
+    {
+        return status.ToLower() switch {
+            "pending" => "Chờ xử lý",
+            "processing" => "Đang xử lý",
+            "shipped" => "Đã gửi hàng",
+            "delivered" => "Đã giao hàng",
+            "cancelled" => "Đã hủy",
+            _ => status
+        };
+    }
+    
+    string GetPaymentStatusBadgeClass(string status)
+    {
+        return status.ToLower() switch {
+            "paid" => "success",
+            "pending" => "warning",
+            "failed" => "danger",
+            "refunded" => "info",
+            _ => "secondary"
+        };
+    }
+    
+    string GetPaymentStatusText(string status)
+    {
+        return status.ToLower() switch {
+            "paid" => "Đã thanh toán",
+            "pending" => "Chờ thanh toán",
+            "failed" => "Thất bại",
+            "refunded" => "Đã hoàn tiền",
+            _ => status
+        };
+    }
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-page-header-content">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <a href="@Url.Action("Orders", "Seller")" class="admin-btn admin-btn-sm admin-btn-outline">
+                        <i data-lucide="arrow-left"></i>
+                    </a>
+                    <h1 class="admin-page-title mb-0">
+                        Chi tiết đơn hàng #@Model.OrderNumber
+                    </h1>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Seller")">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="@Url.Action("Orders", "Seller")">Đơn hàng</a></li>
-                        <li class="breadcrumb-item active">Chi tiết</li>
-                    </ol>
+                <p class="admin-page-description">
+                    Đặt ngày @Model.CreatedAt.ToString("dd/MM/yyyy 'lúc' HH:mm")
+                </p>
+            </div>
+            <div class="admin-page-actions">
+                <button type="button" class="admin-btn admin-btn-outline" onclick="window.print()">
+                    <i data-lucide="printer" class="me-2"></i>
+                    In hóa đơn
+                </button>
+                @if (Model.CanUpdateStatus && Model.AvailableStatusTransitions.Any())
+                {
+                    <button type="button" class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                        <i data-lucide="edit" class="me-2"></i>
+                        Cập nhật trạng thái
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Banner -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h5 class="mb-2">Trạng thái đơn hàng</h5>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <span class="admin-badge admin-badge-@GetStatusBadgeClass(Model.Status)" style="font-size: 1.1rem; padding: 0.5rem 1rem;">
+                                @GetStatusText(Model.Status)
+                            </span>
+                            <span class="text-muted d-none d-md-inline">|</span>
+                            <span class="admin-badge admin-badge-@GetPaymentStatusBadgeClass(Model.PaymentStatus)">
+                                @GetPaymentStatusText(Model.PaymentStatus)
+                            </span>
+                            <span class="text-muted d-none d-md-inline">|</span>
+                            <span class="text-muted">
+                                <i data-lucide="credit-card" style="width: 16px; height: 16px;"></i>
+                                @Model.PaymentMethod
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">Cập nhật lần cuối</div>
+                        <div class="fw-semibold">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Thông tin đơn hàng -->
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                Đơn hàng #@Model.OrderNumber
-                                @switch (Model.Status)
-                                {
-                                    case "pending":
-                                        <span class="badge badge-warning ml-2">Chờ xử lý</span>
-                                        break;
-                                    case "processing":
-                                        <span class="badge badge-info ml-2">Đang xử lý</span>
-                                        break;
-                                    case "shipped":
-                                        <span class="badge badge-primary ml-2">Đã gửi hàng</span>
-                                        break;
-                                    case "delivered":
-                                        <span class="badge badge-success ml-2">Đã giao hàng</span>
-                                        break;
-                                    case "cancelled":
-                                        <span class="badge badge-danger ml-2">Đã hủy</span>
-                                        break;
-                                    default:
-                                        <span class="badge badge-secondary ml-2">@Model.Status</span>
-                                        break;
-                                }
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <!-- Thông tin khách hàng -->
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <h5><i class="fas fa-user"></i> Thông tin khách hàng</h5>
-                                    <address>
-                                        <strong>@Model.User.FullName</strong><br>
-                                        Email: @Model.User.Email<br>
-                                        @if (!string.IsNullOrEmpty(Model.User.Phone))
-                                        {
-                                            @:Điện thoại: @Model.User.Phone<br>
-                                        }
-                                    </address>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5><i class="fas fa-shipping-fast"></i> Địa chỉ giao hàng</h5>
-                                    <address>
-                                        @Html.Raw(Model.ShippingAddress.Replace("\n", "<br>"))
-                                    </address>
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Customer Information -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i data-lucide="user" class="me-2"></i>
+                        Thông tin khách hàng
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Họ tên</label>
+                                <div class="fw-semibold">@Model.CustomerName</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Email</label>
+                                <div>
+                                    <a href="mailto:@Model.CustomerEmail" class="text-decoration-none">
+                                        @Model.CustomerEmail
+                                    </a>
                                 </div>
                             </div>
-
-                            <!-- Sản phẩm trong đơn hàng -->
-                            <h5><i class="fas fa-box"></i> Sản phẩm đã đặt</h5>
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Sản phẩm</th>
-                                            <th class="text-center">Số lượng</th>
-                                            <th class="text-right">Đơn giá</th>
-                                            <th class="text-right">Thành tiền</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model.OrderItems)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        @if (!string.IsNullOrEmpty(item.ProductImage))
-                                                        {
-                                                            <img src="@item.ProductImage" alt="@item.ProductName" class="img-thumbnail mr-2" style="width: 50px; height: 50px; object-fit: cover;">
-                                                        }
-                                                        <div>
-                                                            <strong>@item.ProductName</strong><br>
-                                                            <small class="text-muted">SKU: @item.ProductSKU</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center">@item.Quantity</td>
-                                                <td class="text-right">@item.UnitPrice.ToString("N0") VNĐ</td>
-                                                <td class="text-right">@item.TotalPrice.ToString("N0") VNĐ</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="3" class="text-right">Tạm tính:</th>
-                                            <th class="text-right">@((Model.TotalAmount - Model.ShippingFee + Model.DiscountAmount - Model.Tax).ToString("N0")) VNĐ</th>
-                                        </tr>
-                                        @if (Model.DiscountAmount > 0)
-                                        {
-                                            <tr>
-                                                <th colspan="3" class="text-right">Giảm giá (@Model.CouponCode):</th>
-                                                <th class="text-right text-success">-@Model.DiscountAmount.ToString("N0") VNĐ</th>
-                                            </tr>
-                                        }
-                                        @if (Model.ShippingFee > 0)
-                                        {
-                                            <tr>
-                                                <th colspan="3" class="text-right">Phí vận chuyển:</th>
-                                                <th class="text-right">@Model.ShippingFee.ToString("N0") VNĐ</th>
-                                            </tr>
-                                        }
-                                        @if (Model.Tax > 0)
-                                        {
-                                            <tr>
-                                                <th colspan="3" class="text-right">Thuế:</th>
-                                                <th class="text-right">@Model.Tax.ToString("N0") VNĐ</th>
-                                            </tr>
-                                        }
-                                        <tr class="bg-light">
-                                            <th colspan="3" class="text-right">Tổng cộng:</th>
-                                            <th class="text-right text-primary">@Model.TotalAmount.ToString("N0") VNĐ</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            @if (!string.IsNullOrEmpty(Model.CustomerPhone))
                             {
-                                <div class="mt-3">
-                                    <h6><i class="fas fa-sticky-note"></i> Ghi chú từ khách hàng:</h6>
-                                    <div class="alert alert-info">
-                                        @Model.Notes
+                                <div class="mb-3">
+                                    <label class="text-muted small mb-1">Số điện thoại</label>
+                                    <div>
+                                        <a href="tel:@Model.CustomerPhone" class="text-decoration-none">
+                                            @Model.CustomerPhone
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Địa chỉ giao hàng</label>
+                                <div>@Html.Raw(Model.ShippingAddress.Replace("\n", "<br>"))</div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.BillingAddress) && Model.BillingAddress != Model.ShippingAddress)
+                            {
+                                <div class="mb-3">
+                                    <label class="text-muted small mb-1">Địa chỉ thanh toán</label>
+                                    <div>@Html.Raw(Model.BillingAddress.Replace("\n", "<br>"))</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i data-lucide="package" class="me-2"></i>
+                        Sản phẩm trong đơn hàng
+                        @if (!Model.CanViewFullOrder)
+                        {
+                            <span class="badge bg-info ms-2">Chỉ hiển thị sản phẩm của bạn</span>
+                        }
+                    </h5>
+                </div>
+                <div class="admin-card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60%;">Sản phẩm</th>
+                                    <th class="text-center" style="width: 15%;">Số lượng</th>
+                                    <th class="text-end" style="width: 12.5%;">Đơn giá</th>
+                                    <th class="text-end" style="width: 12.5%;">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@item.ProductImage" alt="@item.ProductName" 
+                                                     class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                                <div>
+                                                    <div class="fw-semibold mb-1">@item.ProductName</div>
+                                                    <small class="text-muted">SKU: @item.ProductSKU</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <span class="admin-badge admin-badge-secondary">@item.Quantity</span>
+                                        </td>
+                                        <td class="text-end align-middle">@item.UnitPrice.ToString("N0") ₫</td>
+                                        <td class="text-end align-middle fw-semibold">@item.TotalPrice.ToString("N0") ₫</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i data-lucide="calculator" class="me-2"></i>
+                        Tổng quan đơn hàng
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td>Tạm tính:</td>
+                                        <td class="text-end">@Model.Subtotal.ToString("N0") ₫</td>
+                                    </tr>
+                                    @if (Model.DiscountAmount > 0)
+                                    {
+                                        <tr>
+                                            <td>
+                                                Giảm giá
+                                                @if (!string.IsNullOrEmpty(Model.CouponCode))
+                                                {
+                                                    <span class="text-muted">(@Model.CouponCode)</span>
+                                                }:
+                                            </td>
+                                            <td class="text-end text-success">-@Model.DiscountAmount.ToString("N0") ₫</td>
+                                        </tr>
+                                    }
+                                    @if (Model.ShippingFee > 0)
+                                    {
+                                        <tr>
+                                            <td>Phí vận chuyển:</td>
+                                            <td class="text-end">@Model.ShippingFee.ToString("N0") ₫</td>
+                                        </tr>
+                                    }
+                                    @if (Model.Tax > 0)
+                                    {
+                                        <tr>
+                                            <td>Thuế:</td>
+                                            <td class="text-end">@Model.Tax.ToString("N0") ₫</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th>Tổng cộng:</th>
+                                        <th class="text-end text-primary fs-5">@Model.TotalAmount.ToString("N0") ₫</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="alert alert-info mt-3 mb-0">
+                            <strong><i data-lucide="message-square" style="width: 16px; height: 16px;"></i> Ghi chú:</strong><br>
+                            @Model.Notes
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Order Information -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i data-lucide="info" class="me-2"></i>
+                        Thông tin đơn hàng
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5 text-muted">Mã đơn:</dt>
+                        <dd class="col-7">
+                            <code class="text-primary fw-semibold">#@Model.OrderNumber</code>
+                        </dd>
+                        
+                        <dt class="col-5 text-muted">Ngày đặt:</dt>
+                        <dd class="col-7">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                        
+                        <dt class="col-5 text-muted">Cập nhật:</dt>
+                        <dd class="col-7">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                        
+                        @if (Model.ShippedAt.HasValue)
+                        {
+                            <dt class="col-5 text-muted">Ngày gửi:</dt>
+                            <dd class="col-7">@Model.ShippedAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                        }
+                        
+                        @if (Model.DeliveredAt.HasValue)
+                        {
+                            <dt class="col-5 text-muted">Ngày giao:</dt>
+                            <dd class="col-7">@Model.DeliveredAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Status Timeline -->
+            @if (Model.StatusHistory != null && Model.StatusHistory.Any())
+            {
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i data-lucide="activity" class="me-2"></i>
+                            Lịch sử trạng thái
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="timeline">
+                            @foreach (var history in Model.StatusHistory.OrderByDescending(h => h.CreatedAt))
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-@GetStatusBadgeClass(history.Status)"></div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <span class="fw-semibold">@GetStatusText(history.Status)</span>
+                                            <small class="text-muted">@history.CreatedAt.ToString("dd/MM HH:mm")</small>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(history.Notes))
+                                        {
+                                            <small class="text-muted d-block">@history.Notes</small>
+                                        }
                                     </div>
                                 </div>
                             }
                         </div>
                     </div>
                 </div>
+            }
 
-                <!-- Thông tin bên phải -->
-                <div class="col-md-4">
-                    <!-- Cập nhật trạng thái -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Cập nhật trạng thái</h3>
-                        </div>
-                        <div class="card-body">
-                            <form asp-action="UpdateOrderStatus" asp-controller="Seller" method="post">
-                                <input type="hidden" name="id" value="@Model.Id" />
-                                <div class="form-group">
-                                    <label for="status">Trạng thái đơn hàng:</label>
-                                    <select name="status" class="form-control">
-                                        <option value="pending" selected="@(Model.Status == "pending")">Chờ xử lý</option>
-                                        <option value="processing" selected="@(Model.Status == "processing")">Đang xử lý</option>
-                                        <option value="shipped" selected="@(Model.Status == "shipped")">Đã gửi hàng</option>
-                                        <option value="delivered" selected="@(Model.Status == "delivered")">Đã giao hàng</option>
-                                        <option value="cancelled" selected="@(Model.Status == "cancelled")">Đã hủy</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-save"></i> Cập nhật trạng thái
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Thông tin đơn hàng -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Thông tin đơn hàng</h3>
-                        </div>
-                        <div class="card-body">
-                            <dl class="row">
-                                <dt class="col-sm-6">Mã đơn:</dt>
-                                <dd class="col-sm-6">#@Model.OrderNumber</dd>
-                                
-                                <dt class="col-sm-6">Ngày đặt:</dt>
-                                <dd class="col-sm-6">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
-                                
-                                <dt class="col-sm-6">Thanh toán:</dt>
-                                <dd class="col-sm-6">
-                                    @switch (Model.PaymentStatus)
-                                    {
-                                        case "pending":
-                                            <span class="badge badge-warning">Chờ thanh toán</span>
-                                            break;
-                                        case "paid":
-                                            <span class="badge badge-success">Đã thanh toán</span>
-                                            break;
-                                        case "failed":
-                                            <span class="badge badge-danger">Thanh toán thất bại</span>
-                                            break;
-                                        case "refunded":
-                                            <span class="badge badge-info">Đã hoàn tiền</span>
-                                            break;
-                                        default:
-                                            <span class="badge badge-secondary">@Model.PaymentStatus</span>
-                                            break;
-                                    }
-                                </dd>
-                                
-                                <dt class="col-sm-6">Phương thức:</dt>
-                                <dd class="col-sm-6">@Model.PaymentMethod</dd>
-                                
-                                @if (Model.ShippedAt.HasValue)
-                                {
-                                    <dt class="col-sm-6">Ngày gửi:</dt>
-                                    <dd class="col-sm-6">@Model.ShippedAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
-                                }
-                                
-                                @if (Model.DeliveredAt.HasValue)
-                                {
-                                    <dt class="col-sm-6">Ngày giao:</dt>
-                                    <dd class="col-sm-6">@Model.DeliveredAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
-                                }
-                            </dl>
-                        </div>
-                    </div>
-
-                    <!-- Hành động -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Hành động</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="btn-group-vertical w-100">
-                                <a href="@Url.Action("Orders", "Seller")" class="btn btn-secondary mb-2">
-                                    <i class="fas fa-list"></i> Quay lại danh sách
-                                </a>
-                                <button type="button" class="btn btn-info mb-2" onclick="window.print()">
-                                    <i class="fas fa-print"></i> In đơn hàng
-                                </button>
-                                @if (Model.Status == "processing" || Model.Status == "pending")
-                                {
-                                    <button type="button" class="btn btn-warning mb-2" onclick="cancelOrder('@Model.Id')">
-                                        <i class="fas fa-ban"></i> Hủy đơn hàng
-                                    </button>
-                                }
-                            </div>
-                        </div>
+            <!-- Quick Actions -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i data-lucide="zap" class="me-2"></i>
+                        Hành động nhanh
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="d-grid gap-2">
+                        @if (Model.AvailableStatusTransitions.Contains("processing"))
+                        {
+                            <button type="button" class="admin-btn admin-btn-success" onclick="quickUpdateStatus('processing')">
+                                <i data-lucide="check" class="me-2"></i>
+                                Duyệt đơn hàng
+                            </button>
+                        }
+                        @if (Model.AvailableStatusTransitions.Contains("shipped"))
+                        {
+                            <button type="button" class="admin-btn admin-btn-primary" onclick="quickUpdateStatus('shipped')">
+                                <i data-lucide="truck" class="me-2"></i>
+                                Đánh dấu đã gửi
+                            </button>
+                        }
+                        @if (Model.AvailableStatusTransitions.Contains("delivered"))
+                        {
+                            <button type="button" class="admin-btn admin-btn-info" onclick="quickUpdateStatus('delivered')">
+                                <i data-lucide="package-check" class="me-2"></i>
+                                Xác nhận đã giao
+                            </button>
+                        }
+                        @if (Model.AvailableStatusTransitions.Contains("cancelled"))
+                        {
+                            <button type="button" class="admin-btn admin-btn-danger" onclick="quickUpdateStatus('cancelled')">
+                                <i data-lucide="x-circle" class="me-2"></i>
+                                Hủy đơn hàng
+                            </button>
+                        }
+                        <button type="button" class="admin-btn admin-btn-outline" onclick="window.print()">
+                            <i data-lucide="printer" class="me-2"></i>
+                            In hóa đơn
+                        </button>
+                        <a href="mailto:@Model.CustomerEmail" class="admin-btn admin-btn-outline">
+                            <i data-lucide="mail" class="me-2"></i>
+                            Liên hệ khách hàng
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật trạng thái đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="newStatus" class="form-label">Trạng thái mới</label>
+                    <select class="form-select" id="newStatus">
+                        <option value="">-- Chọn trạng thái --</option>
+                        @foreach (var status in Model.AvailableStatusTransitions)
+                        {
+                            <option value="@status">@GetStatusText(status)</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Ghi chú (tùy chọn)</label>
+                    <textarea class="form-control" id="notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="submitStatusUpdate()">
+                    Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        function cancelOrder(orderId) {
-            if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-                // Gọi API hoặc submit form để hủy đơn hàng
-                $.post('@Url.Action("UpdateOrderStatus", "Seller")', {
-                    id: orderId,
-                    status: 'cancelled'
-                }).done(function() {
-                    location.reload();
-                }).fail(function() {
-                    alert('Có lỗi xảy ra khi hủy đơn hàng!');
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+
+        function quickUpdateStatus(newStatus) {
+            const statusText = {
+                'processing': 'duyệt đơn hàng',
+                'shipped': 'đánh dấu đơn hàng đã gửi',
+                'delivered': 'xác nhận đơn hàng đã giao',
+                'cancelled': 'hủy đơn hàng'
+            };
+            
+            if (confirm(`Bạn có chắc chắn muốn ${statusText[newStatus]}?`)) {
+                updateOrderStatus(newStatus, null);
             }
         }
+
+        function submitStatusUpdate() {
+            const newStatus = document.getElementById('newStatus').value;
+            const notes = document.getElementById('notes').value;
+            
+            if (!newStatus) {
+                alert('Vui lòng chọn trạng thái mới.');
+                return;
+            }
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('updateStatusModal'));
+            modal.hide();
+            
+            updateOrderStatus(newStatus, notes);
+        }
+
+        function updateOrderStatus(newStatus, notes) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            
+            fetch('@Url.Action("UpdateOrderStatus", "Seller")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    orderId: '@Model.OrderId',
+                    newStatus: newStatus,
+                    notes: notes || '',
+                    __RequestVerificationToken: token
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi cập nhật trạng thái. Vui lòng thử lại.');
+            });
+        }
     </script>
+    
+    @Html.AntiForgeryToken()
+
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+        
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.4375rem;
+            top: 0.5rem;
+            bottom: -0.5rem;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+        
+        .timeline-item:last-child::before {
+            display: none;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -1.75rem;
+            top: 0.25rem;
+            width: 0.875rem;
+            height: 0.875rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px currentColor;
+        }
+        
+        .timeline-content {
+            padding-left: 0.5rem;
+        }
+        
+        @@media print {
+            .admin-page-actions,
+            .admin-card:last-child {
+                display: none !important;
+            }
+        }
+    </style>
 }

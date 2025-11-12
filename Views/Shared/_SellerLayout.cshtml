@@ -99,14 +99,14 @@
                     <li class="menu-header" style="padding: 1rem 1.5rem 0.5rem; color: #666666; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">QUẢN LÝ SẢN PHẨM</li>
                     
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("Products", "Seller")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                        <a href="@Url.Action("Index", "SellerProducts")" class="menu-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "SellerProducts" && (ViewContext.RouteData.Values["Action"]?.ToString() == "Index" || ViewContext.RouteData.Values["Action"]?.ToString() == null) ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="package" style="margin-right: 1rem; width: 20px;"></i>
                             <span>Sản phẩm của tôi</span>
                         </a>
                     </li>
 
                     <li class="menu-item" style="margin: 0.5rem 1rem; border-radius: 12px;">
-                        <a href="@Url.Action("CreateProduct", "Seller")" class="menu-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "CreateProduct" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
+                        <a href="@Url.Action("Create", "SellerProducts")" class="menu-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "SellerProducts" && ViewContext.RouteData.Values["Action"]?.ToString() == "Create" ? "active" : "")" style="display: flex; align-items: center; padding: 1rem; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500;">
                             <i data-lucide="plus" style="margin-right: 1rem; width: 20px;"></i>
                             <span>Thêm sản phẩm</span>
                         </a>
@@ -376,6 +376,59 @@
                 console.log('Backup restore:', savedScrollPosition);
             }
         }, 100);
+
+        // ===== FIX GRAY OVERLAY / MODAL BACKDROP ISSUE =====
+        // Clean up any leftover modal backdrops or modal-open class
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Checking for modal backdrop cleanup...');
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            
+            // Remove any leftover modal backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            if (backdrops.length > 0) {
+                console.log('🗑️ Removing', backdrops.length, 'modal backdrops');
+                backdrops.forEach(backdrop => backdrop.remove());
+            }
+            
+            // Remove any elements with position fixed and high z-index that might be overlays
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                const style = window.getComputedStyle(el);
+                if (style.position === 'fixed' && 
+                    parseInt(style.zIndex) > 1000 && 
+                    style.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+                    !el.classList.contains('admin-sidebar') &&
+                    !el.classList.contains('admin-header')) {
+                    console.log('🗑️ Found suspicious overlay element:', el);
+                    // Check if it's covering the screen
+                    if (el.offsetWidth > window.innerWidth * 0.8 || 
+                        el.offsetHeight > window.innerHeight * 0.8) {
+                        console.log('⚠️ Removing overlay element');
+                        el.remove();
+                    }
+                }
+            });
+            
+            // Reset any overflow hidden on body
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            console.log('✅ Modal backdrop cleanup complete');
+        });
+        
+        // Additional cleanup after 500ms to catch late-loading overlays
+        setTimeout(function() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            if (backdrops.length > 0) {
+                console.log('🗑️ Late cleanup: Removing', backdrops.length, 'modal backdrops');
+                backdrops.forEach(backdrop => backdrop.remove());
+            }
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }, 500);
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

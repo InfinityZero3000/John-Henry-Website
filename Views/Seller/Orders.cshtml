@@ -1,4 +1,4 @@
-@model JohnHenryFashionWeb.ViewModels.OrderListViewModel
+@model JohnHenryFashionWeb.ViewModels.SellerOrdersViewModel
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
     Layout = "~/Views/Shared/_SellerLayout.cshtml";
@@ -24,66 +24,107 @@
         </div>
     </div>
 
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-content">
+                    <div class="admin-stat-label">Tổng đơn hàng</div>
+                    <div class="admin-stat-value">@Model.TotalOrders</div>
+                </div>
+                <div class="admin-stat-icon" style="background-color: rgba(59, 130, 246, 0.1);">
+                    <i data-lucide="shopping-bag" style="color: #3b82f6;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-content">
+                    <div class="admin-stat-label">Đơn chờ xử lý</div>
+                    <div class="admin-stat-value text-warning">@Model.PendingOrders</div>
+                </div>
+                <div class="admin-stat-icon" style="background-color: rgba(251, 191, 36, 0.1);">
+                    <i data-lucide="clock" style="color: #fbbf24;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-content">
+                    <div class="admin-stat-label">Đơn hôm nay</div>
+                    <div class="admin-stat-value text-info">@Model.TodayOrders</div>
+                </div>
+                <div class="admin-stat-icon" style="background-color: rgba(14, 165, 233, 0.1);">
+                    <i data-lucide="calendar" style="color: #0ea5e9;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-content">
+                    <div class="admin-stat-label">Doanh thu hôm nay</div>
+                    <div class="admin-stat-value text-success">@Model.TodayRevenue.ToString("N0") ₫</div>
+                </div>
+                <div class="admin-stat-icon" style="background-color: rgba(34, 197, 94, 0.1);">
+                    <i data-lucide="dollar-sign" style="color: #22c55e;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filters Section -->
     <div class="admin-filters">
         <form method="get" class="admin-filters-form">
             <div class="admin-search-box">
                 <i data-lucide="search"></i>
-                <input type="text" name="search" value="@Model.SearchTerm" 
-                       placeholder="Mã đơn hàng, tên khách hàng..." class="admin-search-input">
+                <input type="text" name="search" value="@Model.SearchQuery" 
+                       placeholder="Mã đơn hàng, tên khách hàng, email..." class="admin-search-input">
             </div>
             
             <select name="status" class="admin-form-select" onchange="this.form.submit()">
-                <option value="">Tất cả trạng thái</option>
-                @{
-                    var statusOptions = new[] {
-                        new { Value = "pending", Text = "Chờ xử lý" },
-                        new { Value = "processing", Text = "Đang xử lý" },
-                        new { Value = "shipped", Text = "Đã gửi" },
-                        new { Value = "delivered", Text = "Đã giao" },
-                        new { Value = "cancelled", Text = "Đã hủy" }
-                    };
-                }
-                @foreach (var option in statusOptions)
-                {
-                    <option value="@option.Value" selected="@(Model.Status == option.Value)">@option.Text</option>
-                }
+                <option value="" selected="@(string.IsNullOrEmpty(Model.StatusFilter))">Tất cả trạng thái (@Model.StatusCounts["all"])</option>
+                <option value="pending" selected="@(Model.StatusFilter == "pending")">Chờ xử lý (@Model.StatusCounts["pending"])</option>
+                <option value="processing" selected="@(Model.StatusFilter == "processing")">Đang xử lý (@Model.StatusCounts["processing"])</option>
+                <option value="completed" selected="@(Model.StatusFilter == "completed")">Hoàn thành (@Model.StatusCounts["completed"])</option>
+                <option value="cancelled" selected="@(Model.StatusFilter == "cancelled")">Đã hủy (@Model.StatusCounts["cancelled"])</option>
             </select>
             
-            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" 
-                   class="admin-form-input" placeholder="Từ ngày">
-            
-            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" 
-                   class="admin-form-input" placeholder="Đến ngày">
-            
             <button type="submit" class="admin-btn admin-btn-primary">
-                <i data-lucide="filter" class="me-1"></i>
-                Lọc
+                <i data-lucide="search" class="me-1"></i>
+                Tìm kiếm
             </button>
+            
+            @if (!string.IsNullOrEmpty(Model.SearchQuery) || !string.IsNullOrEmpty(Model.StatusFilter))
+            {
+                <a href="@Url.Action("Orders")" class="admin-btn admin-btn-outline">
+                    <i data-lucide="x" class="me-1"></i>
+                    Xóa lọc
+                </a>
+            }
         </form>
     </div>
 
     <!-- Filter Tabs -->
     <div class="admin-filter-tabs mb-4">
-        <a href="@Url.Action("Orders", new { status = "", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
-           class="admin-filter-tab @(string.IsNullOrEmpty(Model.Status) ? "active" : "")">
-            Tất cả
+        <a href="@Url.Action("Orders", new { search = Model.SearchQuery })" 
+           class="admin-filter-tab @(string.IsNullOrEmpty(Model.StatusFilter) ? "active" : "")">
+            Tất cả <span class="badge bg-secondary ms-1">@Model.StatusCounts["all"]</span>
         </a>
-        <a href="@Url.Action("Orders", new { status = "pending", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
-           class="admin-filter-tab @(Model.Status == "pending" ? "active" : "")">
-            Chờ xử lý
+        <a href="@Url.Action("Orders", new { status = "pending", search = Model.SearchQuery })" 
+           class="admin-filter-tab @(Model.StatusFilter == "pending" ? "active" : "")">
+            Chờ xử lý <span class="badge bg-warning ms-1">@Model.StatusCounts["pending"]</span>
         </a>
-        <a href="@Url.Action("Orders", new { status = "processing", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
-           class="admin-filter-tab @(Model.Status == "processing" ? "active" : "")">
-            Đang xử lý
+        <a href="@Url.Action("Orders", new { status = "processing", search = Model.SearchQuery })" 
+           class="admin-filter-tab @(Model.StatusFilter == "processing" ? "active" : "")">
+            Đang xử lý <span class="badge bg-info ms-1">@Model.StatusCounts["processing"]</span>
         </a>
-        <a href="@Url.Action("Orders", new { status = "shipped", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
-           class="admin-filter-tab @(Model.Status == "shipped" ? "active" : "")">
-            Đã gửi
+        <a href="@Url.Action("Orders", new { status = "completed", search = Model.SearchQuery })" 
+           class="admin-filter-tab @(Model.StatusFilter == "completed" ? "active" : "")">
+            Hoàn thành <span class="badge bg-success ms-1">@Model.StatusCounts["completed"]</span>
         </a>
-        <a href="@Url.Action("Orders", new { status = "delivered", search = Model.SearchTerm, fromDate = Model.FromDate, toDate = Model.ToDate })" 
-           class="admin-filter-tab @(Model.Status == "delivered" ? "active" : "")">
-            Đã giao
+        <a href="@Url.Action("Orders", new { status = "cancelled", search = Model.SearchQuery })" 
+           class="admin-filter-tab @(Model.StatusFilter == "cancelled" ? "active" : "")">
+            Đã hủy <span class="badge bg-danger ms-1">@Model.StatusCounts["cancelled"]</span>
         </a>
     </div>
 
@@ -202,16 +243,17 @@
         {
             <div class="admin-pagination">
                 <div class="admin-pagination-info">
-                    Hiển thị trang @Model.CurrentPage / @Model.TotalPages
+                    Hiển thị <strong>@((Model.CurrentPage - 1) * Model.PageSize + 1) - @Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalOrders)</strong> 
+                    trong tổng số <strong>@Model.TotalOrders</strong> đơn hàng
                 </div>
                 <div class="admin-pagination-buttons">
                     @if (Model.CurrentPage > 1)
                     {
-                        <a href="@Url.Action("Orders", new { page = 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                        <a href="@Url.Action("Orders", new { page = 1, search = Model.SearchQuery, status = Model.StatusFilter })" 
                            class="admin-pagination-btn" title="Trang đầu">
                             <i data-lucide="chevrons-left"></i>
                         </a>
-                        <a href="@Url.Action("Orders", new { page = Model.CurrentPage - 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                        <a href="@Url.Action("Orders", new { page = Model.CurrentPage - 1, search = Model.SearchQuery, status = Model.StatusFilter })" 
                            class="admin-pagination-btn" title="Trang trước">
                             <i data-lucide="chevron-left"></i>
                         </a>
@@ -239,18 +281,18 @@
                         }
                         else
                         {
-                            <a href="@Url.Action("Orders", new { page = i, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                            <a href="@Url.Action("Orders", new { page = i, search = Model.SearchQuery, status = Model.StatusFilter })" 
                                class="admin-pagination-btn">@i</a>
                         }
                     }
 
                     @if (Model.CurrentPage < Model.TotalPages)
                     {
-                        <a href="@Url.Action("Orders", new { page = Model.CurrentPage + 1, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                        <a href="@Url.Action("Orders", new { page = Model.CurrentPage + 1, search = Model.SearchQuery, status = Model.StatusFilter })" 
                            class="admin-pagination-btn" title="Trang tiếp">
                             <i data-lucide="chevron-right"></i>
                         </a>
-                        <a href="@Url.Action("Orders", new { page = Model.TotalPages, search = Model.SearchTerm, status = Model.Status, fromDate = Model.FromDate, toDate = Model.ToDate })" 
+                        <a href="@Url.Action("Orders", new { page = Model.TotalPages, search = Model.SearchQuery, status = Model.StatusFilter })" 
                            class="admin-pagination-btn" title="Trang cuối">
                             <i data-lucide="chevrons-right"></i>
                         </a>
@@ -287,15 +329,65 @@
 
         function updateOrderStatus(orderId, newStatus) {
             const statusText = {
-                'processing': 'duyệt đơn hàng',
-                'shipped': 'đánh dấu đã gửi hàng'
+                'processing': 'duyệt đơn hàng và bắt đầu xử lý',
+                'shipped': 'đánh dấu đơn hàng đã gửi đi',
+                'delivered': 'xác nhận đơn hàng đã giao thành công',
+                'cancelled': 'hủy đơn hàng'
             };
             
-            if (confirm(`Bạn có chắc chắn muốn ${statusText[newStatus] || 'cập nhật trạng thái'}?`)) {
-                // TODO: Implement AJAX call to update order status
-                // For now, we'll just reload the page
-                window.location.reload();
+            const actionText = statusText[newStatus] || 'cập nhật trạng thái';
+            
+            if (confirm(`Bạn có chắc chắn muốn ${actionText}?`)) {
+                // Show loading state
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+                
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                
+                // Make AJAX call
+                fetch('@Url.Action("UpdateOrderStatus", "Seller")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: new URLSearchParams({
+                        orderId: orderId,
+                        newStatus: newStatus,
+                        __RequestVerificationToken: token
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(data.message);
+                        // Reload page to show updated status
+                        window.location.reload();
+                    } else {
+                        // Show error message
+                        alert('Lỗi: ' + data.message);
+                        // Restore button
+                        button.disabled = false;
+                        button.innerHTML = originalContent;
+                        lucide.createIcons();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã xảy ra lỗi khi cập nhật trạng thái. Vui lòng thử lại.');
+                    // Restore button
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                    lucide.createIcons();
+                });
             }
         }
     </script>
+    
+    <!-- Anti-forgery token for AJAX requests -->
+    @Html.AntiForgeryToken()
 }
