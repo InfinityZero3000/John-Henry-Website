@@ -217,7 +217,9 @@ namespace JohnHenryFashionWeb.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            
+            // Redirect to login page after logout
+            return RedirectToAction(nameof(Login), "Account");
         }
 
         [HttpPost]
@@ -481,6 +483,10 @@ namespace JohnHenryFashionWeb.Controllers
             {
                 return RedirectToAction(nameof(SetPassword));
             }
+
+            // Pass user info to ViewBag for sidebar
+            ViewBag.UserFullName = $"{user.FirstName} {user.LastName}".Trim();
+            ViewBag.UserAvatar = user.Avatar;
 
             return View();
         }

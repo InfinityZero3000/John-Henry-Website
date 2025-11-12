@@ -553,12 +553,49 @@
                 });
             });
 
-            // Category filter functionality  
+            // Category filter functionality - Server-side filtering with URL redirect
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Category selected:', this.value);
-                    filterProducts();
+                    
+                    // Map filter values to subcategory names (backend will handle parent category + keyword filtering)
+                    const categoryMap = {
+                        // Áo categories
+                        'ao-freelancer': 'Áo nữ',  // Parent category - show all
+                        'ao-blouse': 'Áo Blouse',  // Subcategory - filter by keyword
+                        'ao-tshirt-nu': 'Áo T-Shirt Nữ',
+                        'ao-polo-nu': 'Áo Polo Nữ',
+                        'ao-blazer-khoac': 'Áo Blazer',
+                        'ao-len-nu': 'Áo Len Nữ',
+                        // Quần categories
+                        'quan-freelancer': 'Quần nữ',  // Parent category - show all
+                        'quan-jeans-nu': 'Quần Jean Nữ',  // Subcategory - filter by keyword
+                        'quan-tay-nu': 'Quần Âu Nữ',
+                        'quan-short-nu': 'Quần Short Nữ',
+                        'quan-legging-nu': 'Quần Legging Nữ',
+                        // Đầm categories
+                        'dam': 'Đầm nữ',  // Parent category - show all
+                        'dam-cong-so': 'Đầm Công Sở',
+                        'dam-da-tiec': 'Đầm Dạ Tiệc',
+                        'dam-maxi': 'Đầm Maxi',
+                        // Váy categories
+                        'chanvay': 'Chân váy nữ',  // Parent category - show all
+                        'vay-but-chi': 'Váy Bút Chì',
+                        'vay-xoe': 'Váy Xòe',
+                        'vay-midi': 'Váy Midi',
+                        // Phụ kiện categories
+                        'phu-kien-nu': 'Phụ kiện nữ'  // Parent category - show all
+                    };
+                    
+                    const categoryName = categoryMap[this.value];
+                    if (categoryName) {
+                        // Build URL with category parameter
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('category', categoryName);
+                        url.searchParams.set('page', '1'); // Reset to first page
+                        window.location.href = url.toString();
+                    }
                 });
             });
 
@@ -688,11 +725,14 @@
 
             // Subcategory dropdown functionality
             const expandIcons = document.querySelectorAll('.expand-icon');
+            console.log('Found expand icons:', expandIcons.length);
             expandIcons.forEach(icon => {
                 icon.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent default action
                     e.stopPropagation(); // Prevent triggering parent label click
                     const targetId = this.getAttribute('data-target');
                     const subcategoriesDiv = document.getElementById(targetId);
+                    console.log('Clicked expand icon, target:', targetId, 'found:', !!subcategoriesDiv);
                     
                     if (subcategoriesDiv) {
                         if (subcategoriesDiv.classList.contains('show')) {
@@ -721,11 +761,12 @@
                             
                             // Open this dropdown with smooth animation
                             subcategoriesDiv.style.display = 'block';
-                            subcategoriesDiv.classList.add('show');
                             this.classList.add('expanded');
                             
-                            // Trigger reflow for smooth animation
-                            subcategoriesDiv.offsetHeight;
+                            // Trigger reflow for smooth animation before adding class
+                            void subcategoriesDiv.offsetHeight;
+                            
+                            subcategoriesDiv.classList.add('show');
                             subcategoriesDiv.style.maxHeight = '300px';
                             subcategoriesDiv.style.opacity = '1';
                         }

@@ -1,39 +1,88 @@
 @model List<JohnHenryFashionWeb.Models.Wishlist>
 @{
     ViewData["Title"] = "Danh sách yêu thích";
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var wishlistCount = ViewBag.WishlistCount as int? ?? 0;
 }
 
 @Html.AntiForgeryToken()
 
-<div class="container py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-            <li class="breadcrumb-item active">Danh sách yêu thích</li>
-        </ol>
-    </nav>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block user-sidebar">
+            <div class="sidebar-content">
+                <div class="text-center mb-3">
+                    <div class="user-avatar">
+                        @if (ViewBag.UserAvatar != null && !string.IsNullOrEmpty(ViewBag.UserAvatar))
+                        {
+                            <img src="@ViewBag.UserAvatar" alt="Avatar" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <i data-lucide="user-circle" style="width: 60px; height: 60px; color: #6c757d;"></i>
+                        }
+                    </div>
+                    <h5 class="mt-2">@(ViewBag.UserFullName ?? User.Identity!.Name)</h5>
+                    <p class="text-muted">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Profile", "UserDashboard")">
+                            <i data-lucide="user" class="me-2"></i>
+                            Hồ sơ 
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Orders", "UserDashboard")">
+                            <i data-lucide="shopping-bag" class="me-2"></i>
+                            Đơn hàng 
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/Wishlist">
+                            <i data-lucide="heart" class="me-2"></i>
+                            Yêu thích
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("ChangePassword", "Account")">
+                            <i data-lucide="lock" class="me-2"></i>
+                            Đổi mật khẩu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Notifications", "UserDashboard")">
+                            <i data-lucide="bell" class="me-2"></i>
+                            Thông báo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-action="Logout" asp-controller="Account" method="post" style="display: inline; width: 100%;">
+                            <button type="submit" class="nav-link w-100 text-start" style="background: none; border: none; color: #000000;">
+                                <i data-lucide="log-out" class="me-2"></i>
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
-    <!-- Wishlist Header -->
-    <div class="wishlist-header mb-4">
-        <div class="row align-items-center">
-            <div class="col-md-8">
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Danh sách yêu thích</h1>
                 @if (wishlistCount > 0)
                 {
-                    <p class="text-muted">Bạn có @wishlistCount sản phẩm yêu thích</p>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearWishlist()">
+                            <i class="fas fa-trash me-2"></i>Xóa tất cả
+                        </button>
+                    </div>
                 }
             </div>
-            @if (wishlistCount > 0)
-            {
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-outline-danger" onclick="clearWishlist()">
-                        <i class="fas fa-trash me-2"></i>Xóa tất cả
-                    </button>
-                </div>
-            }
-        </div>
-    </div>
 
     @if (Model.Any())
     {
@@ -142,10 +191,118 @@
             </a>
         </div>
     }
+        </main>
+    </div>
 </div>
 
 @section Styles {
     <style>
+        /* Container and Layout Fixes */
+        .container-fluid {
+            padding: 0;
+        }
+
+        .row {
+            margin: 0;
+            display: flex;
+        }
+
+        /* Sidebar - Optimized shorter layout */
+        .user-sidebar {
+            background: #ffffff !important;
+            border-right: 1px solid #dee2e6;
+            min-height: auto;
+            max-height: 80vh;
+            position: relative !important;
+            padding: 0 !important;
+            z-index: 1;
+        }
+
+        .sidebar-content {
+            padding: 15px 10px;
+            height: auto;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Main content area */
+        main.col-md-9 {
+            margin-left: 0 !important;
+            padding: 20px;
+            flex: 1;
+            min-height: 100vh;
+            background: #ffffff;
+        }
+
+        /* Navigation styles */
+        .user-sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 3px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .user-sidebar .nav-link:hover {
+            color: #333;
+            background-color: #f8f9fa;
+            text-decoration: none;
+        }
+
+        .user-sidebar .nav-link.active {
+            color: #333;
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
+
+        .user-sidebar .nav-link i {
+            width: 18px;
+            height: 18px;
+            text-align: center;
+        }
+
+        /* Lucide icons styling */
+        .user-sidebar i[data-lucide] {
+            width: 18px;
+            height: 18px;
+            stroke-width: 1.5;
+        }
+
+        /* Avatar and user info - Compact */
+        .user-avatar {
+            margin-bottom: 10px;
+        }
+
+        .text-center h5 {
+            margin-bottom: 3px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .text-center .text-muted {
+            margin-bottom: 15px;
+        }
+
+        /* Form and button styling */
+        .user-sidebar form {
+            width: 100%;
+        }
+
+        .user-sidebar button.nav-link {
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+            color: #000000 !important;
+        }
+
+        .user-sidebar button.nav-link:hover {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+            color: #000000 !important;
+        }
+
         /* Sử dụng card styles từ hệ thống chính */
         .product-card-new {
             background: white;
@@ -154,6 +311,8 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-card-new:hover {
@@ -164,9 +323,10 @@
         .product-image-container {
             position: relative;
             width: 100%;
-            aspect-ratio: 3 / 4;
+            height: 380px;
             overflow: hidden;
             background: #f8f9fa;
+            flex-shrink: 0;
         }
         
         .product-image {
@@ -182,14 +342,17 @@
         }
         
         .product-info {
-            padding: 16px;
+            padding: 20px 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-name {
             font-size: 15px;
             font-weight: 500;
             color: #2c3e50;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -331,6 +494,45 @@
             .product-price {
                 font-size: 16px;
             }
+        }
+
+        /* Mobile Responsive for Sidebar */
+        @@media (max-width: 767.98px) {
+            .row {
+                flex-direction: column;
+            }
+            
+            .user-sidebar {
+                min-height: auto;
+                max-height: 60vh;
+                order: 2;
+            }
+            
+            main.col-md-9 {
+                order: 1;
+                min-height: auto;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-content {
+                padding: 10px 8px;
+            }
+        }
+
+        /* Ensure footer is never covered */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container-fluid {
+            flex: 1;
+        }
+
+        footer {
+            margin-top: auto;
+            z-index: 999 !important;
         }
     </style>
 }
@@ -556,5 +758,9 @@
                 toast.remove();
             });
         }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
     </script>
 }

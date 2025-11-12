@@ -714,21 +714,21 @@
                 const normalizedName = normalizeVietnamese(productName);
                 
                 const categoryKeywords = {
-                    'ao': ['ao'],
-                    'ao-polo': ['polo'],
-                    'ao-so-mi': ['so mi', 'somi'],
+                    'ao': ['ao','áo'],
+                    'ao-polo': ['polo', 'áo polo'],
+                    'ao-so-mi': ['so mi', 'somi', 'áo sơ mi'],
                     'ao-len': ['len', 'sweater'],
-                    'ao-khoac': ['khoac', 'jacket'],
-                    'quan': ['quan'],
-                    'quan-khaki': ['khaki'],
+                    'ao-khoac': ['khoac', 'jacket', 'khoác'],
+                    'quan': ['quan','quần'],
+                    'quan-khaki': ['khaki', 'kaki'],
                     'quan-jeans': ['jeans', 'jean'],
-                    'quan-tay': ['tay'],
-                    'quan-short': ['short'],
-                    'phu-kien': ['mu', 'giay', 'dep', 'that lung', 'vi', 'tui', 'mat kinh'],
-                    'vi-nam': ['vi'],
-                    'that-lung': ['that lung'],
-                    'giay-dep': ['giay', 'dep'],
-                    'tui-xach': ['tui']
+                    'quan-tay': ['tay','tây'],
+                    'quan-short': ['short', 'quần đùi'],
+                    'phu-kien': ['mũ', 'giày', 'dép', 'thắt lưng', 'ví', 'túi', 'mắt kính'],
+                    'vi-nam': ['ví', 'vi'],
+                    'that-lung': ['thắt lưng'],
+                    'giay-dep': ['giày', 'dép'],
+                    'tui-xach': ['túi']
                 };
                 
                 const keywords = categoryKeywords[category];
@@ -752,13 +752,39 @@
                 });
             });
 
-            // Category filter functionality - DISABLED for pagination
+            // Category filter functionality - Server-side filtering with URL redirect
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             categoryRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     console.log('Category selected:', this.value);
-                    // filterProducts(); // Disabled - using server-side filtering instead
-                    console.log('Note: Client-side filtering disabled. Please use server-side filters.');
+                    
+                    // Map filter values to subcategory names (backend will handle parent category + keyword filtering)
+                    const categoryMap = {
+                        'ao': 'Áo nam',  // Parent category - show all
+                        'ao-polo': 'Áo Polo',  // Subcategory - filter by keyword
+                        'ao-so-mi': 'Áo Sơ mi',
+                        'ao-len': 'Áo Len',
+                        'ao-khoac': 'Áo Khoác',
+                        'quan': 'Quần nam',  // Parent category - show all
+                        'quan-khaki': 'Quần Khaki',  // Subcategory - filter by keyword
+                        'quan-jeans': 'Quần Jeans',
+                        'quan-tay': 'Quần Tây',
+                        'quan-short': 'Quần Short',
+                        'phu-kien': 'Phụ kiện nam',  // Parent category - show all
+                        'vi-nam': 'Phụ kiện nam',
+                        'that-lung': 'Phụ kiện nam',
+                        'giay-dep': 'Phụ kiện nam',
+                        'tui-xach': 'Phụ kiện nam'
+                    };
+                    
+                    const categoryName = categoryMap[this.value];
+                    if (categoryName) {
+                        // Build URL with category parameter
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('category', categoryName);
+                        url.searchParams.set('page', '1'); // Reset to first page
+                        window.location.href = url.toString();
+                    }
                 });
             });
 
@@ -862,8 +888,13 @@
             const sortSelect = document.getElementById('sort-select');
             if (sortSelect) {
                 sortSelect.addEventListener('change', function() {
-                    console.log('Sort by:', this.value);
-                    // Add sorting functionality here
+                    const sortValue = this.value;
+                    console.log('Sort by:', sortValue);
+                    
+                    // Redirect to current page with sort parameter
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('sort', sortValue);
+                    window.location.href = url.toString();
                 });
             }
 
@@ -888,11 +919,14 @@
 
             // Subcategory dropdown functionality
             const expandIcons = document.querySelectorAll('.expand-icon');
+            console.log('Found expand icons:', expandIcons.length);
             expandIcons.forEach(icon => {
                 icon.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent default action
                     e.stopPropagation(); // Prevent triggering parent label click
                     const targetId = this.getAttribute('data-target');
                     const subcategoriesDiv = document.getElementById(targetId);
+                    console.log('Clicked expand icon, target:', targetId, 'found:', !!subcategoriesDiv);
                     
                     if (subcategoriesDiv) {
                         if (subcategoriesDiv.classList.contains('show')) {
@@ -921,11 +955,12 @@
                             
                             // Open this dropdown with smooth animation
                             subcategoriesDiv.style.display = 'block';
-                            subcategoriesDiv.classList.add('show');
                             this.classList.add('expanded');
                             
-                            // Trigger reflow for smooth animation
-                            subcategoriesDiv.offsetHeight;
+                            // Trigger reflow for smooth animation before adding class
+                            void subcategoriesDiv.offsetHeight;
+                            
+                            subcategoriesDiv.classList.add('show');
                             subcategoriesDiv.style.maxHeight = '300px';
                             subcategoriesDiv.style.opacity = '1';
                         }
@@ -948,27 +983,6 @@
                 });
             });
         });
-
-        // Add to cart function from homepage - NOW USING GLOBAL FUNCTION
-        // (Commented out local function, using global addToCart from _Layout.cshtml)
-        /*
-        function addToCart(productId, button) {
-            // Add loading state
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            button.disabled = true;
-
-            // Simulate API call
-            setTimeout(() => {
-                // Reset button
-                button.innerHTML = originalText;
-                button.disabled = false;
-                
-                // Show success message (you can customize this)
-                alert('Đã thêm sản phẩm vào giỏ hàng!');
-            }, 1000);
-        }
-        */
 
         // Wishlist function from homepage
         function toggleWishlist(productId, button) {

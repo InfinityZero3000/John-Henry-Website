@@ -38,6 +38,14 @@ namespace JohnHenryFashionWeb.Controllers
 
             ViewBag.WishlistCount = wishlistItems.Count;
 
+            // Get user info for sidebar
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                ViewBag.UserFullName = $"{user.FirstName} {user.LastName}".Trim();
+                ViewBag.UserAvatar = user.Avatar;
+            }
+
             return View(wishlistItems);
         }
 

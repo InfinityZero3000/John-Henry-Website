@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using JohnHenryFashionWeb.Models;
 using JohnHenryFashionWeb.Data;
 using JohnHenryFashionWeb.ViewModels;
+using JohnHenryFashionWeb.Helpers;
 
 namespace JohnHenryFashionWeb.Controllers
 {
@@ -13,15 +14,18 @@ namespace JohnHenryFashionWeb.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly ILogger<UserDashboardController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public UserDashboardController(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            ILogger<UserDashboardController> logger)
+            ILogger<UserDashboardController> logger,
+            IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _context = context;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [AllowAnonymous]
@@ -94,7 +98,7 @@ namespace JohnHenryFashionWeb.Controllers
                 PhoneNumber = user.PhoneNumber ?? "",
                 Gender = user.Gender ?? "",
                 DateOfBirth = user.DateOfBirth,
-                Avatar = user.Avatar
+                Avatar = AvatarHelper.GetAvatarOrDefault(user.Avatar, _webHostEnvironment)
             };
 
             return View(profileModel);
@@ -268,6 +272,114 @@ namespace JohnHenryFashionWeb.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAvatar(IFormFile avatarFile)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                if (userId == null)
+                {
+                    TempData["Error"] = "Vui lòng đăng nhập để cập nhật ảnh đại diện.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    TempData["Error"] = "Không tìm thấy người dùng.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                // Validate file
+                if (avatarFile == null || avatarFile.Length == 0)
+                {
+                    TempData["Error"] = "Vui lòng chọn một file ảnh.";
+                    return RedirectToAction(nameof(Profile));
+                }
+
+                // Check file size (max 5MB)
+                if (avatarFile.Length > 5 * 1024 * 1024)
+                {
+                    TempData["Error"] = "Kích thước file không được vượt quá 5MB.";
+                    return RedirectToAction(nameof(Profile));
+                }
+
+                // Check file extension
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var fileExtension = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    TempData["Error"] = "Chỉ chấp nhận file ảnh định dạng JPG, PNG, GIF hoặc WEBP.";
+                    return RedirectToAction(nameof(Profile));
+                }
+
+                // Create avatars directory if not exists
+                var avatarsPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "avatars");
+                if (!Directory.Exists(avatarsPath))
+                {
+                    Directory.CreateDirectory(avatarsPath);
+                }
+
+                // Delete old avatar if exists
+                if (!string.IsNullOrEmpty(user.Avatar))
+                {
+                    var oldAvatarPath = Path.Combine(_webHostEnvironment.WebRootPath, user.Avatar.TrimStart('/'));
+                    if (System.IO.File.Exists(oldAvatarPath))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(oldAvatarPath);
+                            _logger.LogInformation($"Deleted old avatar: {oldAvatarPath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Failed to delete old avatar: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Generate unique filename
+                var uniqueFileName = $"{userId}_{Guid.NewGuid()}{fileExtension}";
+                var filePath = Path.Combine(avatarsPath, uniqueFileName);
+
+                // Save file
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await avatarFile.CopyToAsync(fileStream);
+                }
+
+                // Update user avatar path
+                user.Avatar = $"/images/avatars/{uniqueFileName}";
+                user.UpdatedAt = DateTime.UtcNow;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation($"User {user.Email} updated avatar successfully: {user.Avatar}");
+                    TempData["Success"] = "Cập nhật ảnh đại diện thành công!";
+                }
+                else
+                {
+                    // Delete uploaded file if update failed
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật ảnh đại diện. Vui lòng thử lại.";
+                }
+
+                return RedirectToAction(nameof(Profile));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating avatar: {ex.Message}");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật ảnh đại diện. Vui lòng thử lại.";
+                return RedirectToAction(nameof(Profile));
+            }
         }
     }
 }

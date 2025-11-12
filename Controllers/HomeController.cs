@@ -156,10 +156,10 @@ public class HomeController : Controller
 
         ViewBag.BestSellerCollectionBanner = bestSellerCollectionBanner;
 
-        // Load category banners
+        // Load category banners (Product Categories Section)
         var aoNamBanner = await _context.MarketingBanners
             .Where(b => b.IsActive 
-                && b.Position == "category_banner"
+                && b.Position == "category"
                 && b.TargetPage == "AoNam"
                 && b.StartDate <= now
                 && (b.EndDate == null || b.EndDate >= now))
@@ -171,7 +171,7 @@ public class HomeController : Controller
 
         var aoNuBanner = await _context.MarketingBanners
             .Where(b => b.IsActive 
-                && b.Position == "category_banner"
+                && b.Position == "category"
                 && b.TargetPage == "AoNu"
                 && b.StartDate <= now
                 && (b.EndDate == null || b.EndDate >= now))
@@ -210,7 +210,9 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public async Task<IActionResult> JohnHenry(int page = 1)
+    public async Task<IActionResult> JohnHenry(string? category = null, string? color = null, 
+        decimal? minPrice = null, decimal? maxPrice = null, string? size = null, 
+        string? sort = "default", int page = 1)
     {
         const int pageSize = 40; // 10 rows x 4 products per row
 
@@ -227,6 +229,14 @@ public class HomeController : Controller
         ViewBag.Breadcrumbs = breadcrumbs;
         ViewBag.MetaTitle = "JOHN HENRY - Thời trang nam nữ cao cấp";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập JOHN HENRY với các sản phẩm thời trang nam nữ chất lượng cao, phong cách hiện đại và sang trọng.";
+        
+        // Pass filter params to view
+        ViewBag.SelectedCategory = category;
+        ViewBag.SelectedColor = color;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
+        ViewBag.SelectedSize = size;
+        ViewBag.Sort = sort;
 
         // Load active marketing banners for John Henry collection page
         var now = DateTime.UtcNow;
@@ -241,21 +251,161 @@ public class HomeController : Controller
 
         ViewBag.CollectionBanners = collectionBanners;
 
-        // Load products from database - John Henry collection (Products with SKU NOT starting with "FW")
+        // Build query with filters
+        var productsQuery = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.IsActive && !p.SKU.StartsWith("FW"));
+
+        // Filter by category - Support Vietnamese case-insensitive matching + subcategory keywords
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            var categoryTrimmed = category.Trim();
+            
+            // Define subcategory keywords mapping (case-insensitive)
+            var subcategoryKeywords = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+            {
+                // John Henry subcategories
+                {"Áo Polo", new[] {"polo"}},
+                {"Áo Sơ mi", new[] {"sơ mi", "so mi"}},
+                {"Áo Thun", new[] {"thun", "t-shirt", "tshirt"}},
+                {"Áo Len", new[] {"len", "sweater"}},
+                {"Áo Khoác", new[] {"khoác", "jacket"}},
+                {"Áo Vest", new[] {"vest", "blazer"}},
+                {"Quần Khaki", new[] {"khaki", "kaki"}},
+                {"Quần Jeans", new[] {"jeans", "jean"}},
+                {"Quần Tây", new[] {"tây", "tay"}},
+                {"Quần Short", new[] {"short"}},
+                // Freelancer subcategories
+                {"Áo Blouse", new[] {"blouse"}},
+                {"Áo T-Shirt Nữ", new[] {"t-shirt", "tshirt", "thun"}},
+                {"Áo Polo Nữ", new[] {"polo"}},
+                {"Áo Blazer", new[] {"blazer"}},
+                {"Áo Len Nữ", new[] {"len", "sweater"}},
+                {"Quần Jean Nữ", new[] {"jean"}},
+                {"Quần Âu Nữ", new[] {"âu", "au"}},
+                {"Quần Short Nữ", new[] {"short"}},
+                {"Đầm Công Sở", new[] {"đầm", "dam"}},
+                {"Đầm Dạ Tiệc", new[] {"đầm", "dam"}},
+                {"Đầm Maxi", new[] {"đầm", "dam", "maxi"}},
+                {"Váy Bút Chì", new[] {"váy", "vay", "bút chì", "but chi"}},
+                {"Váy Xòe", new[] {"váy", "vay", "xòe", "xoe"}},
+                {"Váy Midi", new[] {"váy", "vay", "midi"}}
+            };
+            
+            // Check if this is a subcategory request
+            string[]? keywords = null;
+            string? parentCategoryName = null;
+            
+            if (subcategoryKeywords.ContainsKey(categoryTrimmed))
+            {
+                keywords = subcategoryKeywords[categoryTrimmed];
+                
+                // Determine parent category based on subcategory
+                if (categoryTrimmed.Contains("Áo") || categoryTrimmed.Contains("Blouse") || categoryTrimmed.Contains("Polo") || categoryTrimmed.Contains("Blazer"))
+                {
+                    parentCategoryName = categoryTrimmed.Contains("Nữ") || categoryTrimmed.Contains("Blouse") || categoryTrimmed.Contains("Blazer") ? "Áo nữ" : "Áo nam";
+                }
+                else if (categoryTrimmed.Contains("Quần"))
+                {
+                    parentCategoryName = categoryTrimmed.Contains("Nữ") ? "Quần nữ" : "Quần nam";
+                }
+                else if (categoryTrimmed.Contains("Đầm"))
+                {
+                    parentCategoryName = "Đầm nữ";
+                }
+                else if (categoryTrimmed.Contains("Váy"))
+                {
+                    parentCategoryName = "Chân váy nữ";
+                }
+            }
+            else
+            {
+                // This is a parent category
+                parentCategoryName = categoryTrimmed;
+            }
+            
+            // Find parent category
+            if (!string.IsNullOrWhiteSpace(parentCategoryName))
+            {
+                var lowerCategory = parentCategoryName.ToLower();
+                var upperCategory = parentCategoryName.ToUpper();
+                var capitalizedCategory = parentCategoryName.Length > 0 
+                    ? char.ToUpper(parentCategoryName[0]) + parentCategoryName.Substring(1).ToLower() 
+                    : parentCategoryName;
+
+                var categoryEntity = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Slug == parentCategoryName || 
+                        EF.Functions.ILike(c.Name, lowerCategory) || 
+                        EF.Functions.ILike(c.Name, upperCategory) ||
+                        EF.Functions.ILike(c.Name, capitalizedCategory));
+                
+                if (categoryEntity != null)
+                {
+                    productsQuery = productsQuery.Where(p => p.CategoryId == categoryEntity.Id);
+                    
+                    // Apply subcategory keyword filtering if keywords exist
+                    if (keywords != null && keywords.Length > 0)
+                    {
+                        // Build OR condition for all keyword variations
+                        foreach (var keyword in keywords)
+                        {
+                            var lowerKeyword = $"%{keyword.ToLower()}%";
+                            var upperKeyword = $"%{keyword.ToUpper()}%";
+                            var capitalizedKeyword = keyword.Length > 0 
+                                ? $"%{char.ToUpper(keyword[0]) + keyword.Substring(1).ToLower()}%" 
+                                : $"%{keyword}%";
+                            
+                            productsQuery = productsQuery.Where(p => 
+                                EF.Functions.ILike(p.Name, lowerKeyword) || 
+                                EF.Functions.ILike(p.Name, upperKeyword) ||
+                                EF.Functions.ILike(p.Name, capitalizedKeyword));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Filter by color
+        if (!string.IsNullOrWhiteSpace(color))
+        {
+            productsQuery = productsQuery.Where(p => p.Color != null && p.Color.ToLower().Contains(color.ToLower()));
+        }
+
+        // Filter by price range
+        if (minPrice.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
+        }
+        if (maxPrice.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
+        }
+
+        // Filter by size
+        if (!string.IsNullOrWhiteSpace(size))
+        {
+            productsQuery = productsQuery.Where(p => p.Size != null && p.Size.Contains(size));
+        }
+
+        // Apply sorting
+        productsQuery = sort switch
+        {
+            "name" => productsQuery.OrderBy(p => p.Name),
+            "price-low" => productsQuery.OrderBy(p => p.Price),
+            "price-high" => productsQuery.OrderByDescending(p => p.Price),
+            "newest" => productsQuery.OrderByDescending(p => p.CreatedAt),
+            _ => productsQuery.OrderByDescending(p => p.IsFeatured).ThenByDescending(p => p.CreatedAt)
+        };
+
         // Get total count for pagination
-        var totalProducts = await _context.Products
-            .Where(p => p.IsActive && !p.SKU.StartsWith("FW"))
-            .CountAsync();
+        var totalProducts = await productsQuery.CountAsync();
 
         // Calculate pagination
         var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
-        page = Math.Max(1, Math.Min(page, totalPages)); // Ensure page is in valid range
+        page = Math.Max(1, Math.Min(page, Math.Max(1, totalPages)));
 
-        var products = await _context.Products
-            .Include(p => p.Category)
-            .Include(p => p.Brand)
-            .Where(p => p.IsActive && !p.SKU.StartsWith("FW"))
-            .OrderByDescending(p => p.CreatedAt)
+        var products = await productsQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -273,7 +423,9 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public async Task<IActionResult> Freelancer(int page = 1)
+    public async Task<IActionResult> Freelancer(string? category = null, string? color = null, 
+        decimal? minPrice = null, decimal? maxPrice = null, string? size = null, 
+        string? sort = "default", int page = 1)
     {
         const int pageSize = 40; // 10 rows x 4 products per row
 
@@ -290,6 +442,14 @@ public class HomeController : Controller
         ViewBag.Breadcrumbs = breadcrumbs;
         ViewBag.MetaTitle = "FREELANCER - Thời trang nữ hiện đại";
         ViewBag.MetaDescription = "Khám phá bộ sưu tập FREELANCER với các sản phẩm thời trang nữ chất lượng cao, phong cách hiện đại và sang trọng dành riêng cho phái đẹp.";
+        
+        // Pass filter params to view
+        ViewBag.SelectedCategory = category;
+        ViewBag.SelectedColor = color;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
+        ViewBag.SelectedSize = size;
+        ViewBag.Sort = sort;
 
         // Load active marketing banners for Freelancer collection page
         var now = DateTime.UtcNow;
@@ -304,21 +464,161 @@ public class HomeController : Controller
 
         ViewBag.CollectionBanners = collectionBanners;
 
-        // Load products from database - Freelancer collection (Products with SKU starting with "FW")
+        // Build query with filters
+        var productsQuery = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.IsActive && p.SKU.StartsWith("FW"));
+
+        // Filter by category - Support Vietnamese case-insensitive matching + subcategory keywords
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            var categoryTrimmed = category.Trim();
+            
+            // Define subcategory keywords mapping (case-insensitive)
+            var subcategoryKeywords = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Áo Polo", new[] {"polo"}},
+                {"Áo Sơ mi", new[] {"sơ mi", "so mi"}},
+                {"Áo Thun", new[] {"thun", "t-shirt", "tshirt"}},
+                {"Áo Len", new[] {"len", "sweater"}},
+                {"Áo Khoác", new[] {"khoác", "jacket"}},
+                {"Áo Vest", new[] {"vest", "blazer"}},
+                {"Quần Khaki", new[] {"khaki", "kaki"}},
+                {"Quần Jeans", new[] {"jeans", "jean"}},
+                {"Quần Tây", new[] {"tây", "tay"}},
+                {"Quần Short", new[] {"short"}},
+                {"Áo Blouse", new[] {"blouse"}},
+                {"Áo T-Shirt Nữ", new[] {"t-shirt", "tshirt", "thun"}},
+                {"Áo Sơ Mi Nữ", new[] {"sơ mi", "so mi"}},
+                {"Áo Polo Nữ", new[] {"polo"}},
+                {"Áo Blazer", new[] {"blazer"}},
+                {"Áo Len Nữ", new[] {"len", "sweater"}},
+                {"Quần Jean Nữ", new[] {"jean"}},
+                {"Quần Âu Nữ", new[] {"âu", "au"}},
+                {"Quần Short Nữ", new[] {"short"}},
+                {"Quần Legging Nữ", new[] {"legging"}},
+                {"Đầm Công Sở", new[] {"đầm", "dam"}},
+                {"Đầm Dạ Tiệc", new[] {"đầm", "dam"}},
+                {"Đầm Maxi", new[] {"đầm", "dam", "maxi"}},
+                {"Váy Bút Chì", new[] {"váy", "vay", "bút chì", "but chi"}},
+                {"Váy Xòe", new[] {"váy", "vay", "xòe", "xoe"}},
+                {"Váy Midi", new[] {"váy", "vay", "midi"}}
+            };
+            
+            // Check if this is a subcategory request
+            string[]? keywords = null;
+            string? parentCategoryName = null;
+            
+            if (subcategoryKeywords.ContainsKey(categoryTrimmed))
+            {
+                keywords = subcategoryKeywords[categoryTrimmed];
+                
+                // Determine parent category based on subcategory
+                if (categoryTrimmed.Contains("Áo") || categoryTrimmed.Contains("Blouse") || categoryTrimmed.Contains("Polo") || categoryTrimmed.Contains("Blazer"))
+                {
+                    parentCategoryName = categoryTrimmed.Contains("Nữ") || categoryTrimmed.Contains("Blouse") || categoryTrimmed.Contains("Blazer") ? "Áo nữ" : "Áo nam";
+                }
+                else if (categoryTrimmed.Contains("Quần"))
+                {
+                    parentCategoryName = categoryTrimmed.Contains("Nữ") ? "Quần nữ" : "Quần nam";
+                }
+                else if (categoryTrimmed.Contains("Đầm"))
+                {
+                    parentCategoryName = "Đầm nữ";
+                }
+                else if (categoryTrimmed.Contains("Váy"))
+                {
+                    parentCategoryName = "Chân váy nữ";
+                }
+            }
+            else
+            {
+                // This is a parent category
+                parentCategoryName = categoryTrimmed;
+            }
+            
+            // Find parent category
+            if (!string.IsNullOrWhiteSpace(parentCategoryName))
+            {
+                var lowerCategory = parentCategoryName.ToLower();
+                var upperCategory = parentCategoryName.ToUpper();
+                var capitalizedCategory = parentCategoryName.Length > 0 
+                    ? char.ToUpper(parentCategoryName[0]) + parentCategoryName.Substring(1).ToLower() 
+                    : parentCategoryName;
+
+                var categoryEntity = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Slug == parentCategoryName || 
+                        EF.Functions.ILike(c.Name, lowerCategory) || 
+                        EF.Functions.ILike(c.Name, upperCategory) ||
+                        EF.Functions.ILike(c.Name, capitalizedCategory));
+                
+                if (categoryEntity != null)
+                {
+                    productsQuery = productsQuery.Where(p => p.CategoryId == categoryEntity.Id);
+                    
+                    // Apply subcategory keyword filtering if keywords exist
+                    if (keywords != null && keywords.Length > 0)
+                    {
+                        // Build OR condition for all keyword variations
+                        foreach (var keyword in keywords)
+                        {
+                            var lowerKeyword = $"%{keyword.ToLower()}%";
+                            var upperKeyword = $"%{keyword.ToUpper()}%";
+                            var capitalizedKeyword = keyword.Length > 0 
+                                ? $"%{char.ToUpper(keyword[0]) + keyword.Substring(1).ToLower()}%" 
+                                : $"%{keyword}%";
+                            
+                            productsQuery = productsQuery.Where(p => 
+                                EF.Functions.ILike(p.Name, lowerKeyword) || 
+                                EF.Functions.ILike(p.Name, upperKeyword) ||
+                                EF.Functions.ILike(p.Name, capitalizedKeyword));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Filter by color
+        if (!string.IsNullOrWhiteSpace(color))
+        {
+            productsQuery = productsQuery.Where(p => p.Color != null && p.Color.ToLower().Contains(color.ToLower()));
+        }
+
+        // Filter by price range
+        if (minPrice.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
+        }
+        if (maxPrice.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
+        }
+
+        // Filter by size
+        if (!string.IsNullOrWhiteSpace(size))
+        {
+            productsQuery = productsQuery.Where(p => p.Size != null && p.Size.Contains(size));
+        }
+
+        // Apply sorting
+        productsQuery = sort switch
+        {
+            "name" => productsQuery.OrderBy(p => p.Name),
+            "price-low" => productsQuery.OrderBy(p => p.Price),
+            "price-high" => productsQuery.OrderByDescending(p => p.Price),
+            "newest" => productsQuery.OrderByDescending(p => p.CreatedAt),
+            _ => productsQuery.OrderByDescending(p => p.IsFeatured).ThenByDescending(p => p.CreatedAt)
+        };
+
         // Get total count for pagination
-        var totalProducts = await _context.Products
-            .Where(p => p.IsActive && p.SKU.StartsWith("FW"))
-            .CountAsync();
+        var totalProducts = await productsQuery.CountAsync();
 
         // Calculate pagination
         var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
-        page = Math.Max(1, Math.Min(page, totalPages)); // Ensure page is in valid range
+        page = Math.Max(1, Math.Min(page, Math.Max(1, totalPages)));
 
-        var products = await _context.Products
-            .Include(p => p.Category)
-            .Include(p => p.Brand)
-            .Where(p => p.IsActive && p.SKU.StartsWith("FW"))
-            .OrderByDescending(p => p.CreatedAt)
+        var products = await productsQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -356,8 +656,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập váy FREELANCER với đa dạng các loại váy công sở, váy dạ tiệc, váy maxi chất lượng cao, phong cách hiện đại.";
 
         // Load women's dresses from database BY SUBCATEGORY AND SKU PATTERN
-        var dressCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Đầm nữ");
+        var dressCategory = await FindCategoryByNameAsync("Đầm nữ");
 
         if (dressCategory == null)
         {
@@ -410,8 +709,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập áo nữ FREELANCER với đa dạng các loại áo blouse, áo thun, áo len, áo khoác chất lượng cao, phong cách hiện đại.";
 
         // Load women's shirts from database BY SUBCATEGORY AND SKU PATTERN
-        var shirtCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Áo nữ");
+        var shirtCategory = await FindCategoryByNameAsync("Áo nữ");
 
         if (shirtCategory == null)
         {
@@ -477,8 +775,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập quần nữ FREELANCER với đa dạng các loại quần jean, quần âu, quần short chất lượng cao, phong cách hiện đại.";
 
         // Load women's trousers from database BY SUBCATEGORY AND SKU PATTERN
-        var trousersCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Quần nữ");
+        var trousersCategory = await FindCategoryByNameAsync("Quần nữ");
 
         if (trousersCategory == null)
         {
@@ -544,8 +841,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập chân váy FREELANCER với đa dạng các loại chân váy bút chì, chân váy xòe, chân váy midi chất lượng cao, phong cách hiện đại.";
 
         // Load women's skirts from database BY SUBCATEGORY AND SKU PATTERN
-        var skirtCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Chân váy nữ");
+        var skirtCategory = await FindCategoryByNameAsync("Chân váy nữ");
 
         if (skirtCategory == null)
         {
@@ -611,8 +907,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập phụ kiện nữ FREELANCER với đa dạng túi xách, ví, thắt lưng, mắt kính, khăn, đồng hồ chất lượng cao, phong cách hiện đại.";
 
         // Load women's accessories from database BY SUBCATEGORY AND SKU PATTERN
-        var accessoriesCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Phụ kiện nữ");
+        var accessoriesCategory = await FindCategoryByNameAsync("Phụ kiện nữ");
 
         if (accessoriesCategory == null)
         {
@@ -678,8 +973,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập áo nam JOHN HENRY với đa dạng các loại áo polo, áo sơ mi, áo thun, áo len chất lượng cao, phong cách hiện đại.";
 
         // Load men's shirts from database BY SUBCATEGORY AND SKU PATTERN
-        var shirtCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Áo nam");
+        var shirtCategory = await FindCategoryByNameAsync("Áo nam");
 
         if (shirtCategory == null)
         {
@@ -745,8 +1039,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập quần nam JOHN HENRY với đa dạng các loại quần jean, quần khaki, quần short chất lượng cao, phong cách hiện đại.";
 
         // Load men's trousers from database BY SUBCATEGORY AND SKU PATTERN
-        var trousersCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Quần nam");
+        var trousersCategory = await FindCategoryByNameAsync("Quần nam");
 
         if (trousersCategory == null)
         {
@@ -812,8 +1105,7 @@ public class HomeController : Controller
         ViewBag.MetaDescription = "Khám phá bộ sưu tập phụ kiện nam JOHN HENRY với đa dạng các loại thắt lưng, cà vạt, ví da, túi xách chất lượng cao, phong cách hiện đại.";
 
         // Load men's accessories from database BY SUBCATEGORY AND SKU PATTERN
-        var accessoriesCategory = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == "Phụ kiện nam");
+        var accessoriesCategory = await FindCategoryByNameAsync("Phụ kiện nam");
 
         if (accessoriesCategory == null)
         {
@@ -856,6 +1148,44 @@ public class HomeController : Controller
         ViewBag.CategoryBanner = categoryBanner;
 
         return View(products);
+    }
+
+    // API endpoint for search suggestions
+    [HttpGet]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> SearchSuggestions(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+        {
+            return Json(new { suggestions = new List<object>() });
+        }
+
+        // Normalize query: trim and create pattern for both cases
+        var queryTrimmed = query.Trim();
+        var lowerQuery = $"%{queryTrimmed.ToLower()}%";
+        var upperQuery = $"%{queryTrimmed.ToUpper()}%";
+        var capitalizedQuery = $"%{char.ToUpper(queryTrimmed[0]) + queryTrimmed.Substring(1).ToLower()}%";
+
+        // Get matching products - using ILIKE with multiple case variations for Vietnamese text
+        var products = await _context.Products
+            .Where(p => p.IsActive && 
+                (EF.Functions.ILike(p.Name, lowerQuery) || 
+                 EF.Functions.ILike(p.Name, upperQuery) ||
+                 EF.Functions.ILike(p.Name, capitalizedQuery) ||
+                 EF.Functions.ILike(p.SKU, lowerQuery)))
+            .OrderByDescending(p => p.IsFeatured)
+            .ThenByDescending(p => p.ViewCount)
+            .Take(5)
+            .Select(p => new
+            {
+                name = p.Name,
+                sku = p.SKU,
+                price = p.Price,
+                image = p.FeaturedImageUrl ?? "/images/default-product.jpg"
+            })
+            .ToListAsync();
+
+        return Json(new { suggestions = products });
     }
 
     public IActionResult Blog()
@@ -999,6 +1329,139 @@ public class HomeController : Controller
         });
     }
 
+    // Search products
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public async Task<IActionResult> Search(string query, string? category = null, string? color = null, 
+        decimal? minPrice = null, decimal? maxPrice = null, string? size = null, 
+        string? sort = "default", int page = 1)
+    {
+        const int pageSize = 40;
+
+        // Generate breadcrumbs for Search page
+        var breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Name = "Trang chủ", Url = Url.Action("Index", "Home") ?? "/" },
+            new BreadcrumbItem { Name = $"Tìm kiếm: {query}", Url = "" }
+        };
+
+        var breadcrumbJsonLd = _seoService.GenerateBreadcrumbJsonLd(breadcrumbs);
+
+        ViewBag.BreadcrumbJsonLd = breadcrumbJsonLd;
+        ViewBag.Breadcrumbs = breadcrumbs;
+        ViewBag.MetaTitle = $"Tìm kiếm: {query} - John Henry Fashion";
+        ViewBag.MetaDescription = $"Kết quả tìm kiếm cho '{query}' tại John Henry Fashion";
+        ViewBag.SearchQuery = query;
+        ViewBag.SelectedCategory = category;
+        ViewBag.SelectedColor = color;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
+        ViewBag.SelectedSize = size;
+        ViewBag.Sort = sort;
+
+        // Build search query
+        var productsQuery = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.IsActive);
+
+        // Search by query (name, SKU, description) - using multiple case variations for Vietnamese text
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var queryTrimmed = query.Trim();
+            var lowerQuery = $"%{queryTrimmed.ToLower()}%";
+            var upperQuery = $"%{queryTrimmed.ToUpper()}%";
+            var capitalizedQuery = $"%{char.ToUpper(queryTrimmed[0]) + queryTrimmed.Substring(1).ToLower()}%";
+
+            productsQuery = productsQuery.Where(p =>
+                EF.Functions.ILike(p.Name, lowerQuery) ||
+                EF.Functions.ILike(p.Name, upperQuery) ||
+                EF.Functions.ILike(p.Name, capitalizedQuery) ||
+                EF.Functions.ILike(p.SKU, lowerQuery) ||
+                (p.Description != null && (
+                    EF.Functions.ILike(p.Description, lowerQuery) ||
+                    EF.Functions.ILike(p.Description, upperQuery) ||
+                    EF.Functions.ILike(p.Description, capitalizedQuery)
+                ))
+            );
+        }
+
+        // Filter by category
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            var categorySlug = category.Trim();
+            var categoryEntity = await _context.Categories
+                .FirstOrDefaultAsync(c => c.Slug == categorySlug || EF.Functions.ILike(c.Name, categorySlug));
+            
+            if (categoryEntity != null)
+            {
+                productsQuery = productsQuery.Where(p => p.CategoryId == categoryEntity.Id);
+            }
+        }
+
+        // Filter by color
+        if (!string.IsNullOrWhiteSpace(color))
+        {
+            var colorQuery = $"%{color.Trim()}%";
+            productsQuery = productsQuery.Where(p => p.Color != null && EF.Functions.ILike(p.Color, colorQuery));
+        }
+
+        // Filter by price range
+        if (minPrice.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
+        }
+        if (maxPrice.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
+        }
+
+        // Filter by size
+        if (!string.IsNullOrWhiteSpace(size))
+        {
+            productsQuery = productsQuery.Where(p => p.Size != null && p.Size.Contains(size));
+        }
+
+        // Apply sorting
+        productsQuery = sort switch
+        {
+            "name" => productsQuery.OrderBy(p => p.Name),
+            "price-low" => productsQuery.OrderBy(p => p.Price),
+            "price-high" => productsQuery.OrderByDescending(p => p.Price),
+            "newest" => productsQuery.OrderByDescending(p => p.CreatedAt),
+            _ => productsQuery.OrderByDescending(p => p.IsFeatured).ThenByDescending(p => p.CreatedAt)
+        };
+
+        // Get total count for pagination
+        var totalProducts = await productsQuery.CountAsync();
+
+        // Calculate pagination
+        var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+        page = Math.Max(1, Math.Min(page, Math.Max(1, totalPages)));
+
+        // Get products for current page
+        var products = await productsQuery
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        // Map to ProductViewModel
+        var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
+
+        // Pass pagination info to view
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = totalPages;
+        ViewBag.TotalProducts = totalProducts;
+        ViewBag.PageSize = pageSize;
+
+        // Get all categories for filter sidebar
+        ViewBag.Categories = await _context.Categories
+            .Where(c => c.ParentId == null && c.IsActive)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
+        return View(productViewModels);
+    }
+
     // Debug endpoint to analyze category distribution
     public async Task<IActionResult> CategoryAnalysis()
     {
@@ -1065,8 +1528,7 @@ public class HomeController : Controller
         try
         {
             // Get the correct category ID for "Phụ kiện nữ"
-            var accessoriesCategory = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Name == "Phụ kiện nữ");
+            var accessoriesCategory = await FindCategoryByNameAsync("Phụ kiện nữ");
             
             if (accessoriesCategory == null)
             {
@@ -1134,5 +1596,25 @@ public class HomeController : Controller
                 stackTrace = ex.StackTrace
             });
         }
+    }
+
+    // Helper method: Find category by name with Vietnamese case-insensitive matching
+    private async Task<Category?> FindCategoryByNameAsync(string categoryName)
+    {
+        if (string.IsNullOrWhiteSpace(categoryName))
+            return null;
+
+        var categoryTrimmed = categoryName.Trim();
+        var lowerCategory = categoryTrimmed.ToLower();
+        var upperCategory = categoryTrimmed.ToUpper();
+        var capitalizedCategory = categoryTrimmed.Length > 0 
+            ? char.ToUpper(categoryTrimmed[0]) + categoryTrimmed.Substring(1).ToLower() 
+            : categoryTrimmed;
+
+        return await _context.Categories
+            .FirstOrDefaultAsync(c => 
+                EF.Functions.ILike(c.Name, lowerCategory) || 
+                EF.Functions.ILike(c.Name, upperCategory) ||
+                EF.Functions.ILike(c.Name, capitalizedCategory));
     }
 }

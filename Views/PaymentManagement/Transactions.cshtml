@@ -1,0 +1,329 @@
+@model List<JohnHenryFashionWeb.Models.PaymentTransaction>
+@{
+    ViewData["Title"] = "Quản lý giao dịch thanh toán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Giao dịch thanh toán</li>";
+
+    var stats = ViewBag.Statistics;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var statusFilter = ViewBag.StatusFilter as string;
+    var paymentMethodFilter = ViewBag.PaymentMethodFilter as string;
+    var fromDate = ViewBag.FromDate as DateTime?;
+    var toDate = ViewBag.ToDate as DateTime?;
+    var searchTerm = ViewBag.SearchTerm as string;
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <div>
+                <h1 class="admin-page-title">
+                    <i data-lucide="credit-card"></i>
+                    Giao dịch thanh toán
+                </h1>
+            </div>
+            <a href="@Url.Action("Index", "PaymentManagement")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="chevrons-left"></i>
+                Quay lại tổng quan
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-success">
+            <i data-lucide="check-circle"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="admin-alert admin-alert-danger">
+            <i data-lucide="alert-circle"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng giá trị</h3>
+                    <p class="value">@stats.TotalAmount.ToString("N0")₫</p>
+                    <p class="change">Tất cả giao dịch</p>
+                </div>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Phí nền tảng</h3>
+                    <p class="value">@stats.TotalPlatformFee.ToString("N0")₫</p>
+                    <p class="change">Tổng phí thu</p>
+                </div>
+                <div class="admin-stat-card-icon success">
+                    <i data-lucide="percent"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Hoàn thành</h3>
+                    <p class="value">@stats.CompletedCount</p>
+                    <p class="change">Giao dịch thành công</p>
+                </div>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Thất bại</h3>
+                    <p class="value">@stats.FailedCount</p>
+                    <p class="change">Cần xem xét</p>
+                </div>
+                <div class="admin-stat-card-icon danger">
+                    <i data-lucide="x-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="admin-filters">
+        <form method="get" action="@Url.Action("Transactions")">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="admin-form-label">Trạng thái</label>
+                    <select name="status" class="admin-form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(statusFilter))">Tất cả</option>
+                        <option value="pending" selected="@(statusFilter == "pending")">Đang chờ</option>
+                        <option value="completed" selected="@(statusFilter == "completed")">Hoàn thành</option>
+                        <option value="failed" selected="@(statusFilter == "failed")">Thất bại</option>
+                        <option value="refunded" selected="@(statusFilter == "refunded")">Đã hoàn tiền</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="admin-form-label">Phương thức</label>
+                    <select name="paymentMethod" class="admin-form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(paymentMethodFilter))">Tất cả</option>
+                        <option value="COD" selected="@(paymentMethodFilter == "COD")">COD</option>
+                        <option value="VNPay" selected="@(paymentMethodFilter == "VNPay")">VNPay</option>
+                        <option value="MoMo" selected="@(paymentMethodFilter == "MoMo")">MoMo</option>
+                        <option value="ZaloPay" selected="@(paymentMethodFilter == "ZaloPay")">ZaloPay</option>
+                        <option value="BankTransfer" selected="@(paymentMethodFilter == "BankTransfer")">Chuyển khoản</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="admin-form-label">Từ ngày</label>
+                    <input type="date" name="fromDate" class="admin-form-select" value="@(fromDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="admin-form-label">Đến ngày</label>
+                    <input type="date" name="toDate" class="admin-form-select" value="@(toDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="admin-form-label">Tìm kiếm</label>
+                    <input type="text" name="search" class="admin-form-select" placeholder="Mã GD, email..." value="@searchTerm" />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="admin-btn admin-btn-primary" style="width:100%">
+                        <i data-lucide="search"></i>
+                        Lọc
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tab Links -->
+    <div class="admin-filter-tabs">
+        <a href="@Url.Action("Transactions", "PaymentManagement", new { status = "pending" })" class="admin-filter-tab @(statusFilter == "pending" ? "active" : "")">
+            <i data-lucide="clock" style="width:14px;height:14px"></i>
+            Đang chờ (@stats.PendingCount)
+        </a>
+        <a href="@Url.Action("Transactions", "PaymentManagement", new { status = "completed" })" class="admin-filter-tab @(statusFilter == "completed" ? "active" : "")">
+            <i data-lucide="check-circle" style="width:14px;height:14px"></i>
+            Hoàn thành (@stats.CompletedCount)
+        </a>
+        <a href="@Url.Action("Transactions", "PaymentManagement", new { status = "failed" })" class="admin-filter-tab @(statusFilter == "failed" ? "active" : "")">
+            <i data-lucide="x-circle" style="width:14px;height:14px"></i>
+            Thất bại (@stats.FailedCount)
+        </a>
+        <a href="@Url.Action("Transactions", "PaymentManagement")" class="admin-filter-tab @(string.IsNullOrEmpty(statusFilter) ? "active" : "")">
+            <i data-lucide="list" style="width:14px;height:14px"></i>
+            Tất cả
+        </a>
+    </div>
+
+    <!-- Transactions List -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Mã GD</th>
+                        <th>Đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Seller</th>
+                        <th>Phương thức</th>
+                        <th>Số tiền</th>
+                        <th>Phí</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th style="width:120px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="admin-badge admin-badge-secondary">
+                                    @(transaction.TransactionReference ?? "N/A")
+                                </span>
+                            </td>
+                            <td>
+                                @if (transaction.Order != null)
+                                {
+                                    <a href="@Url.Action("OrderDetail", "Admin", new { id = transaction.OrderId })" style="font-weight:500;">
+                                        @transaction.Order.OrderNumber
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--admin-text-light);">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (transaction.Customer != null)
+                                {
+                                    <div style="font-weight:500;">@transaction.Customer.Email</div>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--admin-text-light);">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (transaction.Seller != null)
+                                {
+                                    <span style="font-size:0.875rem;">@transaction.Seller.Email</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--admin-text-light);">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="admin-badge admin-badge-info">
+                                    <i data-lucide="credit-card" style="width:12px;height:12px"></i>
+                                    @transaction.PaymentMethod
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@transaction.Amount.ToString("N0")₫</strong>
+                            </td>
+                            <td>@transaction.PlatformFee.ToString("N0")₫</td>
+                            <td>
+                                @switch (transaction.Status?.ToLower())
+                                {
+                                    case "completed":
+                                        <span class="admin-badge admin-badge-success"><i data-lucide="check-circle" style="width:12px;height:12px"></i> Hoàn thành</span>
+                                        break;
+                                    case "pending":
+                                        <span class="admin-badge admin-badge-warning"><i data-lucide="clock" style="width:12px;height:12px"></i> Đang chờ</span>
+                                        break;
+                                    case "failed":
+                                        <span class="admin-badge admin-badge-danger"><i data-lucide="x-circle" style="width:12px;height:12px"></i> Thất bại</span>
+                                        break;
+                                    case "refunded":
+                                        <span class="admin-badge admin-badge-secondary"><i data-lucide="rotate-ccw" style="width:12px;height:12px"></i> Đã hoàn</span>
+                                        break;
+                                    default:
+                                        <span class="admin-badge">@transaction.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td><div style="font-size:0.875rem;">@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div></td>
+                            <td class="actions">
+                                <a href="@Url.Action("TransactionDetails", new { id = transaction.Id })" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem chi tiết">
+                                    <i data-lucide="eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (totalPages > 1)
+            {
+                <div class="admin-pagination">
+                    @if (currentPage > 1)
+                    {
+                        <a href="?page=@(currentPage - 1)&status=@statusFilter&paymentMethod=@paymentMethodFilter&fromDate=@(fromDate?.ToString("yyyy-MM-dd"))&toDate=@(toDate?.ToString("yyyy-MM-dd"))&search=@searchTerm" class="admin-pagination-btn">
+                            <i data-lucide="chevron-left"></i> Trước
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="admin-pagination-btn" disabled><i data-lucide="chevron-left"></i> Trước</button>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <a href="?page=@i&status=@statusFilter&paymentMethod=@paymentMethodFilter&fromDate=@(fromDate?.ToString("yyyy-MM-dd"))&toDate=@(toDate?.ToString("yyyy-MM-dd"))&search=@searchTerm" class="admin-pagination-btn @(i == currentPage ? "active" : "")">@i</a>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <a href="?page=@(currentPage + 1)&status=@statusFilter&paymentMethod=@paymentMethodFilter&fromDate=@(fromDate?.ToString("yyyy-MM-dd"))&toDate=@(toDate?.ToString("yyyy-MM-dd"))&search=@searchTerm" class="admin-pagination-btn">
+                            Tiếp <i data-lucide="chevron-right"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="admin-pagination-btn" disabled>Tiếp <i data-lucide="chevron-right"></i></button>
+                    }
+                </div>
+
+                <div class="admin-text-center" style="margin-top:var(--spacing-md);color:var(--admin-text-light);font-size:0.875rem;">
+                    Trang @currentPage / @totalPages
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding:3rem;">
+                <i data-lucide="inbox" style="width:64px;height:64px;color:var(--admin-text-muted);margin-bottom:1rem"></i>
+                <h3 style="margin-bottom:0.5rem;">Không có giao dịch nào</h3>
+                <p style="color:var(--admin-text-light);">Không tìm thấy giao dịch thanh toán phù hợp với bộ lọc</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>lucide.createIcons();</script>
+}

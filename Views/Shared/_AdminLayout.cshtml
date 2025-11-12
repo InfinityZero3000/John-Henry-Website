@@ -315,6 +315,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/admin-script.js"></script>
     
     <script>
@@ -412,6 +413,110 @@
                 console.log('Backup restore:', savedScrollPosition);
             }
         }, 100);
+
+        // ========== SIDEBAR TOGGLE FOR RESPONSIVE ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const adminWrapper = document.querySelector('.admin-wrapper');
+            
+            if (sidebarToggle && sidebar) {
+                // Toggle sidebar on button click
+                sidebarToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    sidebar.classList.toggle('show');
+                    
+                    // Add overlay when sidebar is open on mobile
+                    if (window.innerWidth <= 991) {
+                        if (sidebar.classList.contains('show')) {
+                            // Hide toggle button when sidebar opens
+                            sidebarToggle.style.opacity = '0';
+                            sidebarToggle.style.visibility = 'hidden';
+                            sidebarToggle.style.pointerEvents = 'none';
+                            
+                            // Create overlay
+                            let overlay = document.querySelector('.admin-sidebar-overlay');
+                            if (!overlay) {
+                                overlay = document.createElement('div');
+                                overlay.className = 'admin-sidebar-overlay';
+                                document.body.appendChild(overlay);
+                                
+                                // Click overlay to close sidebar
+                                overlay.addEventListener('click', function() {
+                                    sidebar.classList.remove('show');
+                                    overlay.remove();
+                                    
+                                    // Show toggle button again
+                                    sidebarToggle.style.opacity = '1';
+                                    sidebarToggle.style.visibility = 'visible';
+                                    sidebarToggle.style.pointerEvents = 'auto';
+                                });
+                            }
+                        } else {
+                            // Remove overlay
+                            const overlay = document.querySelector('.admin-sidebar-overlay');
+                            if (overlay) {
+                                overlay.remove();
+                            }
+                            
+                            // Show toggle button again
+                            sidebarToggle.style.opacity = '1';
+                            sidebarToggle.style.visibility = 'visible';
+                            sidebarToggle.style.pointerEvents = 'auto';
+                        }
+                    }
+                    
+                    // Update toggle icon
+                    const icon = sidebarToggle.querySelector('i');
+                    if (icon) {
+                        const isOpen = sidebar.classList.contains('show');
+                        // Change icon based on state
+                        if (window.innerWidth <= 991) {
+                            // Mobile: use X when open, menu when closed
+                            lucide.createIcons();
+                        }
+                    }
+                });
+                
+                // Close sidebar when clicking menu item on mobile
+                if (window.innerWidth <= 991) {
+                    const menuLinks = sidebar.querySelectorAll('.menu-link');
+                    menuLinks.forEach(link => {
+                        link.addEventListener('click', function() {
+                            sidebar.classList.remove('show');
+                            const overlay = document.querySelector('.admin-sidebar-overlay');
+                            if (overlay) {
+                                overlay.remove();
+                            }
+                            
+                            // Show toggle button again
+                            sidebarToggle.style.opacity = '1';
+                            sidebarToggle.style.visibility = 'visible';
+                            sidebarToggle.style.pointerEvents = 'auto';
+                        });
+                    });
+                }
+                
+                // Handle window resize
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 991) {
+                        // Desktop: remove mobile classes and overlay
+                        sidebar.classList.remove('show');
+                        const overlay = document.querySelector('.admin-sidebar-overlay');
+                        if (overlay) {
+                            overlay.remove();
+                        }
+                        
+                        // Ensure toggle button is visible on desktop
+                        sidebarToggle.style.opacity = '1';
+                        sidebarToggle.style.visibility = 'visible';
+                        sidebarToggle.style.pointerEvents = 'auto';
+                    }
+                });
+            }
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

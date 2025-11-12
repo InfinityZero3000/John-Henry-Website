@@ -31,13 +31,17 @@
                     <h5 class="admin-card-title">Thông tin mã giảm giá</h5>
                 </div>
                 <div class="admin-card-body">
-                    <form asp-action="Create" method="post">
+                    <!-- Validation Summary -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <form id="couponForm" method="post" action="/Coupon/Create">
+                        @Html.AntiForgeryToken()
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="admin-form-group">
                                     <label asp-for="Code" class="admin-label">Mã giảm giá <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input asp-for="Code" class="admin-input" placeholder="VD: SUMMER2025" />
+                                        <input asp-for="Code" class="admin-input" placeholder="VD: SUMMER2025" required />
                                         <button type="button" class="admin-btn admin-btn-secondary" onclick="generateCode()">
                                             <i data-lucide="shuffle"></i> Tạo tự động
                                         </button>
@@ -48,7 +52,7 @@
                             <div class="col-md-6">
                                 <div class="admin-form-group">
                                     <label asp-for="Name" class="admin-label">Tên mã giảm giá <span class="text-danger">*</span></label>
-                                    <input asp-for="Name" class="admin-input" placeholder="VD: Giảm giá mùa hè" />
+                                    <input asp-for="Name" class="admin-input" placeholder="VD: Giảm giá mùa hè" required />
                                     <span asp-validation-for="Name" class="text-danger"></span>
                                 </div>
                             </div>
@@ -64,10 +68,10 @@
                             <div class="col-md-6">
                                 <div class="admin-form-group">
                                     <label asp-for="Type" class="admin-label">Loại giảm giá <span class="text-danger">*</span></label>
-                                    <select asp-for="Type" class="admin-input" onchange="toggleDiscountType()">
+                                    <select asp-for="Type" class="admin-input" onchange="toggleDiscountType()" required>
                                         <option value="">Chọn loại giảm giá</option>
                                         <option value="percentage">Phần trăm (%)</option>
-                                        <option value="fixed">Số tiền cố định (VNĐ)</option>
+                                        <option value="fixed_amount">Số tiền cố định (VNĐ)</option>
                                     </select>
                                     <span asp-validation-for="Type" class="text-danger"></span>
                                 </div>
@@ -76,7 +80,7 @@
                                 <div class="admin-form-group">
                                     <label asp-for="Value" class="admin-label">Giá trị giảm <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input asp-for="Value" type="number" step="0.01" class="admin-input" placeholder="0" min="0" />
+                                        <input asp-for="Value" type="number" step="0.01" class="admin-input" placeholder="0" min="0.01" required />
                                         <span class="input-group-text" id="discount-unit">%</span>
                                     </div>
                                     <span asp-validation-for="Value" class="text-danger"></span>
@@ -177,6 +181,37 @@
             if (startDateInput && !startDateInput.value) {
                 startDateInput.value = today;
             }
+
+            // Show validation summary if there are errors
+            const validationSummary = document.querySelector('[data-valmsg-summary="true"]');
+            if (validationSummary && validationSummary.querySelector('ul li')) {
+                validationSummary.style.display = 'block';
+            }
+
+            // Add form submit listener for debugging
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    console.log('Form submitting...');
+                    console.log('Form action:', form.action);
+                    console.log('Form method:', form.method);
+                    
+                    // Log form data
+                    const formData = new FormData(form);
+                    console.log('Form data:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`  ${key}: ${value}`);
+                    }
+                    
+                    // Check if form is valid
+                    if (!form.checkValidity()) {
+                        console.log('Form validation failed!');
+                        e.preventDefault();
+                        form.reportValidity();
+                        return false;
+                    }
+                });
+            }
         });
 
         function generateCode() {
@@ -186,6 +221,7 @@
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             document.querySelector('#Code').value = result;
+            console.log('Generated code:', result);
         }
 
         function toggleDiscountType() {
@@ -193,10 +229,12 @@
             const unit = document.querySelector('#discount-unit');
             const valueInput = document.querySelector('#Value');
             
+            console.log('Discount type changed to:', discountType);
+            
             if (discountType === 'percentage') {
                 unit.textContent = '%';
                 valueInput.setAttribute('max', '100');
-            } else if (discountType === 'fixed') {
+            } else if (discountType === 'fixed_amount') {
                 unit.textContent = 'VNĐ';
                 valueInput.removeAttribute('max');
             }

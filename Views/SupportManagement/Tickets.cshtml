@@ -1,8 +1,9 @@
 @model List<JohnHenryFashionWeb.Models.SupportTicket>
 @{
-    ViewData["Title"] = "Support Tickets";
+    ViewData["Title"] = "Quản lý Support Tickets";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    
+    ViewData["Breadcrumb"] = "<li class=\"breadcrumb-item active\">Support Tickets</li>";
+
     var stats = ViewBag.Statistics;
     var currentPage = ViewBag.CurrentPage ?? 1;
     var totalPages = ViewBag.TotalPages ?? 1;
@@ -12,419 +13,241 @@
     var searchTerm = ViewBag.SearchTerm as string;
 }
 
-<style>
-    .support-container {
-        padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: calc(100vh - 80px);
-    }
-
-    .page-header-glass {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .stats-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: transform 0.3s ease;
-    }
-
-    .stats-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .stats-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 1rem;
-    }
-
-    .filter-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .ticket-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    .ticket-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-
-    .priority-badge {
-        padding: 0.35rem 0.75rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .priority-urgent {
-        background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-        color: white;
-    }
-
-    .priority-high {
-        background: linear-gradient(135deg, #ffa502, #ff6348);
-        color: white;
-    }
-
-    .priority-medium {
-        background: linear-gradient(135deg, #ffd32a, #ffb142);
-        color: white;
-    }
-
-    .priority-low {
-        background: linear-gradient(135deg, #48dbfb, #0abde3);
-        color: white;
-    }
-
-    .status-badge {
-        padding: 0.35rem 0.75rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .status-open {
-        background: linear-gradient(135deg, #48dbfb, #0abde3);
-        color: white;
-    }
-
-    .status-inprogress {
-        background: linear-gradient(135deg, #ffd32a, #ffb142);
-        color: white;
-    }
-
-    .status-resolved {
-        background: linear-gradient(135deg, #1dd1a1, #10ac84);
-        color: white;
-    }
-
-    .status-closed {
-        background: linear-gradient(135deg, #a29bfe, #6c5ce7);
-        color: white;
-    }
-
-    .btn-glass {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #667eea;
-        padding: 0.5rem 1.5rem;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-    }
-
-    .btn-glass:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .pagination-glass .page-link {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #667eea;
-        margin: 0 0.25rem;
-        border-radius: 8px;
-    }
-
-    .pagination-glass .page-link:hover {
-        background: rgba(255, 255, 255, 1);
-        transform: translateY(-2px);
-    }
-
-    .pagination-glass .page-item.active .page-link {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-color: transparent;
-        color: white;
-    }
-
-    .ticket-meta {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #666;
-    }
-
-    .ticket-meta i {
-        color: #764ba2;
-    }
-</style>
-
-<div class="support-container">
+<div class="admin-content">
     <!-- Page Header -->
-    <div class="page-header-glass">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="mb-2" style="color: #667eea; font-weight: 700;">
-                    <i class="fas fa-ticket-alt me-2"></i>Quản lý Support Tickets
-                </h2>
-                <p class="text-muted mb-0">Quản lý và xử lý các yêu cầu hỗ trợ từ khách hàng</p>
-            </div>
+    <div class="admin-page-header">
+        <div class="admin-flex-between">
+            <h1 class="admin-page-title">
+                <i data-lucide="headphones"></i>
+                Support Tickets
+            </h1>
+            <a href="@Url.Action("Index", "SupportManagement")" class="admin-btn admin-btn-secondary">
+                <i data-lucide="chevrons-left"></i>
+                Quay lại tổng quan
+            </a>
         </div>
+        <p class="admin-page-subtitle">Quản lý và xử lý support tickets từ khách hàng</p>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="stats-card">
-                <div class="stats-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                    <i class="fas fa-inbox text-white"></i>
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Tổng tickets</h3>
+                    <p class="value">@stats.TotalTickets</p>
+                    <p class="change">Tất cả tickets</p>
                 </div>
-                <h3 class="mb-1" style="color: #667eea;">@stats.TotalTickets</h3>
-                <p class="text-muted mb-0">Tổng Tickets</p>
+                <div class="admin-stat-card-icon primary">
+                    <i data-lucide="ticket"></i>
+                </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="stats-card">
-                <div class="stats-icon" style="background: linear-gradient(135deg, #48dbfb, #0abde3);">
-                    <i class="fas fa-folder-open text-white"></i>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang mở</h3>
+                    <p class="value">@stats.OpenTickets</p>
+                    <p class="change">Cần xử lý</p>
                 </div>
-                <h3 class="mb-1" style="color: #0abde3;">@stats.OpenTickets</h3>
-                <p class="text-muted mb-0">Tickets Mở</p>
+                <div class="admin-stat-card-icon warning">
+                    <i data-lucide="alert-circle"></i>
+                </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="stats-card">
-                <div class="stats-icon" style="background: linear-gradient(135deg, #ffd32a, #ffb142);">
-                    <i class="fas fa-spinner text-white"></i>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Đang xử lý</h3>
+                    <p class="value">@stats.InProgressTickets</p>
+                    <p class="change">Đang giải quyết</p>
                 </div>
-                <h3 class="mb-1" style="color: #ffb142;">@stats.InProgressTickets</h3>
-                <p class="text-muted mb-0">Đang Xử Lý</p>
+                <div class="admin-stat-card-icon info">
+                    <i data-lucide="clock"></i>
+                </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="stats-card">
-                <div class="stats-icon" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
-                    <i class="fas fa-exclamation-triangle text-white"></i>
+
+        <div class="admin-stat-card">
+            <div class="admin-stat-card-content">
+                <div class="admin-stat-card-info">
+                    <h3>Ưu tiên cao</h3>
+                    <p class="value">@stats.HighPriorityCount</p>
+                    <p class="change">Cần ưu tiên</p>
                 </div>
-                <h3 class="mb-1" style="color: #ee5a6f;">@stats.HighPriorityCount</h3>
-                <p class="text-muted mb-0">Ưu Tiên Cao</p>
+                <div class="admin-stat-card-icon danger">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filter-card">
-        <form method="get" asp-action="Tickets">
-            <div class="row g-3">
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Trạng thái</label>
-                    <select name="status" class="form-select">
-                        <option value="">Tất cả</option>
-                        <option value="Open" selected="@(statusFilter == "Open")">Mở</option>
-                        <option value="InProgress" selected="@(statusFilter == "InProgress")">Đang xử lý</option>
-                        <option value="Resolved" selected="@(statusFilter == "Resolved")">Đã giải quyết</option>
-                        <option value="Closed" selected="@(statusFilter == "Closed")">Đã đóng</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Độ ưu tiên</label>
-                    <select name="priority" class="form-select">
-                        <option value="">Tất cả</option>
-                        <option value="Urgent" selected="@(priorityFilter == "Urgent")">Khẩn cấp</option>
-                        <option value="High" selected="@(priorityFilter == "High")">Cao</option>
-                        <option value="Medium" selected="@(priorityFilter == "Medium")">Trung bình</option>
-                        <option value="Low" selected="@(priorityFilter == "Low")">Thấp</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Danh mục</label>
-                    <select name="category" class="form-select">
-                        <option value="">Tất cả</option>
-                        <option value="Product Issue" selected="@(categoryFilter == "Product Issue")">Sản phẩm</option>
-                        <option value="Order Issue" selected="@(categoryFilter == "Order Issue")">Đơn hàng</option>
-                        <option value="Payment" selected="@(categoryFilter == "Payment")">Thanh toán</option>
-                        <option value="Account" selected="@(categoryFilter == "Account")">Tài khoản</option>
-                        <option value="Other" selected="@(categoryFilter == "Other")">Khác</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Tìm kiếm</label>
-                    <input type="text" name="search" class="form-control" 
-                           placeholder="Ticket #, Subject, Email..." 
-                           value="@searchTerm">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label d-block">&nbsp;</label>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-2"></i>Lọc
-                    </button>
-                </div>
-            </div>
-        </form>
+    <!-- Tab Links -->
+    <div class="admin-filter-tabs">
+        <a href="@Url.Action("Tickets", "SupportManagement", new { status = "open" })" class="admin-filter-tab @(statusFilter == "open" ? "active" : "")">
+            <i data-lucide="circle" style="width:14px;height:14px"></i>
+            Đang mở (@stats.OpenTickets)
+        </a>
+        <a href="@Url.Action("Tickets", "SupportManagement", new { status = "in_progress" })" class="admin-filter-tab @(statusFilter == "in_progress" ? "active" : "")">
+            <i data-lucide="refresh-cw" style="width:14px;height:14px"></i>
+            Đang xử lý (@stats.InProgressTickets)
+        </a>
+        <a href="@Url.Action("Tickets", "SupportManagement", new { status = "resolved" })" class="admin-filter-tab @(statusFilter == "resolved" ? "active" : "")">
+            <i data-lucide="check-circle" style="width:14px;height:14px"></i>
+            Đã giải quyết (@stats.ResolvedTickets)
+        </a>
+        <a href="@Url.Action("Tickets", "SupportManagement")" class="admin-filter-tab @(string.IsNullOrEmpty(statusFilter) ? "active" : "")">
+            <i data-lucide="list" style="width:14px;height:14px"></i>
+            Tất cả (@stats.TotalTickets)
+        </a>
     </div>
 
-    <!-- Tickets List -->
+    <!-- Tickets Table -->
     @if (Model != null && Model.Any())
     {
-        foreach (var ticket in Model)
-        {
-            <div class="ticket-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center mb-2">
-                            <h5 class="mb-0 me-3">
-                                <a href="@Url.Action("TicketDetails", new { id = ticket.Id })" 
-                                   style="color: #667eea; text-decoration: none;">
-                                    #@ticket.TicketNumber
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Ticket Number</th>
+                        <th>Tiêu đề</th>
+                        <th>Khách hàng</th>
+                        <th>Danh mục</th>
+                        <th>Độ ưu tiên</th>
+                        <th>Trạng thái</th>
+                        <th>Giao cho</th>
+                        <th>Ngày tạo</th>
+                        <th style="width:120px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model)
+                    {
+                        <tr>
+                            <td><strong>#@ticket.TicketNumber</strong></td>
+                            <td>
+                                <div style="font-weight:500;">@ticket.Subject</div>
+                                @if (!string.IsNullOrEmpty(ticket.Description) && ticket.Description.Length > 50)
+                                {
+                                    <div style="font-size:0.8125rem;color:var(--admin-text-light);">@ticket.Description.Substring(0, 50)...</div>
+                                }
+                            </td>
+                            <td>
+                                @if (ticket.User != null)
+                                {
+                                    <div style="font-weight:500;">@ticket.User.Email</div>
+                                    <div style="font-size:0.8125rem;color:var(--admin-text-light);">@ticket.UserType</div>
+                                }
+                            </td>
+                            <td><span class="admin-badge admin-badge-info">@ticket.Category</span></td>
+                            <td>
+                                @switch (ticket.Priority?.ToLower())
+                                {
+                                    case "urgent":
+                                        <span class="admin-badge admin-badge-danger"><i data-lucide="alert-octagon" style="width:12px;height:12px"></i> Khẩn cấp</span>
+                                        break;
+                                    case "high":
+                                        <span class="admin-badge admin-badge-warning"><i data-lucide="alert-triangle" style="width:12px;height:12px"></i> Cao</span>
+                                        break;
+                                    case "medium":
+                                        <span class="admin-badge admin-badge-info"><i data-lucide="info" style="width:12px;height:12px"></i> TB</span>
+                                        break;
+                                    case "low":
+                                        <span class="admin-badge admin-badge-secondary"><i data-lucide="minus-circle" style="width:12px;height:12px"></i> Thấp</span>
+                                        break;
+                                    default:
+                                        <span class="admin-badge">@ticket.Priority</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @switch (ticket.Status?.ToLower())
+                                {
+                                    case "open":
+                                        <span class="admin-badge admin-badge-warning"><i data-lucide="circle" style="width:12px;height:12px"></i> Đang mở</span>
+                                        break;
+                                    case "in_progress":
+                                        <span class="admin-badge admin-badge-info"><i data-lucide="refresh-cw" style="width:12px;height:12px"></i> Đang xử lý</span>
+                                        break;
+                                    case "resolved":
+                                        <span class="admin-badge admin-badge-success"><i data-lucide="check-circle" style="width:12px;height:12px"></i> Đã giải quyết</span>
+                                        break;
+                                    case "closed":
+                                        <span class="admin-badge admin-badge-secondary"><i data-lucide="x-circle" style="width:12px;height:12px"></i> Đã đóng</span>
+                                        break;
+                                    default:
+                                        <span class="admin-badge">@ticket.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (ticket.AssignedAdmin != null)
+                                {
+                                    <span style="font-size:0.875rem;">@ticket.AssignedAdmin.Email</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--admin-text-light);font-size:0.875rem;"><i data-lucide="user-x" style="width:12px;height:12px"></i> Chưa giao</span>
+                                }
+                            </td>
+                            <td><div style="font-size:0.875rem;">@ticket.CreatedAt.ToString("dd/MM/yyyy")</div></td>
+                            <td class="actions">
+                                <a href="@Url.Action("TicketDetails", "SupportManagement", new { id = ticket.Id })" class="admin-btn admin-btn-sm admin-btn-secondary" title="Xem chi tiết">
+                                    <i data-lucide="eye"></i>
                                 </a>
-                            </h5>
-                            <span class="priority-badge priority-@ticket.Priority?.ToLower()">
-                                @ticket.Priority
-                            </span>
-                            <span class="status-badge status-@ticket.Status?.ToLower() ms-2">
-                                @(ticket.Status == "InProgress" ? "Đang xử lý" : 
-                                  ticket.Status == "Open" ? "Mở" : 
-                                  ticket.Status == "Resolved" ? "Đã giải quyết" : "Đã đóng")
-                            </span>
-                        </div>
-                        <h6 class="mb-2" style="color: #333;">@ticket.Subject</h6>
-                        <p class="text-muted mb-2">
-                            @(ticket.Description?.Length > 150 ? ticket.Description.Substring(0, 150) + "..." : ticket.Description)
-                        </p>
-                        <div class="ticket-meta">
-                            <span>
-                                <i class="fas fa-user"></i>
-                                @(ticket.User?.Email ?? "N/A")
-                            </span>
-                            <span>
-                                <i class="fas fa-tag"></i>
-                                @ticket.Category
-                            </span>
-                            <span>
-                                <i class="fas fa-clock"></i>
-                                @ticket.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                            </span>
-                            @if (ticket.AssignedAdmin != null)
-                            {
-                                <span>
-                                    <i class="fas fa-user-tie"></i>
-                                    @ticket.AssignedAdmin.Email
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="text-warning">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    Chưa gán
-                                </span>
-                            }
-                            <span>
-                                <i class="fas fa-comments"></i>
-                                @ticket.ReplyCount replies
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <a href="@Url.Action("TicketDetails", new { id = ticket.Id })" 
-                           class="btn btn-glass">
-                            <i class="fas fa-eye me-2"></i>Xem chi tiết
-                        </a>
-                    </div>
-                </div>
-            </div>
-        }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
 
-        <!-- Pagination -->
-        @if (totalPages > 1)
-        {
-            <nav aria-label="Pagination" class="mt-4">
-                <ul class="pagination pagination-glass justify-content-center">
+            @if (totalPages > 1)
+            {
+                <div class="admin-pagination">
                     @if (currentPage > 1)
                     {
-                        <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Tickets", new { 
-                                page = currentPage - 1, 
-                                status = statusFilter,
-                                priority = priorityFilter,
-                                category = categoryFilter,
-                                search = searchTerm 
-                            })">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                        </li>
+                        <a href="?page=@(currentPage - 1)&status=@statusFilter&priority=@priorityFilter&category=@categoryFilter&search=@searchTerm" class="admin-pagination-btn"><i data-lucide="chevron-left"></i> Trước</a>
+                    }
+                    else
+                    {
+                        <button class="admin-pagination-btn" disabled><i data-lucide="chevron-left"></i> Trước</button>
                     }
 
                     @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
                     {
-                        <li class="page-item @(i == currentPage ? "active" : "")">
-                            <a class="page-link" href="@Url.Action("Tickets", new { 
-                                page = i,
-                                status = statusFilter,
-                                priority = priorityFilter,
-                                category = categoryFilter,
-                                search = searchTerm 
-                            })">@i</a>
-                        </li>
+                        <a href="?page=@i&status=@statusFilter&priority=@priorityFilter&category=@categoryFilter&search=@searchTerm" class="admin-pagination-btn @(i == currentPage ? "active" : "")">@i</a>
                     }
 
                     @if (currentPage < totalPages)
                     {
-                        <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Tickets", new { 
-                                page = currentPage + 1,
-                                status = statusFilter,
-                                priority = priorityFilter,
-                                category = categoryFilter,
-                                search = searchTerm 
-                            })">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
+                        <a href="?page=@(currentPage + 1)&status=@statusFilter&priority=@priorityFilter&category=@categoryFilter&search=@searchTerm" class="admin-pagination-btn">Tiếp <i data-lucide="chevron-right"></i></a>
                     }
-                </ul>
-            </nav>
-        }
+                    else
+                    {
+                        <button class="admin-pagination-btn" disabled>Tiếp <i data-lucide="chevron-right"></i></button>
+                    }
+                </div>
+
+                <div class="admin-text-center" style="margin-top:var(--spacing-md);color:var(--admin-text-light);font-size:0.875rem;">
+                    Trang @currentPage / @totalPages (Tổng @stats.TotalTickets tickets)
+                </div>
+            }
+        </div>
     }
     else
     {
-        <div class="filter-card text-center py-5">
-            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-            <h5 class="text-muted">Không có ticket nào</h5>
-            <p class="text-muted">Hiện tại không có ticket nào phù hợp với bộ lọc</p>
+        <div class="admin-card">
+            <div class="admin-card-body admin-text-center" style="padding:3rem;">
+                <i data-lucide="inbox" style="width:64px;height:64px;color:var(--admin-text-muted);margin-bottom:1rem"></i>
+                <h3 style="margin-bottom:0.5rem;">Không có tickets</h3>
+                <p style="color:var(--admin-text-light);">Không tìm thấy tickets nào phù hợp với bộ lọc</p>
+            </div>
         </div>
     }
 </div>
 
 @section Scripts {
-    <script>
-        // Auto-refresh every 30 seconds
-        setTimeout(function() {
-            location.reload();
-        }, 30000);
-    </script>
+    <script>lucide.createIcons();</script>
 }

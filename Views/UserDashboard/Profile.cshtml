@@ -11,14 +11,8 @@
             <div class="sidebar-content">
                 <div class="text-center mb-3">
                     <div class="user-avatar">
-                        @if (!string.IsNullOrEmpty(Model.Avatar))
-                        {
-                            <img src="@Model.Avatar" alt="Avatar" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
-                        }
-                        else
-                        {
-                            <i data-lucide="user-circle" style="width: 60px; height: 60px; color: #6c757d;"></i>
-                        }
+                        <img src="@Model.Avatar" alt="Avatar" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;" 
+                             onerror="this.onerror=null; this.src='/images/default-avatar.svg';">
                     </div>
                     <h5 class="mt-2">@Model.FullName</h5>
                     <p class="text-muted">@Model.Email</p>
@@ -181,17 +175,9 @@
                         </div>
                         <div class="card-body text-center">
                             <div class="avatar-preview mb-3">
-                                @if (!string.IsNullOrEmpty(Model.Avatar))
-                                {
-                                    <img src="@Model.Avatar" alt="Avatar" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="avatar-placeholder">
-                                        <i class="fas fa-user-circle fa-6x text-muted"></i>
-                                        <p class="text-muted mt-2">Chưa có ảnh đại diện</p>
-                                    </div>
-                                }
+                                <img src="@Model.Avatar" alt="Avatar" class="rounded-circle img-thumbnail" 
+                                     style="width: 150px; height: 150px; object-fit: cover;"
+                                     onerror="this.onerror=null; this.src='/images/default-avatar.svg';">
                             </div>
                             
                             <form asp-action="UpdateAvatar" method="post" enctype="multipart/form-data">

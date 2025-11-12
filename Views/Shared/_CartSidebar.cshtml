@@ -82,9 +82,18 @@
                     <a href="/Cart" class="btn btn-outline view-cart-btn">
                         Xem giỏ hàng
                     </a>
-                    <a href="/Checkout" class="btn btn-primary checkout-btn">
-                        Thanh toán
-                    </a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="/Payment/Checkout" class="btn btn-primary checkout-btn">
+                            Thanh toán
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Checkout" class="btn btn-primary checkout-btn">
+                            Thanh toán
+                        </a>
+                    }
                 </div>
             </div>
         }

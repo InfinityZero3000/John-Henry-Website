@@ -146,100 +146,149 @@ namespace JohnHenryFashionWeb.Controllers
 
         // Admin Management Actions
 
-        // GET: Coupon/Manage
+        // GET: Coupon/Manage - Redirect to Admin Coupons page
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Manage(int page = 1, string? search = null)
+        public IActionResult Manage(int page = 1, string? search = null)
         {
-            const int pageSize = 20;
-            
-            var query = _context.Coupons.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(c => c.Code.Contains(search) || 
-                                        c.Name.Contains(search) ||
-                                        (c.Description != null && c.Description.Contains(search)));
-                ViewBag.Search = search;
-            }
-
-            var totalCoupons = await query.CountAsync();
-            var coupons = await query
-                .OrderByDescending(c => c.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCoupons / pageSize);
-
-            return View(coupons);
+            return RedirectToAction("Coupons", "Admin");
         }
 
-        // GET: Coupon/Create
+        // GET: Coupon/Create - Redirect to Admin Coupons page
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            return View();
+            return RedirectToAction("Coupons", "Admin");
         }
 
-        // POST: Coupon/Create
+        // POST: Coupon/Create - Redirect to Admin Coupons page
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Coupon coupon)
+        public IActionResult Create(Coupon coupon)
+        {
+            return RedirectToAction("Coupons", "Admin");
+        }
+
+        /* DEPRECATED: Use /admin/coupons modal instead
+        // Original Create actions - keeping validation logic for reference
+        public async Task<IActionResult> CreateOriginal(Coupon coupon)
         {
             try
             {
-                if (ModelState.IsValid)
+                Console.WriteLine($"[CREATE COUPON] Starting - Code: {coupon.Code}, Name: {coupon.Name}, Type: {coupon.Type}, Value: {coupon.Value}");
+                
+                // Validation
+                if (string.IsNullOrWhiteSpace(coupon.Code))
                 {
-                    // Check if code already exists
-                    var existingCoupon = await _context.Coupons
-                        .FirstOrDefaultAsync(c => c.Code.ToUpper() == coupon.Code.ToUpper());
-                    
-                    if (existingCoupon != null)
-                    {
-                        ModelState.AddModelError("Code", "Mã giảm giá này đã tồn tại");
-                        return View(coupon);
-                    }
-
-                    coupon.Id = Guid.NewGuid();
-                    coupon.Code = coupon.Code.ToUpper();
-                    coupon.CreatedAt = DateTime.UtcNow;
-                    coupon.UpdatedAt = DateTime.UtcNow;
-
-                    _context.Coupons.Add(coupon);
-                    await _context.SaveChangesAsync();
-
-                    TempData["SuccessMessage"] = "Tạo mã giảm giá thành công!";
-                    return RedirectToAction(nameof(Manage));
+                    ModelState.AddModelError("Code", "Mã giảm giá không được để trống");
                 }
+
+                if (string.IsNullOrWhiteSpace(coupon.Name))
+                {
+                    ModelState.AddModelError("Name", "Tên mã giảm giá không được để trống");
+                }
+
+                if (string.IsNullOrWhiteSpace(coupon.Type))
+                {
+                    ModelState.AddModelError("Type", "Vui lòng chọn loại giảm giá");
+                }
+                else if (coupon.Type != "percentage" && coupon.Type != "fixed_amount")
+                {
+                    ModelState.AddModelError("Type", "Loại giảm giá không hợp lệ");
+                }
+
+                if (coupon.Value <= 0)
+                {
+                    ModelState.AddModelError("Value", "Giá trị giảm phải lớn hơn 0");
+                }
+
+                if (coupon.Type == "percentage" && coupon.Value > 100)
+                {
+                    ModelState.AddModelError("Value", "Giá trị giảm phần trăm không được vượt quá 100%");
+                }
+
+                if (coupon.EndDate.HasValue && coupon.StartDate.HasValue && coupon.EndDate < coupon.StartDate)
+                {
+                    ModelState.AddModelError("EndDate", "Ngày kết thúc phải sau ngày bắt đầu");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    Console.WriteLine("[CREATE COUPON] ModelState is invalid:");
+                    foreach (var key in ModelState.Keys)
+                    {
+                        var errors = ModelState[key]?.Errors;
+                        if (errors != null && errors.Count > 0)
+                        {
+                            foreach (var error in errors)
+                            {
+                                Console.WriteLine($"  {key}: {error.ErrorMessage}");
+                            }
+                        }
+                    }
+                    return View(coupon);
+                }
+
+                // Check if code already exists
+                var existingCoupon = await _context.Coupons
+                    .FirstOrDefaultAsync(c => c.Code.ToUpper() == coupon.Code.ToUpper());
+                
+                if (existingCoupon != null)
+                {
+                    Console.WriteLine($"[CREATE COUPON] Code already exists: {coupon.Code}");
+                    ModelState.AddModelError("Code", "Mã giảm giá này đã tồn tại");
+                    return View(coupon);
+                }
+
+                coupon.Id = Guid.NewGuid();
+                coupon.Code = coupon.Code.ToUpper();
+                coupon.CreatedAt = DateTime.UtcNow;
+                coupon.UpdatedAt = DateTime.UtcNow;
+                coupon.UsageCount = 0;
+
+                Console.WriteLine($"[CREATE COUPON] Adding to database - ID: {coupon.Id}");
+                _context.Coupons.Add(coupon);
+                await _context.SaveChangesAsync();
+                Console.WriteLine("[CREATE COUPON] Saved successfully!");
+
+                TempData["SuccessMessage"] = "Tạo mã giảm giá thành công!";
+                return RedirectToAction(nameof(Manage));
             }
-            catch
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "Có lỗi xảy ra khi tạo mã giảm giá");
+                Console.WriteLine($"[CREATE COUPON] Exception: {ex.Message}");
+                Console.WriteLine($"[CREATE COUPON] Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[CREATE COUPON] Inner Exception: {ex.InnerException.Message}");
+                }
+                ModelState.AddModelError("", $"Có lỗi xảy ra khi tạo mã giảm giá: {ex.Message}");
             }
 
             return View(coupon);
         }
+        */
 
-        // GET: Coupon/Edit/5
+
+        // GET: Coupon/Edit/5 - Redirect to Admin Coupons page
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(Guid id)
+        public IActionResult Edit(Guid id)
         {
-            var coupon = await _context.Coupons.FindAsync(id);
-            if (coupon == null)
-            {
-                return NotFound();
-            }
-
-            return View(coupon);
+            return RedirectToAction("Coupons", "Admin");
         }
 
-        // POST: Coupon/Edit/5
+        // POST: Coupon/Edit/5 - Redirect to Admin Coupons page
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Coupon coupon)
+        public IActionResult Edit(Guid id, Coupon coupon)
+        {
+            return RedirectToAction("Coupons", "Admin");
+        }
+
+        /* DEPRECATED: Use /admin/coupons modal instead
+        // Original Edit actions
+        public async Task<IActionResult> EditOriginal(Guid id, Coupon coupon)
         {
             if (id != coupon.Id)
             {
@@ -292,6 +341,7 @@ namespace JohnHenryFashionWeb.Controllers
 
             return View(coupon);
         }
+        */
 
         // POST: Coupon/Delete/5
         [HttpPost]

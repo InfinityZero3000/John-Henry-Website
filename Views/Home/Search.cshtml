@@ -1,0 +1,314 @@
+@model List<JohnHenryFashionWeb.ViewModels.ProductViewModel>
+
+@{
+    ViewData["Title"] = $"Tìm kiếm: {ViewBag.SearchQuery}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/john-henry-style.css" />
+    <link rel="stylesheet" href="~/css/product-filter-style.css" />
+    <style>
+        :root {
+            --jh-red: #951329;
+            --jh-dark-red: #95122A;
+            --jh-white: #FFFFFF;
+        }
+
+        .search-page {
+            min-height: 100vh;
+            padding-top: 2rem;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, var(--jh-red), var(--jh-dark-red));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .search-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .search-subtitle {
+            font-size: 1rem;
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        .products-section {
+            flex: 1;
+        }
+
+        .products-header {
+            background-color: white;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .no-results h3 {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results p {
+            color: #999;
+        }
+
+        @@media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .sidebar {
+                max-width: none;
+            }
+        }
+    </style>
+}
+
+<div class="search-page">
+    <!-- Search Header -->
+    <section class="search-header">
+        <div class="container">
+            <h1 class="search-title">Kết quả tìm kiếm: "@ViewBag.SearchQuery"</h1>
+            <p class="search-subtitle">Tìm thấy @ViewBag.TotalProducts sản phẩm</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Sidebar Filters -->
+            <div class="sidebar">
+                <form id="filter-form" method="get" action="@Url.Action("Search", "Home")">
+                    <input type="hidden" name="query" value="@ViewBag.SearchQuery" />
+                    
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Danh mục
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="filter-options">
+                            <div class="filter-option d-flex justify-content-between align-items-center">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="category" value="" class="me-2" 
+                                           @(string.IsNullOrEmpty(ViewBag.SelectedCategory) ? "checked" : "")>
+                                    Tất cả
+                                </label>
+                            </div>
+                            @if (ViewBag.Categories != null)
+                            {
+                                @foreach (var category in (List<JohnHenryFashionWeb.Models.Category>)ViewBag.Categories)
+                                {
+                                    <div class="filter-option d-flex justify-content-between align-items-center">
+                                        <label class="d-flex align-items-center mb-0">
+                                            <input type="radio" name="category" value="@category.Slug" class="me-2"
+                                                   @(ViewBag.SelectedCategory == category.Slug ? "checked" : "")>
+                                            @category.Name
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Màu sắc
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="color-options-new">
+                            <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                <label class="d-flex align-items-center mb-0">
+                                    <input type="radio" name="color" value="" class="me-2" 
+                                           @(string.IsNullOrEmpty(ViewBag.SelectedColor) ? "checked" : "")>
+                                    Tất cả
+                                </label>
+                            </div>
+                            @{
+                                var colors = new[] {
+                                    new { Name = "White", Value = "white", Color = "#fff", Border = "1px solid #ddd" },
+                                    new { Name = "Black", Value = "black", Color = "#000", Border = "" },
+                                    new { Name = "Navy", Value = "navy", Color = "#4a90e2", Border = "" },
+                                    new { Name = "Blue", Value = "blue", Color = "#5bc0eb", Border = "" },
+                                    new { Name = "Green", Value = "green", Color = "#9bc53d", Border = "" },
+                                    new { Name = "Red", Value = "red", Color = "#e55353", Border = "" }
+                                };
+
+                                foreach (var color in colors)
+                                {
+                                    <div class="color-row d-flex justify-content-between align-items-center mb-2">
+                                        <label class="d-flex align-items-center mb-0">
+                                            <input type="radio" name="color" value="@color.Value" class="me-2"
+                                                   @(ViewBag.SelectedColor == color.Value ? "checked" : "")>
+                                            @color.Name
+                                        </label>
+                                        <div class="color-square" style="background-color: @color.Color; @color.Border width: 16px; height: 16px;"></div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h5 class="d-flex justify-content-between align-items-center">
+                            Giá
+                            <i class="fas fa-chevron-down"></i>
+                        </h5>
+                        <div class="price-range-new">
+                            <div class="price-inputs">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-fill">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Tối thiểu</span>
+                                            <input type="number" name="minPrice" class="form-control" 
+                                                   value="@(ViewBag.MinPrice ?? 0)" min="0" step="100000">
+                                        </div>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Tối đa</span>
+                                            <input type="number" name="maxPrice" class="form-control" 
+                                                   value="@(ViewBag.MaxPrice ?? 3000000)" min="0" step="100000">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-danger btn-sm px-4 me-2">Áp dụng</button>
+                        <button type="button" class="btn btn-outline-dark btn-sm px-4 clear-filters">Xóa</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Products Section -->
+            <div class="products-section">
+                <div class="products-header">
+                    <div class="sort-options">
+                        <form method="get" action="@Url.Action("Search", "Home")" class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="query" value="@ViewBag.SearchQuery" />
+                            <input type="hidden" name="category" value="@ViewBag.SelectedCategory" />
+                            <input type="hidden" name="color" value="@ViewBag.SelectedColor" />
+                            <input type="hidden" name="minPrice" value="@ViewBag.MinPrice" />
+                            <input type="hidden" name="maxPrice" value="@ViewBag.MaxPrice" />
+                            <label for="sort-select">Sắp xếp theo</label>
+                            <select id="sort-select" name="sort" class="sort-select" onchange="this.form.submit()">
+                                <option value="default" selected="@(ViewBag.Sort == "default" ? "selected" : null)">Mặc định</option>
+                                <option value="name" selected="@(ViewBag.Sort == "name" ? "selected" : null)">Tên A-Z</option>
+                                <option value="price-low" selected="@(ViewBag.Sort == "price-low" ? "selected" : null)">Giá thấp đến cao</option>
+                                <option value="price-high" selected="@(ViewBag.Sort == "price-high" ? "selected" : null)">Giá cao đến thấp</option>
+                                <option value="newest" selected="@(ViewBag.Sort == "newest" ? "selected" : null)">Mới nhất</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="products-grid">
+                    <div class="row g-4">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var product in Model)
+                            {
+                                @await Html.PartialAsync("_ProductCard", product)
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <div class="no-results">
+                                    <i class="fas fa-search"></i>
+                                    <h3>Không tìm thấy sản phẩm</h3>
+                                    <p>Không có sản phẩm nào phù hợp với từ khóa "@ViewBag.SearchQuery"</p>
+                                    <a href="@Url.Action("Index", "Home")" class="btn btn-danger mt-3">Về trang chủ</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @* Pagination *@
+                @if (Model != null && Model.Any())
+                {
+                    @await Html.PartialAsync("_Pagination")
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear filters functionality
+            const clearFiltersBtn = document.querySelector('.clear-filters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    // Redirect to search page without filters
+                    window.location.href = '@Url.Action("Search", "Home")?query=@ViewBag.SearchQuery';
+                });
+            }
+
+            // Filter section toggle functionality
+            const filterTitles = document.querySelectorAll('.filter-section h5');
+            filterTitles.forEach(title => {
+                title.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    const content = this.nextElementSibling;
+
+                    if (content.style.display === 'none') {
+                        content.style.display = 'block';
+                        icon.classList.remove('fa-chevron-right');
+                        icon.classList.add('fa-chevron-down');
+                    } else {
+                        content.style.display = 'none';
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-right');
+                    }
+                });
+            });
+        });
+    </script>
+}

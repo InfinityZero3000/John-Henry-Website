@@ -79,6 +79,7 @@
     <link rel="stylesheet" href="~/css/john-henry-style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/product-card-additions.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/z-index-hierarchy.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive-mobile.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/JohnHenryFashionWeb.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
     
@@ -205,13 +206,13 @@
             height: auto;
             background: #FFFFFF;
             position: relative;
-            z-index: inherit;
+            z-index: 1;
         }
         
         .main-header .container {
             background: #FFFFFF;
             position: relative;
-            z-index: inherit;
+            z-index: 1;
         }
         
         .logo-section {
@@ -244,10 +245,13 @@
             flex: 1;
             max-width: 500px;
             margin: 0 30px;
+            position: relative;
+            /* z-index controlled by z-index-hierarchy.css */
         }
         
         .search-box {
             position: relative;
+            z-index: 1;
         }
         
         .search-box input {
@@ -258,6 +262,8 @@
             font-size: 14px;
             transition: all 0.3s ease;
             background-color: #dcddde;
+            position: relative;
+            z-index: 1;
         }
         
         .search-box input:focus {
@@ -271,6 +277,131 @@
             top: 50%;
             transform: translateY(-50%);
             color: #6c757d;
+            z-index: 2;
+        }
+        
+        /* Search Suggestions Dropdown */
+        .search-suggestions {
+            position: fixed !important;
+            /* Position will be calculated by JavaScript */
+            background: #ffffff !important; /* Pure white, no transparency */
+            border: none !important; /* No border */
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important; /* Softer shadow */
+            z-index: 999999999 !important; /* Maximum z-index */
+            max-height: 450px;
+            overflow-y: auto;
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: none;
+            pointer-events: auto !important;
+            backdrop-filter: none !important; /* Remove blur effect */
+            -webkit-backdrop-filter: none !important;
+            filter: none !important; /* Remove any filter effects */
+            transform: none !important; /* Remove any transform that creates stacking context */
+        }
+        
+        .suggestions-loading {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .suggestions-loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @@keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .suggestions-header {
+            padding: 14px 20px;
+            border-bottom: 2px solid #8b0000;
+            background: linear-gradient(135deg, #8b0000 0%, #a00000 100%); /* Red gradient header */
+            font-size: 14px;
+            color: #ffffff !important; /* White text */
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .suggestions-header strong {
+            color: #ffffff !important;
+        }
+        
+        .suggestions-list {
+            padding: 8px 0;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .suggestion-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        .suggestion-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .suggestion-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .suggestion-price {
+            font-size: 13px;
+            color: var(--jh-red);
+            font-weight: 600;
+        }
+        
+        .no-suggestions {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .view-all-results {
+            display: block;
+            padding: 12px 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            color: var(--jh-red);
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+        
+        .view-all-results:hover {
+            background: #f8f9fa;
         }
         
         .header-icons {
@@ -432,7 +563,7 @@
             padding: 2px 0;
             @* margin-top: 1px; *@
             position: relative;
-            z-index: inherit;
+            z-index: 1;
         }
         
         .nav-menu {
@@ -442,7 +573,7 @@
             padding: 0;
             list-style: none;
             position: relative;
-            z-index: inherit;
+            z-index: 1;
         }
         
         .nav-item {
@@ -498,7 +629,7 @@
             border-radius: 0;
             padding: 35px !important;
             display: none !important;
-            z-index: 9999;
+            z-index: 9990;
             opacity: 0;
             transform: translateY(-10px);
             transition: all 0.3s ease;
@@ -941,10 +1072,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 50px;
+            width: 66px;
             height: 35px;
             background: rgba(255,255,255,0.1);
-            border-radius: 8px;
             color: #ffffff;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
@@ -1089,11 +1219,16 @@
 
                 <!-- Search Section -->
                 <div class="search-section">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Áo thun nam, đầm, váy,..." class="form-control">
-                    </div>
+                    <form id="header-search-form" action="@Url.Action("Search", "Home")" method="get" class="search-box">
+                        <i class="fas fa-search" id="header-search-icon" style="cursor: pointer;"></i>
+                        <input type="text" name="query" id="header-search-input" placeholder="Áo thun nam, đầm, váy,..." class="form-control" autocomplete="off">
+                    </form>
                 </div>
+
+                <!-- Mobile Menu Toggle Button -->
+                <button class="mobile-menu-toggle d-lg-none" id="mobile-menu-toggle" aria-label="Menu">
+                    <i data-lucide="menu"></i>
+                </button>
 
                 <!-- Header Icons -->
                 <div class="header-icons">
@@ -1169,21 +1304,21 @@
                                     <div class="dropdown-category-item">
                                         <a href="/Home/JohnHenryShirt" class="dropdown-category with-arrow">ÁO NAM</a>
                                         <div class="submenu">
-                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO POLO</a>
-                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO SƠ MI</a>
-                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO THUN</a>
-                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO LEN</a>
-                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO KHOÁC</a>
-                                            <a href="/Home/JohnHenryShirt" class="submenu-item">ÁO VEST - BLAZER</a>
+                                            <a href="/Home/JohnHenry?category=Áo+Polo" class="submenu-item">ÁO POLO</a>
+                                            <a href="/Home/JohnHenry?category=Áo+Sơ+mi" class="submenu-item">ÁO SƠ MI</a>
+                                            <a href="/Home/JohnHenry?category=Áo+Thun" class="submenu-item">ÁO THUN</a>
+                                            <a href="/Home/JohnHenry?category=Áo+Len" class="submenu-item">ÁO LEN</a>
+                                            <a href="/Home/JohnHenry?category=Áo+Khoác" class="submenu-item">ÁO KHOÁC</a>
+                                            <a href="/Home/JohnHenry?category=Áo+Vest" class="submenu-item">ÁO VEST - BLAZER</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
                                         <a href="/Home/JohnHenryTrousers" class="dropdown-category with-arrow">QUẦN NAM</a>
                                         <div class="submenu">
-                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN KHAKI</a>
-                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN JEANS</a>
-                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN TÂY</a>
-                                            <a href="/Home/JohnHenryTrousers" class="submenu-item">QUẦN SHORT</a>
+                                            <a href="/Home/JohnHenry?category=Quần+Khaki" class="submenu-item">QUẦN KHAKI</a>
+                                            <a href="/Home/JohnHenry?category=Quần+Jeans" class="submenu-item">QUẦN JEANS</a>
+                                            <a href="/Home/JohnHenry?category=Quần+Tây" class="submenu-item">QUẦN TÂY</a>
+                                            <a href="/Home/JohnHenry?category=Quần+Short" class="submenu-item">QUẦN SHORT</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
@@ -1214,21 +1349,21 @@
                                     <div class="dropdown-category-item">
                                         <a href="/Home/FreelancerShirt" class="dropdown-category with-arrow">ÁO NỮ</a>
                                         <div class="submenu">
-                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO BLOUSE</a>
-                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO T-SHIRT</a>
-                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO SƠ MI</a>
-                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO POLO</a>
-                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO BLAZER</a>
-                                            <a href="/Home/FreelancerShirt" class="submenu-item">ÁO LEN</a>
+                                            <a href="/Home/Freelancer?category=Áo+Blouse" class="submenu-item">ÁO BLOUSE</a>
+                                            <a href="/Home/Freelancer?category=Áo+T-Shirt+Nữ" class="submenu-item">ÁO T-SHIRT</a>
+                                            <a href="/Home/Freelancer?category=Áo+Sơ+Mi+Nữ" class="submenu-item">ÁO SƠ MI</a>
+                                            <a href="/Home/Freelancer?category=Áo+Polo+Nữ" class="submenu-item">ÁO POLO</a>
+                                            <a href="/Home/Freelancer?category=Áo+Blazer" class="submenu-item">ÁO BLAZER</a>
+                                            <a href="/Home/Freelancer?category=Áo+Len+Nữ" class="submenu-item">ÁO LEN</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
                                         <a href="/Home/FreelancerTrousers" class="dropdown-category with-arrow">QUẦN NỮ</a>
                                         <div class="submenu">
-                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN JEAN</a>
-                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN TÂY</a>
-                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN SHORT</a>
-                                            <a href="/Home/FreelancerTrousers" class="submenu-item">QUẦN LEGGING</a>
+                                            <a href="/Home/Freelancer?category=Quần+Jean+Nữ" class="submenu-item">QUẦN JEAN</a>
+                                            <a href="/Home/Freelancer?category=Quần+Âu+Nữ" class="submenu-item">QUẦN TÂY</a>
+                                            <a href="/Home/Freelancer?category=Quần+Short+Nữ" class="submenu-item">QUẦN SHORT</a>
+                                            <a href="/Home/Freelancer?category=Quần+Legging+Nữ" class="submenu-item">QUẦN LEGGING</a>
                                         </div>
                                     </div>
                                     <div class="dropdown-category-item">
@@ -1283,6 +1418,125 @@
             <main role="main" class="pb-3">
                 @RenderBody()
             </main>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    <div class="mobile-nav-menu" id="mobile-nav-menu">
+        <div class="mobile-nav-header">
+            <h3>Menu</h3>
+            <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Đóng menu">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="mobile-nav-content">
+            <ul class="mobile-nav-list">
+                <li class="mobile-nav-item">
+                    <a href="/" class="mobile-nav-link">
+                        <i data-lucide="home"></i>
+                        <span>Trang Chủ</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item has-submenu">
+                    <a href="/Home/JohnHenry" class="mobile-nav-link">
+                        <i data-lucide="shirt"></i>
+                        <span>John Henry</span>
+                        <i data-lucide="chevron-down" class="submenu-icon"></i>
+                    </a>
+                    <ul class="mobile-submenu">
+                        <li class="mobile-submenu-item has-submenu">
+                            <a href="/Home/JohnHenryShirt" class="mobile-submenu-link">
+                                <span>Áo Nam</span>
+                                <i data-lucide="chevron-down" class="submenu-icon"></i>
+                            </a>
+                            <ul class="mobile-submenu-nested">
+                                <li><a href="/Home/JohnHenry?category=Áo Polo">Áo Polo</a></li>
+                                <li><a href="/Home/JohnHenry?category=Áo Sơ mi">Áo Sơ mi</a></li>
+                                <li><a href="/Home/JohnHenry?category=Áo Thun">Áo Thun</a></li>
+                                <li><a href="/Home/JohnHenry?category=Áo Len">Áo Len</a></li>
+                                <li><a href="/Home/JohnHenry?category=Áo Khoác">Áo Khoác</a></li>
+                                <li><a href="/Home/JohnHenry?category=Áo Vest">Áo Vest</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-submenu-item has-submenu">
+                            <a href="/Home/JohnHenryPants" class="mobile-submenu-link">
+                                <span>Quần Nam</span>
+                                <i data-lucide="chevron-down" class="submenu-icon"></i>
+                            </a>
+                            <ul class="mobile-submenu-nested">
+                                <li><a href="/Home/JohnHenry?category=Quần Khaki">Quần Khaki</a></li>
+                                <li><a href="/Home/JohnHenry?category=Quần Jean">Quần Jeans</a></li>
+                                <li><a href="/Home/JohnHenry?category=Quần Tây">Quần Tây</a></li>
+                                <li><a href="/Home/JohnHenry?category=Quần Short">Quần Short</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-submenu-item">
+                            <a href="/Home/JohnHenryAccessories" class="mobile-submenu-link">Phụ Kiện</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-item has-submenu">
+                    <a href="/Home/Freelancer" class="mobile-nav-link">
+                        <i data-lucide="sparkles"></i>
+                        <span>Freelancer</span>
+                        <i data-lucide="chevron-down" class="submenu-icon"></i>
+                    </a>
+                    <ul class="mobile-submenu">
+                        <li class="mobile-submenu-item has-submenu">
+                            <a href="#" class="mobile-submenu-link">
+                                <span>Áo Nữ</span>
+                                <i data-lucide="chevron-down" class="submenu-icon"></i>
+                            </a>
+                            <ul class="mobile-submenu-nested">
+                                <li><a href="/Home/Freelancer?category=Áo Thun Nữ">Áo Thun</a></li>
+                                <li><a href="/Home/Freelancer?category=Áo Sơ Mi Nữ">Áo Sơ Mi</a></li>
+                                <li><a href="/Home/Freelancer?category=Áo Len Nữ">Áo Len</a></li>
+                                <li><a href="/Home/Freelancer?category=Áo Khoác Nữ">Áo Khoác</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-submenu-item has-submenu">
+                            <a href="#" class="mobile-submenu-link">
+                                <span>Quần Nữ</span>
+                                <i data-lucide="chevron-down" class="submenu-icon"></i>
+                            </a>
+                            <ul class="mobile-submenu-nested">
+                                <li><a href="/Home/Freelancer?category=Quần Jean Nữ">Quần Jean</a></li>
+                                <li><a href="/Home/Freelancer?category=Quần Tây Nữ">Quần Tây</a></li>
+                                <li><a href="/Home/Freelancer?category=Quần Short Nữ">Quần Short</a></li>
+                                <li><a href="/Home/Freelancer?category=Quần Legging Nữ">Quần Legging</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-submenu-item">
+                            <a href="/Home/Freelancer?category=Đầm" class="mobile-submenu-link">Đầm</a>
+                        </li>
+                        <li class="mobile-submenu-item">
+                            <a href="/Home/Freelancer?category=Chân Váy" class="mobile-submenu-link">Chân Váy</a>
+                        </li>
+                        <li class="mobile-submenu-item">
+                            <a href="/Home/Freelancer?category=Phụ Kiện Nữ" class="mobile-submenu-link">Phụ Kiện</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="mobile-nav-item">
+                    <a href="/Store" class="mobile-nav-link">
+                        <i data-lucide="store"></i>
+                        <span>Cửa Hàng</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a href="/Blog" class="mobile-nav-link">
+                        <i data-lucide="newspaper"></i>
+                        <span>Blog</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a href="/Contact" class="mobile-nav-link">
+                        <i data-lucide="mail"></i>
+                        <span>Liên Hệ</span>
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 
@@ -1380,20 +1634,20 @@
                         <div class="payment-methods mt-4">
                             <h6 class="payment-title">Phương Thức Thanh Toán</h6>
                             <div class="payment-icons">
-                                <div class="payment-icon visa" title="Visa">
-                                    <i class="fab fa-cc-visa"></i>
+                                <div class="payment-icon" title="Visa">
+                                    <img src="~/images/payment/visa.svg" alt="Visa" style="height: 30px;">
                                 </div>
-                                <div class="payment-icon mastercard" title="Mastercard">
-                                    <i class="fab fa-cc-mastercard"></i>
+                                <div class="payment-icon" title="Mastercard">
+                                    <img src="~/images/payment/mastercard.svg" alt="Mastercard" style="height: 30px;">
                                 </div>
-                                <div class="payment-icon momo" title="MoMo">
-                                    <span class="momo-text">MoMo</span>
+                                <div class="payment-icon" title="JCB">
+                                    <img src="~/images/payment/jcb.svg" alt="JCB" style="height: 30px;">
                                 </div>
-                                <div class="payment-icon zalopay" title="ZaloPay">
-                                    <span class="zalopay-text">ZaloPay</span>
+                                <div class="payment-icon" title="VNPay">
+                                    <img src="~/images/payment/vnpay.svg" alt="VNPay" style="height: 30px;">
                                 </div>
-                                <div class="payment-icon banking" title="Banking">
-                                    <i class="fas fa-university"></i>
+                                <div class="payment-icon" title="MoMo">
+                                    <img src="~/images/payment/momo.svg" alt="MoMo" style="height: 30px;">
                                 </div>
                             </div>
                         </div>
@@ -1528,7 +1782,7 @@
         
         // Cart Sidebar Functions
         function openCartSidebar() {
-            console.log('🛒 openCartSidebar called - loading cart data...');
+            console.log('openCartSidebar called - loading cart data...');
             
             fetch('/Cart/GetSidebarData')
                 .then(response => {
@@ -1581,41 +1835,41 @@
         
         // New function to reload cart sidebar data and then open it
         function loadAndOpenCartSidebar() {
-            console.log('🛒 loadAndOpenCartSidebar called - fetching latest cart data...');
+            console.log('loadAndOpenCartSidebar called - fetching latest cart data...');
             
             fetch('/Cart/GetSidebarData')
                 .then(response => {
-                    console.log('📦 Cart sidebar response status:', response.status);
+                    console.log('Cart sidebar response status:', response.status);
                     return response.text();
                 })
                 .then(html => {
-                    console.log('📦 Cart sidebar HTML loaded, length:', html.length);
+                    console.log('Cart sidebar HTML loaded, length:', html.length);
                     
                     const container = document.getElementById('cart-sidebar-container');
                     if (!container) {
-                        console.error('❌ cart-sidebar-container not found!');
+                        console.error('cart-sidebar-container not found!');
                         return;
                     }
                     
                     // Replace the entire cart sidebar HTML with fresh data
                     container.innerHTML = html;
-                    console.log('✅ Cart sidebar HTML replaced with fresh data');
+                    console.log('Cart sidebar HTML replaced with fresh data');
                     
                     const sidebar = document.getElementById('cart-sidebar');
                     const overlay = document.getElementById('cart-sidebar-overlay');
                     
                     if (!sidebar) {
-                        console.error('❌ cart-sidebar element not found after loading HTML!');
+                        console.error('cart-sidebar element not found after loading HTML!');
                         return;
                     }
                     
                     if (!overlay) {
-                        console.error('❌ cart-sidebar-overlay not found!');
+                        console.error('cart-sidebar-overlay not found!');
                         return;
                     }
                     
                     // Open the sidebar
-                    console.log('🎉 Opening cart sidebar with fresh data...');
+                    console.log('Opening cart sidebar with fresh data...');
                     sidebar.classList.add('open');
                     overlay.classList.add('show');
                     document.body.style.overflow = 'hidden';
@@ -1623,16 +1877,79 @@
                     // Re-initialize lucide icons for the new content
                     if (typeof lucide !== 'undefined') {
                         lucide.createIcons();
-                        console.log('✅ Lucide icons re-initialized');
+                        console.log('Lucide icons re-initialized');
                     }
                     
                     // Bind cart sidebar events (quantity controls, remove buttons, etc.)
                     bindCartSidebarEvents();
-                    console.log('✅ Cart sidebar events bound');
-                    console.log('🎊 Cart sidebar successfully opened with latest data!');
+                    console.log('Cart sidebar events bound');
+                    console.log('Cart sidebar successfully opened with latest data!');
                 })
                 .catch(error => {
-                    console.error('❌ Error loading cart sidebar:', error);
+                    console.error('Error loading cart sidebar:', error);
+                    showNotification('Không thể tải giỏ hàng. Vui lòng thử lại.', 'error');
+                });
+        }
+        
+        // Function to refresh cart sidebar data (keeps open/closed state)
+        function refreshCartSidebar() {
+            console.log('refreshCartSidebar called - refreshing cart data...');
+            
+            const sidebar = document.getElementById('cart-sidebar');
+            const wasOpen = sidebar && sidebar.classList.contains('open');
+            
+            fetch('/Cart/GetSidebarData')
+                .then(response => {
+                    console.log('Cart sidebar refresh response status:', response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('Cart sidebar HTML refreshed, length:', html.length);
+                    
+                    const container = document.getElementById('cart-sidebar-container');
+                    if (!container) {
+                        console.error('cart-sidebar-container not found!');
+                        return;
+                    }
+                    
+                    // Replace the entire cart sidebar HTML with fresh data
+                    container.innerHTML = html;
+                    console.log('Cart sidebar HTML replaced with fresh data');
+                    
+                    const newSidebar = document.getElementById('cart-sidebar');
+                    const overlay = document.getElementById('cart-sidebar-overlay');
+                    
+                    if (!newSidebar) {
+                        console.error('cart-sidebar element not found after loading HTML!');
+                        return;
+                    }
+                    
+                    if (!overlay) {
+                        console.error('cart-sidebar-overlay not found!');
+                        return;
+                    }
+                    
+                    // Restore the open/closed state
+                    if (wasOpen) {
+                        console.log('Restoring sidebar open state...');
+                        newSidebar.classList.add('open');
+                        overlay.classList.add('show');
+                        document.body.style.overflow = 'hidden';
+                    }
+                    
+                    // Re-initialize lucide icons for the new content
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                        console.log('Lucide icons re-initialized');
+                    }
+                    
+                    // Bind cart sidebar events (quantity controls, remove buttons, etc.)
+                    bindCartSidebarEvents();
+                    console.log('Cart sidebar events bound');
+                    console.log('Cart sidebar successfully refreshed!');
+                })
+                .catch(error => {
+                    console.error('Error refreshing cart sidebar:', error);
                     showNotification('Không thể tải giỏ hàng. Vui lòng thử lại.', 'error');
                 });
         }
@@ -1695,7 +2012,7 @@
             
             // Remove item buttons
             const removeButtons = document.querySelectorAll('.remove-item-btn');
-            console.log(`🗑️ Found ${removeButtons.length} remove buttons`);
+            console.log(`Found ${removeButtons.length} remove buttons`);
             
             removeButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -1703,7 +2020,7 @@
                     e.stopPropagation();
                     
                     const cartItemId = this.dataset.cartItemId;
-                    console.log(`🗑️ Remove button clicked for ItemId: ${cartItemId}`);
+                    console.log(`Remove button clicked for ItemId: ${cartItemId}`);
                     removeCartItem(cartItemId);
                 });
             });
@@ -1729,8 +2046,8 @@
             .then(data => {
                 console.log('UpdateQuantity response:', data);
                 if (data.success) {
-                    // Refresh cart sidebar with latest data
-                    loadAndOpenCartSidebar();
+                    // Refresh cart sidebar with latest data (maintains open state)
+                    refreshCartSidebar();
                     // Update header cart count
                     updateCartCount(data.cartCount);
                     showNotification('Đã cập nhật số lượng', 'success');
@@ -1746,7 +2063,7 @@
         }
         
         function removeCartItem(cartItemId) {
-            console.log(`🗑️ Removing cart item - ItemId: ${cartItemId}`);
+            console.log(`Removing cart item - ItemId: ${cartItemId}`);
             
             if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
                 fetch('/Cart/RemoveItem', {
@@ -1764,8 +2081,8 @@
                     console.log('RemoveItem response:', data);
                     if (data.success) {
 
-                        // Refresh cart sidebar with latest data
-                        loadAndOpenCartSidebar();
+                        // Refresh cart sidebar with latest data (maintains open state)
+                        refreshCartSidebar();
                         // Update header cart count
                         updateCartCount(data.cartCount);
                         showNotification('Đã xóa sản phẩm khỏi giỏ hàng', 'success');
@@ -1783,7 +2100,7 @@
         
         // Real Add to Cart function
         async function addToCart(productId, button, quantity = 1, size = null, color = null) {
-            console.log('🛒 addToCart called:', { productId, quantity, size, color });
+            console.log('addToCart called:', { productId, quantity, size, color });
             
             // Check if user is authenticated
             const isAuthenticated = document.querySelector('.user-authenticated');
@@ -1829,11 +2146,19 @@
                     // Show success message
                     showNotification('Đã thêm sản phẩm vào giỏ hàng!', 'success');
                     
-                    // Open cart sidebar after adding to cart to show updated items
-                    console.log('Product added successfully, reloading and opening cart sidebar...');
+                    // Check if sidebar is already open
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const isOpen = sidebar && sidebar.classList.contains('open');
                     
-                    // Force reload cart sidebar data before opening
-                    loadAndOpenCartSidebar();
+                    if (isOpen) {
+                        // Sidebar already open - just refresh the data
+                        console.log('Product added, sidebar is open - refreshing data...');
+                        refreshCartSidebar();
+                    } else {
+                        // Sidebar closed - load data and open it
+                        console.log('Product added, opening cart sidebar...');
+                        loadAndOpenCartSidebar();
+                    }
                 } else {
                     console.log('AddToCart failed:', result.message);
                     showNotification(result.message || 'Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
@@ -1899,6 +2224,7 @@
         window.updateWishlistCount = updateWishlistCount;
         window.openCartSidebar = openCartSidebar;
         window.loadAndOpenCartSidebar = loadAndOpenCartSidebar;
+        window.refreshCartSidebar = refreshCartSidebar;
         window.closeCartSidebar = closeCartSidebar;
         window.addToCart = addToCart;
         
@@ -1914,6 +2240,91 @@
                     loadAndOpenCartSidebar(); // Always reload fresh data when opening cart
                 });
             }
+            
+            // Mobile Menu Functionality
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileNavMenu = document.getElementById('mobile-nav-menu');
+            const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+            const mobileNavClose = document.getElementById('mobile-nav-close');
+            
+            function openMobileMenu() {
+                mobileNavMenu.classList.add('active');
+                mobileNavOverlay.classList.add('active');
+                document.body.classList.add('mobile-menu-open');
+            }
+            
+            function closeMobileMenu() {
+                mobileNavMenu.classList.remove('active');
+                mobileNavOverlay.classList.remove('active');
+                document.body.classList.remove('mobile-menu-open');
+            }
+            
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', openMobileMenu);
+            }
+            
+            if (mobileNavClose) {
+                mobileNavClose.addEventListener('click', closeMobileMenu);
+            }
+            
+            if (mobileNavOverlay) {
+                mobileNavOverlay.addEventListener('click', closeMobileMenu);
+            }
+            
+            // Handle submenu toggles
+            document.querySelectorAll('.mobile-nav-item.has-submenu > .mobile-nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const submenu = this.nextElementSibling;
+                    const isActive = this.classList.contains('active');
+                    
+                    // Close all other submenus at same level
+                    document.querySelectorAll('.mobile-nav-item.has-submenu > .mobile-nav-link').forEach(otherLink => {
+                        if (otherLink !== this) {
+                            otherLink.classList.remove('active');
+                            const otherSubmenu = otherLink.nextElementSibling;
+                            if (otherSubmenu) otherSubmenu.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current submenu
+                    if (isActive) {
+                        this.classList.remove('active');
+                        submenu.classList.remove('active');
+                    } else {
+                        this.classList.add('active');
+                        submenu.classList.add('active');
+                    }
+                });
+            });
+            
+            // Handle nested submenu toggles
+            document.querySelectorAll('.mobile-submenu-item.has-submenu > .mobile-submenu-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const submenu = this.nextElementSibling;
+                    const isActive = this.classList.contains('active');
+                    
+                    // Close all other nested submenus at same level
+                    const parentSubmenu = this.closest('.mobile-submenu');
+                    parentSubmenu.querySelectorAll('.mobile-submenu-item.has-submenu > .mobile-submenu-link').forEach(otherLink => {
+                        if (otherLink !== this) {
+                            otherLink.classList.remove('active');
+                            const otherSubmenu = otherLink.nextElementSibling;
+                            if (otherSubmenu) otherSubmenu.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current nested submenu
+                    if (isActive) {
+                        this.classList.remove('active');
+                        submenu.classList.remove('active');
+                    } else {
+                        this.classList.add('active');
+                        submenu.classList.add('active');
+                    }
+                });
+            });
             
             // Initialize AOS
             AOS.init({
@@ -2032,6 +2443,178 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             initializeLucide();
+            
+            // Header search functionality with autocomplete
+            const searchForm = document.getElementById('header-search-form');
+            const searchInput = document.getElementById('header-search-input');
+            const searchIcon = document.getElementById('header-search-icon');
+            const suggestionsDropdown = document.getElementById('search-suggestions');
+            const suggestionsList = document.getElementById('suggestions-list');
+            
+            let searchTimeout = null;
+            let currentQuery = '';
+            
+            if (searchForm && searchInput && searchIcon && suggestionsDropdown && suggestionsList) {
+                // Submit form when clicking search icon
+                searchIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        hideSuggestions();
+                        searchForm.submit();
+                    }
+                });
+                
+                // Submit form when pressing Enter
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const query = searchInput.value.trim();
+                        if (query) {
+                            hideSuggestions();
+                            searchForm.submit();
+                        }
+                    }
+                });
+                
+                // Show suggestions as user types
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    currentQuery = query;
+                    
+                    // Clear previous timeout
+                    if (searchTimeout) {
+                        clearTimeout(searchTimeout);
+                    }
+                    
+                    if (query.length < 2) {
+                        hideSuggestions();
+                        return;
+                    }
+                    
+                    // Debounce: wait 300ms after user stops typing
+                    searchTimeout = setTimeout(() => {
+                        fetchSuggestions(query);
+                    }, 300);
+                });
+                
+                // Hide suggestions when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchForm.contains(e.target)) {
+                        hideSuggestions();
+                    }
+                });
+                
+                // Keep suggestions visible when clicking inside
+                suggestionsDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                // Update dropdown position on scroll and resize
+                window.addEventListener('scroll', function() {
+                    if (suggestionsDropdown.style.display === 'block') {
+                        const inputRect = searchInput.getBoundingClientRect();
+                        const searchSectionRect = searchInput.closest('.search-section').getBoundingClientRect();
+                        suggestionsDropdown.style.top = `${inputRect.bottom + 5}px`;
+                        suggestionsDropdown.style.left = `${searchSectionRect.left}px`;
+                    }
+                }, { passive: true });
+                
+                window.addEventListener('resize', function() {
+                    if (suggestionsDropdown.style.display === 'block') {
+                        const inputRect = searchInput.getBoundingClientRect();
+                        const searchSectionRect = searchInput.closest('.search-section').getBoundingClientRect();
+                        suggestionsDropdown.style.top = `${inputRect.bottom + 5}px`;
+                        suggestionsDropdown.style.left = `${searchSectionRect.left}px`;
+                        suggestionsDropdown.style.width = `${searchSectionRect.width}px`;
+                    }
+                });
+            }
+            
+            function fetchSuggestions(query) {
+                // Show loading state
+                suggestionsList.innerHTML = '<div class="suggestions-loading">Đang tìm kiếm</div>';
+                suggestionsDropdown.style.display = 'block';
+                
+                fetch(`/Home/SearchSuggestions?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Check if query hasn't changed while fetching
+                        if (query === currentQuery) {
+                            if (data.suggestions && data.suggestions.length > 0) {
+                                displaySuggestions(data.suggestions, query);
+                            } else {
+                                displayNoResults();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching suggestions:', error);
+                        suggestionsList.innerHTML = '<div class="no-suggestions">Có lỗi xảy ra. Vui lòng thử lại.</div>';
+                    });
+            }
+            
+            function displaySuggestions(suggestions, query) {
+                suggestionsList.innerHTML = '';
+                
+                suggestions.forEach(product => {
+                    const item = document.createElement('a');
+                    item.href = `/Home/Search?query=${encodeURIComponent(product.name)}`;
+                    item.className = 'suggestion-item';
+                    
+                    item.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" class="suggestion-image">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">${highlightMatch(product.name, query)}</div>
+                            <div class="suggestion-price">${formatPrice(product.price)}</div>
+                        </div>
+                    `;
+                    
+                    suggestionsList.appendChild(item);
+                });
+                
+                // Add "View all results" link
+                const viewAllLink = document.createElement('a');
+                viewAllLink.href = `/Home/Search?query=${encodeURIComponent(query)}`;
+                viewAllLink.className = 'view-all-results';
+                viewAllLink.textContent = `Xem thêm ${suggestions.length > 5 ? '131' : suggestions.length} sản phẩm`;
+                suggestionsList.appendChild(viewAllLink);
+                
+                showSuggestions();
+            }
+            
+            function displayNoResults() {
+                suggestionsList.innerHTML = '<div class="no-suggestions">Không tìm thấy sản phẩm</div>';
+                showSuggestions();
+            }
+            
+            function showSuggestions() {
+                // Calculate position based on search input
+                const inputRect = searchInput.getBoundingClientRect();
+                const searchSectionRect = searchInput.closest('.search-section').getBoundingClientRect();
+                
+                // Position dropdown below the search input
+                suggestionsDropdown.style.top = `${inputRect.bottom + 5}px`;
+                suggestionsDropdown.style.left = `${searchSectionRect.left}px`;
+                suggestionsDropdown.style.width = `${searchSectionRect.width}px`;
+                suggestionsDropdown.style.display = 'block';
+            }
+            
+            function hideSuggestions() {
+                suggestionsDropdown.style.display = 'none';
+            }
+            
+            function highlightMatch(text, query) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                return text.replace(regex, '<strong>$1</strong>');
+            }
+            
+            function formatPrice(price) {
+                return new Intl.NumberFormat('vi-VN', { 
+                    style: 'currency', 
+                    currency: 'VND' 
+                }).format(price);
+            }
         });
         
         // Also initialize after any dynamic content changes
@@ -2053,6 +2636,16 @@
     <!-- Cart Sidebar -->
     <div id="cart-sidebar-container">
         @await Html.PartialAsync("_CartSidebar", new List<JohnHenryFashionWeb.Models.ShoppingCartItem>())
+    </div>
+    
+    <!-- Search Suggestions Dropdown (Outside header for proper z-index stacking) -->
+    <div id="search-suggestions" class="search-suggestions" style="display: none;">
+        <div class="suggestions-header">
+            <strong>Gợi ý sản phẩm</strong>
+        </div>
+        <div id="suggestions-list" class="suggestions-list">
+            <div class="suggestions-loading">Đang tìm kiếm</div>
+        </div>
     </div>
 </body>
 </html>
