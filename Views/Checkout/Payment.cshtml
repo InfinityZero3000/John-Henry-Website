@@ -2,6 +2,19 @@
 @{
     ViewData["Title"] = "Thanh toán";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    string GetPaymentButtonText(string paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            "vnpay" => "Thanh toán với VNPay",
+            "momo" => "Thanh toán với MoMo",
+            "stripe" => "Thanh toán bằng thẻ",
+            "cod" => "Xác nhận đặt hàng",
+            "bank_transfer" => "Xác nhận chuyển khoản",
+            _ => "Hoàn tất thanh toán"
+        };
+    }
 }
 
 @section Styles {
@@ -37,79 +50,173 @@
             </div>
         </div>
 
-        <div class="row">
-            <!-- Payment Form -->
-            <div class="col-lg-8">
-                <div class="payment-form">
+        <div class="row justify-content-center">
+            <!-- Payment Content - Full Width Centered -->
+            <div class="col-lg-10">
+                <div class="payment-container">
+                    <!-- Payment Method Info Header -->
+                    <div class="payment-header text-center mb-4">
+                        @{
+                            var selectedMethod = Model.PaymentMethods.FirstOrDefault(m => m.Code == Model.SelectedPaymentMethod);
+                            if (selectedMethod != null)
+                            {
+                                <div class="selected-payment-method">
+                                    <div class="payment-method-logo mb-3">
+                                        @if (selectedMethod.Code == "vnpay")
+                                        {
+                                            <img src="~/images/payment/vnpay.svg" alt="VNPay" style="height: 60px;">
+                                        }
+                                        else if (selectedMethod.Code == "momo")
+                                        {
+                                            <img src="~/images/payment/momo.svg" alt="MoMo" style="height: 60px;">
+                                        }
+                                        else if (selectedMethod.Code == "stripe")
+                                        {
+                                            <img src="~/images/payment/stripe.svg" alt="Stripe" style="height: 60px;">
+                                        }
+                                        else if (selectedMethod.Code == "cod")
+                                        {
+                                            <i class="fas fa-money-bill-wave fa-3x text-success"></i>
+                                        }
+                                        else if (selectedMethod.Code == "bank_transfer")
+                                        {
+                                            <i class="fas fa-university fa-3x text-primary"></i>
+                                        }
+                                    </div>
+                                    <h3 class="mb-2">@selectedMethod.DisplayName</h3>
+                                    <p class="text-muted">@selectedMethod.Description</p>
+                                </div>
+                            }
+                        }
+                    </div>
+
                     <form id="paymentForm" asp-action="ProcessPayment" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="SessionId" />
-                        
-                        <!-- Payment Methods -->
-                        <div class="form-section mb-4">
-                            <h4 class="section-title">
-                                <i class="fas fa-credit-card me-2"></i>
-                                Chọn phương thức thanh toán
-                            </h4>
-                            
-                            <div class="payment-methods">
-                                @foreach (var method in Model.PaymentMethods)
-                                {
-                                    <div class="payment-method" data-method="@method.Code">
-                                        <label class="payment-method-label">
-                                            <input type="radio" asp-for="SelectedPaymentMethod" value="@method.Code" 
-                                                   class="payment-method-radio" data-gateway="@method.Gateway">
-                                            <div class="payment-method-content">
-                                                <div class="payment-method-icon">
-                                                    @if (method.Code == "vnpay")
-                                                    {
-                                                        <img src="~/images/payment/vnpay.png" alt="VNPay">
-                                                    }
-                                                    else if (method.Code == "momo")
-                                                    {
-                                                        <img src="~/images/payment/momo.png" alt="MoMo">
-                                                    }
-                                                    else if (method.Code == "stripe")
-                                                    {
-                                                        <img src="~/images/payment/stripe.png" alt="Stripe">
-                                                    }
-                                                    else if (method.Code == "cod")
-                                                    {
-                                                        <i class="fas fa-money-bill-wave"></i>
-                                                    }
-                                                    else if (method.Code == "bank_transfer")
-                                                    {
-                                                        <i class="fas fa-university"></i>
-                                                    }
-                                                </div>
-                                                <div class="payment-method-info">
-                                                    <h6 class="payment-method-name">@method.DisplayName</h6>
-                                                    <p class="payment-method-description">@method.Description</p>
-                                                </div>
-                                                @if (method.ServiceFee > 0)
-                                                {
-                                                    <div class="payment-method-fee">
-                                                        <small>Phí: @method.ServiceFee.ToString("N0") ₫</small>
-                                                    </div>
-                                                }
-                                            </div>
-                                        </label>
+                        <input type="hidden" asp-for="SelectedPaymentMethod" />
+
+
+                        <!-- VNPay QR Payment Section -->
+                        <div id="vnpayPaymentForm" class="payment-qr-section" style="@(Model.SelectedPaymentMethod == "vnpay" ? "" : "display: none;")">
+                            <div class="qr-payment-container">
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Quét mã QR bằng ứng dụng ngân hàng hoặc VNPay để thanh toán
+                                </div>
+                                
+                                <div class="qr-code-wrapper">
+                                    <div class="qr-code-container">
+                                        <div id="vnpayQRCode" class="qr-code-display">
+                                            <i class="fas fa-qrcode fa-5x text-primary mb-3"></i>
+                                            <p class="text-muted">Nhấn "Thanh toán" để tạo mã QR</p>
+                                        </div>
                                     </div>
-                                }
+                                </div>
+                                
+                                <div class="payment-amount-section text-center mt-4">
+                                    <h2 class="payment-amount text-primary mb-2">@Model.TotalAmount.ToString("N0") ₫</h2>
+                                    <p class="text-muted">Số tiền cần thanh toán</p>
+                                </div>
+                                
+                                <div class="countdown-section text-center mt-3" style="display: none;">
+                                    <div class="countdown-timer">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <span id="vnpayCountdown">15:00</span>
+                                    </div>
+                                    <small class="text-muted">Mã QR có hiệu lực</small>
+                                </div>
+                                
+                                <div class="payment-instructions mt-4">
+                                    <h6 class="mb-3"><i class="fas fa-mobile-alt me-2"></i>Hướng dẫn thanh toán:</h6>
+                                    <ol class="instruction-list">
+                                        <li>Mở ứng dụng ngân hàng hoặc VNPay trên điện thoại</li>
+                                        <li>Chọn chức năng "Quét mã QR"</li>
+                                        <li>Quét mã QR hiển thị ở trên</li>
+                                        <li>Xác nhận thông tin và hoàn tất thanh toán</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="payment-info-box mt-4">
+                                    <div class="info-item">
+                                        <i class="fas fa-file-invoice me-2 text-primary"></i>
+                                        <span><strong>Mã đơn hàng:</strong> @Model.Session.Id</span>
+                                    </div>
+                                    <div class="info-item mt-2">
+                                        <i class="fas fa-info-circle me-2 text-warning"></i>
+                                        <span class="text-muted">Vui lòng không thay đổi nội dung chuyển khoản</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
+                        <!-- MoMo QR Payment Section -->
+                        <div id="momoPaymentForm" class="payment-qr-section" style="@(Model.SelectedPaymentMethod == "momo" ? "" : "display: none;")">
+                            <div class="qr-payment-container">
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Quét mã QR bằng ứng dụng MoMo để thanh toán
+                                </div>
+                                
+                                <div class="qr-code-wrapper">
+                                    <div class="qr-code-container">
+                                        <div id="momoQRCode" class="qr-code-display">
+                                            <i class="fas fa-qrcode fa-5x text-danger mb-3"></i>
+                                            <p class="text-muted">Nhấn "Thanh toán" để tạo mã QR</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-amount-section text-center mt-4">
+                                    <h2 class="payment-amount text-danger mb-2">@Model.TotalAmount.ToString("N0") ₫</h2>
+                                    <p class="text-muted">Số tiền cần thanh toán</p>
+                                </div>
+                                
+                                <div class="countdown-section text-center mt-3" style="display: none;">
+                                    <div class="countdown-timer">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <span id="momoCountdown">15:00</span>
+                                    </div>
+                                    <small class="text-muted">Mã QR có hiệu lực</small>
+                                </div>
+                                
+                                <div class="payment-instructions mt-4">
+                                    <h6 class="mb-3"><i class="fas fa-mobile-alt me-2"></i>Hướng dẫn thanh toán:</h6>
+                                    <ol class="instruction-list">
+                                        <li>Mở ứng dụng MoMo trên điện thoại</li>
+                                        <li>Chọn "Quét mã" trên màn hình chính</li>
+                                        <li>Quét mã QR hiển thị ở trên</li>
+                                        <li>Xác nhận và thanh toán</li>
+                                    </ol>
+                                    
+                                    <div class="text-center mt-3">
+                                        <button type="button" class="btn btn-danger btn-lg" onclick="openMoMoApp()" id="openMoMoBtn" style="display: none;">
+                                            <i class="fas fa-mobile-alt me-2"></i>
+                                            Mở ứng dụng MoMo
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-info-box mt-4">
+                                    <div class="info-item">
+                                        <i class="fas fa-file-invoice me-2 text-danger"></i>
+                                        <span><strong>Mã đơn hàng:</strong> @Model.Session.Id</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                         <!-- Stripe Payment Form -->
-                        <div id="stripePaymentForm" class="payment-details-form" style="display: none;">
+                        <div id="stripePaymentForm" class="payment-details-form" style="@(Model.SelectedPaymentMethod == "stripe" ? "" : "display: none;")">
                             <div class="form-section mb-4">
-                                <h5 class="section-subtitle">Thông tin thẻ tín dụng</h5>
+                                <h5 class="section-subtitle"><i class="fas fa-credit-card me-2"></i>Thông tin thẻ tín dụng</h5>
                                 
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="form-group mb-3">
                                             <label class="form-label required">Tên chủ thẻ</label>
                                             <input type="text" id="stripeCardholderName" class="form-control" 
-                                                   placeholder="Nhập tên chủ thẻ">
+                                                   placeholder="VD: NGUYEN VAN A">
                                         </div>
                                     </div>
                                 </div>
@@ -137,131 +244,122 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Thông tin thẻ của bạn được mã hóa an toàn bởi Stripe
+                                </div>
                             </div>
                         </div>
 
                         <!-- Bank Transfer Details -->
-                        <div id="bankTransferForm" class="payment-details-form" style="display: none;">
+                        <div id="bankTransferForm" class="payment-details-form" style="@(Model.SelectedPaymentMethod == "bank_transfer" ? "" : "display: none;")">
                             <div class="form-section mb-4">
-                                <h5 class="section-subtitle">Thông tin chuyển khoản</h5>
+                                <h5 class="section-subtitle"><i class="fas fa-university me-2"></i>Thông tin chuyển khoản</h5>
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    Vui lòng chuyển khoản vào một trong các tài khoản dưới đây và ghi chú mã đơn hàng.
+                                    Vui lòng chuyển khoản vào một trong các tài khoản dưới đây
                                 </div>
                                 
                                 <div class="bank-accounts">
-                                    <div class="bank-account">
+                                    <div class="bank-account-card">
                                         <div class="bank-info">
-                                            <h6><i class="fas fa-university me-2"></i>Vietcombank</h6>
-                                            <p><strong>Số TK:</strong> 1234567890</p>
-                                            <p><strong>Chủ TK:</strong> JOHN HENRY FASHION</p>
-                                            <p><strong>Chi nhánh:</strong> Hà Nội</p>
+                                            <h6><i class="fas fa-university me-2 text-primary"></i>Vietcombank</h6>
+                                            <div class="account-detail">
+                                                <span class="label">Số tài khoản:</span>
+                                                <span class="value">1234567890</span>
+                                                <button type="button" class="btn btn-sm btn-outline-primary copy-btn ms-2" 
+                                                        data-copy="1234567890">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                            <div class="account-detail">
+                                                <span class="label">Chủ tài khoản:</span>
+                                                <span class="value">JOHN HENRY FASHION</span>
+                                            </div>
+                                            <div class="account-detail">
+                                                <span class="label">Chi nhánh:</span>
+                                                <span class="value">Hà Nội</span>
+                                            </div>
                                         </div>
-                                        <button type="button" class="btn btn-outline-primary btn-sm copy-btn" 
-                                                data-copy="1234567890">
-                                            <i class="fas fa-copy"></i> Copy
-                                        </button>
                                     </div>
                                     
-                                    <div class="bank-account">
+                                    <div class="bank-account-card mt-3">
                                         <div class="bank-info">
-                                            <h6><i class="fas fa-university me-2"></i>Techcombank</h6>
-                                            <p><strong>Số TK:</strong> 0987654321</p>
-                                            <p><strong>Chủ TK:</strong> JOHN HENRY FASHION</p>
-                                            <p><strong>Chi nhánh:</strong> TP.HCM</p>
+                                            <h6><i class="fas fa-university me-2 text-success"></i>Techcombank</h6>
+                                            <div class="account-detail">
+                                                <span class="label">Số tài khoản:</span>
+                                                <span class="value">0987654321</span>
+                                                <button type="button" class="btn btn-sm btn-outline-primary copy-btn ms-2" 
+                                                        data-copy="0987654321">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                            <div class="account-detail">
+                                                <span class="label">Chủ tài khoản:</span>
+                                                <span class="value">JOHN HENRY FASHION</span>
+                                            </div>
+                                            <div class="account-detail">
+                                                <span class="label">Chi nhánh:</span>
+                                                <span class="value">TP. Hồ Chí Minh</span>
+                                            </div>
                                         </div>
-                                        <button type="button" class="btn btn-outline-primary btn-sm copy-btn" 
-                                                data-copy="0987654321">
-                                            <i class="fas fa-copy"></i> Copy
-                                        </button>
                                     </div>
                                 </div>
                                 
-                                <div class="transfer-note mt-3">
-                                    <label class="form-label">Nội dung chuyển khoản (bắt buộc)</label>
-                                    <input type="text" class="form-control" readonly 
-                                           value="Thanh toan don hang @Model.Session.Id">
-                                    <small class="text-muted">Vui lòng nhập chính xác nội dung này khi chuyển khoản</small>
+                                <div class="transfer-note-box mt-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-sticky-note me-2"></i>
+                                        Nội dung chuyển khoản (bắt buộc)
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-lg" readonly 
+                                               value="Thanh toan don hang @Model.Session.Id" id="transferContent">
+                                        <button type="button" class="btn btn-primary copy-btn" data-copy="Thanh toan don hang @Model.Session.Id">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                    <small class="text-danger mt-2 d-block">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Vui lòng nhập chính xác nội dung này khi chuyển khoản để đơn hàng được xử lý nhanh chóng
+                                    </small>
+                                </div>
+                                
+                                <div class="payment-amount-section text-center mt-4 p-4 bg-light rounded">
+                                    <h6 class="text-muted mb-2">Số tiền cần chuyển</h6>
+                                    <h2 class="text-primary mb-0">@Model.TotalAmount.ToString("N0") ₫</h2>
                                 </div>
                             </div>
                         </div>
 
                         <!-- COD Information -->
-                        <div id="codForm" class="payment-details-form" style="display: none;">
+                        <div id="codForm" class="payment-details-form" style="@(Model.SelectedPaymentMethod == "cod" ? "" : "display: none;")">
                             <div class="form-section mb-4">
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-money-bill-wave me-2"></i>
-                                    Bạn sẽ thanh toán bằng tiền mặt khi nhận hàng. 
-                                    Vui lòng chuẩn bị số tiền chính xác: <strong>@Model.TotalAmount.ToString("N0") ₫</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Order Summary in Payment -->
-                        <div class="form-section mb-4">
-                            <h5 class="section-subtitle">Xác nhận đơn hàng</h5>
-                            <div class="order-review">
-                                <div class="order-items">
-                                    @foreach (var item in Model.Session.Items)
-                                    {
-                                        <div class="order-item">
-                                            <img src="@(item.ProductImage ?? "/images/placeholder.jpg")" alt="@item.ProductName">
-                                            <div class="item-info">
-                                                <h6>@item.ProductName</h6>
-                                                <p>Số lượng: @item.Quantity</p>
-                                            </div>
-                                            <div class="item-price">
-                                                @item.TotalPrice.ToString("N0") ₫
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                                
-                                <div class="order-totals">
-                                    <div class="total-row">
-                                        <span>Tạm tính:</span>
-                                        <span>@(Model.Session.TotalAmount - Model.Session.ShippingFee - Model.Session.Tax + Model.Session.DiscountAmount).ToString("N0") ₫</span>
+                                <div class="cod-info-card">
+                                    <div class="cod-icon mb-3">
+                                        <i class="fas fa-money-bill-wave fa-4x text-success"></i>
                                     </div>
-                                    <div class="total-row">
-                                        <span>Phí vận chuyển:</span>
-                                        <span>@Model.Session.ShippingFee.ToString("N0") ₫</span>
+                                    <h5 class="mb-3">Thanh toán khi nhận hàng</h5>
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Bạn sẽ thanh toán bằng tiền mặt cho nhân viên giao hàng
                                     </div>
-                                    @if (Model.Session.DiscountAmount > 0)
-                                    {
-                                        <div class="total-row discount">
-                                            <span>Giảm giá:</span>
-                                            <span class="text-success">-@Model.Session.DiscountAmount.ToString("N0") ₫</span>
-                                        </div>
-                                    }
-                                    <div class="total-row">
-                                        <span>Thuế VAT:</span>
-                                        <span>@Model.Session.Tax.ToString("N0") ₫</span>
-                                    </div>
-                                    <hr>
-                                    <div class="total-row final">
-                                        <strong>
-                                            <span>Tổng cộng:</span>
-                                            <span>@Model.Session.TotalAmount.ToString("N0") ₫</span>
-                                        </strong>
+                                    <div class="payment-amount-section text-center p-4 bg-light rounded">
+                                        <h6 class="text-muted mb-2">Số tiền cần chuẩn bị</h6>
+                                        <h2 class="text-success mb-3">@Model.TotalAmount.ToString("N0") ₫</h2>
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Vui lòng chuẩn bị số tiền chính xác để giao dịch nhanh chóng
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Terms and Conditions -->
-                        <div class="form-section mb-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="acceptTerms" required>
-                                <label class="form-check-label" for="acceptTerms">
-                                    Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản sử dụng</a> 
-                                    và <a href="/privacy" target="_blank">Chính sách bảo mật</a>
-                                </label>
-                            </div>
-                        </div>
 
                         <!-- Action Buttons -->
                         <div class="payment-actions">
-                            <div class="row">
+                            <div class="row g-3">
                                 <div class="col-md-6">
                                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-lg w-100">
                                         <i class="fas fa-arrow-left me-2"></i>
@@ -271,63 +369,85 @@
                                 <div class="col-md-6">
                                     <button type="submit" class="btn btn-primary btn-lg w-100" id="submitPaymentBtn">
                                         <i class="fas fa-lock me-2"></i>
-                                        <span id="paymentButtonText">Hoàn tất thanh toán</span>
+                                        <span id="paymentButtonText">@GetPaymentButtonText(Model.SelectedPaymentMethod)</span>
                                     </button>
                                 </div>
+                            </div>
+                            
+                            <!-- Alternative Payment Link -->
+                            <div class="text-center mt-4">
+                                <a href="@Url.Action("Index")" class="text-muted">
+                                    <i class="fas fa-exchange-alt me-2"></i>
+                                    Chọn phương thức thanh toán khác
+                                </a>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
+        </div>
 
-            <!-- Payment Security -->
-            <div class="col-lg-4">
-                <div class="payment-security sticky-top">
-                    <h5>
-                        <i class="fas fa-shield-alt me-2"></i>
-                        Thanh toán an toàn
-                    </h5>
+        <!-- Order Summary Sidebar - Compact -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-lg-10">
+                <div class="order-summary-compact">
+                    <button class="btn btn-link w-100 text-start d-flex justify-content-between align-items-center" 
+                            type="button" data-bs-toggle="collapse" data-bs-target="#orderSummaryDetails">
+                        <span>
+                            <i class="fas fa-receipt me-2"></i>
+                            Chi tiết đơn hàng
+                        </span>
+                        <span>
+                            <strong>@Model.TotalAmount.ToString("N0") ₫</strong>
+                            <i class="fas fa-chevron-down ms-2"></i>
+                        </span>
+                    </button>
                     
-                    <div class="security-features">
-                        <div class="security-feature">
-                            <i class="fas fa-lock text-success"></i>
-                            <span>Mã hóa SSL 256-bit</span>
+                    <div class="collapse" id="orderSummaryDetails">
+                        <div class="p-3 border-top">
+                            <div class="order-items-compact">
+                                @foreach (var item in Model.Session.Items)
+                                {
+                                    <div class="order-item-compact">
+                                        <img src="@(item.ProductImage ?? "/images/placeholder.jpg")" alt="@item.ProductName">
+                                        <div class="item-info-compact">
+                                            <h6>@item.ProductName</h6>
+                                            <small class="text-muted">SL: @item.Quantity</small>
+                                        </div>
+                                        <div class="item-price-compact">
+                                            @item.TotalPrice.ToString("N0") ₫
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="order-totals-compact mt-3">
+                                <div class="total-row-compact">
+                                    <span>Tạm tính:</span>
+                                    <span>@(Model.Session.TotalAmount - Model.Session.ShippingFee - Model.Session.Tax + Model.Session.DiscountAmount).ToString("N0") ₫</span>
+                                </div>
+                                <div class="total-row-compact">
+                                    <span>Phí vận chuyển:</span>
+                                    <span>@Model.Session.ShippingFee.ToString("N0") ₫</span>
+                                </div>
+                                @if (Model.Session.DiscountAmount > 0)
+                                {
+                                    <div class="total-row-compact text-success">
+                                        <span>Giảm giá:</span>
+                                        <span>-@Model.Session.DiscountAmount.ToString("N0") ₫</span>
+                                    </div>
+                                }
+                                <div class="total-row-compact">
+                                    <span>Thuế VAT:</span>
+                                    <span>@Model.Session.Tax.ToString("N0") ₫</span>
+                                </div>
+                                <hr>
+                                <div class="total-row-compact fw-bold">
+                                    <span>Tổng cộng:</span>
+                                    <span class="text-primary">@Model.Session.TotalAmount.ToString("N0") ₫</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="security-feature">
-                            <i class="fas fa-credit-card text-success"></i>
-                            <span>Bảo mật thông tin thẻ</span>
-                        </div>
-                        <div class="security-feature">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <span>Xác thực 3D Secure</span>
-                        </div>
-                        <div class="security-feature">
-                            <i class="fas fa-undo-alt text-success"></i>
-                            <span>Chính sách hoàn tiền</span>
-                        </div>
-                    </div>
-
-                    <div class="payment-logos mt-4">
-                        <img src="~/images/payment/visa.png" alt="Visa" class="payment-logo">
-                        <img src="~/images/payment/mastercard.png" alt="Mastercard" class="payment-logo">
-                        <img src="~/images/payment/jcb.png" alt="JCB" class="payment-logo">
-                        <img src="~/images/payment/vnpay.png" alt="VNPay" class="payment-logo">
-                        <img src="~/images/payment/momo.png" alt="MoMo" class="payment-logo">
-                    </div>
-
-                    <div class="support-info mt-4">
-                        <h6>Cần hỗ trợ?</h6>
-                        <p>
-                            <i class="fas fa-phone me-2"></i>
-                            <a href="tel:1900123456">1900 123 456</a>
-                        </p>
-                        <p>
-                            <i class="fas fa-envelope me-2"></i>
-                            <a href="mailto:support@johnhenry.com">support@johnhenry.com</a>
-                        </p>
-                        <p class="text-muted small">
-                            Thời gian hỗ trợ: 8:00 - 22:00 (T2-CN)
-                        </p>
                     </div>
                 </div>
             </div>
@@ -351,5 +471,6 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="~/js/payment.js"></script>
 }

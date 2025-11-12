@@ -30,6 +30,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
+                        <div id="addressList">
                         @if (ViewBag.Addresses != null && ((List<JohnHenryFashionWeb.Models.Address>)ViewBag.Addresses).Any())
                         {
                             @foreach (var address in (List<JohnHenryFashionWeb.Models.Address>)ViewBag.Addresses)
@@ -62,21 +63,81 @@
                                     </label>
                                 </div>
                             }
-                            
-                            <div class="text-center">
-                                <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-primary">
-                                    <i class="fas fa-plus"></i> Thêm địa chỉ mới
-                                </a>
-                            </div>
                         }
                         else
                         {
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                Bạn chưa có địa chỉ giao hàng. 
-                                <a asp-controller="Account" asp-action="Profile" class="alert-link">Thêm địa chỉ ngay</a>
+                                Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ bên dưới.
                             </div>
                         }
+                        </div>
+                            
+                        <!-- Collapse form for new address -->
+                        <div class="text-center mb-3">
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#newAddressForm">
+                                <i class="fas fa-plus"></i> Thêm địa chỉ mới
+                            </button>
+                        </div>
+
+                        <div class="collapse" id="newAddressForm">
+                            <div class="card card-body border-primary">
+                                <h6 class="mb-3">Địa chỉ mới</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="newFirstName" class="form-label">Họ <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="newFirstName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="newLastName" class="form-label">Tên <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="newLastName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="newPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                        <input type="tel" class="form-control" id="newPhone" placeholder="0123456789" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="newProvince" class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="newProvince" required>
+                                            <option value="">-- Chọn tỉnh/thành --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="newDistrict" class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="newDistrict" required disabled>
+                                            <option value="">-- Chọn quận/huyện --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="newWard" class="form-label">Phường/Xã <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="newWard" required disabled>
+                                            <option value="">-- Chọn phường/xã --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="newAddress1" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="newAddress1" placeholder="Số nhà, tên đường" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="newAddress2" class="form-label">Ghi chú thêm cho đơn hàng (tùy chọn)</label>
+                                        <textarea class="form-control" id="newAddress2" rows="2" placeholder="Màu sắc, kích thước, yêu cầu giao hàng..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="newIsDefault">
+                                            <label class="form-check-label" for="newIsDefault">
+                                                Đặt làm địa chỉ mặc định
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="button" class="btn btn-primary w-100" onclick="saveNewAddress()">
+                                            <i class="fas fa-save"></i> Lưu địa chỉ
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -319,7 +380,11 @@
 
 @section Scripts {
     <script>
+        console.log('Checkout scripts loaded!');
+        
         $(document).ready(function() {
+            console.log('Document ready!');
+            
             $('#placeOrderBtn').click(function() {
                 processPayment();
             });
@@ -328,10 +393,66 @@
             $('input[name="paymentMethod"]').change(function() {
                 showPaymentInstructions($(this).val());
             });
+            
+            // Load provinces when form is shown
+            let provincesLoaded = false;
+            
+            $('#newAddressForm').on('shown.bs.collapse', function() {
+                console.log('Form shown! provincesLoaded:', provincesLoaded);
+                if (!provincesLoaded) {
+                    console.log('Loading provinces for the first time...');
+                    loadProvinces();
+                    provincesLoaded = true;
+                }
+            });
+            
+            // When Province changes, load Districts
+            $('#newProvince').on('change', function() {
+                const provinceId = $(this).val();
+                const provinceName = $(this).find('option:selected').data('name');
+                
+                console.log('Province changed:', provinceId, provinceName);
+                
+                $('#newDistrict').empty().append('<option value="">-- Chọn quận/huyện --</option>').prop('disabled', !provinceId);
+                $('#newWard').empty().append('<option value="">-- Chọn phường/xã --</option>').prop('disabled', true);
+                
+                if (provinceId) {
+                    fetch(`/api/AddressApi/districts/${provinceId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Districts loaded:', data.length);
+                            data.forEach(district => {
+                                $('#newDistrict').append(`<option value="${district.id}" data-name="${district.name}">${district.name}</option>`);
+                            });
+                        })
+                        .catch(error => console.error('Error loading districts:', error));
+                }
+            });
+
+            // When District changes, load Wards
+            $('#newDistrict').on('change', function() {
+                const districtId = $(this).val();
+                const districtName = $(this).find('option:selected').data('name');
+                
+                console.log('District changed:', districtId, districtName);
+                
+                $('#newWard').empty().append('<option value="">-- Chọn phường/xã --</option>').prop('disabled', !districtId);
+                
+                if (districtId) {
+                    fetch(`/api/AddressApi/wards/${districtId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Wards loaded:', data.length);
+                            data.forEach(ward => {
+                                $('#newWard').append(`<option value="${ward.id}" data-name="${ward.name}">${ward.name}</option>`);
+                            });
+                        })
+                        .catch(error => console.error('Error loading wards:', error));
+                }
+            });
         });
 
         function processPayment() {
-            const formData = new FormData();
             const addressId = $('input[name="addressId"]:checked').val();
             const paymentMethod = $('input[name="paymentMethod"]:checked').val();
             const notes = $('textarea[name="notes"]').val();
@@ -351,18 +472,29 @@
             // Disable button and show loading
             $('#placeOrderBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...');
 
-            formData.append('addressId', addressId);
-            formData.append('paymentMethod', paymentMethod);
-            formData.append('notes', notes);
-            formData.append('couponCode', couponCode);
-            formData.append('__RequestVerificationToken', token);
-
+            // Send as JSON instead of FormData
             fetch('/Payment/ProcessPayment', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: new URLSearchParams({
+                    'addressId': addressId,
+                    'paymentMethod': paymentMethod,
+                    'notes': notes || '',
+                    'couponCode': couponCode || '',
+                    '__RequestVerificationToken': token
+                })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Payment response:', data);
                 if (data.success) {
                     if (data.redirectUrl) {
                         window.location.href = data.redirectUrl;
@@ -433,5 +565,125 @@
             // Redirect to checkout with coupon code
             window.location.href = '@Url.Action("Checkout", "Payment")?couponCode=' + encodeURIComponent(couponCode);
         });
+
+        // Load Provinces function
+        function loadProvinces() {
+            console.log('Loading provinces...');
+            fetch('/api/AddressApi/provinces')
+                .then(response => {
+                    console.log('Provinces response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Provinces loaded:', data.length);
+                    const select = $('#newProvince');
+                    select.empty().append('<option value="">-- Chọn tỉnh/thành --</option>');
+                    data.forEach(province => {
+                        select.append(`<option value="${province.id}" data-name="${province.name}">${province.name}</option>`);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading provinces:', error);
+                    alert('Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại.');
+                });
+        }
+
+        // Save new address function
+        function saveNewAddress() {
+            const firstName = $('#newFirstName').val().trim();
+            const lastName = $('#newLastName').val().trim();
+            const phone = $('#newPhone').val().trim();
+            const address1 = $('#newAddress1').val().trim();
+            const address2 = $('#newAddress2').val().trim();
+            
+            // Get selected names for display
+            const provinceName = $('#newProvince option:selected').data('name') || '';
+            const districtName = $('#newDistrict option:selected').data('name') || '';
+            const wardName = $('#newWard option:selected').data('name') || '';
+            
+            const isDefault = $('#newIsDefault').is(':checked');
+
+            // Validation
+            if (!firstName || !lastName) {
+                alert('Vui lòng nhập họ tên!');
+                return;
+            }
+
+            if (!phone) {
+                alert('Vui lòng nhập số điện thoại!');
+                return;
+            }
+
+            if (!$('#newProvince').val()) {
+                alert('Vui lòng chọn tỉnh/thành phố!');
+                return;
+            }
+
+            if (!$('#newDistrict').val()) {
+                alert('Vui lòng chọn quận/huyện!');
+                return;
+            }
+
+            if (!$('#newWard').val()) {
+                alert('Vui lòng chọn phường/xã!');
+                return;
+            }
+
+            if (!address1) {
+                alert('Vui lòng nhập địa chỉ!');
+                return;
+            }
+
+            // Get antiforgery token
+            const token = $('input[name="__RequestVerificationToken"]').val();
+
+            // Send to server
+            fetch('/Payment/SaveAddress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'firstName': firstName,
+                    'lastName': lastName,
+                    'phone': phone,
+                    'address1': address1,
+                    'address2': address2,
+                    'city': provinceName,
+                    'state': districtName + (wardName ? ', ' + wardName : ''),
+                    'postalCode': '',
+                    'isDefault': isDefault,
+                    '__RequestVerificationToken': token
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide warning if exists
+                    $('#addressList .alert-warning').hide();
+                    
+                    // Add new address to list
+                    $('#addressList').append(data.addressHtml);
+                    
+                    // Clear form
+                    $('#newFirstName, #newLastName, #newPhone, #newAddress1, #newAddress2').val('');
+                    $('#newProvince').val('');
+                    $('#newDistrict').empty().append('<option value="">-- Chọn quận/huyện --</option>').prop('disabled', true);
+                    $('#newWard').empty().append('<option value="">-- Chọn phường/xã --</option>').prop('disabled', true);
+                    $('#newIsDefault').prop('checked', false);
+                    
+                    // Collapse form
+                    $('#newAddressForm').collapse('hide');
+                    
+                    alert('Đã lưu địa chỉ thành công!');
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi lưu địa chỉ. Vui lòng thử lại.');
+            });
+        }
     </script>
 }

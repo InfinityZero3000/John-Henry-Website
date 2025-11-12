@@ -516,6 +516,123 @@ namespace JohnHenryFashionWeb.Controllers
                 RedirectUrl = $"/Payment/MoMo/Return?resultCode=0&orderId={order.Id}&transId=123456"
             });
         }
+
+        // POST: Payment/SaveAddress
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveAddress(
+            string firstName, 
+            string lastName, 
+            string phone, 
+            string address1, 
+            string? address2,
+            string city, 
+            string state, 
+            string postalCode,
+            bool isDefault = false)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập" });
+            }
+
+            try
+            {
+                // Validation
+                if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập họ tên" });
+                }
+
+                if (string.IsNullOrWhiteSpace(phone))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập số điện thoại" });
+                }
+
+                if (string.IsNullOrWhiteSpace(address1) || string.IsNullOrWhiteSpace(city))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập địa chỉ đầy đủ" });
+                }
+
+                // If setting as default, unset other default addresses
+                if (isDefault)
+                {
+                    var existingDefaults = await _context.Addresses
+                        .Where(a => a.UserId == userId && a.IsDefault)
+                        .ToListAsync();
+                    
+                    foreach (var addr in existingDefaults)
+                    {
+                        addr.IsDefault = false;
+                    }
+                }
+
+                // Create new address
+                var newAddress = new Address
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    Type = "shipping",
+                    FirstName = firstName.Trim(),
+                    LastName = lastName.Trim(),
+                    Phone = phone.Trim(),
+                    Address1 = address1.Trim(),
+                    Address2 = address2?.Trim(),
+                    City = city.Trim(),
+                    State = state?.Trim() ?? "",
+                    PostalCode = postalCode?.Trim() ?? "",
+                    Country = "Vietnam",
+                    IsDefault = isDefault,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Addresses.Add(newAddress);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"New address saved for user {userId}: {newAddress.Id}");
+
+                return Json(new { 
+                    success = true, 
+                    message = "Đã lưu địa chỉ thành công",
+                    addressId = newAddress.Id,
+                    addressHtml = RenderAddressHtml(newAddress)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving address");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lưu địa chỉ" });
+            }
+        }
+
+        private string RenderAddressHtml(Address address)
+        {
+            var isDefaultBadge = address.IsDefault ? "<span class=\"badge bg-primary ms-2\">Mặc định</span>" : "";
+            var address2Line = !string.IsNullOrEmpty(address.Address2) ? $"<br><span class=\"text-muted\">{address.Address2}</span>" : "";
+            var phoneLine = !string.IsNullOrEmpty(address.Phone) ? $"<br><span class=\"text-muted\">SĐT: {address.Phone}</span>" : "";
+
+            return $@"
+<div class=""form-check border rounded p-3 mb-3"">
+    <input class=""form-check-input"" type=""radio"" name=""addressId"" value=""{address.Id}"" 
+           id=""address_{address.Id}"" checked>
+    <label class=""form-check-label w-100"" for=""address_{address.Id}"">
+        <div class=""d-flex justify-content-between"">
+            <div>
+                <strong>{address.FirstName} {address.LastName}</strong>
+                {isDefaultBadge}
+                <br>
+                <span class=""text-muted"">{address.Address1}</span>
+                {address2Line}
+                <br>
+                <span class=""text-muted"">{address.City}, {address.State} {address.PostalCode}</span>
+                {phoneLine}
+            </div>
+        </div>
+    </label>
+</div>";
+        }
     }
 
     public class PaymentResult

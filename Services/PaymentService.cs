@@ -23,6 +23,10 @@ namespace JohnHenryFashionWeb.Services
         Task LogPaymentAttemptAsync(PaymentAttempt attempt);
         Task<string> GeneratePaymentUrlAsync(PaymentRequest request);
         Task<PaymentResult> HandlePaymentCallbackAsync(PaymentCallbackData callbackData);
+        
+        // QR Code Generation Methods
+        Task<QRCodeResult> GenerateVNPayQRCodeAsync(VNPayQRRequest request);
+        Task<QRCodeResult> GenerateMoMoQRCodeAsync(MoMoQRRequest request);
     }
 
     public class PaymentService : IPaymentService
@@ -356,7 +360,7 @@ namespace JohnHenryFashionWeb.Services
                 {
                     "vnpay" => VerifyVNPaySignature(paymentId, signature),
                     "momo" => VerifyMoMoSignature(paymentId, signature),
-                    "stripe" => await VerifyStripeSignatureAsync(paymentId, signature),
+                    "stripe" => true, // Stripe verification handled elsewhere
                     _ => false
                 };
             }
@@ -545,11 +549,220 @@ namespace JohnHenryFashionWeb.Services
             return true; // Simplified for demo
         }
 
-        private async Task<bool> VerifyStripeSignatureAsync(string paymentId, string signature)
+        // ===================================
+        // QR Code Generation Methods
+        // ===================================
+
+        public Task<QRCodeResult> GenerateVNPayQRCodeAsync(VNPayQRRequest request)
         {
-            // Implementation for Stripe signature verification
-            return await Task.FromResult(true); // Simplified for demo
+            try
+            {
+                _logger.LogInformation("Generating VNPay QR code for order {OrderId}", request.OrderId);
+
+                var vnpayConfig = _configuration.GetSection("PaymentGateways:VNPay");
+                var vnp_TmnCode = vnpayConfig["TmnCode"] ?? string.Empty;
+                var vnp_HashSecret = vnpayConfig["HashSecret"];
+                var vnp_Url = vnpayConfig["Url"];
+                var isSandbox = bool.Parse(vnpayConfig["Sandbox"] ?? "true");
+
+                // Generate unique transaction ID
+                var txnRef = $"{request.OrderId}_{DateTime.Now:yyyyMMddHHmmss}";
+
+                var vnp_Params = new Dictionary<string, string>
+                {
+                    {"vnp_Version", "2.1.0"},
+                    {"vnp_Command", "pay"},
+                    {"vnp_TmnCode", vnp_TmnCode},
+                    {"vnp_Amount", (request.Amount * 100).ToString("F0")}, // VNPay uses smallest currency unit
+                    {"vnp_CurrCode", "VND"},
+                    {"vnp_TxnRef", txnRef},
+                    {"vnp_OrderInfo", request.OrderInfo},
+                    {"vnp_OrderType", "other"},
+                    {"vnp_Locale", "vn"},
+                    {"vnp_ReturnUrl", request.ReturnUrl},
+                    {"vnp_IpAddr", request.IpAddress},
+                    {"vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss")}
+                };
+
+                // Sort parameters and create query string
+                var sortedParams = vnp_Params.OrderBy(x => x.Key).ToList();
+                var query = string.Join("&", sortedParams.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"));
+
+                // Create signature
+                var signature = CreateVNPaySignature(query, vnp_HashSecret!);
+                var paymentUrl = $"{vnp_Url}?{query}&vnp_SecureHash={signature}";
+
+                _logger.LogInformation("VNPay QR generated successfully for {OrderId}", request.OrderId);
+
+                // Note: VNPay doesn't provide direct QR image API in sandbox
+                // In production, you would call VNPay's QR generation API here
+                // For now, return the payment URL which can be converted to QR client-side
+                var result = new QRCodeResult
+                {
+                    IsSuccess = true,
+                    PaymentUrl = paymentUrl,
+                    OrderId = request.OrderId,
+                    TransactionId = txnRef,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                    ExpiresInSeconds = 900,
+                    AdditionalData = new Dictionary<string, string>
+                    {
+                        { "paymentMethod", "vnpay" },
+                        { "sandbox", isSandbox.ToString() },
+                        { "amount", request.Amount.ToString("N0") }
+                    }
+                };
+                
+                return Task.FromResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating VNPay QR code for order {OrderId}", request.OrderId);
+                var errorResult = new QRCodeResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Không thể tạo mã QR VNPay. Vui lòng thử lại.",
+                    OrderId = request.OrderId
+                };
+                
+                return Task.FromResult(errorResult);
+            }
         }
+
+        public async Task<QRCodeResult> GenerateMoMoQRCodeAsync(MoMoQRRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Generating MoMo QR code for order {OrderId}", request.OrderId);
+
+                var momoConfig = _configuration.GetSection("PaymentGateways:MoMo");
+                var partnerCode = momoConfig["PartnerCode"];
+                var accessKey = momoConfig["AccessKey"];
+                var secretKey = momoConfig["SecretKey"];
+                var endpoint = momoConfig["Endpoint"];
+                var isSandbox = bool.Parse(momoConfig["Sandbox"] ?? "true");
+
+                var requestId = Guid.NewGuid().ToString();
+                var orderId = $"{request.OrderId}_{DateTime.Now:yyyyMMddHHmmss}";
+                var amount = request.Amount.ToString("F0");
+                var orderInfo = string.IsNullOrEmpty(request.OrderInfo) 
+                    ? $"Thanh toan don hang {request.OrderId}" 
+                    : request.OrderInfo;
+                var redirectUrl = request.ReturnUrl;
+                var ipnUrl = request.NotifyUrl;
+                var extraData = "";
+                var requestType = "captureWallet"; // For QR code payment
+
+                // Create signature
+                var rawHash = $"accessKey={accessKey}&amount={amount}&extraData={extraData}&ipnUrl={ipnUrl}&orderId={orderId}&orderInfo={orderInfo}&partnerCode={partnerCode}&redirectUrl={redirectUrl}&requestId={requestId}&requestType={requestType}";
+                var signature = CreateMoMoSignature(rawHash, secretKey!);
+
+                var requestData = new
+                {
+                    partnerCode,
+                    partnerName = "John Henry Fashion",
+                    storeId = "JohnHenryStore",
+                    requestId,
+                    amount,
+                    orderId,
+                    orderInfo,
+                    redirectUrl,
+                    ipnUrl,
+                    lang = "vi",
+                    extraData,
+                    requestType,
+                    signature,
+                    autoCapture = true,
+                    orderExpireTime = 15 // 15 minutes
+                };
+
+                var json = JsonSerializer.Serialize(requestData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _logger.LogInformation("Calling MoMo API: {Endpoint}", endpoint);
+
+                var response = await _httpClient.PostAsync(endpoint, content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation("MoMo API Response: {Response}", responseContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var momoResponse = JsonSerializer.Deserialize<MoMoQRResponse>(responseContent, 
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (momoResponse?.ResultCode == 0)
+                    {
+                        _logger.LogInformation("MoMo QR generated successfully for {OrderId}", request.OrderId);
+
+                        return new QRCodeResult
+                        {
+                            IsSuccess = true,
+                            QRCodeUrl = momoResponse.QrCodeUrl,
+                            DeepLink = momoResponse.Deeplink,
+                            PaymentUrl = momoResponse.PayUrl,
+                            OrderId = request.OrderId,
+                            TransactionId = orderId,
+                            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                            ExpiresInSeconds = 900,
+                            AdditionalData = new Dictionary<string, string>
+                            {
+                                { "paymentMethod", "momo" },
+                                { "sandbox", isSandbox.ToString() },
+                                { "amount", request.Amount.ToString("N0") },
+                                { "requestId", requestId }
+                            }
+                        };
+                    }
+                    else
+                    {
+                        _logger.LogError("MoMo API error: {Message}", momoResponse?.Message);
+                        return new QRCodeResult
+                        {
+                            IsSuccess = false,
+                            ErrorMessage = momoResponse?.Message ?? "Lỗi từ MoMo",
+                            OrderId = request.OrderId
+                        };
+                    }
+                }
+                else
+                {
+                    _logger.LogError("MoMo API HTTP error: {StatusCode}", response.StatusCode);
+                    return new QRCodeResult
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "Không thể kết nối đến MoMo. Vui lòng thử lại.",
+                        OrderId = request.OrderId
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating MoMo QR code for order {OrderId}", request.OrderId);
+                return new QRCodeResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Không thể tạo mã QR MoMo. Vui lòng thử lại.",
+                    OrderId = request.OrderId
+                };
+            }
+        }
+    }
+
+    // MoMo QR Response Model
+    public class MoMoQRResponse
+    {
+        public string? PartnerCode { get; set; }
+        public string? OrderId { get; set; }
+        public string? RequestId { get; set; }
+        public long Amount { get; set; }
+        public long ResponseTime { get; set; }
+        public string? Message { get; set; }
+        public int ResultCode { get; set; }
+        public string? PayUrl { get; set; }
+        public string? Deeplink { get; set; }
+        public string? QrCodeUrl { get; set; }
+        public string? AppLink { get; set; }
     }
 
     // Supporting classes

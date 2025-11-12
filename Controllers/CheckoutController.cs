@@ -162,7 +162,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateSession(CheckoutCreateViewModel model)
+        public async Task<IActionResult> CreateSession([FromBody] CheckoutCreateViewModel model)
         {
             try
             {
@@ -369,7 +369,7 @@ namespace JohnHenryFashionWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Payment(string sessionId)
+        public async Task<IActionResult> Payment(string sessionId, string? paymentMethod = null)
         {
             if (string.IsNullOrEmpty(sessionId) || !Guid.TryParse(sessionId, out var sessionGuid))
             {
@@ -397,7 +397,8 @@ namespace JohnHenryFashionWeb.Controllers
                 Session = session,
                 PaymentMethods = paymentMethods,
                 ShippingMethods = shippingMethods,
-                TotalAmount = session.TotalAmount
+                TotalAmount = session.TotalAmount,
+                SelectedPaymentMethod = paymentMethod ?? session.PaymentMethod ?? ""
             };
 
             return View(model);
@@ -879,5 +880,162 @@ namespace JohnHenryFashionWeb.Controllers
             var random = new Random().Next(1000, 9999);
             return $"JH{timestamp}{random}";
         }
+
+        // ===================================
+        // QR Code Generation API Endpoints
+        // ===================================
+
+        [HttpPost]
+        [Route("Checkout/GeneratePaymentQR")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> GeneratePaymentQR([FromBody] GenerateQRRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.SessionId) || string.IsNullOrEmpty(request.PaymentMethod))
+                {
+                    return Json(new { success = false, message = "Thiếu thông tin bắt buộc" });
+                }
+
+                // Get checkout session
+                var session = await _context.CheckoutSessions
+                    .Include(s => s.Items)
+                    .FirstOrDefaultAsync(s => s.Id == Guid.Parse(request.SessionId) && s.Status == "active");
+
+                if (session == null || session.ExpiresAt < DateTime.UtcNow)
+                {
+                    return Json(new { success = false, message = "Phiên thanh toán đã hết hạn" });
+                }
+
+                // Get client IP
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                
+                // Generate URLs
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var returnUrl = $"{baseUrl}/Payment/Return";
+                var notifyUrl = $"{baseUrl}/Payment/Notify";
+
+                QRCodeResult result;
+
+                switch (request.PaymentMethod.ToLower())
+                {
+                    case "vnpay":
+                        var vnpayRequest = new VNPayQRRequest
+                        {
+                            SessionId = request.SessionId,
+                            Amount = session.TotalAmount,
+                            OrderId = session.Id.ToString(),
+                            OrderInfo = $"Thanh toan don hang {session.Id}",
+                            IpAddress = ipAddress,
+                            ReturnUrl = returnUrl,
+                            NotifyUrl = notifyUrl
+                        };
+                        result = await _paymentService.GenerateVNPayQRCodeAsync(vnpayRequest);
+                        break;
+
+                    case "momo":
+                        var momoRequest = new MoMoQRRequest
+                        {
+                            SessionId = request.SessionId,
+                            Amount = session.TotalAmount,
+                            OrderId = session.Id.ToString(),
+                            OrderInfo = $"Thanh toan don hang {session.Id}",
+                            ReturnUrl = returnUrl,
+                            NotifyUrl = notifyUrl
+                        };
+                        result = await _paymentService.GenerateMoMoQRCodeAsync(momoRequest);
+                        break;
+
+                    default:
+                        return Json(new { success = false, message = "Phương thức thanh toán không hỗ trợ QR code" });
+                }
+
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation("QR code generated successfully for session {SessionId} using {PaymentMethod}", 
+                        request.SessionId, request.PaymentMethod);
+
+                    return Json(new
+                    {
+                        success = true,
+                        qrCodeUrl = result.QRCodeUrl,
+                        qrDataUrl = result.QRDataUrl,
+                        deepLink = result.DeepLink,
+                        paymentUrl = result.PaymentUrl,
+                        transactionId = result.TransactionId,
+                        expiresAt = result.ExpiresAt,
+                        expiresInSeconds = result.ExpiresInSeconds
+                    });
+                }
+                else
+                {
+                    _logger.LogError("Failed to generate QR code: {Error}", result.ErrorMessage);
+                    return Json(new { success = false, message = result.ErrorMessage });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating payment QR code");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tạo mã QR" });
+            }
+        }
+
+        [HttpGet]
+        [Route("Checkout/CheckPaymentStatus")]
+        public async Task<IActionResult> CheckPaymentStatus(string sessionId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    return Json(new { status = "error", message = "Session ID không hợp lệ" });
+                }
+
+                // Get checkout session
+                var session = await _context.CheckoutSessions
+                    .FirstOrDefaultAsync(s => s.Id == Guid.Parse(sessionId));
+
+                if (session == null)
+                {
+                    return Json(new { status = "error", message = "Không tìm thấy phiên thanh toán" });
+                }
+
+                // Check if order was created and paid
+                var order = await _context.Orders
+                    .FirstOrDefaultAsync(o => o.Id.ToString() == session.Id.ToString() || 
+                                              o.OrderNumber.Contains(session.Id.ToString()));
+
+                if (order != null && order.PaymentStatus == "paid")
+                {
+                    return Json(new
+                    {
+                        status = "paid",
+                        message = "Thanh toán thành công",
+                        redirectUrl = Url.Action("OrderConfirmation", "Orders", new { orderId = order.Id })
+                    });
+                }
+
+                // Check if session expired
+                if (session.ExpiresAt < DateTime.UtcNow)
+                {
+                    return Json(new { status = "expired", message = "Phiên thanh toán đã hết hạn" });
+                }
+
+                // Still pending
+                return Json(new { status = "pending", message = "Đang chờ thanh toán" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking payment status for session {SessionId}", sessionId);
+                return Json(new { status = "error", message = "Có lỗi xảy ra" });
+            }
+        }
+    }
+
+    // Request model for QR generation
+    public class GenerateQRRequest
+    {
+        public string SessionId { get; set; } = string.Empty;
+        public string PaymentMethod { get; set; } = string.Empty;
     }
 }

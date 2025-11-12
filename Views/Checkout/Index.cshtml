@@ -230,22 +230,19 @@
                                     <label for="city" class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
                                     <select class="form-select" id="city" name="city" required>
                                         <option value="">-- Chọn tỉnh/thành --</option>
-                                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                                        <option value="Hà Nội">Hà Nội</option>
-                                        <option value="Đà Nẵng">Đà Nẵng</option>
-                                        <option value="Cần Thơ">Cần Thơ</option>
-                                        <option value="Khác">Khác</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="district" class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="district" name="district" 
-                                           placeholder="Nhập quận/huyện" required>
+                                    <select class="form-select" id="district" name="district" required disabled>
+                                        <option value="">-- Chọn quận/huyện --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="ward" class="form-label">Phường/Xã <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="ward" name="ward" 
-                                           placeholder="Nhập phường/xã" required>
+                                    <select class="form-select" id="ward" name="ward" required disabled>
+                                        <option value="">-- Chọn phường/xã --</option>
+                                    </select>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label for="notes" class="form-label">Ghi chú (tùy chọn)</label>
@@ -679,6 +676,13 @@
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Load provinces from database
+            loadProvinces();
+            
+            // Listen for city/province changes
+            document.getElementById('city').addEventListener('change', handleProvinceChange);
+            document.getElementById('district').addEventListener('change', handleDistrictChange);
+            
             // Listen for shipping method changes
             document.querySelectorAll('input[name="shippingMethod"]').forEach(radio => {
                 radio.addEventListener('change', handleShippingMethodChange);
@@ -697,6 +701,91 @@
                 saveAddressBtn.addEventListener('click', saveShippingAddress);
             }
         });
+        
+        // Load provinces from API
+        function loadProvinces() {
+            console.log('Loading provinces...');
+            fetch('/api/AddressApi/provinces')
+                .then(response => {
+                    console.log('Provinces response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Provinces loaded:', data.length);
+                    const select = document.getElementById('city');
+                    select.innerHTML = '<option value="">-- Chọn tỉnh/thành --</option>';
+                    data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.id;
+                        option.textContent = province.name;
+                        option.setAttribute('data-name', province.name);
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading provinces:', error);
+                    alert('Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại.');
+                });
+        }
+        
+        // Handle province change
+        function handleProvinceChange(event) {
+            const provinceId = event.target.value;
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            
+            console.log('Province changed:', provinceId);
+            
+            // Reset district and ward
+            districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+            districtSelect.disabled = !provinceId;
+            wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+            wardSelect.disabled = true;
+            
+            if (provinceId) {
+                fetch(`/api/AddressApi/districts/${provinceId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Districts loaded:', data.length);
+                        data.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district.id;
+                            option.textContent = district.name;
+                            option.setAttribute('data-name', district.name);
+                            districtSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading districts:', error));
+            }
+        }
+        
+        // Handle district change
+        function handleDistrictChange(event) {
+            const districtId = event.target.value;
+            const wardSelect = document.getElementById('ward');
+            
+            console.log('District changed:', districtId);
+            
+            // Reset ward
+            wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+            wardSelect.disabled = !districtId;
+            
+            if (districtId) {
+                fetch(`/api/AddressApi/wards/${districtId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Wards loaded:', data.length);
+                        data.forEach(ward => {
+                            const option = document.createElement('option');
+                            option.value = ward.id;
+                            option.textContent = ward.name;
+                            option.setAttribute('data-name', ward.name);
+                            wardSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading wards:', error));
+            }
+        }
         
         // Handle shipping method change
         function handleShippingMethodChange(event) {
@@ -865,9 +954,16 @@
             
             // Additional validation for address fields
             const address = formData.get('address')?.trim();
-            const ward = formData.get('ward')?.trim();
-            const district = formData.get('district')?.trim();
-            const city = formData.get('city')?.trim();
+            
+            // Get selected text values instead of IDs
+            const citySelect = document.getElementById('city');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            
+            const city = citySelect.options[citySelect.selectedIndex]?.getAttribute('data-name') || citySelect.options[citySelect.selectedIndex]?.text || '';
+            const district = districtSelect.options[districtSelect.selectedIndex]?.getAttribute('data-name') || districtSelect.options[districtSelect.selectedIndex]?.text || '';
+            const ward = wardSelect.options[wardSelect.selectedIndex]?.getAttribute('data-name') || wardSelect.options[wardSelect.selectedIndex]?.text || '';
+            
             const phone = formData.get('phone')?.trim();
             const email = formData.get('email')?.trim();
             const firstName = formData.get('firstName')?.trim();
@@ -884,9 +980,9 @@
             console.log('City:', city);
             console.log('============================');
             
-            // Validate email
-            const emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
-            if (!email || !emailPattern.test(email)) {
+            // Validate email - simple validation (check for at symbol and dot)
+            const atSymbol = String.fromCharCode(64);
+            if (!email || !email.includes(atSymbol) || !email.includes('.') || email.length < 5) {
                 showToast('Vui lòng nhập địa chỉ email hợp lệ', 'error');
                 console.error('Email validation failed:', email);
                 return;
@@ -942,44 +1038,44 @@
             // Build AddressViewModel for shipping address
             const fullName = `${firstName} ${lastName}`;
             const orderData = {
-                email: email,
-                shippingAddress: {
-                    fullName: fullName,
-                    phoneNumber: phone,
-                    address: address,
-                    ward: ward,
-                    district: district,
-                    city: city,
-                    postalCode: formData.get('postalCode')?.trim() || null,
-                    addressNote: formData.get('addressNote')?.trim() || null,
-                    isDefault: false
+                Email: email,  // Changed to uppercase E to match C# property
+                ShippingAddress: {  // Changed to PascalCase
+                    FullName: fullName,
+                    PhoneNumber: phone,
+                    Address: address,
+                    Ward: ward,
+                    District: district,
+                    City: city,
+                    PostalCode: formData.get('postalCode')?.trim() || null,
+                    AddressNote: formData.get('addressNote')?.trim() || null,
+                    IsDefault: false
                 },
-                billingAddress: {
-                    fullName: fullName,
-                    phoneNumber: phone,
-                    address: address,
-                    ward: ward,
-                    district: district,
-                    city: city,
-                    postalCode: formData.get('postalCode')?.trim() || null,
-                    addressNote: formData.get('addressNote')?.trim() || null,
-                    isDefault: false
+                BillingAddress: {  // Changed to PascalCase
+                    FullName: fullName,
+                    PhoneNumber: phone,
+                    Address: address,
+                    Ward: ward,
+                    District: district,
+                    City: city,
+                    PostalCode: formData.get('postalCode')?.trim() || null,
+                    AddressNote: formData.get('addressNote')?.trim() || null,
+                    IsDefault: false
                 },
-                useSameAddressForBilling: true,
-                shippingMethod: shippingMethod,
-                couponCode: appliedCouponData ? appliedCouponData.code : null,
-                notes: formData.get('notes')?.trim() || null
+                UseSameAddressForBilling: true,
+                ShippingMethod: shippingMethod,
+                CouponCode: appliedCouponData ? appliedCouponData.code : null,
+                Notes: formData.get('notes')?.trim() || null
             };
             
             console.log('=== ORDER DATA DEBUG ===');
-            console.log('Email:', orderData.email);
-            console.log('FullName:', orderData.shippingAddress.fullName);
-            console.log('Phone:', orderData.shippingAddress.phoneNumber);
-            console.log('Address:', orderData.shippingAddress.address);
-            console.log('Ward:', orderData.shippingAddress.ward);
-            console.log('District:', orderData.shippingAddress.district);
-            console.log('City:', orderData.shippingAddress.city);
-            console.log('Shipping Method:', orderData.shippingMethod);
+            console.log('Email:', orderData.Email);
+            console.log('FullName:', orderData.ShippingAddress.FullName);
+            console.log('Phone:', orderData.ShippingAddress.PhoneNumber);
+            console.log('Address:', orderData.ShippingAddress.Address);
+            console.log('Ward:', orderData.ShippingAddress.Ward);
+            console.log('District:', orderData.ShippingAddress.District);
+            console.log('City:', orderData.ShippingAddress.City);
+            console.log('Shipping Method:', orderData.ShippingMethod);
             console.log('Full Order Data:', JSON.stringify(orderData, null, 2));
             console.log('======================');
             
@@ -1010,6 +1106,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
                         'RequestVerificationToken': csrfToken
                     },
                     body: JSON.stringify(orderData)
