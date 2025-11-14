@@ -88,8 +88,8 @@
                                     <div class="cart-item-quantity">
                                         <div class="quantity-controls">
                                             <button type="button" 
-                                                    class="qty-btn" 
-                                                    onclick="updateQuantity('@item.Id', @(item.Quantity - 1))"
+                                                    class="qty-btn qty-minus" 
+                                                    onclick="updateQuantity('@item.Id', parseInt(this.parentElement.querySelector('.qty-input').value) - 1)"
                                                     @(item.Quantity <= 1 ? "disabled" : "")>
                                                 <i data-lucide="minus"></i>
                                             </button>
@@ -97,11 +97,13 @@
                                                    class="qty-input" 
                                                    value="@item.Quantity" 
                                                    min="1" 
-                                                   max="99"
+                                                   max="@item.Product.StockQuantity"
+                                                   data-cart-item-id="@item.Id"
                                                    onchange="updateQuantity('@item.Id', this.value)">
                                             <button type="button" 
-                                                    class="qty-btn" 
-                                                    onclick="updateQuantity('@item.Id', @(item.Quantity + 1))">
+                                                    class="qty-btn qty-plus" 
+                                                    onclick="updateQuantity('@item.Id', parseInt(this.parentElement.querySelector('.qty-input').value) + 1)"
+                                                    @(item.Quantity >= item.Product.StockQuantity ? "disabled" : "")>
                                                 <i data-lucide="plus"></i>
                                             </button>
                                         </div>
@@ -893,7 +895,12 @@
         
         // Update quantity function
         async function updateQuantity(cartItemId, quantity) {
-            if (quantity < 1) return;
+            quantity = parseInt(quantity);
+            
+            if (quantity < 1) {
+                showToast('Số lượng phải lớn hơn 0', 'error');
+                return;
+            }
             
             try {
                 const response = await fetch('/Cart/UpdateQuantity', {
@@ -902,7 +909,7 @@
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                     },
-                    body: JSON.stringify({ cartItemId: cartItemId, quantity: parseInt(quantity) })
+                    body: JSON.stringify({ cartItemId: cartItemId, quantity: quantity })
                 });
                 
                 const result = await response.json();
@@ -910,28 +917,52 @@
                 if (result.success) {
                     // Update item quantity input
                     const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
-                    cartItem.querySelector('.quantity-input').value = quantity;
+                    const qtyInput = cartItem.querySelector('.qty-input');
+                    const qtyMinus = cartItem.querySelector('.qty-minus');
+                    const qtyPlus = cartItem.querySelector('.qty-plus');
                     
-                    // Update item total
-                    cartItem.querySelector('.total-price').textContent = result.itemTotal.toLocaleString() + '₫';
+                    if (qtyInput) {
+                        qtyInput.value = quantity;
+                        const maxStock = parseInt(qtyInput.getAttribute('max'));
+                        
+                        // Enable/disable minus button
+                        if (qtyMinus) {
+                            qtyMinus.disabled = quantity <= 1;
+                        }
+                        
+                        // Enable/disable plus button
+                        if (qtyPlus) {
+                            qtyPlus.disabled = quantity >= maxStock;
+                        }
+                    }
                     
-                    // Update cart summary
-                    document.querySelector('.cart-subtotal').textContent = result.cartTotal.toLocaleString() + '₫';
-                    document.querySelector('.cart-total').textContent = (result.cartTotal + 30000).toLocaleString() + '₫';
+                    // Update the checkbox price data
+                    const checkbox = cartItem.querySelector('.item-checkbox');
+                    if (checkbox) {
+                        checkbox.dataset.price = result.itemTotal;
+                    }
+                    
+                    // Re-calculate selected items total
+                    updateSelectedSummary();
                     
                     // Update cart count in header
                     updateCartCount(result.cartCount);
                     
-                    // Re-calculate selected items total
-                    const checkbox = document.querySelector(`[data-cart-item-id="${cartItemId}"].item-checkbox`);
-                    if (checkbox) {
-                        checkbox.dataset.price = result.itemTotal;
-                        updateSelectedSummary();
+                    // Re-initialize Lucide icons for the updated buttons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
                     }
                     
-                    showToast(result.message, 'success');
+                    showToast('Đã cập nhật số lượng', 'success');
                 } else {
                     showToast(result.message, 'error');
+                    // Revert input value on error
+                    const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
+                    const qtyInput = cartItem.querySelector('.qty-input');
+                    if (qtyInput) {
+                        const currentValue = qtyInput.dataset.currentValue || qtyInput.value;
+                        qtyInput.value = currentValue;
+                    }
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
