@@ -35,7 +35,8 @@
                                 <div class="position-relative d-inline-block">
                                     @if (!string.IsNullOrEmpty(Model.Avatar))
                                     {
-                                        <img id="avatar-preview" src="@Model.Avatar" alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                        <img id="avatar-preview" src="@Model.Avatar" alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;"
+                                             onerror="this.onerror=null; this.style.display='none'; var div = document.createElement('div'); div.id = 'avatar-preview'; div.className = 'bg-primary rounded-circle d-flex align-items-center justify-content-center'; div.style.cssText = 'width: 150px; height: 150px;'; div.innerHTML = '<i class=\'fas fa-user text-white\' style=\'font-size: 3rem;\'></i>'; this.parentElement.appendChild(div);">
                                     }
                                     else
                                     {
