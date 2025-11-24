@@ -413,7 +413,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Profile(string? tab = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -428,7 +428,8 @@ namespace JohnHenryFashionWeb.Controllers
                 LastName = user.LastName ?? "",
                 PhoneNumber = user.PhoneNumber ?? "",
                 Gender = user.Gender ?? "",
-                DateOfBirth = user.DateOfBirth
+                DateOfBirth = user.DateOfBirth,
+                Avatar = user.Avatar
             };
 
             return View(model);
@@ -573,20 +574,8 @@ namespace JohnHenryFashionWeb.Controllers
         [Authorize]
         public async Task<IActionResult> Orders()
         {
-            var userId = _userManager.GetUserId(User);
-            if (userId == null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var orders = await _context.Orders
-                .Where(o => o.UserId == userId)
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
-
-            return View(orders);
+            // Redirect to Profile page with orders tab
+            return RedirectToAction("Profile", new { tab = "orders" });
         }
 
         #region Helpers

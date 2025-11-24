@@ -155,6 +155,9 @@ namespace JohnHenryFashionWeb.ViewModels
         [Display(Name = "Ngày sinh")]
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
+
+        // Add avatar for display
+        public string? Avatar { get; set; }
     }
 
     public class ChangePasswordViewModel
