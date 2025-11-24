@@ -1,4 +1,5 @@
 @model JohnHenryFashionWeb.Models.Order
+@using System.Text.Json
 @inject UserManager<ApplicationUser> UserManager
 
 @{
@@ -6,10 +7,44 @@
     var currentUser = await UserManager.GetUserAsync(User);
     var avatarUrl = !string.IsNullOrEmpty(currentUser?.Avatar) 
         ? currentUser.Avatar 
-        : "/images/avatars/default-avatar.svg";
+        : "/images/default-avatar.svg";
     var userName = currentUser != null && !string.IsNullOrEmpty(currentUser.FirstName) 
         ? $"{currentUser.FirstName} {currentUser.LastName}".Trim()
         : (User.Identity?.Name ?? "User");
+    
+    // Parse shipping address from JSON
+    string displayShippingAddress = "Chưa có địa chỉ";
+    if (!string.IsNullOrEmpty(Model.ShippingAddress))
+    {
+        try
+        {
+            var addressObj = JsonSerializer.Deserialize<Dictionary<string, object>>(Model.ShippingAddress);
+            if (addressObj != null)
+            {
+                var parts = new List<string>();
+                
+                if (addressObj.ContainsKey("fullName") && addressObj["fullName"] != null)
+                    parts.Add(addressObj["fullName"].ToString() ?? "");
+                if (addressObj.ContainsKey("phoneNumber") && addressObj["phoneNumber"] != null)
+                    parts.Add("SĐT: " + (addressObj["phoneNumber"].ToString() ?? ""));
+                if (addressObj.ContainsKey("address") && addressObj["address"] != null)
+                    parts.Add(addressObj["address"].ToString() ?? "");
+                if (addressObj.ContainsKey("ward") && addressObj["ward"] != null)
+                    parts.Add(addressObj["ward"].ToString() ?? "");
+                if (addressObj.ContainsKey("district") && addressObj["district"] != null)
+                    parts.Add(addressObj["district"].ToString() ?? "");
+                if (addressObj.ContainsKey("city") && addressObj["city"] != null)
+                    parts.Add(addressObj["city"].ToString() ?? "");
+                
+                if (parts.Any())
+                    displayShippingAddress = string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            }
+        }
+        catch
+        {
+            displayShippingAddress = Model.ShippingAddress;
+        }
+    }
 }
 
 <div class="container py-4">
@@ -93,7 +128,7 @@
                         <div class="col-md-6">
                             <div class="info-box p-3 bg-light rounded">
                                 <h6 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ giao hàng</h6>
-                                <p class="mb-0">@Html.Raw(Model.ShippingAddress?.Replace("\n", "<br>") ?? "Chưa có địa chỉ")</p>
+                                <p class="mb-0">@displayShippingAddress</p>
                             </div>
                         </div>
                     </div>

@@ -12,7 +12,7 @@
                 <div class="text-center mb-3">
                     <div class="user-avatar">
                         <img src="@Model.Avatar" alt="Avatar" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;" 
-                             onerror="this.onerror=null; this.src='/images/default-avatar.svg';">
+                             onerror="this.onerror=null; this.style.display='none'; var icon = document.createElement('i'); icon.setAttribute('data-lucide', 'user-circle'); icon.style.cssText = 'width: 60px; height: 60px; color: #6c757d;'; this.parentElement.appendChild(icon); if(typeof lucide !== 'undefined') lucide.createIcons();">
                     </div>
                     <h5 class="mt-2">@Model.FullName</h5>
                     <p class="text-muted">@Model.Email</p>
@@ -177,7 +177,7 @@
                             <div class="avatar-preview mb-3">
                                 <img src="@Model.Avatar" alt="Avatar" class="rounded-circle img-thumbnail" 
                                      style="width: 150px; height: 150px; object-fit: cover;"
-                                     onerror="this.onerror=null; this.src='/images/default-avatar.svg';">
+                                     onerror="this.onerror=null; this.style.display='none'; var icon = document.createElement('i'); icon.setAttribute('data-lucide', 'user-circle'); icon.style.cssText = 'width: 150px; height: 150px; color: #6c757d;'; this.parentElement.appendChild(icon); if(typeof lucide !== 'undefined') lucide.createIcons();">
                             </div>
                             
                             <form asp-action="UpdateAvatar" method="post" enctype="multipart/form-data">
