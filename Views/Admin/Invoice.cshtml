@@ -1,7 +1,45 @@
 @model JohnHenryFashionWeb.Models.Order
+@using System.Text.Json
 @{
     Layout = null;
     var subtotal = Model.TotalAmount - Model.ShippingFee - Model.Tax + Model.DiscountAmount;
+    
+    // Parse shipping address from JSON
+    string displayShippingAddress = "N/A";
+    if (!string.IsNullOrEmpty(Model.ShippingAddress))
+    {
+        try
+        {
+            // Try to parse as JSON first
+            var addressObj = JsonSerializer.Deserialize<Dictionary<string, object>>(Model.ShippingAddress);
+            if (addressObj != null)
+            {
+                var parts = new List<string>();
+                
+                // Build address string from JSON properties
+                if (addressObj.ContainsKey("fullName") && addressObj["fullName"] != null)
+                    parts.Add(addressObj["fullName"].ToString() ?? "");
+                if (addressObj.ContainsKey("phoneNumber") && addressObj["phoneNumber"] != null)
+                    parts.Add("SĐT: " + (addressObj["phoneNumber"].ToString() ?? ""));
+                if (addressObj.ContainsKey("address") && addressObj["address"] != null)
+                    parts.Add(addressObj["address"].ToString() ?? "");
+                if (addressObj.ContainsKey("ward") && addressObj["ward"] != null)
+                    parts.Add(addressObj["ward"].ToString() ?? "");
+                if (addressObj.ContainsKey("district") && addressObj["district"] != null)
+                    parts.Add(addressObj["district"].ToString() ?? "");
+                if (addressObj.ContainsKey("city") && addressObj["city"] != null)
+                    parts.Add(addressObj["city"].ToString() ?? "");
+                
+                if (parts.Any())
+                    displayShippingAddress = string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            }
+        }
+        catch
+        {
+            // If not JSON, use as is
+            displayShippingAddress = Model.ShippingAddress;
+        }
+    }
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -234,7 +272,7 @@
             </div>
             <div class="detail-box">
                 <h3>Địa chỉ giao hàng</h3>
-                <p>@(Model.ShippingAddress ?? "N/A")</p>
+                <p style="white-space: pre-line;">@displayShippingAddress</p>
                 @if (Model.ShippedAt.HasValue)
                 {
                     <p style="margin-top: 15px;"><strong>Ngày gửi hàng:</strong> @Model.ShippedAt.Value.ToString("dd/MM/yyyy HH:mm")</p>

@@ -1,10 +1,45 @@
 @model JohnHenryFashionWeb.ViewModels.OrderDetailsViewModel
+@using System.Text.Json
 
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
     ViewData["CurrentSection"] = "Orders";
     ViewData["PageIcon"] = "file-text";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    // Parse shipping address from JSON
+    string displayShippingAddress = "N/A";
+    if (!string.IsNullOrEmpty(Model.ShippingAddress))
+    {
+        try
+        {
+            var addressObj = JsonSerializer.Deserialize<Dictionary<string, object>>(Model.ShippingAddress);
+            if (addressObj != null)
+            {
+                var parts = new List<string>();
+                
+                if (addressObj.ContainsKey("fullName") && addressObj["fullName"] != null)
+                    parts.Add(addressObj["fullName"].ToString() ?? "");
+                if (addressObj.ContainsKey("phoneNumber") && addressObj["phoneNumber"] != null)
+                    parts.Add("SĐT: " + (addressObj["phoneNumber"].ToString() ?? ""));
+                if (addressObj.ContainsKey("address") && addressObj["address"] != null)
+                    parts.Add(addressObj["address"].ToString() ?? "");
+                if (addressObj.ContainsKey("ward") && addressObj["ward"] != null)
+                    parts.Add(addressObj["ward"].ToString() ?? "");
+                if (addressObj.ContainsKey("district") && addressObj["district"] != null)
+                    parts.Add(addressObj["district"].ToString() ?? "");
+                if (addressObj.ContainsKey("city") && addressObj["city"] != null)
+                    parts.Add(addressObj["city"].ToString() ?? "");
+                
+                if (parts.Any())
+                    displayShippingAddress = string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            }
+        }
+        catch
+        {
+            displayShippingAddress = Model.ShippingAddress;
+        }
+    }
 }
 
 <div class="admin-content">
@@ -77,7 +112,7 @@
                 </tr>
                 <tr>
                     <td><strong>Địa chỉ:</strong></td>
-                    <td>@Model.ShippingAddress</td>
+                    <td>@displayShippingAddress</td>
                 </tr>
                 @if (!string.IsNullOrEmpty(Model.Notes))
                 {

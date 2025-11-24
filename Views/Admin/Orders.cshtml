@@ -511,6 +511,29 @@
 
         let currentOrderIdForPrint = null;
 
+        // Helper function to parse and format shipping address
+        function formatShippingAddress(addressString) {
+            if (!addressString) return 'N/A';
+            
+            try {
+                // Try to parse as JSON
+                const addressObj = JSON.parse(addressString);
+                const parts = [];
+                
+                if (addressObj.fullName) parts.push(addressObj.fullName);
+                if (addressObj.phoneNumber) parts.push(`SĐT: ${addressObj.phoneNumber}`);
+                if (addressObj.address) parts.push(addressObj.address);
+                if (addressObj.ward) parts.push(addressObj.ward);
+                if (addressObj.district) parts.push(addressObj.district);
+                if (addressObj.city) parts.push(addressObj.city);
+                
+                return parts.length > 0 ? parts.join(', ') : 'N/A';
+            } catch (e) {
+                // If not JSON, return as is
+                return addressString;
+            }
+        }
+
         // View order details in modal
         function viewOrderDetails(orderId) {
             currentOrderIdForPrint = orderId;
@@ -637,7 +660,7 @@
                                 <h6 class="mb-0"><i data-lucide="map-pin"></i> Địa chỉ giao hàng</h6>
                             </div>
                             <div class="card-body">
-                                <p class="mb-0">${order.shippingAddress || 'N/A'}</p>
+                                <p class="mb-0">${formatShippingAddress(order.shippingAddress)}</p>
                             </div>
                         </div>
                     </div>

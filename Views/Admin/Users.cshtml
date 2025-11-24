@@ -195,7 +195,8 @@
                                 @if (!string.IsNullOrEmpty(user.Avatar))
                                 {
                                     <img src="@user.Avatar" alt="@user.FullName" 
-                                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid var(--admin-border);">
+                                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid var(--admin-border);"
+                                         onerror="this.onerror=null; this.style.display='none'; var div = document.createElement('div'); div.style.cssText = 'width: 40px; height: 40px; background: var(--admin-bg-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--admin-border);'; var icon = document.createElement('i'); icon.setAttribute('data-lucide', 'user'); icon.style.cssText = 'width: 18px; height: 18px; color: var(--admin-text-muted);'; div.appendChild(icon); this.parentElement.appendChild(div); if(typeof lucide !== 'undefined') lucide.createIcons();">
                                 }
                                 else
                                 {
