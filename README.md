@@ -1,3 +1,6 @@
+# Home Interface 
+![alt text](image.png)
+
 # John Henry Fashion Web Platform
 
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=for-the-badge&logo=dotnet)
