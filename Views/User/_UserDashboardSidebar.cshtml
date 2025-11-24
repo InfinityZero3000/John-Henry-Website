@@ -12,7 +12,8 @@
         <div class="d-flex align-items-center mb-3">
             @if (!string.IsNullOrEmpty(user?.Avatar))
             {
-                <img src="@user.Avatar" alt="Avatar" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                <img src="@user.Avatar" alt="Avatar" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;"
+                     onerror="this.onerror=null; this.style.display='none'; var div = document.createElement('div'); div.className = 'bg-primary rounded-circle d-flex align-items-center justify-content-center me-3'; div.style.cssText = 'width: 60px; height: 60px;'; div.innerHTML = '<i class=\'fas fa-user text-white fs-4\'></i>'; this.parentElement.appendChild(div);">
             }
             else
             {

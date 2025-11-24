@@ -2146,19 +2146,9 @@
                     // Show success message
                     showNotification('Đã thêm sản phẩm vào giỏ hàng!', 'success');
                     
-                    // Check if sidebar is already open
-                    const sidebar = document.getElementById('cart-sidebar');
-                    const isOpen = sidebar && sidebar.classList.contains('open');
-                    
-                    if (isOpen) {
-                        // Sidebar already open - just refresh the data
-                        console.log('Product added, sidebar is open - refreshing data...');
-                        refreshCartSidebar();
-                    } else {
-                        // Sidebar closed - load data and open it
-                        console.log('Product added, opening cart sidebar...');
-                        loadAndOpenCartSidebar();
-                    }
+                    // Always open sidebar after adding product
+                    console.log('Product added, opening cart sidebar...');
+                    loadAndOpenCartSidebar();
                 } else {
                     console.log('AddToCart failed:', result.message);
                     showNotification(result.message || 'Có lỗi khi thêm sản phẩm vào giỏ hàng', 'error');
