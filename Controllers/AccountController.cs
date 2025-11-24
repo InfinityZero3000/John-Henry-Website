@@ -572,7 +572,7 @@ namespace JohnHenryFashionWeb.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Orders()
+        public IActionResult Orders()
         {
             // Redirect to Profile page with orders tab
             return RedirectToAction("Profile", new { tab = "orders" });
