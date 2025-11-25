@@ -347,20 +347,10 @@ public class HomeController : Controller
                     // Apply subcategory keyword filtering if keywords exist
                     if (keywords != null && keywords.Length > 0)
                     {
-                        // Build OR condition for all keyword variations
-                        foreach (var keyword in keywords)
-                        {
-                            var lowerKeyword = $"%{keyword.ToLower()}%";
-                            var upperKeyword = $"%{keyword.ToUpper()}%";
-                            var capitalizedKeyword = keyword.Length > 0 
-                                ? $"%{char.ToUpper(keyword[0]) + keyword.Substring(1).ToLower()}%" 
-                                : $"%{keyword}%";
-                            
-                            productsQuery = productsQuery.Where(p => 
-                                EF.Functions.ILike(p.Name, lowerKeyword) || 
-                                EF.Functions.ILike(p.Name, upperKeyword) ||
-                                EF.Functions.ILike(p.Name, capitalizedKeyword));
-                        }
+                        // Build OR condition for all keywords - product name must contain ANY keyword
+                        // Filter products where name contains any of the keywords (with case variations)
+                        // Use a helper to build the condition properly for EF Core
+                        productsQuery = ApplyKeywordFilter(productsQuery, keywords);
                     }
                 }
             }
@@ -495,6 +485,7 @@ public class HomeController : Controller
                 {"Áo Blazer", new[] {"blazer"}},
                 {"Áo Len Nữ", new[] {"len", "sweater"}},
                 {"Quần Jean Nữ", new[] {"jean"}},
+                {"Quần Tây Nữ", new[] {"tây", "tay"}},
                 {"Quần Âu Nữ", new[] {"âu", "au"}},
                 {"Quần Short Nữ", new[] {"short"}},
                 {"Quần Legging Nữ", new[] {"legging"}},
@@ -560,20 +551,10 @@ public class HomeController : Controller
                     // Apply subcategory keyword filtering if keywords exist
                     if (keywords != null && keywords.Length > 0)
                     {
-                        // Build OR condition for all keyword variations
-                        foreach (var keyword in keywords)
-                        {
-                            var lowerKeyword = $"%{keyword.ToLower()}%";
-                            var upperKeyword = $"%{keyword.ToUpper()}%";
-                            var capitalizedKeyword = keyword.Length > 0 
-                                ? $"%{char.ToUpper(keyword[0]) + keyword.Substring(1).ToLower()}%" 
-                                : $"%{keyword}%";
-                            
-                            productsQuery = productsQuery.Where(p => 
-                                EF.Functions.ILike(p.Name, lowerKeyword) || 
-                                EF.Functions.ILike(p.Name, upperKeyword) ||
-                                EF.Functions.ILike(p.Name, capitalizedKeyword));
-                        }
+                        // Build OR condition for all keywords - product name must contain ANY keyword
+                        // Filter products where name contains any of the keywords (with case variations)
+                        // Use a helper to build the condition properly for EF Core
+                        productsQuery = ApplyKeywordFilter(productsQuery, keywords);
                     }
                 }
             }
@@ -1616,5 +1597,42 @@ public class HomeController : Controller
                 EF.Functions.ILike(c.Name, lowerCategory) || 
                 EF.Functions.ILike(c.Name, upperCategory) ||
                 EF.Functions.ILike(c.Name, capitalizedCategory));
+    }
+
+    // Helper method: Apply keyword filter with OR logic (product name must contain ANY keyword)
+    private IQueryable<Product> ApplyKeywordFilter(IQueryable<Product> query, string[] keywords)
+    {
+        if (keywords == null || keywords.Length == 0)
+            return query;
+
+        // Build all search patterns for all keywords (lowercase, uppercase, capitalized)
+        var patterns = new List<string>();
+        foreach (var keyword in keywords)
+        {
+            patterns.Add($"%{keyword.ToLower()}%");
+            patterns.Add($"%{keyword.ToUpper()}%");
+            if (keyword.Length > 0)
+            {
+                patterns.Add($"%{char.ToUpper(keyword[0]) + keyword.Substring(1).ToLower()}%");
+            }
+        }
+
+        // Apply single Where clause with OR conditions for all patterns
+        // Product name matches if it contains ANY pattern
+        // Handle up to 12 patterns (4 keywords x 3 variations) which should be sufficient
+        return query.Where(p =>
+            EF.Functions.ILike(p.Name, patterns[0]) ||
+            (patterns.Count > 1 && EF.Functions.ILike(p.Name, patterns[1])) ||
+            (patterns.Count > 2 && EF.Functions.ILike(p.Name, patterns[2])) ||
+            (patterns.Count > 3 && EF.Functions.ILike(p.Name, patterns[3])) ||
+            (patterns.Count > 4 && EF.Functions.ILike(p.Name, patterns[4])) ||
+            (patterns.Count > 5 && EF.Functions.ILike(p.Name, patterns[5])) ||
+            (patterns.Count > 6 && EF.Functions.ILike(p.Name, patterns[6])) ||
+            (patterns.Count > 7 && EF.Functions.ILike(p.Name, patterns[7])) ||
+            (patterns.Count > 8 && EF.Functions.ILike(p.Name, patterns[8])) ||
+            (patterns.Count > 9 && EF.Functions.ILike(p.Name, patterns[9])) ||
+            (patterns.Count > 10 && EF.Functions.ILike(p.Name, patterns[10])) ||
+            (patterns.Count > 11 && EF.Functions.ILike(p.Name, patterns[11]))
+        );
     }
 }
