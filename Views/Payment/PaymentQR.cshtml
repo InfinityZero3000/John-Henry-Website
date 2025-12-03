@@ -1,0 +1,367 @@
+@model JohnHenryFashionWeb.Models.Order
+@{
+    ViewData["Title"] = "Thanh toán đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Giỏ hàng</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Payment" asp-action="Checkout">Thanh toán</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">QR Payment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="checkout-steps mb-5">
+        <div class="steps-container">
+            <div class="step completed">
+                <div class="step-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <span class="step-title">Thông tin</span>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step active">
+                <div class="step-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <span class="step-title">Thanh toán</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <span class="step-title">Hoàn thành</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-5">
+                    <div id="payment-content">
+                        <!-- Payment Gateway Logo -->
+                        <div class="payment-logo mb-4">
+                            @if (Model.PaymentMethod == "vnpay")
+                            {
+                                <h3 class="text-primary"><i class="fas fa-credit-card me-2"></i>VNPay</h3>
+                            }
+                            else if (Model.PaymentMethod == "momo")
+                            {
+                                <h3 class="text-danger"><i class="fas fa-wallet me-2"></i>MoMo</h3>
+                            }
+                        </div>
+
+                        <!-- QR Code Container -->
+                        <div id="qr-container" class="mb-4">
+                            <div class="qr-placeholder">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Đang tạo mã QR...</p>
+                            </div>
+                        </div>
+
+                        <!-- Payment Amount -->
+                        <div class="payment-amount mb-4">
+                            <h2 class="display-4 @(Model.PaymentMethod == "momo" ? "text-danger" : "text-primary")">
+                                @Model.TotalAmount.ToString("N0")₫
+                            </h2>
+                            <p class="text-muted">Số tiền cần thanh toán</p>
+                        </div>
+
+                        <!-- Order Info -->
+                        <div class="alert alert-info">
+                            <p class="mb-0"><strong>Mã đơn hàng:</strong> @Model.OrderNumber</p>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="instructions text-start mt-4">
+                            <h5><i class="fas fa-mobile-alt me-2"></i>Hướng dẫn thanh toán:</h5>
+                            @if (Model.PaymentMethod == "vnpay")
+                            {
+                                <ol>
+                                    <li>Mở ứng dụng ngân hàng hoặc VNPay trên điện thoại</li>
+                                    <li>Chọn chức năng "Quét mã QR"</li>
+                                    <li>Quét mã QR hiển thị ở trên</li>
+                                    <li>Xác nhận thông tin và hoàn tất thanh toán</li>
+                                </ol>
+                            }
+                            else if (Model.PaymentMethod == "momo")
+                            {
+                                <ol>
+                                    <li>Mở ứng dụng MoMo trên điện thoại</li>
+                                    <li>Chọn "Quét mã" trên màn hình chính</li>
+                                    <li>Quét mã QR hiển thị ở trên</li>
+                                    <li>Xác nhận và thanh toán</li>
+                                </ol>
+                                <div class="text-center mt-3">
+                                    <button type="button" class="btn btn-danger btn-lg" id="openMoMoBtn" style="display: none;">
+                                        <i class="fas fa-mobile-alt me-2"></i>
+                                        Mở ứng dụng MoMo
+                                    </button>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Countdown Timer -->
+                        <div id="countdown-timer" class="mt-4" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock me-2"></i>
+                                Mã QR có hiệu lực: <strong id="countdown">15:00</strong>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Button -->
+                        <div class="mt-4">
+                            <a href="@Url.Action("Checkout", "Payment")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Success State (hidden initially) -->
+                    <div id="payment-success" style="display: none;">
+                        <div class="text-success mb-4">
+                            <i class="fas fa-check-circle" style="font-size: 5rem;"></i>
+                        </div>
+                        <h3 class="text-success">Thanh toán thành công!</h3>
+                        <p class="text-muted">Đơn hàng của bạn đã được xác nhận.</p>
+                        <a href="@Url.Action("OrderConfirmation", "Payment", new { id = Model.Id })" class="btn btn-success btn-lg mt-3">
+                            <i class="fas fa-receipt me-2"></i>Xem đơn hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .checkout-steps {
+            margin-bottom: 2rem;
+        }
+
+        .steps-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-icon {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .step.completed .step-icon {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .step.active .step-title,
+        .step.completed .step-title {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background-color: #e9ecef;
+            margin: 0 15px;
+            margin-top: -25px;
+            transition: all 0.3s ease;
+        }
+
+        .step-line.completed {
+            background-color: #28a745;
+        }
+
+        .qr-placeholder {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qr-code-image {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        const orderId = '@Model.Id';
+        const paymentMethod = '@Model.PaymentMethod';
+        let checkInterval;
+        let countdownInterval;
+        let expiryTime;
+
+        $(document).ready(function() {
+            // Only generate QR for VNPay and MoMo
+            if (paymentMethod === 'vnpay' || paymentMethod === 'momo') {
+                generateQRCode();
+                startPaymentStatusCheck();
+            } else {
+                // For COD or Bank Transfer, show success immediately
+                $('#payment-content').hide();
+                $('#payment-success').show();
+            }
+        });
+
+        function generateQRCode() {
+            fetch(`/Payment/GeneratePaymentQR?orderId=${orderId}&paymentMethod=${paymentMethod}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Display QR code
+                    const qrContainer = $('#qr-container');
+                    if (data.qrCodeUrl) {
+                        qrContainer.html(`<img src="${data.qrCodeUrl}" alt="QR Code" id="qr-code-image" class="img-fluid">`);
+                    } else if (data.qrDataUrl) {
+                        qrContainer.html(`<img src="${data.qrDataUrl}" alt="QR Code" id="qr-code-image" class="img-fluid">`);
+                    } else if (data.paymentUrl) {
+                        // Redirect to payment gateway
+                        window.location.href = data.paymentUrl;
+                        return;
+                    }
+
+                    // Show deep link button for MoMo
+                    if (paymentMethod === 'momo' && data.deepLink) {
+                        $('#openMoMoBtn').attr('onclick', `window.location.href='${data.deepLink}'`).show();
+                    }
+
+                    // Start countdown if expiry time is provided
+                    if (data.expiresAt) {
+                        expiryTime = new Date(data.expiresAt);
+                        startCountdown();
+                    } else if (data.expiresInSeconds) {
+                        expiryTime = new Date(Date.now() + data.expiresInSeconds * 1000);
+                        startCountdown();
+                    }
+                } else {
+                    $('#qr-container').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${data.message || 'Không thể tạo mã QR. Vui lòng thử lại.'}
+                        </div>
+                        <a href="${window.location.href}" class="btn btn-primary">Thử lại</a>
+                    `);
+                }
+            })
+            .catch(error => {
+                console.error('Error generating QR:', error);
+                $('#qr-container').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Có lỗi xảy ra. Vui lòng thử lại.
+                    </div>
+                    <a href="${window.location.href}" class="btn btn-primary">Thử lại</a>
+                `);
+            });
+        }
+
+        function startPaymentStatusCheck() {
+            // Check payment status every 3 seconds
+            checkInterval = setInterval(function() {
+                fetch(`/Payment/CheckPaymentStatus?orderId=${orderId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'paid') {
+                            // Payment successful
+                            clearInterval(checkInterval);
+                            clearInterval(countdownInterval);
+                            $('#payment-content').hide();
+                            $('#payment-success').show();
+                        } else if (data.status === 'expired') {
+                            // Payment expired
+                            clearInterval(checkInterval);
+                            clearInterval(countdownInterval);
+                            $('#qr-container').html(`
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Mã QR đã hết hạn. Vui lòng tạo lại.
+                                </div>
+                                <a href="${window.location.href}" class="btn btn-primary">Tạo lại mã QR</a>
+                            `);
+                        }
+                    })
+                    .catch(error => console.error('Error checking payment status:', error));
+            }, 3000);
+        }
+
+        function startCountdown() {
+            $('#countdown-timer').show();
+            
+            countdownInterval = setInterval(function() {
+                const now = new Date();
+                const remaining = expiryTime - now;
+                
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    $('#countdown').text('00:00');
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                $('#countdown').text(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+            }, 1000);
+        }
+
+        // Clean up intervals when page unloads
+        $(window).on('beforeunload', function() {
+            if (checkInterval) clearInterval(checkInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
+        });
+    </script>
+}
