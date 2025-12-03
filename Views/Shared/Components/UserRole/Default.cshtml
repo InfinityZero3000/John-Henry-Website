@@ -1,0 +1,18 @@
+@model JohnHenryFashionWeb.ViewComponents.UserRoleViewModel
+
+@if (User?.Identity?.IsAuthenticated == true && Model != null && (Model.IsAdmin || Model.IsSeller))
+{
+    @if (Model.IsAdmin)
+    {
+        <a href="@Url.Action("Dashboard", "Admin")" class="header-icon" title="Bảng điều khiển Admin">
+            <i data-lucide="layout-dashboard"></i>
+        </a>
+    }
+    else if (Model.IsSeller)
+    {
+        <a href="@Url.Action("Dashboard", "Seller")" class="header-icon" title="Bảng điều khiển Seller">
+            <i data-lucide="store"></i>
+        </a>
+    }
+}
+
